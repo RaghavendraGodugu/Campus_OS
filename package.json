@@ -1,0 +1,25 @@
+{
+  "name": "campus-os",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CampusOS — unified college management and student service platform",
+  "license": "MIT",
+  "workspaces": [
+    "campusOs_backend",
+    "campusOs_frontend"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev:backend": "npm run dev --workspace campusOs_backend",
+    "dev:frontend": "npm run dev --workspace campusOs_frontend",
+    "test": "npm run test --workspace campusOs_backend",
+    "test:frontend": "npm run test --workspace campusOs_frontend",
+    "lint": "npm run lint --workspace campusOs_backend && npm run lint --workspace campusOs_frontend",
+    "format": "npm run format --workspace campusOs_backend && npm run format --workspace campusOs_frontend",
+    "create-admin": "npm run create-admin --workspace campusOs_backend",
+    "seed:demo": "npm run seed:demo --workspace campusOs_backend",
+    "build": "npm run build --workspace campusOs_frontend"
+  }
+}
