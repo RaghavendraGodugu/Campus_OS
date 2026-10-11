@@ -30,10 +30,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
       maxlength: [200, "Email cannot exceed 200 characters"],
-      match: [
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-        "Please provide a valid email address",
-      ],
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please provide a valid email address"],
     },
 
     passwordHash: {
@@ -129,6 +126,9 @@ const userSchema = new mongoose.Schema(
     refreshTokens: [
       {
         tokenHash: { type: String, required: true },
+        /** Identifies the device session; stable across rotations. */
+        sessionId: { type: String, required: true },
+        /** Groups a rotation chain so reuse of any member is detectable. */
         familyId: { type: String, required: true },
         device: { type: String, default: "" },
         userAgent: { type: String, default: "" },

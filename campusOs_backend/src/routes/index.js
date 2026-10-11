@@ -19,6 +19,10 @@ router.get("/health/live", healthController.live);
 router.get("/health/ready", healthController.ready);
 
 // ===== Versioned API =====
-router.use("/api/v1", authRoutes);
+// Each feature router is mounted under its own path segment, so the version
+// prefix and the domain stay separable and new modules slot in predictably.
+// auth.routes defines "/login", so mounting at "/api/v1/auth" yields
+// POST /api/v1/auth/login.
+router.use("/api/v1/auth", authRoutes);
 
 module.exports = router;
