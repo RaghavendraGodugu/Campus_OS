@@ -12,11 +12,38 @@ auditable resolution.
 
 | Phase | Scope | State |
 | --- | --- | --- |
-| A — MVP | Auth, RBAC, profiles, request engine, complaints + SLA, certificates, invoices/payments, notifications, announcements, audit, reports | **In progress** |
-| B — Campus operations | Academics, attendance, timetable, exams, hostel, library, placements, events | Not started |
-| C — Advanced | AI assistant, verification, extra channels | Not started |
+| Foundation | Repo, config, logging, error handling, DB connection | **Done, verified** |
+| Data layer | User, Student, Department, Program, AuditLog, Counter | **Done, verified** |
+| Auth & RBAC | Login, rotating refresh with reuse detection, CSRF, 13-role permission matrix | **Done, verified** |
+| Phase A remainder | Request engine, complaints + SLA, certificates, finance, notifications, announcements, reports | Not started |
+| Phase B | Academics, attendance, timetable, exams, hostel, library, placements, events | Not started |
+| Phase C | AI assistant, verification, extra channels | Not started |
 
-Only work that has been executed and verified is marked as done in this table.
+Only work that has been executed and verified is marked done. Current backend
+state: **69 tests passing**, ESLint clean, server boots and serves authenticated
+API traffic.
+
+### What is implemented
+
+- Session auth: short-lived access token plus rotating refresh token, both in
+  `HttpOnly` `SameSite=None` cookies
+- **Refresh token reuse detection**: replaying a spent token revokes every
+  session and invalidates outstanding access tokens
+- Stateless double-submit CSRF, bound to the user and session via HMAC
+- 13-role permission matrix (`domain:action:scope`); absence means denial
+- Role changes take effect on the next request — the user is re-read per request
+- Confidential-complaint access restricted to `DEAN` and `PRINCIPAL`, and
+  deliberately **not** granted to `SUPER_ADMIN`
+- Audit log with automatic redaction of free text, so the trail cannot leak
+  complaint contents
+- `npm run create-admin` and `npm run seed:demo`
+
+### Not yet implemented
+
+Student profiles beyond the `Student` model, the request engine, complaints,
+certificates, invoices, payments, notifications, announcements, reports, and
+the entire frontend. The backend currently serves only `/health` and
+`/api/v1/auth/*`.
 
 ## Repository layout
 
@@ -68,14 +95,39 @@ in development.
 ### Testing and linting
 
 ```bash
-npm test           # backend integration suite (uses an isolated in-memory MongoDB)
-npm run test:frontend
+npm test           # backend integration suite
 npm run lint
 npm run format
 ```
 
-Backend tests never touch your development or Atlas database: they boot a
-throwaway MongoDB via `mongodb-memory-server`.
+Backend tests boot an **ephemeral MongoDB** (`mongodb-memory-server`) on a
+fixed port, so a test run can never read or delete your development or Atlas
+database. A guard hook aborts the run if the connection is anything other than
+that ephemeral instance.
+
+To reuse a locally installed `mongod` instead of downloading one:
+
+```bash
+export MONGOMS_SYSTEM_BINARY=/opt/homebrew/opt/mongodb-community/bin/mongod
+npm test
+```
+
+### Switching to MongoDB Atlas
+
+Development was verified against a local MongoDB 8.0 instance. To use Atlas:
+
+1. Paste the connection string into `campusOs_backend/.env`:
+
+   ```env
+   MONGO_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/campusos_dev?retryWrites=true&w=majority
+   ```
+
+2. In Atlas, add your IP to the cluster's **Access List**, or allow
+   `0.0.0.0/0` for a development cluster.
+3. Restart the server. Indexes are created automatically on connect.
+
+Atlas has **not** been exercised yet — the connection path is untested until
+you supply the string.
 
 ### Seed data
 
