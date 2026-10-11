@@ -27,7 +27,14 @@ const mongoose = require("mongoose");
 const { connectDB, disconnectDB } = require("../src/config/db");
 const { getEnv } = require("../src/config/env");
 const { ROLES } = require("../src/config/constants");
-const { Department, Program, Student, User } = require("../src/models");
+const {
+  Department,
+  Program,
+  Student,
+  User,
+  RequestType,
+  Request,
+} = require("../src/models");
 
 /** Prefix applied to every demo record so it is never mistaken for real. */
 const DEMO_PREFIX = "DEMO";
@@ -316,6 +323,164 @@ async function main() {
     students.push({ user, student });
   }
   process.stdout.write(`  student accounts : ${students.length}\n`);
+
+  // ===== Request types =====
+  // Without a catalogue the demo has nothing to apply for, so this is the
+  // part that makes the request engine demonstrable at all.
+  const requestTypeSpecs = [
+    {
+      name: `${DEMO_PREFIX} Bonafide Certificate`,
+      code: "DEMO_BONAFIDE",
+      department: "DEMO-CSE",
+      description: "Certificate confirming a student's enrolment and standing.",
+      fields: [
+        {
+          name: "copies",
+          label: "Number of copies",
+          type: "NUMBER",
+          required: true,
+          min: 1,
+          max: 5,
+        },
+        {
+          name: "purpose",
+          label: "Purpose",
+          type: "TEXT",
+          required: true,
+          maxLength: 300,
+        },
+      ],
+      requiredDocuments: [
+        {
+          name: "ID proof",
+          description: "Government or college identity card",
+          required: true,
+        },
+      ],
+      slaHours: 72,
+    },
+    {
+      name: `${DEMO_PREFIX} Study Certificate`,
+      code: "DEMO_STUDY",
+      department: "DEMO-CSE",
+      description: "Certificate of current enrolment for a specific academic year.",
+      fields: [
+        {
+          name: "academicYear",
+          label: "Academic year",
+          type: "SELECT",
+          required: true,
+          options: ["2024-25", "2025-26"],
+        },
+      ],
+      slaHours: 96,
+    },
+    {
+      name: `${DEMO_PREFIX} No Dues Certificate`,
+      code: "DEMO_NODUES",
+      department: "DEMO-SAFF",
+      description:
+        "Confirms the student has no outstanding dues. Requires fee clearance.",
+      fields: [
+        { name: "note", label: "Additional note", type: "TEXTAREA", required: false },
+      ],
+      requiresFeeClearance: true,
+      requiresPayment: true,
+      slaHours: 120,
+    },
+    {
+      name: `${DEMO_PREFIX} Transcript Request`,
+      code: "DEMO_TRANSCRIPT",
+      department: "DEMO-ECE",
+      description: "Full academic transcript including grades.",
+      fields: [
+        {
+          name: "years",
+          label: "Number of years",
+          type: "NUMBER",
+          required: true,
+          min: 1,
+          max: 4,
+        },
+      ],
+      slaHours: 168,
+    },
+  ];
+
+  const requestTypes = [];
+  for (const spec of requestTypeSpecs) {
+    requestTypes.push(
+      await RequestType.findOneAndUpdate(
+        { code: spec.code },
+        {
+          $set: {
+            name: spec.name,
+            description: spec.description,
+            department: departments[spec.department]._id,
+            fields: spec.fields ?? [],
+            requiredDocuments: spec.requiredDocuments ?? [],
+            slaHours: spec.slaHours ?? 72,
+            requiresPayment: spec.requiresPayment ?? false,
+            requiresFeeClearance: spec.requiresFeeClearance ?? false,
+            isActive: true,
+            isDemo: true,
+          },
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      )
+    );
+  }
+  process.stdout.write(`  request types    : ${requestTypes.length}\n`);
+
+  // ===== Sample requests =====
+  // A couple of seeded requests give the management dashboard something to
+  // show without inventing operational history.
+  const sampleRequests = [
+    {
+      student: students[0],
+      type: requestTypes[0],
+      status: "SUBMITTED",
+      title: "Bonafide certificate for a bank loan",
+    },
+    {
+      student: students[0],
+      type: requestTypes[1],
+      status: "UNDER_REVIEW",
+      title: "Study certificate for passport application",
+    },
+    {
+      student: students[1],
+      type: requestTypes[2],
+      status: "APPROVED",
+      title: "No dues certificate for internship",
+    },
+  ];
+
+  let seq = 0;
+  for (const sample of sampleRequests) {
+    seq += 1;
+    const now = new Date();
+    await Request.findOneAndUpdate(
+      { reference: `${DEMO_PREFIX}-REQ-000${seq}` },
+      {
+        $set: {
+          reference: `${DEMO_PREFIX}-REQ-000${seq}`,
+          requestType: sample.type._id,
+          student: sample.student.student._id,
+          department: sample.type.department,
+          title: sample.title,
+          data: {},
+          description: "Seeded demo request.",
+          status: sample.status,
+          submittedAt: now,
+          dueAt: new Date(now.getTime() + (sample.type.slaHours ?? 72) * 3600 * 1000),
+          isDemo: true,
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+  }
+  process.stdout.write(`  sample requests  : ${sampleRequests.length}\n`);
 
   // ===== Demo flag =====
   // Read by the frontend to render the "DEMO DATA" banner.

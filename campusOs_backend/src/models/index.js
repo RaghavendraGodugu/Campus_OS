@@ -14,6 +14,10 @@ const Program = require("./Program");
 const Student = require("./Student");
 const AuditLog = require("./AuditLog");
 const Counter = require("./Counter");
+const RequestType = require("./RequestType");
+const Request = require("./Request");
+const Document = require("./Document");
+const Notification = require("./Notification");
 
 // Each entry maps a model name to the Mongoose model, used by the index-sync
 // health check and by the test harness for cleanup between suites.
@@ -24,6 +28,10 @@ const models = {
   Student,
   AuditLog,
   Counter,
+  RequestType,
+  Request,
+  Document,
+  Notification,
 };
 
 /**

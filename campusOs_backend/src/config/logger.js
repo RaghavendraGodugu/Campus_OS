@@ -93,8 +93,12 @@ function createLogger(options = {}) {
     }
   }
 
+  // Tests set LOG_LEVEL=silent: a suite makes hundreds of requests, and the
+  // resulting log volume buries real failures.
+  const level = process.env.LOG_LEVEL ?? (isProduction ? "info" : "debug");
+
   return pino({
-    level: isProduction ? "info" : "debug",
+    level,
     redact: {
       paths: redactPaths,
       censor: "[redacted]",

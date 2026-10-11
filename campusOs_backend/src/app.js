@@ -28,6 +28,16 @@ const crypto = require("crypto");
 
 const { getEnv } = require("./config/env");
 const { logger } = require("./config/logger");
+
+// Register every model before any route runs.
+//
+// Mongoose's `.populate()` resolves references through the model registry, and
+// a model that has never been required is simply absent from it. Loading them
+// lazily — only via the routes that happen to touch them — therefore makes
+// populate throw `MissingSchemaError` for any reference owned by a model that
+// no mounted route imported. This barrelled require guarantees the registry is
+// complete regardless of which routers are mounted.
+require("./models");
 const routes = require("./routes");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 const { ApiError, ERROR_CODE } = require("./utils/ApiError");

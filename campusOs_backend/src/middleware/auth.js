@@ -157,10 +157,44 @@ function requireRole(...roles) {
 }
 
 /**
- * Require all listed permissions (convenience wrapper with clearer intent at
+ * Require ALL listed permissions (convenience wrapper with clearer intent at
  * call sites than `requirePermission(a, b, c)`).
  */
 const requireAllPermissions = (...permissions) => requirePermission(...permissions);
+
+/**
+ * Require AT LEAST ONE of the listed permissions.
+ *
+ * `requirePermission` is deliberately conjunctive: a route listing two
+ * permissions means both are needed. Where a capability is reachable by more
+ * than one kind of role — for example, an HOD assigning within their own
+ * department *or* a principal assigning anywhere — the intent is a
+ * disjunction, and expressing it with `requirePermission` would deny everyone.
+ *
+ * @param {...string} permissions
+ */
+function requireAnyPermission(...permissions) {
+  if (permissions.length === 0) {
+    throw new Error(
+      "requireAnyPermission() needs at least one permission. Omitting it would allow every request."
+    );
+  }
+
+  return function anyPermissionGate(req, res, next) {
+    if (!req.user) {
+      return next(ApiError.unauthenticated("Authentication required"));
+    }
+
+    if (!permissions.some((permission) => userHasPermission(req.user, permission))) {
+      req.permissionDenied = { anyOf: permissions, role: req.user.role };
+      return next(
+        ApiError.forbidden("You do not have permission to perform this action")
+      );
+    }
+
+    return next();
+  };
+}
 
 /**
  * Attach an optional authenticated user without rejecting anonymous requests.
@@ -241,6 +275,7 @@ module.exports = {
   optionalAuthenticate,
   requirePermission,
   requireAllPermissions,
+  requireAnyPermission,
   requireRole,
   requireStudentAccount,
   requireStaff,

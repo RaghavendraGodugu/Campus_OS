@@ -37,6 +37,8 @@ const TEST_ENV = {
   CSRF_SECRET: "test-csrf-secret-value-at-least-32-characters-long",
   COOKIE_SECURE: "false",
   LOG_PRETTY: "false",
+  // Silence request/response logging so a failing assertion is readable.
+  LOG_LEVEL: "silent",
   // Empty, so tests exercise the "integrations not configured" branches.
   CLOUDINARY_CLOUD_NAME: "",
   RAZORPAY_KEY_ID: "",

@@ -198,9 +198,82 @@ module.exports = {
   createProgram,
   createUser,
   createStudent,
+  createRequestType,
+  createRequest,
   loginAs,
   agentFor,
   readCookie,
   expectError,
   ENROLMENT_DATE,
 };
+
+/**
+ * Create a request type — one entry in the catalogue of available services.
+ *
+ * Defaults to a minimal valid definition, so a test only has to describe the
+ * fields its own scenario depends on.
+ */
+async function createRequestType({ department, fields = [], ...overrides } = {}) {
+  const RequestType = require("../../src/models/RequestType");
+  const dept = department ?? (await createDepartment());
+  const suffix = uniqueSuffix();
+
+  return RequestType.create({
+    name: overrides.name ?? `Test Request Type ${suffix}`,
+    code: overrides.code ?? `TRT${suffix.toUpperCase()}`,
+    department: dept._id,
+    fields,
+    slaHours: 72,
+    ...overrides,
+  });
+}
+
+/**
+ * Create a request.
+ *
+ * `student` is the record returned by createStudent() — pass its `user` and
+ * `student` so ownership links are consistent. Defaults reproduce exactly what
+ * request.service.submitRequest() writes, including the initial history entry.
+ *
+ * @param {object} params
+ * @param {object} params.owner  `{ user, student, department, program }` from createStudent()
+ * @param {object} [params.requestType]
+ * @param {string} [params.status]
+ */
+async function createRequest({
+  owner,
+  requestType,
+  status = "SUBMITTED",
+  ...overrides
+} = {}) {
+  const Request = require("../../src/models/Request");
+  const { REQUEST_STATUS } = require("../../src/config/constants");
+  const ObjectId = require("mongoose").Types.ObjectId;
+
+  const ownerUser = owner?.user;
+  const ownerStudentId = owner?.student?._id ?? ownerUser?.student;
+  const departmentId =
+    requestType?.department ?? owner?.department?._id ?? new ObjectId();
+
+  return Request.create({
+    reference: `REQ-2026-${String(Math.floor(Math.random() * 1e9)).padStart(6, "0")}`,
+    requestType: requestType?._id ?? new ObjectId(),
+    student: ownerStudentId ?? new ObjectId(),
+    department: departmentId,
+    title: "Test request",
+    data: {},
+    status,
+    submittedAt: new Date(),
+    dueAt: new Date(Date.now() + 72 * 3600 * 1000),
+    statusHistory: [
+      {
+        from: null,
+        to: REQUEST_STATUS.SUBMITTED,
+        actor: ownerUser?._id ?? new ObjectId(),
+        actorRole: ownerUser?.role ?? "STUDENT",
+        at: new Date(),
+      },
+    ],
+    ...overrides,
+  });
+}
