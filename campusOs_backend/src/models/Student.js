@@ -147,12 +147,17 @@ studentSchema.index({ department: 1, program: 1, batchYear: 1, rollNumber: 1 });
 /** Backs "which students in this batch still owe fees". */
 studentSchema.index({ feeStatus: 1, department: 1 });
 
-// Derive batchYear from the enrolment date when it was not supplied.
-studentSchema.pre("validate", function deriveBatchYear(next) {
+/**
+ * Derive batchYear from the enrolment date when it was not supplied.
+ *
+ * Written as an `async` function rather than the callback form
+ * (`function(next){ next(); }`): Mongoose 9 **removed** callback-based pre
+ * middleware, and passing `next` into one throws `next is not a function`.
+ */
+studentSchema.pre("validate", async function deriveBatchYear() {
   if (!this.batchYear && this.enrolmentDate) {
     this.batchYear = this.enrolmentDate.getFullYear();
   }
-  next();
 });
 
 /**

@@ -12,10 +12,21 @@ module.exports = [
   js.configs.recommended,
   {
     // This config file itself runs under Node/CommonJS.
-    files: ["eslint.config.js", "vitest.config.js"],
+    files: ["eslint.config.js"],
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: "commonjs",
+      globals: { ...globals.node },
+    },
+  },
+  {
+    // vitest.config.js uses ESM syntax. The package is CommonJS ("type" is
+    // absent), but this file is loaded by Vite's config loader, so ESLint must
+    // be told to parse it as a module.
+    files: ["vitest.config.js"],
+    languageOptions: {
+      ecmaVersion: 2024,
+      sourceType: "module",
       globals: { ...globals.node },
     },
   },

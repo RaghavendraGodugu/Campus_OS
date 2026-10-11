@@ -110,17 +110,19 @@ const me = asyncHandler(async (req, res) => {
 const logout = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies?.[COOKIE_NAMES.REFRESH_TOKEN];
 
-  if (req.user && refreshToken) {
-    await authService.logout(req.user._id.toString(), refreshToken);
-  }
+  // Revoke by the refresh token itself, not by `req.user`: this route is
+  // deliberately unguarded so that a user with an expired access token can
+  // still sign out. Depending on req.user would skip revocation entirely and
+  // leave the session usable on the server.
+  const { revoked, userId } = await authService.logout(refreshToken);
 
   clearAuthCookies(res);
 
   await auditService.record({
     action: AUDIT_ACTION.LOGOUT,
     entity: "User",
-    entityId: req.user?._id ?? null,
-    actor: req.user ?? null,
+    entityId: userId,
+    metadata: { revoked },
     req,
   });
 

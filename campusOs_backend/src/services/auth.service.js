@@ -413,11 +413,27 @@ async function revokeAllSessions(userId, reason, req) {
 /**
  * Revoke one session by its refresh-token hash (single-device logout).
  *
- * @param {string} userId
+ * Takes the **raw refresh token** rather than a userId, because `/auth/logout`
+ * is deliberately not behind `authenticate`: a user whose access token has
+ * already expired must still be able to sign out. Identifying the session from
+ * the refresh token means revocation works in exactly that case — deriving it
+ * from `req.user` would silently skip revocation and leave the session alive
+ * on the server.
+ *
  * @param {string} rawRefreshToken
+ * @returns {Promise<{revoked: boolean, userId: string|null}>}
  */
-async function revokeSession(userId, rawRefreshToken) {
-  if (!rawRefreshToken) return { revoked: false };
+async function revokeSession(rawRefreshToken) {
+  if (!rawRefreshToken) return { revoked: false, userId: null };
+
+  // Identify the owner from the token. A malformed or forged token yields null,
+  // and the caller still clears cookies — logout must never fail.
+  let userId;
+  try {
+    userId = verifyRefreshToken(rawRefreshToken).sub;
+  } catch {
+    return { revoked: false, userId: null };
+  }
 
   const result = await User.updateOne(
     { _id: userId, "refreshTokens.tokenHash": hashToken(rawRefreshToken) },
@@ -429,7 +445,7 @@ async function revokeSession(userId, rawRefreshToken) {
     }
   );
 
-  return { revoked: result.modifiedCount > 0 };
+  return { revoked: result.modifiedCount > 0, userId };
 }
 
 /**
