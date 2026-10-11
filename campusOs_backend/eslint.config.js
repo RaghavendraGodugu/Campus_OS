@@ -51,6 +51,13 @@ module.exports = [
     },
   },
   {
+    // CLI scripts write their report to stdout; that is the entire point.
+    files: ["scripts/**/*.js"],
+    rules: {
+      "no-console": "off",
+    },
+  },
+  {
     // Vite test runner exposes globals like describe/it/expect when configured.
     files: ["tests/**/*.js"],
     languageOptions: {

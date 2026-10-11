@@ -18,7 +18,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "create-admin": "node scripts/create-admin.js",
-    "seed:demo": "node scripts/seed-demo.js"
+    "seed:demo": "node scripts/seed-demo.js",
+    "run:escalations": "node scripts/run-escalation.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

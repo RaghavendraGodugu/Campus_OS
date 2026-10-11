@@ -34,6 +34,7 @@ const {
   User,
   RequestType,
   Request,
+  Complaint,
 } = require("../src/models");
 
 /** Prefix applied to every demo record so it is never mistaken for real. */
@@ -481,6 +482,78 @@ async function main() {
     );
   }
   process.stdout.write(`  sample requests  : ${sampleRequests.length}\n`);
+
+  // ===== Sample complaints =====
+  // Includes a confidential one so the restricted queue can be demonstrated.
+  const sampleComplaints = [
+    {
+      student: students[0],
+      category: "HOSTEL",
+      subject: "DEMO Water supply in Block C",
+      description:
+        "DEMO: There has been no water supply to the second floor since Monday.",
+      confidential: false,
+      priority: "MEDIUM",
+      status: "INVESTIGATING",
+      hoursOverdue: 3,
+    },
+    {
+      student: students[1],
+      category: "FEES",
+      subject: "DEMO Duplicate fee payment charged",
+      description:
+        "DEMO: A fee instalment appears to have been deducted twice this term.",
+      confidential: false,
+      priority: "HIGH",
+      status: "OPEN",
+      hoursOverdue: 26,
+    },
+    {
+      student: students[2],
+      category: "HARASSMENT",
+      subject: "DEMO Confidential grievance",
+      description:
+        "DEMO: A confidential matter. Visible only to the complainant, the assigned handler and oversight roles.",
+      confidential: true,
+      priority: "CRITICAL",
+      status: "ACKNOWLEDGED",
+      hoursOverdue: 1,
+    },
+  ];
+
+  const { addBusinessHours } = require("../src/utils/sla");
+  const slaPolicy = require("../src/utils/slaPolicy");
+  let cseq = 0;
+  for (const sample of sampleComplaints) {
+    cseq += 1;
+    const now = new Date();
+    const dueAt = addBusinessHours(
+      now,
+      slaPolicy.responseHoursFor(sample.category) - sample.hoursOverdue
+    );
+    await Complaint.findOneAndUpdate(
+      { reference: `${DEMO_PREFIX}-CMP-000${cseq}` },
+      {
+        $set: {
+          reference: `${DEMO_PREFIX}-CMP-000${cseq}`,
+          student: sample.student.student._id,
+          department: sample.student.student.department,
+          subject: sample.subject,
+          description: sample.description,
+          category: sample.category,
+          confidential: sample.confidential,
+          priority: sample.priority,
+          status: sample.status,
+          dueAt,
+          submittedAt: new Date(now.getTime() - (sample.hoursOverdue + 48) * 3600 * 1000),
+          respondedAt: sample.status === "OPEN" ? null : now,
+          isDemo: true,
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+  }
+  process.stdout.write(`  sample complaints: ${sampleComplaints.length}\n`);
 
   // ===== Demo flag =====
   // Read by the frontend to render the "DEMO DATA" banner.

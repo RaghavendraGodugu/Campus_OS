@@ -11,6 +11,7 @@ const express = require("express");
 const healthController = require("../controllers/health.controller");
 const authRoutes = require("./auth.routes");
 const requestRoutes = require("./request.routes");
+const complaintRoutes = require("./complaint.routes");
 
 const router = express.Router();
 
@@ -26,5 +27,6 @@ router.get("/health/ready", healthController.ready);
 // POST /api/v1/auth/login.
 router.use("/api/v1/auth", authRoutes);
 router.use("/api/v1", requestRoutes);
+router.use("/api/v1", complaintRoutes);
 
 module.exports = router;

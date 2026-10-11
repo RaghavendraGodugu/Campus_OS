@@ -97,12 +97,34 @@ const P = {
   COMPLAINT_CREATE: "complaint:create:own",
   COMPLAINT_READ_OWN: "complaint:read:own",
   COMPLAINT_READ_ASSIGNED: "complaint:read:assigned",
+  /**
+   * See the unassigned, non-restricted queue so it can be triaged.
+   *
+   * Distinct from handling: picking up a complaint is how it becomes assigned,
+   * and `complaint:read:assigned` alone would make assignment impossible.
+   * Never grants access to confidential complaints.
+   */
+  COMPLAINT_TRIAGE: "complaint:triage:institution",
   COMPLAINT_READ_DEPARTMENT: "complaint:read:department",
   COMPLAINT_READ_INSTITUTION: "complaint:read:institution",
   /** Restricted category: sexual harassment, safety, financial misconduct. */
   COMPLAINT_READ_CONFIDENTIAL: "complaint:read:confidential",
   COMPLAINT_UPDATE_ASSIGNED: "complaint:update:assigned",
   COMPLAINT_ESCALATE: "complaint:escalate:institution",
+  /** Move an open complaint to ACKNOWLEDGED. */
+  COMPLAINT_ACKNOWLEDGE: "complaint:acknowledge:assigned",
+  /** Begin investigation after acknowledgement. */
+  COMPLAINT_INVESTIGATE: "complaint:investigate:assigned",
+  /** Record a resolution. Terminal unless the student reopens. */
+  COMPLAINT_RESOLVE: "complaint:resolve:assigned",
+  /** Student reopens a resolved complaint within the allowed window. */
+  COMPLAINT_REOPEN_OWN: "complaint:reopen:own",
+  /** Student submits feedback on a resolution. */
+  COMPLAINT_FEEDBACK_OWN: "complaint:feedback:own",
+  /** See the escalation log for a complaint. */
+  COMPLAINT_READ_ESCALATIONS: "complaint:read-escalations:department",
+  /** Configure SLA policy and the holiday calendar. */
+  SLA_MANAGE: "sla:manage:institution",
 
   // ===== Certificates =====
   CERTIFICATE_APPLY: "certificate:apply:own",
@@ -180,6 +202,8 @@ const ROLE_PERMISSIONS = {
     P.REQUEST_RESPOND_OWN,
     P.COMPLAINT_CREATE,
     P.COMPLAINT_READ_OWN,
+    P.COMPLAINT_REOPEN_OWN,
+    P.COMPLAINT_FEEDBACK_OWN,
     P.CERTIFICATE_APPLY,
     P.CERTIFICATE_READ_OWN,
     P.INVOICE_READ_OWN,
@@ -200,6 +224,10 @@ const ROLE_PERMISSIONS = {
     P.REQUEST_INTERNAL_NOTE,
     P.COMPLAINT_READ_ASSIGNED,
     P.COMPLAINT_UPDATE_ASSIGNED,
+    P.COMPLAINT_TRIAGE,
+    P.COMPLAINT_ACKNOWLEDGE,
+    P.COMPLAINT_INVESTIGATE,
+    P.COMPLAINT_RESOLVE,
     P.CERTIFICATE_READ_ASSIGNED,
     P.ANNOUNCEMENT_READ,
   ],
@@ -235,6 +263,10 @@ const ROLE_PERMISSIONS = {
     P.REQUEST_INTERNAL_NOTE,
     P.COMPLAINT_READ_DEPARTMENT,
     P.COMPLAINT_UPDATE_ASSIGNED,
+    P.COMPLAINT_TRIAGE,
+    P.COMPLAINT_ACKNOWLEDGE,
+    P.COMPLAINT_INVESTIGATE,
+    P.COMPLAINT_RESOLVE,
     P.CERTIFICATE_READ_DEPARTMENT,
     P.CERTIFICATE_VERIFY,
     P.CERTIFICATE_APPROVE,
@@ -286,6 +318,10 @@ const ROLE_PERMISSIONS = {
     P.COMPLAINT_READ_DEPARTMENT,
     P.COMPLAINT_READ_ASSIGNED,
     P.COMPLAINT_UPDATE_ASSIGNED,
+    P.COMPLAINT_TRIAGE,
+    P.COMPLAINT_ACKNOWLEDGE,
+    P.COMPLAINT_INVESTIGATE,
+    P.COMPLAINT_RESOLVE,
     P.ANNOUNCEMENT_READ,
     P.REPORT_READ_DEPARTMENT,
   ],
@@ -300,6 +336,10 @@ const ROLE_PERMISSIONS = {
     P.COMPLAINT_READ_DEPARTMENT,
     P.COMPLAINT_READ_ASSIGNED,
     P.COMPLAINT_UPDATE_ASSIGNED,
+    P.COMPLAINT_TRIAGE,
+    P.COMPLAINT_ACKNOWLEDGE,
+    P.COMPLAINT_INVESTIGATE,
+    P.COMPLAINT_RESOLVE,
     P.ANNOUNCEMENT_READ,
     P.REPORT_READ_DEPARTMENT,
   ],
@@ -314,6 +354,10 @@ const ROLE_PERMISSIONS = {
     P.COMPLAINT_READ_DEPARTMENT,
     P.COMPLAINT_READ_ASSIGNED,
     P.COMPLAINT_UPDATE_ASSIGNED,
+    P.COMPLAINT_TRIAGE,
+    P.COMPLAINT_ACKNOWLEDGE,
+    P.COMPLAINT_INVESTIGATE,
+    P.COMPLAINT_RESOLVE,
     P.CERTIFICATE_READ_INSTITUTION,
     P.ANNOUNCEMENT_READ,
     P.REPORT_READ_DEPARTMENT,
@@ -338,6 +382,11 @@ const ROLE_PERMISSIONS = {
     P.COMPLAINT_READ_ASSIGNED,
     P.COMPLAINT_READ_CONFIDENTIAL,
     P.COMPLAINT_UPDATE_ASSIGNED,
+    P.COMPLAINT_TRIAGE,
+    P.COMPLAINT_ACKNOWLEDGE,
+    P.COMPLAINT_INVESTIGATE,
+    P.COMPLAINT_RESOLVE,
+    P.COMPLAINT_READ_ESCALATIONS,
     P.COMPLAINT_ESCALATE,
     P.CERTIFICATE_READ_INSTITUTION,
     P.CERTIFICATE_VERIFY,
@@ -362,6 +411,11 @@ const ROLE_PERMISSIONS = {
     P.COMPLAINT_READ_ASSIGNED,
     P.COMPLAINT_READ_CONFIDENTIAL,
     P.COMPLAINT_UPDATE_ASSIGNED,
+    P.COMPLAINT_TRIAGE,
+    P.COMPLAINT_ACKNOWLEDGE,
+    P.COMPLAINT_INVESTIGATE,
+    P.COMPLAINT_RESOLVE,
+    P.COMPLAINT_READ_ESCALATIONS,
     P.COMPLAINT_ESCALATE,
     P.CERTIFICATE_READ_INSTITUTION,
     P.CERTIFICATE_VERIFY,
@@ -395,6 +449,10 @@ const ROLE_PERMISSIONS = {
     P.COMPLAINT_READ_INSTITUTION,
     P.COMPLAINT_READ_ASSIGNED,
     P.COMPLAINT_UPDATE_ASSIGNED,
+    P.COMPLAINT_TRIAGE,
+    P.COMPLAINT_ACKNOWLEDGE,
+    P.COMPLAINT_INVESTIGATE,
+    P.COMPLAINT_RESOLVE,
     P.CERTIFICATE_READ_INSTITUTION,
     P.CERTIFICATE_REVOKE,
     P.INVOICE_READ_INSTITUTION,
