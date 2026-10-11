@@ -11,6 +11,15 @@ module.exports = [
   },
   js.configs.recommended,
   {
+    // This config file itself runs under Node/CommonJS.
+    files: ["eslint.config.js", "vitest.config.js"],
+    languageOptions: {
+      ecmaVersion: 2024,
+      sourceType: "commonjs",
+      globals: { ...globals.node },
+    },
+  },
+  {
     // Node backend
     files: ["src/**/*.js", "scripts/**/*.js", "tests/**/*.js", "server.js"],
     languageOptions: {
@@ -22,10 +31,7 @@ module.exports = [
       },
     },
     rules: {
-      "no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-      ],
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "no-console": ["error", { allow: ["error", "warn"] }],
       "no-var": "error",
       "prefer-const": "error",

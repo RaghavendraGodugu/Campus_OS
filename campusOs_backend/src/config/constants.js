@@ -1,0 +1,217 @@
+/**
+ * Canonical enumerations shared across models, services and validators.
+ *
+ * These are the single source of truth for every closed set of values in the
+ * system. Anything a Mongoose enum, a Zod validator or a permission check
+ * agrees on must be declared here exactly once, so a value can never be
+ * accepted in one layer and rejected in another.
+ */
+
+/** Institutional roles. Ordered least- to most-privileged for display. */
+const ROLES = {
+  STUDENT: "STUDENT",
+  SUPPORT_STAFF: "SUPPORT_STAFF",
+  FACULTY: "FACULTY",
+  HOD: "HOD",
+  EXAM_ADMIN: "EXAM_ADMIN",
+  ACCOUNTS_ADMIN: "ACCOUNTS_ADMIN",
+  HOSTEL_ADMIN: "HOSTEL_ADMIN",
+  LIBRARY_ADMIN: "LIBRARY_ADMIN",
+  PLACEMENT_ADMIN: "PLACEMENT_ADMIN",
+  DEAN: "DEAN",
+  PRINCIPAL: "PRINCIPAL",
+  SUPER_ADMIN: "SUPER_ADMIN",
+};
+
+const ROLE_VALUES = Object.freeze(Object.values(ROLES));
+
+/** Roles that represent college staff rather than students. */
+const STAFF_ROLES = Object.freeze(ROLE_VALUES.filter((role) => role !== ROLES.STUDENT));
+
+/**
+ * Universal request workflow states (spec §9).
+ *
+ * Transitions are NOT free-form. The legal edges are declared once, in
+ * `utils/workflow.js`, and every state change is validated against that table
+ * before it reaches the database.
+ */
+const REQUEST_STATUS = {
+  DRAFT: "DRAFT",
+  SUBMITTED: "SUBMITTED",
+  ASSIGNED: "ASSIGNED",
+  UNDER_REVIEW: "UNDER_REVIEW",
+  ACTION_REQUIRED: "ACTION_REQUIRED",
+  APPROVAL_PENDING: "APPROVAL_PENDING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+  PROCESSING: "PROCESSING",
+  COMPLETED: "COMPLETED",
+  CANCELLED: "CANCELLED",
+  ESCALATED: "ESCALATED",
+};
+
+const REQUEST_STATUS_VALUES = Object.freeze(Object.values(REQUEST_STATUS));
+
+/**
+ * States a request can never leave. Used to stop SLA clocks and block
+ * further transitions.
+ */
+const TERMINAL_STATUSES = Object.freeze([
+  REQUEST_STATUS.COMPLETED,
+  REQUEST_STATUS.REJECTED,
+  REQUEST_STATUS.CANCELLED,
+]);
+
+/**
+ * States in which a student may still supply information or withdraw.
+ * A request in one of these is considered "open by the student".
+ */
+const STUDENT_ACTIONABLE_STATUSES = Object.freeze([
+  REQUEST_STATUS.DRAFT,
+  REQUEST_STATUS.ACTION_REQUIRED,
+  REQUEST_STATUS.SUBMITTED,
+]);
+
+/** Complaint lifecycle, modelled separately from requests (spec §10). */
+const COMPLAINT_STATUS = {
+  OPEN: "OPEN",
+  ACKNOWLEDGED: "ACKNOWLEDGED",
+  INVESTIGATING: "INVESTIGATING",
+  RESOLVED: "RESOLVED",
+  REJECTED: "REJECTED",
+  REOPENED: "REOPENED",
+};
+
+const COMPLAINT_STATUS_VALUES = Object.freeze(Object.values(COMPLAINT_STATUS));
+
+const COMPLAINT_PRIORITY = {
+  LOW: "LOW",
+  MEDIUM: "MEDIUM",
+  HIGH: "HIGH",
+  CRITICAL: "CRITICAL",
+};
+
+const COMPLAINT_PRIORITY_VALUES = Object.freeze(Object.values(COMPLAINT_PRIORITY));
+
+/** Certificate issuance pipeline (spec §11). */
+const CERTIFICATE_STATUS = {
+  APPLIED: "APPLIED",
+  VALIDATING: "VALIDATING",
+  VERIFYING: "VERIFYING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+  GENERATED: "GENERATED",
+  REVOKED: "REVOKED",
+};
+
+const CERTIFICATE_STATUS_VALUES = Object.freeze(Object.values(CERTIFICATE_STATUS));
+
+/** Invoice lifecycle. Amounts are always integer paise (spec §12). */
+const INVOICE_STATUS = {
+  DRAFT: "DRAFT",
+  ISSUED: "ISSUED",
+  PAID: "PAID",
+  PARTIALLY_PAID: "PARTIALLY_PAID",
+  OVERDUE: "OVERDUE",
+  CANCELLED: "CANCELLED",
+  REFUNDED: "REFUNDED",
+};
+
+const INVOICE_STATUS_VALUES = Object.freeze(Object.values(INVOICE_STATUS));
+
+/** Payment terminal states. A payment is only PAID after server verification. */
+const PAYMENT_STATUS = {
+  CREATED: "CREATED",
+  ATTEMPTED: "ATTEMPTED",
+  PAID: "PAID",
+  FAILED: "FAILED",
+  REFUNDED: "REFUNDED",
+};
+
+const PAYMENT_STATUS_VALUES = Object.freeze(Object.values(PAYMENT_STATUS));
+
+const REFUND_STATUS = {
+  REQUESTED: "REQUESTED",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+  PROCESSED: "PROCESSED",
+  FAILED: "FAILED",
+};
+
+const REFUND_STATUS_VALUES = Object.freeze(Object.values(REFUND_STATUS));
+
+/** Notification kinds the backend can emit in Phase A. */
+const NOTIFICATION_TYPE = {
+  REQUEST_SUBMITTED: "REQUEST_SUBMITTED",
+  REQUEST_ASSIGNED: "REQUEST_ASSIGNED",
+  REQUEST_STATUS_CHANGED: "REQUEST_STATUS_CHANGED",
+  REQUEST_COMMENT: "REQUEST_COMMENT",
+  REQUEST_ACTION_REQUIRED: "REQUEST_ACTION_REQUIRED",
+  COMPLAINT_STATUS_CHANGED: "COMPLAINT_STATUS_CHANGED",
+  COMPLAINT_ESCALATED: "COMPLAINT_ESCALATED",
+  CERTIFICATE_STATUS_CHANGED: "CERTIFICATE_STATUS_CHANGED",
+  CERTIFICATE_READY: "CERTIFICATE_READY",
+  INVOICE_ISSUED: "INVOICE_ISSUED",
+  PAYMENT_RECEIVED: "PAYMENT_RECEIVED",
+  PAYMENT_FAILED: "PAYMENT_FAILED",
+  REFUND_STATUS_CHANGED: "REFUND_STATUS_CHANGED",
+  ANNOUNCEMENT: "ANNOUNCEMENT",
+};
+
+const ANNOUNCEMENT_AUDIENCE = {
+  ALL: "ALL",
+  ROLES: "ROLES",
+  DEPARTMENTS: "DEPARTMENTS",
+  PROGRAMS: "PROGRAMS",
+  YEARS: "YEARS",
+};
+
+/** Audit action namespace. Kept coarse; details live in metadata. */
+const AUDIT_ACTION = {
+  CREATE: "CREATE",
+  UPDATE: "UPDATE",
+  DELETE: "DELETE",
+  LOGIN: "LOGIN",
+  LOGIN_FAILED: "LOGIN_FAILED",
+  LOGOUT: "LOGOUT",
+  TOKEN_REFRESH: "TOKEN_REFRESH",
+  TOKEN_REUSE_DETECTED: "TOKEN_REUSE_DETECTED",
+  PASSWORD_CHANGE: "PASSWORD_CHANGE",
+  ROLE_CHANGE: "ROLE_CHANGE",
+  STATUS_TRANSITION: "STATUS_TRANSITION",
+  ASSIGNMENT: "ASSIGNMENT",
+  PAYMENT_INITIATED: "PAYMENT_INITIATED",
+  PAYMENT_VERIFIED: "PAYMENT_VERIFIED",
+  PAYMENT_FAILED: "PAYMENT_FAILED",
+  REFUND_REQUESTED: "REFUND_REQUESTED",
+  REFUND_PROCESSED: "REFUND_PROCESSED",
+  DOCUMENT_UPLOADED: "DOCUMENT_UPLOADED",
+  DOCUMENT_DOWNLOADED: "DOCUMENT_DOWNLOADED",
+  CERTIFICATE_GENERATED: "CERTIFICATE_GENERATED",
+  ACCESS_DENIED: "ACCESS_DENIED",
+};
+
+module.exports = {
+  ROLES,
+  ROLE_VALUES,
+  STAFF_ROLES,
+  REQUEST_STATUS,
+  REQUEST_STATUS_VALUES,
+  TERMINAL_STATUSES,
+  STUDENT_ACTIONABLE_STATUSES,
+  COMPLAINT_STATUS,
+  COMPLAINT_STATUS_VALUES,
+  COMPLAINT_PRIORITY,
+  COMPLAINT_PRIORITY_VALUES,
+  CERTIFICATE_STATUS,
+  CERTIFICATE_STATUS_VALUES,
+  INVOICE_STATUS,
+  INVOICE_STATUS_VALUES,
+  PAYMENT_STATUS,
+  PAYMENT_STATUS_VALUES,
+  REFUND_STATUS,
+  REFUND_STATUS_VALUES,
+  NOTIFICATION_TYPE,
+  ANNOUNCEMENT_AUDIENCE,
+  AUDIT_ACTION,
+};
