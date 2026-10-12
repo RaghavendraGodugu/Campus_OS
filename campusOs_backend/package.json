@@ -21,7 +21,8 @@
     "seed:demo": "node scripts/seed-demo.js",
     "run:escalations": "node scripts/run-escalation.js",
     "migrate:indexes": "node scripts/migrate-indexes.js",
-    "finance:drill": "node scripts/refund-drill.js"
+    "finance:drill": "node scripts/refund-drill.js",
+    "razorpay:check": "node scripts/check-razorpay.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
