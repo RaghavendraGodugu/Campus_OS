@@ -173,6 +173,77 @@ const reconcile = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * POST /api/v1/finance/payments/:id/verify
+ *
+ * Asks Razorpay whether the payment was really captured, and settles only if
+ * it says so. This is the settlement path for a deployment that cannot receive
+ * webhooks — it is not a weaker form of the webhook, because the decision comes
+ * from Razorpay's authenticated response rather than from this request.
+ */
+const verifyPayment = asyncHandler(async (req, res) => {
+  const outcome = await financeService.verifyPaymentWithGateway({
+    user: req.user,
+    paymentId: req.params.id,
+    req,
+  });
+
+  const settled = outcome.applied;
+
+  return sendSuccess(res, {
+    message: settled
+      ? "Payment confirmed by Razorpay and the invoice has been credited"
+      : describeUnapplied(outcome),
+    data: {
+      applied: settled,
+      reason: outcome.reason,
+      status: outcome.status,
+      capturedAmount: outcome.capturedAmount ?? null,
+      capturedAmountFormatted:
+        outcome.capturedAmount === undefined || outcome.capturedAmount === null
+          ? null
+          : money.format(outcome.capturedAmount),
+    },
+  });
+});
+
+/** Human wording for the reasons verification can decline to settle. */
+function describeUnapplied(outcome) {
+  switch (outcome.reason) {
+    case "already_settled":
+      return "This payment is already recorded as settled";
+    case "not_yet_captured":
+      return `Razorpay reports this payment as "${outcome.gatewayStatus}". It has not been captured yet, so nothing was credited.`;
+    case "payment_failed":
+      return "Razorpay reports this payment as failed. Nothing was charged.";
+    default:
+      return "The payment could not be confirmed, so nothing was credited";
+  }
+}
+
+/**
+ * POST /api/v1/finance/payments/verify-pending
+ *
+ * Sweeps payments left ATTEMPTED — the students who closed the browser after
+ * paying. Without webhooks nothing else would ever revisit them.
+ */
+const verifyPending = asyncHandler(async (req, res) => {
+  const { limit } = req.validated?.query ?? {};
+  const results = await financeService.verifyPendingPayments({
+    user: req.user,
+    limit,
+    req,
+  });
+
+  return sendSuccess(res, {
+    message:
+      `Checked ${results.checked} pending payment(s): ${results.settled} settled, ` +
+      `${results.failed} failed, ${results.stillPending} still awaiting capture` +
+      (results.errors ? `, ${results.errors} could not be checked` : ""),
+    data: results,
+  });
+});
+
 // ===== Refunds =====
 
 /**
@@ -355,6 +426,8 @@ module.exports = {
   confirmPayment,
   listPayments,
   reconcile,
+  verifyPayment,
+  verifyPending,
   requestRefund,
   approveRefund,
   rejectRefund,

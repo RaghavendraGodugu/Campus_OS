@@ -186,6 +186,31 @@ const paymentSchema = new mongoose.Schema(
       issuedAt: { type: Date, default: null },
     },
 
+    /**
+     * How this payment came to be trusted as settled.
+     *
+     * "webhook" means Razorpay pushed it; "gateway_api" means the server asked
+     * Razorpay directly. Both trust the same thing — Razorpay's key secret —
+     * but an auditor needs to know which actually happened, and a deployment
+     * with no public URL has only the second.
+     */
+    verifiedVia: {
+      type: String,
+      enum: {
+        values: ["webhook", "gateway_api"],
+        message: "`{VALUE}` is not a valid verification source",
+      },
+      default: null,
+    },
+
+    /** Result of the most recent direct lookup against the gateway. */
+    gatewayLookup: {
+      attemptedAt: { type: Date, default: null },
+      succeeded: { type: Boolean, default: false },
+      gatewayStatus: { type: String, default: null },
+      description: { type: String, default: null },
+    },
+
     notes: {
       type: String,
       trim: true,

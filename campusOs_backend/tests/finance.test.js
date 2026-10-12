@@ -1539,3 +1539,504 @@ function pdfText(buffer) {
 
   return decoded.join("\n");
 }
+
+// ===========================================================================
+// Direct gateway verification — the settlement path when no webhook URL exists
+//
+// The security property under test is the same one the webhook path defends:
+// nothing the browser sends may cause an invoice to be marked paid. The
+// difference is that here the browser supplies an id and Razorpay supplies the
+// facts, so these tests are written to attack exactly that boundary.
+// ===========================================================================
+
+describe("gateway verification settles nothing on the client's word", () => {
+  /** Start an order and report a payment from checkout, as the browser would. */
+  async function attemptedPayment(student, invoice, { paymentId = "pay_VERIFY" } = {}) {
+    const { agent, csrfToken } = await loginAs(student.user);
+    const orderRes = await postAs(agent, csrfToken, "/api/v1/finance/payments/order", {
+      invoice: invoice.reference,
+    });
+    expect(orderRes.status).toBe(201);
+
+    const confirmRes = await postAs(
+      agent,
+      csrfToken,
+      "/api/v1/finance/payments/confirm",
+      {
+        razorpayOrderId: orderRes.body.data.razorpayOrderId,
+        razorpayPaymentId: paymentId,
+        razorpaySignature: getGateway().isMock
+          ? signPayment(
+              orderRes.body.data.razorpayOrderId,
+              paymentId,
+              getGateway().keySecret
+            )
+          : "irrelevant",
+      }
+    );
+    expect(confirmRes.status).toBe(200);
+
+    return {
+      agent,
+      csrfToken,
+      paymentId: orderRes.body.data.paymentId,
+      orderId: orderRes.body.data.razorpayOrderId,
+    };
+  }
+
+  it("credits only after Razorpay confirms the capture", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { agent, csrfToken, paymentId, orderId } = await attemptedPayment(
+      student,
+      invoice
+    );
+
+    const before = await Invoice.findById(invoice._id).lean();
+    expect(before.status).toBe(INVOICE_STATUS.ISSUED);
+
+    // The gateway knows about this payment, because a student really made it.
+    getGateway().registerPayment("pay_VERIFY", { orderId, amount: invoice.total });
+
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.applied).toBe(true);
+    expect(res.body.data.capturedAmount).toBe(invoice.total);
+
+    const after = await Invoice.findById(invoice._id).lean();
+    expect(after.status).toBe(INVOICE_STATUS.PAID);
+    expect(after.balanceDue).toBe(0);
+  });
+
+  it("issues a receipt through this path too", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { agent, csrfToken, paymentId, orderId } = await attemptedPayment(
+      student,
+      invoice
+    );
+
+    getGateway().registerPayment("pay_VERIFY", { orderId, amount: invoice.total });
+    await postAs(agent, csrfToken, `/api/v1/finance/payments/${paymentId}/verify`, {});
+
+    const payment = await Payment.findById(paymentId).lean();
+    expect(payment.receiptNumber).toMatch(/^RCP-/);
+    expect(payment.verifiedVia).toBe("gateway_api");
+  });
+
+  it("refuses to settle a payment id the gateway does not recognise", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { agent, csrfToken, paymentId } = await attemptedPayment(student, invoice, {
+      paymentId: "pay_COMPLETELY_MADE_UP",
+    });
+
+    // The gateway refuses to find it, which is a lookup failure — not a payment
+    // failure, and emphatically not a settlement.
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+
+    expect(res.status).toBe(502);
+
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.ISSUED);
+    expect(ledger.balanceDue).toBe(invoice.total);
+    expect(ledger.paidAmount).toBe(0);
+  });
+
+  it("refuses a payment the gateway reports as not captured", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { agent, csrfToken, paymentId } = await attemptedPayment(student, invoice);
+
+    const gateway = getGateway();
+    const original = gateway.fetchPayment.bind(gateway);
+    gateway.fetchPayment = async () => ({
+      id: "pay_VERIFY",
+      orderId: (await Payment.findById(paymentId).lean()).razorpayOrderId,
+      amount: invoice.total,
+      status: "authorized", // created or authorized: not yet captured
+      method: "upi",
+      captured: false,
+    });
+
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+    gateway.fetchPayment = original;
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.applied).toBe(false);
+    expect(res.body.data.reason).toBe("not_yet_captured");
+
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.ISSUED);
+    expect(ledger.balanceDue).toBe(invoice.total);
+  });
+
+  it("refuses a payment the gateway reports as failed", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { agent, csrfToken, paymentId } = await attemptedPayment(student, invoice);
+
+    const gateway = getGateway();
+    const original = gateway.fetchPayment.bind(gateway);
+    gateway.fetchPayment = async () => ({
+      id: "pay_VERIFY",
+      orderId: (await Payment.findById(paymentId).lean()).razorpayOrderId,
+      amount: invoice.total,
+      status: "failed",
+      method: "upi",
+      captured: false,
+    });
+
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+    gateway.fetchPayment = original;
+
+    expect(res.body.data.applied).toBe(false);
+    expect(res.body.data.reason).toBe("payment_failed");
+
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.ISSUED);
+  });
+
+  it("refuses a payment the gateway attributes to a different order", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { agent, csrfToken, paymentId } = await attemptedPayment(student, invoice);
+
+    const gateway = getGateway();
+    const original = gateway.fetchPayment.bind(gateway);
+    gateway.fetchPayment = async () => ({
+      id: "pay_VERIFY",
+      orderId: "order_SOMEONE_ELSES",
+      amount: invoice.total,
+      status: "captured",
+      method: "upi",
+      captured: true,
+    });
+
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+    gateway.fetchPayment = original;
+
+    expect(res.status).toBe(409);
+
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.ISSUED);
+    expect(ledger.balanceDue).toBe(invoice.total);
+
+    const payment = await Payment.findById(paymentId).lean();
+    expect(payment.status).toBe(PAYMENT_STATUS.FAILED);
+  });
+
+  it("refuses a captured amount larger than the order", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { agent, csrfToken, paymentId } = await attemptedPayment(student, invoice);
+
+    const gateway = getGateway();
+    const original = gateway.fetchPayment.bind(gateway);
+    gateway.fetchPayment = async () => ({
+      id: "pay_VERIFY",
+      orderId: (await Payment.findById(paymentId).lean()).razorpayOrderId,
+      amount: invoice.total * 10, // far more than was ever ordered
+      status: "captured",
+      method: "upi",
+      captured: true,
+    });
+
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+    gateway.fetchPayment = original;
+
+    expect(res.status).toBe(409);
+
+    // The ledger must not have been inflated by the larger figure.
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.paidAmount).toBe(0);
+    expect(ledger.balanceDue).toBe(invoice.total);
+  });
+
+  it("credits a genuine partial capture and leaves the balance outstanding", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { agent, csrfToken, paymentId } = await attemptedPayment(student, invoice);
+
+    const gateway = getGateway();
+    const original = gateway.fetchPayment.bind(gateway);
+    gateway.fetchPayment = async () => ({
+      id: "pay_VERIFY",
+      orderId: (await Payment.findById(paymentId).lean()).razorpayOrderId,
+      amount: 10000, // Rs.100 of Rs.11,800
+      status: "captured",
+      method: "upi",
+      captured: true,
+    });
+
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+    gateway.fetchPayment = original;
+
+    expect(res.body.data.applied).toBe(true);
+
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.PARTIALLY_PAID);
+    expect(ledger.paidAmount).toBe(10000);
+    expect(ledger.balanceDue).toBe(invoice.total - 10000);
+    expect(ledger.isFullyPaid).toBe(false);
+  });
+
+  it("will not settle the same payment twice", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { agent, csrfToken, paymentId, orderId } = await attemptedPayment(
+      student,
+      invoice
+    );
+
+    getGateway().registerPayment("pay_VERIFY", { orderId, amount: invoice.total });
+
+    const first = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+    expect(first.body.data.applied).toBe(true);
+
+    const second = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+    expect(second.status).toBe(200);
+    expect(second.body.data.applied).toBe(false);
+    expect(second.body.data.reason).toBe("already_settled");
+
+    // Exactly one credit.
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.paidAmount).toBe(invoice.total);
+    expect(ledger.balanceDue).toBe(0);
+  });
+
+  it("does not double-credit when a webhook has already settled it", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { agent, csrfToken, paymentId, orderId } = await attemptedPayment(
+      student,
+      invoice
+    );
+
+    // The webhook arrives first and settles.
+    const { raw, signature, event } = signedWebhook("payment.captured", {
+      id: "pay_VERIFY",
+      order_id: orderId,
+      amount: invoice.total,
+      status: "captured",
+      method: "upi",
+    });
+    expect((await sendWebhook({ raw, signature, event })).status).toBe(200);
+
+    // Verification must then be a no-op rather than a second credit.
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+
+    expect(res.body.data.applied).toBe(false);
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.paidAmount).toBe(invoice.total);
+    expect(ledger.balanceDue).toBe(0);
+  });
+
+  it("404s when a student verifies another student's payment", async () => {
+    const owner = await createStudent();
+    const other = await createStudent();
+    const invoice = await makeInvoice(owner);
+    const { paymentId } = await attemptedPayment(owner, invoice);
+
+    const { agent, csrfToken } = await loginAs(other.user);
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+
+    expect(res.status).toBe(404);
+    expect((await Invoice.findById(invoice._id).lean()).status).toBe(
+      INVOICE_STATUS.ISSUED
+    );
+  });
+
+  it("demands a gateway reference before it will call the provider", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+
+    // Order created, checkout never reported.
+    const { agent, csrfToken } = await makeOrder(student, invoice);
+    const paymentId = (await Payment.findOne({ invoice: invoice._id }).lean())._id;
+
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/payments/${paymentId}/verify`,
+      {}
+    );
+
+    expect(res.status).toBe(400);
+    expect((await Invoice.findById(invoice._id).lean()).status).toBe(
+      INVOICE_STATUS.ISSUED
+    );
+  });
+});
+
+describe("pending payment sweep", () => {
+  it("settles payments left behind by a closed browser", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+
+    // Student pays, then closes the tab without confirming.
+    const { res: orderRes } = await makeOrder(student, invoice);
+    await Payment.updateOne(
+      { _id: orderRes.body.data.paymentId },
+      {
+        $set: {
+          status: PAYMENT_STATUS.ATTEMPTED,
+          razorpayPaymentId: "pay_SWEEP",
+        },
+      }
+    );
+
+    const gateway = getGateway();
+    const original = gateway.fetchPayment.bind(gateway);
+    gateway.fetchPayment = async () => ({
+      id: "pay_SWEEP",
+      orderId: orderRes.body.data.razorpayOrderId,
+      amount: invoice.total,
+      status: "captured",
+      method: "upi",
+      captured: true,
+    });
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+    const res = await postAs(
+      agent,
+      csrfToken,
+      "/api/v1/finance/payments/verify-pending",
+      {}
+    );
+
+    gateway.fetchPayment = original;
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.checked).toBe(1);
+    expect(res.body.data.settled).toBe(1);
+
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.PAID);
+  });
+
+  it("continues past a payment the provider cannot be asked about", async () => {
+    const a = await createStudent();
+    const b = await createStudent();
+    const invA = await makeInvoice(a);
+    const invB = await makeInvoice(b);
+
+    const { res: orderA } = await makeOrder(a, invA);
+    const { res: orderB } = await makeOrder(b, invB);
+
+    for (const [order, payId] of [
+      [orderA, "pay_ONE"],
+      [orderB, "pay_TWO"],
+    ]) {
+      await Payment.updateOne(
+        { _id: order.body.data.paymentId },
+        { $set: { status: PAYMENT_STATUS.ATTEMPTED, razorpayPaymentId: payId } }
+      );
+    }
+
+    const gateway = getGateway();
+    const original = gateway.fetchPayment.bind(gateway);
+    // One unreachable, one genuinely captured.
+    gateway.fetchPayment = async (paymentId) => {
+      if (paymentId === "pay_ONE") {
+        throw { error: { description: "The id provided does not exist" } };
+      }
+      return {
+        id: paymentId,
+        orderId: orderB.body.data.razorpayOrderId,
+        amount: invB.total,
+        status: "captured",
+        method: "upi",
+        captured: true,
+      };
+    };
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+    const res = await postAs(
+      agent,
+      csrfToken,
+      "/api/v1/finance/payments/verify-pending",
+      {}
+    );
+
+    gateway.fetchPayment = original;
+
+    expect(res.body.data.checked).toBe(2);
+    expect(res.body.data.errors).toBe(1);
+    // The reachable payment was still settled.
+    expect(res.body.data.settled).toBe(1);
+    expect((await Invoice.findById(invB._id).lean()).status).toBe(INVOICE_STATUS.PAID);
+    expect((await Invoice.findById(invA._id).lean()).status).toBe(INVOICE_STATUS.ISSUED);
+  });
+
+  it("refuses the sweep to a student", async () => {
+    const student = await createStudent();
+    const { agent, csrfToken } = await loginAs(student.user);
+
+    const res = await postAs(
+      agent,
+      csrfToken,
+      "/api/v1/finance/payments/verify-pending",
+      {}
+    );
+    expect(res.status).toBe(403);
+  });
+});

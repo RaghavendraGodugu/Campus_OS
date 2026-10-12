@@ -255,7 +255,9 @@ class RazorpayGateway {
  * idempotency code runs unchanged: ids have the `order_`/`pay_` prefixes, and
  * signatures are genuine HMACs over the same payload strings.
  *
- * `MOCK_PAYMENT_OUTCOME` (set by tests or the developer) decides whether a
+ * A payment must be registered with `registerPayment()` before it can be
+ * fetched; an unknown id fails exactly as the real gateway fails, which is what
+ * makes the verification path testable rather than always succeeding.
  * payment succeeds or fails, which is how the failure paths are exercised
  * without a live gateway.
  */
@@ -279,6 +281,8 @@ class MockRazorpayGateway {
      */
     this._runId = crypto.randomBytes(4).toString("hex");
     this._counter = 0;
+    this._orders = new Map();
+    this._payments = new Map();
   }
 
   nextId(prefix) {
@@ -287,8 +291,12 @@ class MockRazorpayGateway {
   }
 
   async createOrder({ amount, currency = "INR", receipt, notes }) {
+    const orderId = this.nextId("order");
+
+    this._orders.set(receipt, { orderId, amount, currency });
+
     return {
-      orderId: this.nextId("order"),
+      orderId,
       amount,
       currency,
       status: "created",
@@ -297,24 +305,64 @@ class MockRazorpayGateway {
     };
   }
 
-  async fetchPayment(paymentId) {
-    const outcome = process.env.MOCK_PAYMENT_OUTCOME ?? "captured";
-    const captured = outcome === "captured";
+  /**
+   * @param {string} paymentId
+   * @param {object} [context]
+   * @param {string} [context.orderId] The order this payment is expected to
+   *   belong to. The real gateway ignores it — Razorpay reports the order
+   *   itself — but a mock that invented its own order id would fail the very
+   *   cross-check it exists to exercise, making the verification path
+   *   impossible to develop against locally.
+   */
+  /**
+   * Register a payment as existing at the gateway.
+   *
+   * The mock has no hosted checkout page, so a test declares here the payments
+   * a student "made". Anything not registered is treated as not found — which is
+   * what the real gateway does, and what makes the verification path testable:
+   * a payment id that was never registered must fail exactly as it would in
+   * production rather than being invented on demand.
+   */
+  registerPayment(
+    paymentId,
+    { orderId, amount, status = "captured", method = "upi" } = {}
+  ) {
+    this._payments.set(paymentId, { orderId, amount, status, method });
+    return paymentId;
+  }
+
+  async fetchPayment(paymentId, { orderId } = {}) {
+    const registered = this._payments.get(paymentId);
+
+    if (!registered) {
+      // The shape Razorpay actually uses: a plain object, not an Error, with
+      // the description nested under `error`. Code that only reads `.message`
+      // sees "[object Object]" and cannot tell an auth failure from a 404.
+      throw {
+        statusCode: 400,
+        error: {
+          code: "BAD_REQUEST_ERROR",
+          description: "The id provided does not exist",
+          source: "internal",
+          reason: "input_validation_failed",
+        },
+      };
+    }
+
+    const captured = registered.status === "captured";
 
     return {
       id: paymentId,
-      orderId: `order_from_${paymentId}`,
-      amount: Number(process.env.MOCK_PAYMENT_AMOUNT ?? 0),
+      orderId: registered.orderId ?? orderId,
+      amount: registered.amount,
       currency: "INR",
-      status: captured ? "captured" : "failed",
-      method: "upi",
+      status: registered.status,
+      method: registered.method,
       email: "mock@campusos.local",
       contact: "+910000000000",
       captured,
       errorCode: captured ? null : "BAD_REQUEST_ERROR",
-      errorDescription: captured
-        ? null
-        : "Mock failure configured by MOCK_PAYMENT_OUTCOME",
+      errorDescription: captured ? null : "Mock failure configured by registerPayment",
       createdAt: Math.floor(Date.now() / 1000),
     };
   }

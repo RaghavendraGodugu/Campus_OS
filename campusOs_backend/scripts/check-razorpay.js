@@ -67,32 +67,8 @@ const fail = (m) => console.log(`  FAIL  ${m}`);
   }
 
   // A read against the API: proves the key id and secret authenticate.
-  try {
-    const payment = await gateway.fetchPayment("pay_nonexistent_probe");
-
-    // Razorpay authenticates before it looks the id up, so reaching a
-    // not-found is the success signal here.
-    if (!payment) {
-      pass("credentials authenticated against the Razorpay API");
-    }
-  } catch (error) {
-    const message = String(error.message ?? error);
-    const description = error.description ?? "";
-
-    if (
-      message.toLowerCase().includes("api key") ||
-      description.toLowerCase().includes("api key")
-    ) {
-      fail("credentials rejected by Razorpay — check the key id and secret");
-    } else if (
-      message.toLowerCase().includes("idempotency") === false &&
-      /not found|404/i.test(message)
-    ) {
-      pass("credentials authenticated against the Razorpay API");
-    } else {
-      fail(`API call failed: ${message}`);
-    }
-  }
+  // A read against the API: proves the key id and secret authenticate.
+  await probeCredentials(gateway);
 
   console.log("");
   console.log("  Still unverified until you send a real payment:");
@@ -107,6 +83,47 @@ const fail = (m) => console.log(`  FAIL  ${m}`);
   fail(`unexpected: ${error.message}`);
   process.exit(1);
 });
+
+/**
+ * Confirm the credentials authenticate, using a payment id that cannot exist.
+ *
+ * Razorpay authenticates the request before it looks the id up, so a
+ * "not found" reply is the success signal: the keys were accepted and only the
+ * id was refused.
+ *
+ * The SDK rejects with a plain object — `{ statusCode, error }` — not an Error,
+ * so unwrapping it is necessary rather than cosmetic. Unhandled, that object
+ * stringifies to "[object Object]" and a genuine auth failure looks like an
+ * unexplained crash.
+ */
+async function probeCredentials(gateway) {
+  try {
+    await gateway.fetchPayment("pay_nonexistent_probe");
+    pass("credentials accepted by the Razorpay API");
+    return;
+  } catch (error) {
+    const description = error?.error?.description ?? error?.description ?? "";
+    const code = error?.error?.code ?? "";
+    const status = error?.statusCode ?? "";
+
+    if (/api key|authentication|unauthor/i.test(`${description} ${code}`)) {
+      fail(
+        `credentials rejected by Razorpay (${code || status}) — check the key id and secret`
+      );
+      return;
+    }
+
+    if (/does not exist|not found/i.test(description) || status === 404) {
+      // Exactly what a working key produces for a payment that never existed.
+      pass("credentials accepted by the Razorpay API");
+      return;
+    }
+
+    fail(
+      `API call failed (${code || status || "?"}): ${description || "no description"}`
+    );
+  }
+}
 
 function mask(value) {
   if (value.length <= 10) return "********";

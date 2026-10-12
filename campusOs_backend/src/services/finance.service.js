@@ -25,7 +25,7 @@ const Invoice = require("../models/Invoice");
 const Payment = require("../models/Payment");
 const Student = require("../models/Student");
 const Counter = require("../models/Counter");
-const { ApiError } = require("../utils/ApiError");
+const { ApiError, ERROR_CODE } = require("../utils/ApiError");
 const { userHasPermission, P } = require("../utils/permissions");
 const {
   ROLES,
@@ -318,6 +318,316 @@ async function createOrder({ user, invoiceId, req }) {
  * stores the outcome for audit, because a failed signature here is worth
  * investigating even though it has no financial effect.
  */
+/**
+ * Settle a payment by asking Razorpay directly, for deployments with no webhook.
+ *
+ * ## Why this is not "trusting the browser"
+ *
+ * The rule this module exists to enforce is that an invoice is never marked
+ * paid on the word of the client. This function keeps that rule intact. The
+ * browser still only supplies an id; the *decision* comes from Razorpay's own
+ * authenticated response, reached with the key secret over the server's own
+ * connection. A student who invents a payment id gets a 400 from Razorpay and
+ * settles nothing.
+ *
+ * Webhooks and this path differ only in who initiates the conversation. Both
+ * rely on the same trust anchor — Razorpay's key secret — and both ignore what
+ * the browser claims. A webhook is preferable because it is push and cannot be
+ * forgotten, but it requires a publicly reachable URL, which a project under
+ * development does not have. This is the honest fallback, not a weaker door.
+ *
+ * ## Every cross-check the webhook gets, it gets here too
+ *
+ * The payment must belong to the order we created, must actually be captured,
+ * and must not report more than we ever asked for. Amount and status come from
+ * Razorpay; nothing is taken from the request.
+ *
+ * ## Idempotent, and idempotent *with* the webhook
+ *
+ * Verification only proceeds from a payment that is not already settled, and
+ * crediting is guarded on the invoice balance, so running it after a real
+ * webhook is a no-op rather than a double credit.
+ *
+ * @param {object} params
+ * @param {object} params.user    Owner (student) or accounts staff.
+ * @param {string} params.paymentId
+ * @param {object} [params.req]
+ */
+async function verifyPaymentWithGateway({ user, paymentId, req }) {
+  const payment = await Payment.findById(paymentId);
+
+  if (!payment) {
+    throw ApiError.notFound("Payment not found");
+  }
+
+  const isOwner = payment.student?.toString() === user.student?.toString();
+  const isStaff = userHasPermission(user, P.PAYMENT_READ_INSTITUTION);
+
+  if (!isOwner && !isStaff) {
+    throw ApiError.notFound("Payment not found");
+  }
+
+  // Already settled — by a webhook or an earlier verification. Settling twice
+  // must be impossible, whichever path got here first.
+  if (payment.status === PAYMENT_STATUS.PAID) {
+    return {
+      applied: false,
+      reason: "already_settled",
+      status: payment.status,
+      invoice: payment.invoice,
+    };
+  }
+
+  if (!payment.razorpayPaymentId) {
+    throw ApiError.badRequest(
+      "This payment has no gateway reference yet. Report the payment from checkout first."
+    );
+  }
+
+  const gateway = getGateway();
+
+  // ===== The authoritative step: ask Razorpay. =====
+  let observed;
+  try {
+    // The expected order is passed as context. Razorpay reports the order
+    // itself and ignores it; a local mock needs it to answer consistently.
+    observed = await gateway.fetchPayment(payment.razorpayPaymentId, {
+      orderId: payment.razorpayOrderId,
+    });
+  } catch (error) {
+    const description =
+      error?.error?.description ?? error?.description ?? error?.message ?? "";
+
+    logger.warn(
+      { paymentId: payment._id, description },
+      "Could not retrieve the payment from the gateway"
+    );
+
+    await Payment.updateOne(
+      { _id: payment._id },
+      {
+        $set: {
+          status: PAYMENT_STATUS.ATTEMPTED,
+          gatewayLookup: {
+            attemptedAt: new Date(),
+            succeeded: false,
+            description: String(description).slice(0, 300),
+          },
+        },
+      }
+    );
+
+    // A lookup failure is never a failure of the payment — Razorpay may simply
+    // not have propagated it yet. It stays ATTEMPTED so a later sweep can retry.
+    throw new ApiError(
+      ERROR_CODE.INTEGRATION_ERROR,
+      `The payment provider could not confirm this payment yet: ${description || "no reason given"}. It remains unpaid until confirmed.`
+    );
+  }
+
+  // ===== Cross-check what Razorpay said against what we created. =====
+
+  if (observed.orderId !== payment.razorpayOrderId) {
+    logger.error(
+      {
+        paymentId: payment._id,
+        reportedOrder: observed.orderId,
+        expectedOrder: payment.razorpayOrderId,
+      },
+      "Gateway reported a payment against a different order"
+    );
+
+    await Payment.updateOne(
+      { _id: payment._id },
+      {
+        $set: {
+          status: PAYMENT_STATUS.FAILED,
+          gatewayLookup: {
+            attemptedAt: new Date(),
+            succeeded: false,
+            description: "Order mismatch",
+          },
+        },
+      }
+    );
+
+    throw ApiError.conflict(
+      "The payment does not belong to this order. Nothing has been charged to your account."
+    );
+  }
+
+  if (observed.status !== "captured") {
+    // Not captured yet: failed, authorized, created, or still in flight.
+    await Payment.updateOne(
+      { _id: payment._id },
+      {
+        $set: {
+          status:
+            observed.status === "failed"
+              ? PAYMENT_STATUS.FAILED
+              : PAYMENT_STATUS.ATTEMPTED,
+          gatewayLookup: {
+            attemptedAt: new Date(),
+            succeeded: true,
+            gatewayStatus: observed.status,
+          },
+        },
+      }
+    );
+
+    await notifyPaymentOutcome(
+      payment,
+      observed.status === "failed" ? "failed" : "pending"
+    );
+
+    return {
+      applied: false,
+      reason: observed.status === "failed" ? "payment_failed" : "not_yet_captured",
+      gatewayStatus: observed.status,
+      status:
+        observed.status === "failed" ? PAYMENT_STATUS.FAILED : PAYMENT_STATUS.ATTEMPTED,
+    };
+  }
+
+  const reportedAmount = Number(observed.amount);
+
+  // Razorpay reporting more than we ever ordered is not a partial capture; it
+  // is a mismatch, and crediting it would inflate the ledger.
+  if (reportedAmount > payment.amount) {
+    logger.error(
+      { paymentId: payment._id, reportedAmount, ordered: payment.amount },
+      "Gateway reported a captured amount larger than the order"
+    );
+
+    await Payment.updateOne(
+      { _id: payment._id },
+      {
+        $set: {
+          status: PAYMENT_STATUS.FAILED,
+          gatewayLookup: {
+            attemptedAt: new Date(),
+            succeeded: true,
+            description: "Amount exceeds order",
+          },
+        },
+      }
+    );
+
+    throw ApiError.conflict(
+      "The payment provider reported an amount larger than the order. This has been flagged for review."
+    );
+  }
+
+  // ===== Settle. Crediting remains guarded on the invoice balance. =====
+  const settled = await Payment.findOneAndUpdate(
+    { _id: payment._id, status: { $ne: PAYMENT_STATUS.PAID } },
+    {
+      $set: {
+        status: PAYMENT_STATUS.PAID,
+        capturedAmount: reportedAmount,
+        verifiedAt: new Date(),
+        verifiedVia: "gateway_api",
+        gatewayLookup: {
+          attemptedAt: new Date(),
+          succeeded: true,
+          gatewayStatus: observed.status,
+        },
+      },
+    },
+    { new: true }
+  );
+
+  if (!settled) {
+    // A webhook won the race. Its credit stands; this call changes nothing.
+    logger.info(
+      { paymentId: payment._id },
+      "Payment settled concurrently by another path"
+    );
+    return { applied: false, reason: "already_settled", status: PAYMENT_STATUS.PAID };
+  }
+
+  await creditInvoice(settled);
+
+  await auditService.record({
+    action: AUDIT_ACTION.PAYMENT_VERIFIED,
+    entity: "Payment",
+    entityId: settled._id,
+    entityRef: settled.razorpayPaymentId,
+    metadata: {
+      amount: reportedAmount,
+      method: observed.method,
+      verifiedVia: "gateway_api",
+      // Recorded so an auditor can tell a polled settlement from a pushed one.
+      gatewayStatus: observed.status,
+    },
+    actor: user,
+    req,
+  });
+
+  logger.info(
+    { paymentId: settled._id, amount: reportedAmount },
+    "Payment settled by direct gateway verification"
+  );
+
+  return {
+    applied: true,
+    reason: "captured",
+    status: PAYMENT_STATUS.PAID,
+    capturedAmount: reportedAmount,
+    invoice: settled.invoice,
+  };
+}
+
+/**
+ * Settle every still-unsettled payment that has a gateway reference.
+ *
+ * The counterpart to webhooks for a deployment that cannot receive them: a
+ * student who closed the browser after paying would otherwise stay ATTEMPTED
+ * forever. Accounts staff run this; it only reads from the gateway and settles
+ * what Razorpay confirms.
+ */
+async function verifyPendingPayments({ user, limit = 25, req }) {
+  if (!userHasPermission(user, P.PAYMENT_MANAGE)) {
+    throw ApiError.forbidden("You do not have permission to verify payments");
+  }
+
+  const candidates = await Payment.find({
+    status: PAYMENT_STATUS.ATTEMPTED,
+    razorpayPaymentId: { $ne: null },
+  })
+    .sort({ createdAt: -1 })
+    .limit(Math.min(Math.max(1, Number(limit) || 25), 100))
+    .select("_id status")
+    .lean();
+
+  const results = { checked: 0, settled: 0, failed: 0, stillPending: 0, errors: 0 };
+
+  for (const candidate of candidates) {
+    results.checked += 1;
+    try {
+      const outcome = await verifyPaymentWithGateway({
+        user,
+        paymentId: candidate._id.toString(),
+        req,
+      });
+
+      if (outcome.applied) results.settled += 1;
+      else if (outcome.reason === "payment_failed") results.failed += 1;
+      else if (outcome.reason === "not_yet_captured") results.stillPending += 1;
+    } catch (error) {
+      // One unreachable payment must not abandon the rest of the sweep.
+      results.errors += 1;
+      logger.warn(
+        { paymentId: candidate._id, message: error.message },
+        "Payment verification failed during sweep"
+      );
+    }
+  }
+
+  logger.info({ results }, "Pending payment sweep complete");
+  return results;
+}
+
 async function confirmPayment({
   user,
   razorpayOrderId,
@@ -703,6 +1013,8 @@ module.exports = {
   canReadInvoice,
   createOrder,
   confirmPayment,
+  verifyPaymentWithGateway,
+  verifyPendingPayments,
   applyWebhookEvent,
   creditInvoice,
   listPayments,

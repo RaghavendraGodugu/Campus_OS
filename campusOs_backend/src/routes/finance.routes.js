@@ -102,6 +102,36 @@ router.get(
   financeController.listPayments
 );
 
+// ===== Direct gateway verification =====
+
+/**
+ * POST /api/v1/finance/payments/verify-pending
+ *
+ * Declared before `/payments/:id/...` so the literal path is never mistaken
+ * for an id. Accounts staff only.
+ */
+router.post(
+  "/finance/payments/verify-pending",
+  authenticate,
+  csrfProtection,
+  requireAnyPermission(P.PAYMENT_MANAGE, P.INVOICE_MANAGE),
+  financeController.verifyPending
+);
+
+/**
+ * POST /api/v1/finance/payments/:id/verify
+ *
+ * Settlement path for deployments with no public webhook URL. The browser still
+ * only supplies an id; Razorpay's authenticated response decides whether money
+ * moved. Identical trust anchor to the webhook, different direction.
+ */
+router.post(
+  "/finance/payments/:id/verify",
+  authenticate,
+  csrfProtection,
+  financeController.verifyPayment
+);
+
 // ===== Receipts =====
 
 /**
