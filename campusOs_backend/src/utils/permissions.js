@@ -133,6 +133,8 @@ const P = {
   CERTIFICATE_READ_DEPARTMENT: "certificate:read:department",
   CERTIFICATE_READ_INSTITUTION: "certificate:read:institution",
   CERTIFICATE_VERIFY: "certificate:verify:department",
+  /** Render and store the PDF; the only path that writes an issue record. */
+  CERTIFICATE_ISSUE: "certificate:issue:department",
   CERTIFICATE_APPROVE: "certificate:approve:department",
   CERTIFICATE_APPROVE_INSTITUTION: "certificate:approve:institution",
   CERTIFICATE_REVOKE: "certificate:revoke:institution",
@@ -270,6 +272,9 @@ const ROLE_PERMISSIONS = {
     P.CERTIFICATE_READ_DEPARTMENT,
     P.CERTIFICATE_VERIFY,
     P.CERTIFICATE_APPROVE,
+    // An HOD who can approve but not issue would strand every approved
+    // certificate in the department with nobody able to render it.
+    P.CERTIFICATE_ISSUE,
     P.ANNOUNCEMENT_READ,
     P.REPORT_READ_DEPARTMENT,
     P.AUDIT_READ_DEPARTMENT,
@@ -391,6 +396,7 @@ const ROLE_PERMISSIONS = {
     P.CERTIFICATE_READ_INSTITUTION,
     P.CERTIFICATE_VERIFY,
     P.CERTIFICATE_APPROVE,
+    P.CERTIFICATE_ISSUE,
     P.CERTIFICATE_APPROVE_INSTITUTION,
     P.ANNOUNCEMENT_READ,
     P.ANNOUNCEMENT_MANAGE,
@@ -419,6 +425,7 @@ const ROLE_PERMISSIONS = {
     P.COMPLAINT_ESCALATE,
     P.CERTIFICATE_READ_INSTITUTION,
     P.CERTIFICATE_VERIFY,
+    P.CERTIFICATE_ISSUE,
     P.CERTIFICATE_APPROVE_INSTITUTION,
     P.CERTIFICATE_REVOKE,
     P.ANNOUNCEMENT_READ,
@@ -454,6 +461,7 @@ const ROLE_PERMISSIONS = {
     P.COMPLAINT_INVESTIGATE,
     P.COMPLAINT_RESOLVE,
     P.CERTIFICATE_READ_INSTITUTION,
+    P.CERTIFICATE_ISSUE,
     P.CERTIFICATE_REVOKE,
     P.INVOICE_READ_INSTITUTION,
     P.PAYMENT_READ_INSTITUTION,

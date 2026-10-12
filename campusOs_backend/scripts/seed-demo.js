@@ -35,6 +35,7 @@ const {
   RequestType,
   Request,
   Complaint,
+  Certificate,
 } = require("../src/models");
 
 /** Prefix applied to every demo record so it is never mistaken for real. */
@@ -554,6 +555,65 @@ async function main() {
     );
   }
   process.stdout.write(`  sample complaints: ${sampleComplaints.length}\n`);
+
+  // ===== Sample certificates =====
+  // A generated one needs a real PDF, so the certificate service is used
+  // rather than inserting a row with a fabricated storage key.
+  const certificateService = require("../src/services/certificate.service");
+
+  const certHod = staff[ROLES.HOD];
+  let generatedCertificates = 0;
+
+  for (const spec of [
+    { type: "BONAFIDE", purpose: "Bank loan application", issue: true },
+    { type: "TRANSCRIPT", purpose: "Postgraduate admission", issue: false },
+  ]) {
+    const student = students[0];
+    let certificate = await Certificate.findOne({
+      reference: `${DEMO_PREFIX}-CERT-000${generatedCertificates + 1}`,
+    });
+
+    if (!certificate) {
+      certificate = await certificateService.apply({
+        user: student.user,
+        type: spec.type,
+        purpose: spec.purpose,
+      });
+      // Mark the seeded row so the demo banner can identify it.
+      await Certificate.updateOne({ _id: certificate._id }, { $set: { isDemo: true } });
+    }
+
+    if (!spec.issue || certificate.status === "GENERATED") continue;
+
+    for (const [from, to] of [
+      ["APPLIED", "VALIDATING"],
+      ["VALIDATING", "VERIFYING"],
+      ["VERIFYING", "APPROVED"],
+    ]) {
+      if (certificate.status !== from) continue;
+      certificate = await certificateService.transition({
+        certificateId: certificate._id,
+        to,
+        expectedFrom: from,
+        user: certHod,
+      });
+    }
+
+    try {
+      await certificateService.generate({
+        certificateId: certificate._id,
+        user: certHod,
+      });
+      generatedCertificates += 1;
+    } catch (error) {
+      process.stderr.write(`  (certificate issuance skipped: ${error.message})\n`);
+    }
+  }
+
+  const totalCertificates = await Certificate.countDocuments({});
+  process.stdout.write(
+    `  certificates     : ${totalCertificates} (${generatedCertificates} issued)\n`
+  );
 
   // ===== Demo flag =====
   // Read by the frontend to render the "DEMO DATA" banner.

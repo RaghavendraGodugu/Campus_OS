@@ -19,6 +19,7 @@ const Request = require("./Request");
 const Document = require("./Document");
 const Notification = require("./Notification");
 const Complaint = require("./Complaint");
+const Certificate = require("./Certificate");
 
 // Each entry maps a model name to the Mongoose model, used by the index-sync
 // health check and by the test harness for cleanup between suites.
@@ -34,6 +35,7 @@ const models = {
   Document,
   Notification,
   Complaint,
+  Certificate,
 };
 
 /**

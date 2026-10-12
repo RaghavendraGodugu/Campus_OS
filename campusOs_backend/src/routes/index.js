@@ -12,6 +12,7 @@ const healthController = require("../controllers/health.controller");
 const authRoutes = require("./auth.routes");
 const requestRoutes = require("./request.routes");
 const complaintRoutes = require("./complaint.routes");
+const certificateRoutes = require("./certificate.routes");
 
 const router = express.Router();
 
@@ -28,5 +29,6 @@ router.get("/health/ready", healthController.ready);
 router.use("/api/v1/auth", authRoutes);
 router.use("/api/v1", requestRoutes);
 router.use("/api/v1", complaintRoutes);
+router.use("/api/v1", certificateRoutes);
 
 module.exports = router;

@@ -590,3 +590,47 @@ describe("complaint scoping", () => {
     expect(res.body.meta.total).toBe(1);
   });
 });
+
+describe("SLA precision", () => {
+  it("measures the configured window exactly, whatever the clock time", () => {
+    // Regression guard for a sub-minute truncation: `applyLocalMinutes`
+    // rebuilt the timestamp from date+minutes only, so a 4-business-hour
+    // deadline starting at 15:33:37 landed at 15:33:00 and measured as 239
+    // minutes. It passed at 09:00:00 and failed at 15:33:37, which made the
+    // suite time-of-day dependent.
+    const calendar = slaPolicy.calendarOptions();
+
+    [
+      [9, 0], // opening time
+      [12, 34], // midday
+      [15, 33], // the value that used to fail
+      [17, 0], // closing time
+      [20, 15], // outside working hours
+      [6, 45], // before opening
+    ].forEach(([hour, minute]) => {
+      const start = new Date(Date.UTC(2026, 9, 12, hour, minute, 37, 123));
+      const due = slaUtils.addBusinessHours(start, 4, calendar);
+      const elapsed = slaUtils.businessMinutesBetween(start, due, calendar);
+
+      expect(elapsed).toBe(240);
+    });
+  });
+
+  it("preserves seconds and milliseconds in the deadline", () => {
+    const calendar = slaPolicy.calendarOptions();
+    const start = new Date(Date.UTC(2026, 9, 12, 3, 30, 45, 678));
+    const due = slaUtils.addBusinessHours(start, 4, calendar);
+
+    expect(due.getUTCSeconds()).toBe(45);
+    expect(due.getUTCMilliseconds()).toBe(678);
+  });
+
+  it("is exact across a multi-day window", () => {
+    const calendar = slaPolicy.calendarOptions();
+    const start = new Date(Date.UTC(2026, 9, 12, 3, 30, 12, 345));
+
+    // 48 business hours is exactly six working days of 8 hours.
+    const due = slaUtils.addBusinessHours(start, 48, calendar);
+    expect(slaUtils.businessMinutesBetween(start, due, calendar)).toBe(48 * 60);
+  });
+});

@@ -42,3 +42,5 @@ Thumbs.db
 uploads/
 tmp/
 *.pid
+# Local private file storage (certificates, uploads)
+storage/

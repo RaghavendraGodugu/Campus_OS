@@ -184,7 +184,18 @@ function applyLocalMinutes(date, minutesFromMidnight, timezone) {
   const utcMs =
     Date.UTC(parts.year, parts.month - 1, parts.day, 0, 0, 0, 0) +
     (minutesFromMidnight - offsetMinutes) * 60_000;
-  return new Date(utcMs);
+
+  // Carry the original seconds and milliseconds across.
+  //
+  // `getLocalParts` reports only to the minute, so rebuilding the timestamp
+  // from scratch silently truncated sub-minute precision. That made a
+  // 4-business-hour deadline measured from 15:33:50 land at 15:33:00, and the
+  // elapsed-measurement function then reported 239 minutes instead of 240 —
+  // a deadline that is never quite honoured, and a test that only fails
+  // depending on what time of day it runs.
+  const result = new Date(utcMs);
+  result.setUTCSeconds(date.getUTCSeconds(), date.getUTCMilliseconds());
+  return result;
 }
 
 /** Move to 00:00 on the next local calendar day. */
