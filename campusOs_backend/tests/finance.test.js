@@ -2040,3 +2040,45 @@ describe("pending payment sweep", () => {
     expect(res.status).toBe(403);
   });
 });
+
+describe("refund list paging", () => {
+  /**
+   * A regression guard for a bug the refund page found.
+   *
+   * `listRefunds` has always paginated, but the request validator accepted only
+   * a status filter, so `?page=2&limit=20` was rejected with a 400 and the list
+   * could only ever be read whole. The service was correct and reachable code
+   * that the validator made unreachable.
+   */
+  it("accepts a page and a limit", async () => {
+    const student = await createStudent();
+    const { agent } = await loginAs(student.user);
+
+    const res = await agent.get("/api/v1/finance/refunds?page=1&limit=20");
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta.page).toBe(1);
+    expect(res.body.meta.limit).toBe(20);
+  });
+
+  it("reports a narrowed page rather than silently returning the first", async () => {
+    const student = await createStudent();
+    const { agent } = await loginAs(student.user);
+
+    const res = await agent.get("/api/v1/finance/refunds?page=3&limit=5");
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta.page).toBe(3);
+    expect(res.body.meta.limit).toBe(5);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  it("still refuses an out-of-range limit", async () => {
+    const student = await createStudent();
+    const { agent } = await loginAs(student.user);
+
+    const res = await agent.get("/api/v1/finance/refunds?limit=5000");
+
+    expect(res.status).toBe(400);
+  });
+});

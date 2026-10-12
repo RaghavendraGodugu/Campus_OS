@@ -157,8 +157,20 @@ const refundDecisionSchema = z
   })
   .strict();
 
+/**
+ * GET /finance/refunds
+ *
+ * Carries paging as well as the status filter. It previously accepted only
+ * `status`, while `listRefunds` has always paginated — so any request naming a
+ * page or a limit was rejected outright and the list could only ever be read
+ * whole. Found when the refund page sent `?page=1&limit=20` and got a 400.
+ */
 const refundStatusSchema = z
-  .object({ status: z.enum(REFUND_STATUS_VALUES).optional() })
+  .object({
+    status: z.enum(REFUND_STATUS_VALUES).optional(),
+    page: z.coerce.number().int().min(1).max(10000).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(20),
+  })
   .strict();
 
 module.exports = {

@@ -7,6 +7,14 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Announcements from "./pages/Announcements";
 import AnnouncementDetail from "./pages/AnnouncementDetail";
+import Complaints from "./pages/Complaints";
+import NewComplaint from "./pages/NewComplaint";
+import Certificates from "./pages/Certificates";
+import Reports from "./pages/Reports";
+import AuditTrail from "./pages/AuditTrail";
+import Requests from "./pages/Requests";
+import NewRequest from "./pages/NewRequest";
+import RequestDetail from "./pages/RequestDetail";
 import Invoices from "./pages/Invoices";
 import Refunds from "./pages/Refunds";
 import NotFound from "./pages/NotFound";
@@ -31,6 +39,67 @@ export default function App() {
         }
       >
         <Route index element={<Dashboard />} />
+
+        {/* Declared before the two-segment route below, so "new" is never read
+            as a request reference. */}
+        <Route
+          path="requests/new"
+          element={
+            <RequirePermission permission="request:create:own">
+              <NewRequest />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="requests"
+          element={
+            <RequirePermission permission="request:read:own">
+              <Requests mode="own" />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="requests/:reference"
+          element={
+            <RequirePermission permission="request:read:own">
+              <RequestDetail />
+            </RequirePermission>
+          }
+        />
+        {/* Literal paths first: "new" must not be read as a reference. */}
+        <Route
+          path="complaints/new"
+          element={
+            <RequirePermission permission="complaint:create:own">
+              <NewComplaint />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="complaints"
+          element={
+            <RequirePermission permission="complaint:create:own">
+              <Complaints mode="own" />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="certificates"
+          element={
+            <RequirePermission permission="certificate:apply:own">
+              <Certificates mode="own" />
+            </RequirePermission>
+          }
+        />
+
+        <Route
+          path="management/requests"
+          element={
+            <RequirePermission permission="request:read:assigned">
+              <Requests mode="assigned" />
+            </RequirePermission>
+          }
+        />
 
         <Route
           path="announcements"
@@ -66,8 +135,39 @@ export default function App() {
           }
         />
 
-        {/* Implemented next: requests, complaints, certificates, management,
-            reports and the audit trail. */}
+        <Route
+          path="management/complaints"
+          element={
+            <RequirePermission permission="complaint:read:assigned">
+              <Complaints mode="assigned" />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="management/certificates"
+          element={
+            <RequirePermission permission="certificate:read:assigned">
+              <Certificates mode="assigned" />
+            </RequirePermission>
+          }
+        />
+
+        <Route
+          path="reports"
+          element={
+            <RequirePermission permission="report:read:department">
+              <Reports />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="audit"
+          element={
+            <RequirePermission permission="audit:read:department">
+              <AuditTrail />
+            </RequirePermission>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Route>
 
