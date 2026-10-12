@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/*
+ * CampusOS theme.
+
+ * Colour is defined once as CSS variables and referenced by Tailwind utilities,
+ * so a component never hard-codes a hex value. That is what makes the dark
+ * theme a variable swap rather than a second stylesheet.
+ */
+@theme {
+  --color-brand-50: oklch(0.97 0.014 254);
+  --color-brand-100: oklch(0.93 0.032 254);
+  --color-brand-200: oklch(0.88 0.06 254);
+  --color-brand-300: oklch(0.8 0.1 254);
+  --color-brand-400: oklch(0.7 0.14 254);
+  --color-brand-500: oklch(0.62 0.17 254);
+  --color-brand-600: oklch(0.55 0.18 254);
+  --color-brand-700: oklch(0.48 0.16 254);
+  --color-brand-800: oklch(0.42 0.13 254);
+  --color-brand-900: oklch(0.37 0.1 254);
+
+  --color-ink-50: oklch(0.985 0.002 250);
+  --color-ink-100: oklch(0.967 0.003 250);
+  --color-ink-200: oklch(0.927 0.006 250);
+  --color-ink-300: oklch(0.87 0.01 250);
+  --color-ink-400: oklch(0.7 0.02 250);
+  --color-ink-500: oklch(0.55 0.02 250);
+  --color-ink-600: oklch(0.45 0.02 250);
+  --color-ink-700: oklch(0.37 0.02 250);
+  --color-ink-800: oklch(0.28 0.02 250);
+  --color-ink-900: oklch(0.21 0.02 250);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink-50 text-ink-800 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /*
+   * A visible focus ring on every interactive element.
+   *
+   * Removed only where :focus-visible reports a keyboard interaction, so a
+   * mouse click does not leave a ring behind while a keyboard user always sees
+   * where they are.
+   */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
+
+  /* Respect a stated preference for less motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .skip-link {
+    @apply absolute left-4 top-4 z-50 -translate-y-24 rounded-md bg-brand-700 px-4 py-2 text-sm font-medium text-white transition-transform focus:translate-y-0;
+  }
+}

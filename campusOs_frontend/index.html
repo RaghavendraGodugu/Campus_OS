@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <!--
+      Content Security Policy.
+
+      `connect-src 'self'` is the point: the app talks only to its own origin, so
+      a script injected into the page cannot post the session anywhere else.
+
+      Razorpay is the one deliberate exception, and it is a real reduction in
+      this policy's strength: checkout.js is third-party code that runs with
+      this origin's privileges. There is no way to take a payment without it,
+      so it is allowed explicitly rather than quietly by adding 'unsafe-inline'
+      or 'unsafe-eval', which would have weakened everything to buy the same
+      thing.
+
+      It is loaded on demand in PayDialog, only when a payment is actually
+      started, and only the checkout host is permitted — not a wildcard.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.razorpay.com; connect-src 'self' https://api.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    />
+    <title>CampusOS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
