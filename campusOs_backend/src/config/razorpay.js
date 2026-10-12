@@ -118,6 +118,24 @@ function signPayment({ orderId, paymentId }, keySecret) {
  * still boots, and so the key secret is never loaded into a module that an
  * import graph could reach accidentally.
  */
+/**
+ * Whether a Razorpay key is live or test.
+ *
+ * Razorpay prefixes live keys with `rzp_live_` and test keys with `rzp_test_`.
+ * Deriving the mode from the key means a receipt can state which it is without
+ * the operator keeping a second setting in step — and a mismatch between the
+ * two is how a test receipt ends up filed as a real one.
+ *
+ * @param {string} keyId
+ * @returns {"LIVE"|"TEST"|"UNKNOWN"}
+ */
+function paymentModeForKey(keyId) {
+  if (typeof keyId !== "string" || keyId.length === 0) return "UNKNOWN";
+  if (keyId.startsWith("rzp_live_")) return "LIVE";
+  if (keyId.startsWith("rzp_test_")) return "TEST";
+  return "UNKNOWN";
+}
+
 class RazorpayGateway {
   constructor() {
     const env = getEnv();
@@ -126,20 +144,9 @@ class RazorpayGateway {
     this.keySecret = env.RAZORPAY_KEY_SECRET;
     this.webhookSecret = env.RAZORPAY_WEBHOOK_SECRET;
 
-    /**
-     * Live or test, derived from the publishable key.
-     *
-     * Razorpay prefixes live keys with `rzp_live_` and test keys with
-     * `rzp_test_`. Deriving it here means a receipt can state which it is
-     * without the operator having to keep a second setting in step with the
-     * keys — and a mismatch between the two is how a test receipt ends up
-     * filed as a real one.
-     */
-    this.mode = this.keyId?.startsWith("rzp_live_")
-      ? "LIVE"
-      : this.keyId?.startsWith("rzp_test_")
-        ? "TEST"
-        : "UNKNOWN";
+    // Derived from the key itself, never from a second setting that could
+    // drift out of step with it.
+    this.mode = paymentModeForKey(this.keyId);
   }
 
   get client() {
@@ -197,8 +204,15 @@ class RazorpayGateway {
   }
 
   async refundPayment({ paymentId, amount, reason, notes }) {
-    const refund = await this.client.refunds.create({
-      payment_id: paymentId,
+    if (!paymentId) {
+      throw ApiError.badRequest("A refund requires the gateway payment id");
+    }
+
+    // `payments.refund(paymentId, options)` — NOT `refunds.create()`. The SDK
+    // exposes no `create` on the refunds namespace; calling it would have thrown
+    // a TypeError on every single real refund, while the mock gateway accepted
+    // it happily and every test passed.
+    const refund = await this.client.payments.refund(paymentId, {
       // A full refund omits `amount`; Razorpay then refunds everything.
       ...(amount ? { amount } : {}),
       speed: "normal",
@@ -372,6 +386,7 @@ function resetGateway() {
 }
 
 module.exports = {
+  paymentModeForKey,
   getGateway,
   resetGateway,
   verifyPaymentSignature,
