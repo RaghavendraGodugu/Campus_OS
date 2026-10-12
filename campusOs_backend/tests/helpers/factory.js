@@ -161,7 +161,11 @@ async function loginAs(user, password = "TestPass123!") {
     agent,
     csrfToken: readCookie(res, "cos_ct"),
     userId: res.body.data.user.id,
-    // A raw Cookie header, for tests that mount their own Express app. A
+    // The live user document, for service-level calls that need `role`,
+    // `_id` or `student`. Re-read so it reflects any change a test made after
+    // logging in.
+    user: await User.findById(user._id).select("-passwordHash"),
+    // The cookie header, for tests that mount their own Express app. A
     // supertest agent is bound to the app instance it was created against, so
     // its jar cannot be reused against a different instance.
     cookieHeader: (res.headers["set-cookie"] || [])

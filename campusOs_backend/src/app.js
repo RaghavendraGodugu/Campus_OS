@@ -8,9 +8,12 @@
  *     security headers.
  *  2. `cors` before any body parsing, so a rejected cross-origin preflight is
  *     answered without buffering an upload body.
- *  3. `express.json` with an explicit size limit, ahead of cookie parsing, so
+ *  3. The payment webhook router, which needs the RAW request body, mounted
+ *     above `express.json`. This is the one ordering constraint that is easy to
+ *     break by accident; see the comment at its registration for why.
+ *  4. `express.json` with an explicit size limit, ahead of cookie parsing, so
  *     an oversized body is rejected before anything else inspects it.
- *  4. Route mounting, then `notFoundHandler`, then `errorHandler` — Express
+ *  5. Route mounting, then `notFoundHandler`, then `errorHandler` — Express
  *     requires the error handler to be registered last.
  *
  * Raw-body capture (needed for Razorpay webhook signature verification) is
@@ -39,6 +42,7 @@ const { logger } = require("./config/logger");
 // complete regardless of which routers are mounted.
 require("./models");
 const routes = require("./routes");
+const paymentWebhookRoutes = require("./routes/paymentWebhook.routes");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 const { ApiError, ERROR_CODE } = require("./utils/ApiError");
 
@@ -125,16 +129,29 @@ function createApp() {
   //    passed through untouched by the compression middleware).
   app.use(compression());
 
-  // 5. Body parsing with an explicit ceiling. A college request form is small;
+  // 5. Payment webhooks — BEFORE the JSON body parser.
+  //
+  //    Razorpay signs the exact bytes it transmitted. `express.json()` parses
+  //    the body, after which the original bytes are gone and re-serialising
+  //    cannot be relied on to reproduce them (key order and whitespace are not
+  //    guaranteed to survive). A webhook route mounted after the JSON parser
+  //    therefore could never verify its signature — or, worse, could verify a
+  //    signature over a body the server had itself reformatted.
+  //
+  //    This route mounts its own `express.raw()` and must stay above the next
+  //    line. Nothing else in the app needs the raw body.
+  app.use("/api/v1", paymentWebhookRoutes);
+
+  // 6. Body parsing with an explicit ceiling. A college request form is small;
   //    1mb is generous and bounds memory use under load.
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-  // 6. Cookies. `secret` lets us sign cookies if needed; the CSRF token is
+  // 7. Cookies. `secret` lets us sign cookies if needed; the CSRF token is
   //    verified by HMAC in middleware/csrf.js rather than by cookie-parser.
   app.use(cookieParser());
 
-  // Reject unsupported content types on mutating verbs early, so a
+  // 8. Reject unsupported content types on mutating verbs early, so a
   // text/plain body does not reach a handler as `undefined` req.body.
   app.use((req, res, next) => {
     const mutating = !["GET", "HEAD", "OPTIONS"].includes(req.method);
@@ -154,10 +171,10 @@ function createApp() {
     return next();
   });
 
-  // 7. Routes (including /health).
+  // 9. Routes (including /health).
   app.use(routes);
 
-  // 8. 404, then 9. error handler — order is mandatory in Express.
+  // 10. 404, then 11. error handler — order is mandatory in Express.
   app.use(notFoundHandler);
   app.use(errorHandler);
 

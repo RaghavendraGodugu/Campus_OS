@@ -1,0 +1,168 @@
+/**
+ * Invoice — an amount a student owes.
+ *
+ * ## The total is derived, never supplied
+ *
+ * `subtotal`, `taxTotal` and `total` are computed from `items` by
+ * `finance.service.calculateTotals()` and written together. There is no
+ * endpoint that accepts a client-supplied total, so the amount a student is
+ * charged is always a function of the line items the institution defined.
+ *
+ * ## Why an invoice is not mutated after issue
+ *
+ * Once `status` leaves DRAFT, the amounts are frozen. A corrected invoice is a
+ * credit note plus a new invoice, not an edit — otherwise a payment already
+ * taken against the old total would no longer reconcile.
+ */
+
+const mongoose = require("mongoose");
+
+const { INVOICE_STATUS, INVOICE_STATUS_VALUES } = require("../config/constants");
+
+const invoiceSchema = new mongoose.Schema(
+  {
+    /** Human-readable reference, e.g. "INV-2026-000042". */
+    reference: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      index: true,
+    },
+
+    student: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Student",
+      required: [true, "Invoice must belong to a student"],
+      index: true,
+    },
+
+    /**
+     * What the invoice is for: a request type, a certificate, an admission
+     * charge. Free-form because the institution defines its own fee heads.
+     */
+    purpose: {
+      type: String,
+      required: [true, "Purpose is required"],
+      trim: true,
+      maxlength: [300, "Purpose cannot exceed 300 characters"],
+    },
+
+    /** Linked request, when the fee arises from one. */
+    request: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Request",
+      default: null,
+      index: true,
+    },
+
+    /**
+     * Line items. Amounts are minor units (paise) — integers, never floats.
+     * See utils/money.js.
+     */
+    items: {
+      type: [
+        {
+          description: {
+            type: String,
+            required: [true, "Item description is required"],
+            trim: true,
+            maxlength: [300, "Item description cannot exceed 300 characters"],
+          },
+          /** Quantity is an integer so that quantity × amount stays exact. */
+          quantity: { type: Number, required: true, min: 1, max: 999 },
+          /** Unit price in minor units. */
+          unitAmount: { type: Number, required: true, min: 0 },
+          /** Line total in minor units; quantity × unitAmount. */
+          amount: { type: Number, required: true, min: 0 },
+          /** Tax percentage applied to this line, e.g. 18 for GST. */
+          taxPercent: { type: Number, default: 0, min: 0, max: 100 },
+          /** Tax amount in minor units for this line. */
+          taxAmount: { type: Number, default: 0, min: 0 },
+        },
+      ],
+      validate: {
+        validator: (items) => Array.isArray(items) && items.length > 0,
+        message: "An invoice must have at least one line item",
+      },
+    },
+
+    /** Sum of line amounts, before tax. Minor units. */
+    subtotal: { type: Number, required: true, min: 0 },
+
+    /** Sum of line taxes. Minor units. */
+    taxTotal: { type: Number, required: true, min: 0, default: 0 },
+
+    /** subtotal + taxTotal − discount. The authoritative amount. */
+    total: { type: Number, required: true, min: 0 },
+
+    discount: { type: Number, default: 0, min: 0 },
+
+    currency: {
+      type: String,
+      required: true,
+      default: "INR",
+      enum: { values: ["INR"], message: "`{VALUE}` is not a supported currency" },
+    },
+
+    status: {
+      type: String,
+      required: true,
+      enum: {
+        values: INVOICE_STATUS_VALUES,
+        message: "`{VALUE}` is not a valid invoice status",
+      },
+      default: INVOICE_STATUS.DRAFT,
+      index: true,
+    },
+
+    /** Total of payments verified against this invoice. Minor units. */
+    paidAmount: { type: Number, default: 0, min: 0 },
+
+    /** total − paidAmount − refundedAmount. What is still owed. */
+    balanceDue: { type: Number, required: true, min: 0 },
+
+    issuedAt: { type: Date, default: null },
+    dueAt: { type: Date, default: null },
+    paidAt: { type: Date, default: null },
+    cancelledAt: { type: Date, default: null },
+
+    /** Set once the invoice is fully settled, so a partial payment cannot pass. */
+    isFullyPaid: { type: Boolean, default: false, index: true },
+
+    /** Who issued it. */
+    issuedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: [1000, "Notes cannot exceed 1000 characters"],
+    },
+    isDemo: { type: Boolean, default: false, index: true },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+    toJSON: {
+      transform(_doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      },
+    },
+  }
+);
+
+// The student's billing history.
+invoiceSchema.index({ student: 1, createdAt: -1 });
+
+// Outstanding-fee reports.
+invoiceSchema.index({ student: 1, status: 1, balanceDue: 1 });
+
+// "What is overdue" sweeps.
+invoiceSchema.index({ status: 1, dueAt: 1 });
+
+const Invoice = mongoose.model("Invoice", invoiceSchema);
+
+module.exports = Invoice;
