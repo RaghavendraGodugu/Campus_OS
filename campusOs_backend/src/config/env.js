@@ -18,6 +18,34 @@ const z = require("zod");
 const dotenv = require("dotenv");
 dotenv.config({ path: path.join(__dirname, "..", "..", ".env"), quiet: true });
 
+/**
+ * The database name in a MongoDB connection string, or null when it has none.
+ *
+ * Reads the path between the host and the query string, which is where MongoDB
+ * looks. Returns null rather than "test" so a caller can tell an absent name
+ * from a deliberate one.
+ */
+function databaseNameFrom(uri) {
+  const withoutScheme = String(uri).replace(/^mongodb(\+srv)?:\/\//, "");
+
+  // Credentials are optional, so the host begins after the LAST "@" — and a
+  // local URI has none at all, which is the common case:
+  // `mongodb://127.0.0.1:27017/campusos_dev`. Treating a missing "@" as "no
+  // database" would reject every local connection, which is the opposite of
+  // what this guard is for.
+  const afterCredentials = withoutScheme.includes("@")
+    ? withoutScheme.slice(withoutScheme.lastIndexOf("@") + 1)
+    : withoutScheme;
+
+  if (!afterCredentials.includes("/")) return null;
+
+  const name = afterCredentials
+    .slice(afterCredentials.indexOf("/") + 1)
+    .split("?")[0]
+    .trim();
+  return name.length > 0 ? decodeURIComponent(name) : null;
+}
+
 /** Transform "true"/"false"/"1"/"0" into a real boolean. */
 const booleanish = z.union([z.boolean(), z.string()]).transform((value) => {
   if (typeof value === "boolean") return value;
@@ -65,9 +93,29 @@ const schema = z
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     PORT: z.coerce.number().int().min(1).max(65535).default(5000),
 
+    /**
+     * The database URI.
+     *
+     * A database name is REQUIRED, and not merely recommended.
+     *
+     * A connection string with no path — `mongodb+srv://user:pass@host/?…` —
+     * is valid, and MongoDB resolves it to a database literally named `test`.
+     * That URI is easy to copy from an Atlas dashboard, where the path segment
+     * is optional and invisible in the "drivers" panel, and it produces a
+     * working connection to the wrong place: every document is written, nothing
+     * errors, and the data lands somewhere nobody is looking.
+     *
+     * So it is refused here rather than defaulted. A typo in a database name is
+     * cheap to fix; an entire term's records in a database called `test` is not.
+     */
     MONGO_URI: z
       .string()
-      .min(1, "MONGO_URI is required (Atlas SRV string or a local mongodb:// URI)"),
+      .min(1, "MONGO_URI is required (Atlas SRV string or a local mongodb:// URI)")
+      .refine((value) => databaseNameFrom(value) !== null, {
+        message:
+          "MONGO_URI must include a database name, e.g. mongodb+srv://user:pass@host/campusos?retryWrites=true&w=majority. " +
+          "A URI with no path connects to a database literally named 'test', which looks like it works and quietly sends every record there.",
+      }),
 
     CLIENT_URL: originList,
 
@@ -171,4 +219,4 @@ function getEnv() {
   return env;
 }
 
-module.exports = { getEnv, parseEnv };
+module.exports = { getEnv, parseEnv, databaseNameFrom };
