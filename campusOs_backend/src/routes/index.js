@@ -14,6 +14,8 @@ const requestRoutes = require("./request.routes");
 const complaintRoutes = require("./complaint.routes");
 const certificateRoutes = require("./certificate.routes");
 const financeRoutes = require("./finance.routes");
+const notificationRoutes = require("./notification.routes");
+const announcementRoutes = require("./announcement.routes");
 
 const router = express.Router();
 
@@ -32,5 +34,7 @@ router.use("/api/v1", requestRoutes);
 router.use("/api/v1", complaintRoutes);
 router.use("/api/v1", certificateRoutes);
 router.use("/api/v1", financeRoutes);
+router.use("/api/v1", notificationRoutes);
+router.use("/api/v1", announcementRoutes);
 
 module.exports = router;

@@ -18,6 +18,7 @@ const RequestType = require("./RequestType");
 const Request = require("./Request");
 const Document = require("./Document");
 const Notification = require("./Notification");
+const Announcement = require("./Announcement");
 const Complaint = require("./Complaint");
 const Certificate = require("./Certificate");
 const Invoice = require("./Invoice");
@@ -37,6 +38,7 @@ const models = {
   Request,
   Document,
   Notification,
+  Announcement,
   Complaint,
   Certificate,
   Invoice,

@@ -140,6 +140,31 @@ const REFUND_STATUS = {
 
 const REFUND_STATUS_VALUES = Object.freeze(Object.values(REFUND_STATUS));
 
+/** Who an announcement is addressed to. */
+const AUDIENCE_SCOPE = {
+  ALL: "ALL",
+  ROLES: "ROLES",
+  DEPARTMENT: "DEPARTMENT",
+  PROGRAM: "PROGRAM",
+};
+
+const AUDIENCE_SCOPE_VALUES = Object.freeze(Object.values(AUDIENCE_SCOPE));
+
+/**
+ * Announcement urgency.
+ *
+ * URGENT is for closures and deadlines, not marketing. It is deliberately the
+ * top of a short list rather than a separate channel, so a genuine emergency
+ * cannot be lost among routine notices.
+ */
+const ANNOUNCEMENT_PRIORITY = {
+  NORMAL: "NORMAL",
+  IMPORTANT: "IMPORTANT",
+  URGENT: "URGENT",
+};
+
+const ANNOUNCEMENT_PRIORITY_VALUES = Object.freeze(Object.values(ANNOUNCEMENT_PRIORITY));
+
 /** Notification kinds the backend can emit in Phase A. */
 const NOTIFICATION_TYPE = {
   REQUEST_SUBMITTED: "REQUEST_SUBMITTED",
@@ -185,6 +210,7 @@ const AUDIT_ACTION = {
   PAYMENT_FAILED: "PAYMENT_FAILED",
   REFUND_REQUESTED: "REFUND_REQUESTED",
   REFUND_PROCESSED: "REFUND_PROCESSED",
+  ANNOUNCEMENT_POSTED: "ANNOUNCEMENT_POSTED",
   DOCUMENT_UPLOADED: "DOCUMENT_UPLOADED",
   DOCUMENT_DOWNLOADED: "DOCUMENT_DOWNLOADED",
   CERTIFICATE_GENERATED: "CERTIFICATE_GENERATED",
@@ -211,6 +237,10 @@ module.exports = {
   PAYMENT_STATUS_VALUES,
   REFUND_STATUS,
   REFUND_STATUS_VALUES,
+  AUDIENCE_SCOPE,
+  AUDIENCE_SCOPE_VALUES,
+  ANNOUNCEMENT_PRIORITY,
+  ANNOUNCEMENT_PRIORITY_VALUES,
   NOTIFICATION_TYPE,
   ANNOUNCEMENT_AUDIENCE,
   AUDIT_ACTION,
