@@ -27,6 +27,9 @@ const {
   createOrderSchema,
   confirmPaymentSchema,
   listPaymentsSchema,
+  createRefundSchema,
+  refundDecisionSchema,
+  refundStatusSchema,
 } = require("../validators/finance.validator");
 
 const router = express.Router();
@@ -97,6 +100,79 @@ router.get(
   authenticate,
   validate({ query: listPaymentsSchema }),
   financeController.listPayments
+);
+
+// ===== Receipts =====
+
+/**
+ * GET /api/v1/finance/payments/:id/receipt
+ *
+ * Declared before the refund routes so `payments/:id/receipt` is never read as
+ * a refund identifier. Authorization is per-record inside the service: a
+ * student receives their own receipts, accounts staff receive all of them, and
+ * everyone else gets 404.
+ */
+router.get("/finance/payments/:id/receipt", authenticate, financeController.getReceipt);
+
+/** GET /api/v1/finance/payments/:id/refundable — drives the student's UI. */
+router.get(
+  "/finance/payments/:id/refundable",
+  authenticate,
+  financeController.refundableForPayment
+);
+
+// ===== Refunds =====
+
+/**
+ * POST /api/v1/finance/refunds
+ *
+ * Intent only. No money moves until an authorised officer approves, and the
+ * approval is what calls the gateway.
+ */
+router.post(
+  "/finance/refunds",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.REFUND_REQUEST),
+  validate({ body: createRefundSchema }),
+  financeController.requestRefund
+);
+
+/** GET /api/v1/finance/refunds — a student sees only their own. */
+router.get(
+  "/finance/refunds",
+  authenticate,
+  validate({ query: refundStatusSchema }),
+  financeController.listRefunds
+);
+
+/** GET /api/v1/finance/refunds/:id — accepts a reference like REF-2026-000001. */
+router.get("/finance/refunds/:id", authenticate, financeController.getRefund);
+
+/**
+ * POST /api/v1/finance/refunds/:id/approve
+ *
+ * Permissioned to REFUND_APPROVE, not merely to being an administrator. Approval
+ * calls the provider, so a gateway failure marks the refund FAILED for an
+ * operator to retry rather than reporting a refund that never happened.
+ */
+router.post(
+  "/finance/refunds/:id/approve",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.REFUND_APPROVE),
+  validate({ body: refundDecisionSchema }),
+  financeController.approveRefund
+);
+
+/** POST /api/v1/finance/refunds/:id/reject — a reason is mandatory. */
+router.post(
+  "/finance/refunds/:id/reject",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.REFUND_APPROVE),
+  validate({ body: refundDecisionSchema }),
+  financeController.rejectRefund
 );
 
 // ===== Reconciliation =====

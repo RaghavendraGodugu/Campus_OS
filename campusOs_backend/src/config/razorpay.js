@@ -125,6 +125,21 @@ class RazorpayGateway {
     this.keyId = env.RAZORPAY_KEY_ID;
     this.keySecret = env.RAZORPAY_KEY_SECRET;
     this.webhookSecret = env.RAZORPAY_WEBHOOK_SECRET;
+
+    /**
+     * Live or test, derived from the publishable key.
+     *
+     * Razorpay prefixes live keys with `rzp_live_` and test keys with
+     * `rzp_test_`. Deriving it here means a receipt can state which it is
+     * without the operator having to keep a second setting in step with the
+     * keys — and a mismatch between the two is how a test receipt ends up
+     * filed as a real one.
+     */
+    this.mode = this.keyId?.startsWith("rzp_live_")
+      ? "LIVE"
+      : this.keyId?.startsWith("rzp_test_")
+        ? "TEST"
+        : "UNKNOWN";
   }
 
   get client() {
@@ -236,12 +251,25 @@ class MockRazorpayGateway {
     this.keyId = "rzp_test_MOCKKEY";
     this.keySecret = "mock_key_secret_not_usable_in_production";
     this.webhookSecret = "mock_webhook_secret_not_usable_in_production";
+    this.mode = "MOCK";
+
+    /**
+     * A per-process prefix, so identifiers stay unique across restarts.
+     *
+     * A plain in-memory counter resets to 1 whenever the dev server restarts,
+     * so the next order would reuse `order_mock000000000001` and collide with
+     * a row already in the database — the unique index would then refuse a
+     * perfectly legitimate new payment with a duplicate-key error. Randomising
+     * the prefix makes that impossible while keeping ids readable and
+     * obviously fake.
+     */
+    this._runId = crypto.randomBytes(4).toString("hex");
     this._counter = 0;
   }
 
   nextId(prefix) {
     this._counter += 1;
-    return `${prefix}_mock${String(this._counter).padStart(12, "0")}`;
+    return `${prefix}_mock${this._runId}${String(this._counter).padStart(6, "0")}`;
   }
 
   async createOrder({ amount, currency = "INR", receipt, notes }) {

@@ -44,6 +44,24 @@ const paymentSchema = new mongoose.Schema(
 
     currency: { type: String, required: true, default: "INR" },
 
+    /**
+     * Which gateway produced this payment: "razorpay" or "mock".
+     *
+     * Recorded on the payment so a receipt can state plainly whether it
+     * documents a real transaction or a sandbox one. A receipt that does not
+     * distinguish them is how test payments end up in an audited ledger.
+     */
+    mode: {
+      type: String,
+      required: true,
+      enum: {
+        values: ["LIVE", "TEST", "MOCK"],
+        message: "`{VALUE}` is not a valid payment mode",
+      },
+      default: "MOCK",
+      index: true,
+    },
+
     /** Amount the gateway confirmed, in minor units. Null until captured. */
     capturedAmount: { type: Number, default: null, min: 0 },
 
@@ -57,12 +75,25 @@ const paymentSchema = new mongoose.Schema(
     },
 
     /** Gateway payment id, once known. Unique when present. */
+    /**
+     * Uniquely indexed, but only for documents that actually have a value.
+     *
+     * A plain `unique: true` here would index `null` as an ordinary value, and
+     * since `default: null` puts the field on every document, only ONE document
+     * in the collection could ever exist. `sparse` does not help: it skips
+     * documents where the field is *missing*, not where it is null.
+     *
+     * A partial index over string values expresses the actual rule: this
+     * identifier, when known, belongs to exactly one document.
+     */
     razorpayPaymentId: {
       type: String,
       default: null,
-      unique: true,
-      sparse: true,
       trim: true,
+      index: {
+        unique: true,
+        partialFilterExpression: { razorpayPaymentId: { $type: "string" } },
+      },
     },
 
     /** Gateway refund id, once refunded. */
@@ -117,6 +148,43 @@ const paymentSchema = new mongoose.Schema(
 
     /** Total refunded against this payment, in minor units. */
     refundedAmount: { type: Number, default: 0, min: 0 },
+
+    /**
+     * The receipt issued for this payment.
+     *
+     * Written once, when the payment settles (see receipt.service.issueReceipt).
+     * `receiptNumber` is unique, which is what makes issuance idempotent: a
+     * repeated capture webhook cannot produce a second receipt.
+     */
+    /**
+     * Uniquely indexed, but only for documents that actually have a value.
+     *
+     * A plain `unique: true` here would index `null` as an ordinary value, and
+     * since `default: null` puts the field on every document, only ONE document
+     * in the collection could ever exist. `sparse` does not help: it skips
+     * documents where the field is *missing*, not where it is null.
+     *
+     * A partial index over string values expresses the actual rule: this
+     * identifier, when known, belongs to exactly one document.
+     */
+    receiptNumber: {
+      type: String,
+      default: null,
+      trim: true,
+      index: {
+        unique: true,
+        partialFilterExpression: { receiptNumber: { $type: "string" } },
+      },
+    },
+
+    receipt: {
+      storageKey: { type: String, default: null },
+      originalName: { type: String, default: null },
+      mimeType: { type: String, default: null },
+      bytes: { type: Number, default: null },
+      adapter: { type: String, default: null },
+      issuedAt: { type: Date, default: null },
+    },
 
     notes: {
       type: String,

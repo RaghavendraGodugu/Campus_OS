@@ -55,7 +55,14 @@ describe("CSRF protection", () => {
 
     const res = await agent
       .post(PROTECTED_MUTATION.path)
-      .set("X-CSRF-Token", csrfToken.slice(0, -1) + "0")
+      // Guarantees the token actually differs.
+      //
+      // This was `slice(0, -1) + "0"`, which is a no-op whenever the token
+      // already ends in "0" — about one run in sixteen. The request then
+      // carried the *correct* token, the server rightly accepted it, and the
+      // test failed for looking like a security bypass. A tampering test must
+      // never be able to produce an untampered token.
+      .set("X-CSRF-Token", csrfToken.slice(0, -1) + (csrfToken.endsWith("0") ? "1" : "0"))
       .send({});
 
     expectError(res, 403, "CSRF_INVALID");

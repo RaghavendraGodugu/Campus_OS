@@ -25,6 +25,9 @@ const {
 const { ROLES, INVOICE_STATUS, PAYMENT_STATUS } = require("../src/config/constants");
 const Invoice = require("../src/models/Invoice");
 const Payment = require("../src/models/Payment");
+const Refund = require("../src/models/Refund");
+const Notification = require("../src/models/Notification");
+const mongoose = require("mongoose");
 const financeService = require("../src/services/finance.service");
 const money = require("../src/utils/money");
 const { getGateway, signWebhookPayload, signPayment } = require("../src/config/razorpay");
@@ -670,3 +673,869 @@ describe("signature primitives", () => {
     expect(expect4).toBe(false);
   });
 });
+
+// ===========================================================================
+// Receipts and refunds
+//
+// Receipts are issued from the single point at which a payment settles, so
+// these tests start from a settled payment rather than calling the receipt
+// service directly — the guarantee is about the settlement path, not about the
+// service in isolation.
+// ===========================================================================
+
+/** Create an order and settle it with a signed webhook. Returns the payment. */
+async function settlePayment(
+  student,
+  invoice,
+  { amount = invoice.total, id = "pay_R" } = {}
+) {
+  const { res: orderRes } = await makeOrder(student, invoice);
+  expect(orderRes.status).toBe(201);
+
+  const { raw, signature, event } = signedWebhook("payment.captured", {
+    id,
+    order_id: orderRes.body.data.razorpayOrderId,
+    amount,
+    status: "captured",
+    method: "upi",
+  });
+
+  const res = await sendWebhook({ raw, signature, event });
+  expect(res.status).toBe(200);
+
+  return Payment.findById(orderRes.body.data.paymentId).lean();
+}
+
+describe("receipts", () => {
+  it("issues a receipt when the payment settles", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    expect(payment.status).toBe(PAYMENT_STATUS.PAID);
+    expect(payment.receiptNumber).toMatch(/^RCP-\d{4}-\d{6}$/);
+    expect(payment.receipt.storageKey).toBeTruthy();
+    expect(payment.receipt.mimeType).toBe("application/pdf");
+  });
+
+  it("issues exactly one receipt even when the capture is delivered repeatedly", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+
+    const { agent, csrfToken } = await loginAs(student.user);
+    const orderRes = await postAs(agent, csrfToken, "/api/v1/finance/payments/order", {
+      invoice: invoice.reference,
+    });
+
+    const entity = {
+      id: "pay_DUPRECEIPT",
+      order_id: orderRes.body.data.razorpayOrderId,
+      amount: invoice.total,
+      status: "captured",
+      method: "upi",
+    };
+
+    // Three distinct event ids carrying the same capture: each is a genuinely
+    // new delivery as far as Razorpay is concerned.
+    for (const eventId of ["evt_r1", "evt_r2", "evt_r3"]) {
+      const raw = JSON.stringify({
+        event: "payment.captured",
+        payload: { entity: { ...entity, notes: { eventId } } },
+      });
+      const res = await request(getApp())
+        .post("/api/v1/payments/webhook/razorpay")
+        .set("Content-Type", "application/json")
+        .set("x-razorpay-event", "payment.captured")
+        .set(
+          "x-razorpay-signature",
+          signWebhookPayload(Buffer.from(raw), getGateway().webhookSecret)
+        )
+        .send(raw);
+      expect(res.status).toBe(200);
+    }
+
+    const receipts = await Payment.find({ invoice: invoice._id })
+      .select("receiptNumber")
+      .lean();
+    expect(receipts).toHaveLength(1);
+    expect(receipts[0].receiptNumber).toBeTruthy();
+  });
+
+  it("lets the owning student download their receipt", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    const { agent } = await loginAs(student.user);
+    const res = await agent.get(`/api/v1/finance/payments/${payment._id}/receipt`);
+
+    expect(res.status).toBe(200);
+    expect(res.headers["content-type"]).toContain("application/pdf");
+    // A real PDF, not an empty body.
+    expect(res.body.subarray(0, 4).toString()).toBe("%PDF");
+    expect(res.body.length).toBeGreaterThan(1000);
+  });
+
+  it("404s when a student requests another student's receipt", async () => {
+    const owner = await createStudent();
+    const other = await createStudent();
+    const invoice = await makeInvoice(owner);
+    const payment = await settlePayment(owner, invoice);
+
+    const { agent } = await loginAs(other.user);
+    const res = await agent.get(`/api/v1/finance/payments/${payment._id}/receipt`);
+
+    // 404, not 403: the receipt's existence must not be disclosed.
+    expect(res.status).toBe(404);
+  });
+
+  it("refuses a receipt to a role with no payment permission", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    const faculty = await createUser({ role: ROLES.FACULTY });
+    const { agent } = await loginAs(faculty);
+    const res = await agent.get(`/api/v1/finance/payments/${payment._id}/receipt`);
+
+    expect(res.status).toBe(404);
+  });
+
+  it("gives accounts staff the receipt", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent } = await loginAs(accounts);
+    const res = await agent.get(`/api/v1/finance/payments/${payment._id}/receipt`);
+
+    expect(res.status).toBe(200);
+  });
+
+  it("never issues a receipt for a payment that has not settled", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+
+    // Order created, webhook never arrives.
+    const { res } = await makeOrder(student, invoice);
+    expect(res.status).toBe(201);
+
+    const payment = await Payment.findById(res.body.data.paymentId).lean();
+    expect(payment.status).toBe(PAYMENT_STATUS.CREATED);
+    expect(payment.receiptNumber).toBeNull();
+  });
+
+  it("labels the receipt with the gateway mode so a mock is never filed as real", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    expect(payment.mode).toBe("MOCK");
+
+    const { issueReceipt } = require("../src/services/receipt.service");
+    const rendered = await require("../src/services/receipt.service").renderReceiptPdf({
+      receiptNumber: payment.receiptNumber,
+      payment,
+      invoice: await Invoice.findById(invoice._id).lean(),
+      student: await require("../src/models/Student")
+        .findById(student.student)
+        .populate("user", "fullName")
+        .lean(),
+      department: null,
+      program: null,
+      issuedAt: new Date(),
+    });
+
+    // A real PDF was produced.
+    expect(rendered.subarray(0, 4).toString()).toBe("%PDF");
+
+    // PDFKit compresses its content streams, so the label is asserted at its
+    // source: this is the string printed on the face of the document.
+    const { modeLabel } = require("../src/services/receipt.service");
+    expect(modeLabel("MOCK").text).toContain("MOCK PAYMENT");
+    expect(modeLabel("TEST").text).toContain("TEST PAYMENT");
+    expect(modeLabel("LIVE").text).toBe("PAID");
+    void issueReceipt;
+  });
+});
+
+describe("refund requests", () => {
+  it("records a request without moving any money", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    const { agent, csrfToken } = await loginAs(student.user);
+    const res = await postAs(agent, csrfToken, "/api/v1/finance/refunds", {
+      payment: payment._id,
+      reason: "Fee paid in error after the course was withdrawn",
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.refund.status).toBe("REQUESTED");
+    expect(res.body.data.refund.refundAmount).toBe(invoice.total);
+
+    // Nothing moved: the payment is untouched and still fully captured.
+    const fresh = await Payment.findById(payment._id).lean();
+    expect(fresh.status).toBe(PAYMENT_STATUS.PAID);
+    expect(fresh.refundedAmount).toBe(0);
+
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.PAID);
+  });
+
+  it("defaults to the full remaining amount when none is given", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    const { agent, csrfToken } = await loginAs(student.user);
+    const res = await postAs(agent, csrfToken, "/api/v1/finance/refunds", {
+      payment: payment._id,
+      reason: "Duplicate charge raised against my account this morning",
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.refund.refundAmount).toBe(invoice.total);
+  });
+
+  it("refuses more than the amount still refundable and states the remainder", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    const { agent, csrfToken } = await loginAs(student.user);
+    const res = await postAs(agent, csrfToken, "/api/v1/finance/refunds", {
+      payment: payment._id,
+      amount: "20000.00", // more than the invoice total
+      reason: "Requesting an amount larger than was actually charged",
+    });
+
+    expect(res.status).toBe(400);
+    // The message carries the number the student actually needs.
+    expect(res.body.message).toContain("11,800.00");
+  });
+
+  it("404s when a student requests a refund against another student's payment", async () => {
+    const owner = await createStudent();
+    const other = await createStudent();
+    const invoice = await makeInvoice(owner);
+    const payment = await settlePayment(owner, invoice);
+
+    const { agent, csrfToken } = await loginAs(other.user);
+    const res = await postAs(agent, csrfToken, "/api/v1/finance/refunds", {
+      payment: payment._id,
+      reason: "This refund request is not mine to make in any case",
+    });
+
+    expect(res.status).toBe(404);
+    expect(await Refund.countDocuments({ payment: payment._id })).toBe(0);
+  });
+
+  it("refuses a request with no substantive reason", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    const { agent, csrfToken } = await loginAs(student.user);
+    const res = await postAs(agent, csrfToken, "/api/v1/finance/refunds", {
+      payment: payment._id,
+      reason: "no",
+    });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("refuses a refund against a payment that never settled", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const { res: orderRes } = await makeOrder(student, invoice);
+
+    const { agent, csrfToken } = await loginAs(student.user);
+    const res = await postAs(agent, csrfToken, "/api/v1/finance/refunds", {
+      payment: orderRes.body.data.paymentId,
+      reason: "There was never any money taken to refund in the first place",
+    });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("reports the refundable balance for the client's UI", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    const { agent } = await loginAs(student.user);
+    const res = await agent.get(`/api/v1/finance/payments/${payment._id}/refundable`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.refundableAmount).toBe(invoice.total);
+    expect(res.body.data.refundableFormatted).toBe("₹11,800.00");
+  });
+});
+
+describe("refund decisions", () => {
+  /** Request a refund and return the refund document. */
+  async function requestOne(student, payment, body = {}) {
+    const { agent, csrfToken } = await loginAs(student.user);
+    const res = await postAs(agent, csrfToken, "/api/v1/finance/refunds", {
+      payment: payment._id,
+      reason: "Fee charged after the student had withdrawn from the programme",
+      ...body,
+    });
+    expect(res.status).toBe(201);
+    return Refund.findById(res.body.data.refund.id).lean();
+  }
+
+  it("refuses approval by the student who requested it", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+    const refund = await requestOne(student, payment);
+
+    const { agent, csrfToken } = await loginAs(student.user);
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/approve`,
+      {}
+    );
+
+    // The whole point of separating the acts: a student can never move money.
+    expect(res.status).toBe(403);
+    expect((await Refund.findById(refund._id).lean()).status).toBe("REQUESTED");
+  });
+
+  it("executes the refund on approval and reopens the invoice", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+    const refund = await requestOne(student, payment);
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/approve`,
+      {
+        note: "Confirmed duplicate charge with the billing office",
+      }
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.refund.status).toBe("PROCESSED");
+    expect(res.body.data.refund.razorpayRefundId).toBeTruthy();
+
+    const freshPayment = await Payment.findById(payment._id).lean();
+    expect(freshPayment.refundedAmount).toBe(invoice.total);
+
+    // Fully refunded: the money is back, so the invoice is no longer settled.
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.ISSUED);
+    expect(ledger.paidAmount).toBe(0);
+    expect(ledger.balanceDue).toBe(invoice.total);
+    expect(ledger.isFullyPaid).toBe(false);
+  });
+
+  it("keeps the invoice settled when only part of the payment is refunded", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+    const refund = await requestOne(student, payment, { amount: "100.00" });
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/approve`,
+      {}
+    );
+
+    expect(res.status).toBe(200);
+
+    const freshPayment = await Payment.findById(payment._id).lean();
+    expect(freshPayment.refundedAmount).toBe(10000);
+
+    // A partial refund does not un-settle the invoice.
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.PAID);
+    expect(ledger.isFullyPaid).toBe(true);
+  });
+
+  it("accumulates partial refunds and only reopens once the whole payment is returned", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent: accAgent, csrfToken: accCsrf } = await loginAs(accounts);
+
+    // Three separate ₹100 refunds against a ₹11,800 payment.
+    for (let i = 0; i < 3; i++) {
+      const refund = await requestOne(student, payment, { amount: "100.00" });
+      const res = await postAs(
+        accAgent,
+        accCsrf,
+        `/api/v1/finance/refunds/${refund.reference}/approve`,
+        {}
+      );
+      expect(res.status).toBe(200);
+      const ledger = await Invoice.findById(invoice._id).lean();
+      expect(ledger.status).toBe(INVOICE_STATUS.PAID);
+    }
+
+    const afterThree = await Payment.findById(payment._id).lean();
+    expect(afterThree.refundedAmount).toBe(30000);
+    expect(afterThree.capturedAmount).toBe(invoice.total);
+
+    // The remainder is bounded correctly after the partials.
+    const { agent: stuAgent } = await loginAs(student.user);
+    const remaining = await stuAgent.get(
+      `/api/v1/finance/payments/${payment._id}/refundable`
+    );
+    expect(remaining.body.data.refundableAmount).toBe(invoice.total - 30000);
+    expect(remaining.body.data.refundableFormatted).toBe("₹11,500.00");
+
+    // Returning the rest reopens the invoice.
+    const finalRefund = await requestOne(student, payment);
+    const finalRes = await postAs(
+      accAgent,
+      accCsrf,
+      `/api/v1/finance/refunds/${finalRefund.reference}/approve`,
+      {}
+    );
+    expect(finalRes.status).toBe(200);
+
+    const done = await Payment.findById(payment._id).lean();
+    expect(done.refundedAmount).toBe(invoice.total);
+
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.ISSUED);
+    expect(ledger.balanceDue).toBe(invoice.total);
+  });
+
+  it("refuses to refund the same request twice", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+    const refund = await requestOne(student, payment);
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+
+    const first = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/approve`,
+      {}
+    );
+    expect(first.status).toBe(200);
+
+    // The second attempt must not move money again.
+    const second = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/approve`,
+      {}
+    );
+    expect(second.status).toBe(409);
+
+    const freshPayment = await Payment.findById(payment._id).lean();
+    expect(freshPayment.refundedAmount).toBe(invoice.total);
+  });
+
+  it("refuses approval when the remaining balance no longer covers the request", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    // Both requests are raised while the money is still whole; the second then
+    // loses its backing when the first is processed.
+    const first = await requestOne(student, payment);
+    const second = await requestOne(student, payment);
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+
+    expect(
+      (
+        await postAs(
+          agent,
+          csrfToken,
+          `/api/v1/finance/refunds/${first.reference}/approve`,
+          {}
+        )
+      ).status
+    ).toBe(200);
+
+    // The second no longer has anything behind it.
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${second.reference}/approve`,
+      {}
+    );
+    expect(res.status).toBe(409);
+    // The first refund consumed the whole payment, so nothing remains.
+    expect(res.body.message).toContain("₹0.00");
+  });
+
+  it("marks a refund FAILED and credits nothing when the provider rejects it", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+    const refund = await requestOne(student, payment);
+
+    const gateway = getGateway();
+    const original = gateway.refundPayment.bind(gateway);
+    gateway.refundPayment = async () => {
+      throw new Error("provider rejected: insufficient balance in the merchant account");
+    };
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/approve`,
+      {}
+    );
+
+    gateway.refundPayment = original;
+
+    // Surfaced as an integration failure, never as a successful refund.
+    expect(res.status).toBe(502);
+
+    const freshRefund = await Refund.findById(refund._id).lean();
+    expect(freshRefund.status).toBe("FAILED");
+    expect(freshRefund.failureDescription).toContain("provider rejected");
+
+    // The ledger must not claim the money is back.
+    const freshPayment = await Payment.findById(payment._id).lean();
+    expect(freshPayment.refundedAmount).toBe(0);
+
+    const ledger = await Invoice.findById(invoice._id).lean();
+    expect(ledger.status).toBe(INVOICE_STATUS.PAID);
+  });
+
+  it("declines a refund with a stated reason and leaves the money settled", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+    const refund = await requestOne(student, payment);
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/reject`,
+      {
+        reason: "The fee is non-refundable once the examination has been sat",
+      }
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.refund.status).toBe("REJECTED");
+    expect(res.body.data.refund.rejectionReason).toContain("non-refundable");
+
+    const freshPayment = await Payment.findById(payment._id).lean();
+    expect(freshPayment.refundedAmount).toBe(0);
+    expect((await Invoice.findById(invoice._id).lean()).status).toBe(INVOICE_STATUS.PAID);
+  });
+
+  it("refuses a rejection with no reason given", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+    const refund = await requestOne(student, payment);
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+    const res = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/reject`,
+      {
+        reason: "no",
+      }
+    );
+
+    expect(res.status).toBe(400);
+    expect((await Refund.findById(refund._id).lean()).status).toBe("REQUESTED");
+  });
+
+  it("notifies the student of the decision", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+    const refund = await requestOne(student, payment);
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+    await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/approve`,
+      {}
+    );
+
+    const notifications = await Notification.find({ user: student.user._id }).lean();
+    expect(notifications.some((n) => n.title.includes(refund.reference))).toBe(true);
+  });
+});
+
+describe("refund visibility", () => {
+  it("shows a student only their own refunds", async () => {
+    const mine = await createStudent();
+    const theirs = await createStudent();
+
+    const myInvoice = await makeInvoice(mine);
+    const theirInvoice = await makeInvoice(theirs);
+    const myPayment = await settlePayment(mine, myInvoice, { id: "pay_MINE" });
+    const theirPayment = await settlePayment(theirs, theirInvoice, { id: "pay_THEIRS" });
+
+    for (const [who, payment] of [
+      [mine, myPayment],
+      [theirs, theirPayment],
+    ]) {
+      const { agent, csrfToken } = await loginAs(who.user);
+      await postAs(agent, csrfToken, "/api/v1/finance/refunds", {
+        payment: payment._id,
+        reason: "Requesting a return of the fee charged in error this term",
+      });
+    }
+
+    const { agent } = await loginAs(mine.user);
+    const res = await agent.get("/api/v1/finance/refunds");
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta.total).toBe(1);
+    expect(res.body.data[0].payment._id.toString()).toBe(myPayment._id.toString());
+  });
+
+  it("shows accounts staff every refund", async () => {
+    const a = await createStudent();
+    const b = await createStudent();
+    const invA = await makeInvoice(a);
+    const invB = await makeInvoice(b);
+    const payA = await settlePayment(a, invA, { id: "pay_A" });
+    const payB = await settlePayment(b, invB, { id: "pay_B" });
+
+    for (const [who, payment] of [
+      [a, payA],
+      [b, payB],
+    ]) {
+      const { agent, csrfToken } = await loginAs(who.user);
+      const res = await postAs(agent, csrfToken, "/api/v1/finance/refunds", {
+        payment: payment._id,
+        reason: "Both students were charged for a course they did not attend",
+      });
+      expect(res.status).toBe(201);
+    }
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent } = await loginAs(accounts);
+    const res = await agent.get("/api/v1/finance/refunds");
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta.total).toBe(2);
+  });
+
+  it("404s when a student fetches another student's refund by reference", async () => {
+    const owner = await createStudent();
+    const other = await createStudent();
+    const invoice = await makeInvoice(owner);
+    const payment = await settlePayment(owner, invoice);
+
+    const { agent: oAgent, csrfToken: oCsrf } = await loginAs(owner.user);
+    const created = await postAs(oAgent, oCsrf, "/api/v1/finance/refunds", {
+      payment: payment._id,
+      reason: "Requesting a return of a fee charged in error this term",
+    });
+    const reference = created.body.data.refund.reference;
+
+    const { agent } = await loginAs(other.user);
+    expect((await agent.get(`/api/v1/finance/refunds/${reference}`)).status).toBe(404);
+  });
+});
+
+describe("unique index integrity", () => {
+  /**
+   * A regression guard for a bug that made the second refund in the system's
+   * history impossible.
+   *
+   * `unique: true` on a field with `default: null` indexes `null` as an ordinary
+   * value, so only one document can hold it — and `sparse: true` does not save
+   * it, because sparse skips documents where the field is *missing*, not null.
+   *
+   * The symptom was a duplicate-key CONFLICT on the second refund request with
+   * an error naming a field the student had never supplied. It is asserted here
+   * directly so the schema cannot silently regress.
+   */
+  it("allows many documents to share a null refund reference", async () => {
+    const requester = await createUser({ role: ROLES.STUDENT });
+    const created = [];
+    for (let i = 0; i < 3; i++) {
+      created.push(
+        await Refund.create({
+          reference: `REF-TEST-${i}`,
+          payment: new mongoose.Types.ObjectId(),
+          invoice: new mongoose.Types.ObjectId(),
+          student: new mongoose.Types.ObjectId(),
+          refundAmount: 100,
+          reason: "Placeholder used only to prove the index permits nulls",
+          status: "REQUESTED",
+          requestedBy: requester._id,
+        })
+      );
+    }
+
+    expect(created).toHaveLength(3);
+    // All three hold the same null, which a naive unique index forbids.
+    const stored = await Refund.find({ reference: /^REF-TEST-/ }).lean();
+    expect(stored.map((r) => r.razorpayRefundId)).toEqual([null, null, null]);
+  });
+
+  it("still refuses a duplicate real refund reference", async () => {
+    const requester = await createUser({ role: ROLES.STUDENT });
+    const oid = () => new mongoose.Types.ObjectId();
+    const base = {
+      payment: oid(),
+      invoice: oid(),
+      student: oid(),
+      refundAmount: 100,
+      reason: "Placeholder used only to prove real duplicates are refused",
+      status: "REQUESTED",
+      requestedBy: requester._id,
+    };
+
+    await Refund.create({
+      reference: "REF-UNIQUE-TEST",
+      razorpayRefundId: "rfnd_real_1",
+      ...base,
+    });
+
+    // The constraint must survive: two documents cannot claim one refund id.
+    await expect(
+      Refund.create({
+        reference: "REF-UNIQUE-TEST-2",
+        razorpayRefundId: "rfnd_real_1",
+        ...base,
+      })
+    ).rejects.toThrow(/duplicate|E11000/i);
+  });
+});
+
+describe("document currency rendering", () => {
+  /**
+   * Regression guard for a bug that printed a wrong figure on a receipt.
+   *
+   * PDFKit's built-in fonts are WinAnsi-encoded and carry no glyph for U+20B9.
+   * The ₹ did not merely vanish: PDFKit substituted a character from the
+   * private-use area, and a receipt for ₹5,900.00 rendered as "15,900.00" —
+   * an amount off by a factor of nearly three, on a financial document, while
+   * the database held the correct value throughout.
+   */
+  it("uses a symbol the standard PDF fonts can actually render", () => {
+    const doc = money.formatForDocument(590000);
+
+    // No unsupported glyph may reach a PDF renderer.
+    expect(doc).not.toContain("\u20B9");
+    // The digits must be intact and exact.
+    expect(doc).toBe("Rs. 5,900.00");
+  });
+
+  it("keeps the screen format unchanged for the application UI", () => {
+    expect(money.format(590000)).toBe("\u20B95,900.00");
+  });
+
+  it("renders the exact captured amount into the receipt PDF", async () => {
+    const { renderReceiptPdf } = require("../src/services/receipt.service");
+
+    const buffer = await renderReceiptPdf({
+      receiptNumber: "RCP-TEST-1",
+      payment: {
+        razorpayOrderId: "order_TEST",
+        razorpayPaymentId: "pay_TEST",
+        capturedAmount: 590000,
+        amount: 590000,
+        method: "upi",
+        mode: "MOCK",
+      },
+      invoice: { reference: "INV-TEST-1", total: 590000, balanceDue: 0 },
+      student: { rollNumber: "CS001", user: { fullName: "Test Student" } },
+      department: null,
+      program: null,
+      issuedAt: new Date("2026-01-15T10:30:00Z"),
+    });
+
+    const text = pdfText(buffer);
+
+    // The amount appears verbatim.
+    expect(text).toContain("5,900.00");
+    // Carries the one symbol the standard PDF fonts can render.
+    expect(text).toContain("Rs. 5,900.00");
+
+    // Neither the rupee sign nor its broken substitution may appear. U+00B9 is
+    // what PDFKit emitted instead: a superscript one, which reads as a digit,
+    // so the receipt appeared to say "15,900.00".
+    expect(text).not.toContain("\u20B9");
+    expect(text).not.toContain("\u00B9");
+  });
+});
+
+/**
+ * Recover the visible text from a PDFKit document.
+ *
+ * PDFKit compresses each content stream and writes text as a hex-encoded
+ * string inside a `TJ` array, so a rendered PDF is not greppable as-is. This
+ * inflates every deflate stream and decodes the hex operands back to characters
+ * — which is what makes it possible to assert that a receipt actually prints
+ * the right amount rather than merely that a PDF was produced.
+ */
+function pdfText(buffer) {
+  const zlib = require("zlib");
+  const raw = buffer.toString("latin1");
+  const streams = [];
+
+  const marker = /stream\r?\n/g;
+  let match;
+  while ((match = marker.exec(raw)) !== null) {
+    const start = match.index + match[0].length;
+    const end = raw.indexOf("\nendstream", start);
+    if (end === -1) continue;
+    try {
+      streams.push(
+        zlib.inflateSync(Buffer.from(raw.slice(start, end), "latin1")).toString("latin1")
+      );
+    } catch {
+      // Not a deflate stream (font data, for instance).
+    }
+  }
+
+  // PDFKit splits a line into several TJ operands to apply kerning, so every
+  // hex string inside an array belongs to the same run of text and all of them
+  // must be concatenated in order.
+  const decoded = [];
+  for (const stream of streams) {
+    const arrays = /\[([^\]]*)\]\s*TJ/g;
+    let hit;
+    while ((hit = arrays.exec(stream)) !== null) {
+      let run = "";
+      for (const operand of hit[1].matchAll(/<([0-9a-fA-F]+)>/g)) {
+        run += Buffer.from(operand[1], "hex").toString("latin1");
+      }
+      if (run) decoded.push(run);
+    }
+    // Literal strings, used when the text needs no hex escaping.
+    for (const literal of stream.matchAll(/\(((?:[^()\\]|\\.)*)\)\s*Tj/g)) {
+      decoded.push(literal[1]);
+    }
+  }
+
+  return decoded.join("\n");
+}

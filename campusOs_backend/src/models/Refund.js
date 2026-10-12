@@ -88,7 +88,26 @@ const refundSchema = new mongoose.Schema(
 
     rejectionReason: { type: String, trim: true, maxlength: [1000], default: null },
 
-    razorpayRefundId: { type: String, default: null, unique: true, sparse: true },
+    /**
+     * Uniquely indexed, but only for documents that actually have a value.
+     *
+     * A plain `unique: true` here would index `null` as an ordinary value, and
+     * since `default: null` puts the field on every document, only ONE document
+     * in the collection could ever exist. `sparse` does not help: it skips
+     * documents where the field is *missing*, not where it is null.
+     *
+     * A partial index over string values expresses the actual rule: this
+     * identifier, when known, belongs to exactly one document.
+     */
+    razorpayRefundId: {
+      type: String,
+      default: null,
+      trim: true,
+      index: {
+        unique: true,
+        partialFilterExpression: { razorpayRefundId: { $type: "string" } },
+      },
+    },
 
     failureDescription: { type: String, trim: true, maxlength: [500], default: null },
   },

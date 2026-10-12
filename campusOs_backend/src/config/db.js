@@ -83,6 +83,130 @@ async function connectDB(uri) {
   return connectPromise;
 }
 
+/**
+ * Reconcile a database's indexes with the schemas.
+ *
+ * `autoIndex` only *creates* what is missing. It never removes an index that a
+ * schema no longer declares, so a schema correction does not reach an existing
+ * database — and the stale index keeps enforcing the old rule.
+ *
+ * That is not hypothetical: several unique fields were originally declared
+ * `unique: true, sparse: true` alongside `default: null`. Sparse skips documents
+ * where a field is missing, not where it is null, so MongoDB indexed every
+ * `null` and permitted exactly ONE document per collection. The schemas now use
+ * a partial index over string values; without this, any database created before
+ * that change would still refuse the second refund it ever received.
+ *
+ * `syncIndexes()` drops indexes not present in the schema, so it must never run
+ * unattended in production: run `npm run migrate:indexes` as a deliberate step.
+ */
+async function syncIndexes({ force = false } = {}) {
+  const env = getEnv();
+
+  if (!force && env.NODE_ENV === "production") {
+    logger.warn(
+      "Index sync skipped in production. Run `npm run migrate:indexes` deliberately."
+    );
+    return { skipped: true };
+  }
+
+  // `modelNames()` is empty unless something has required the models. Loading
+  // them here means this works no matter which entry point called it, rather
+  // than silently doing nothing.
+  require("../models");
+
+  const models = mongoose.modelNames();
+  const synced = [];
+
+  for (const name of models) {
+    const model = mongoose.model(name);
+
+    try {
+      // Declared indexes, keyed by their key paths. Mongoose 9 does not put a
+      // name on the options returned by schema.indexes(), so the shape of the
+      // key — not its generated name — is what a live index is matched on.
+      const declared = model.schema.indexes().map(([keys, options]) => ({
+        paths: keyPaths(keys),
+        options,
+      }));
+
+      // Drop indexes the schema no longer declares.
+      const dropped = await model.syncIndexes();
+
+      // `syncIndexes()` only compares index NAMES. An index whose name is still
+      // declared but whose definition changed — here, a unique index that
+      // gained a partialFilterExpression — is left in place, so the old rule
+      // keeps being enforced. Those have to be dropped and rebuilt by hand.
+      const existing = await model.collection.indexes();
+      const replaced = [];
+
+      for (const index of existing) {
+        const wanted = declared.find((d) => samePaths(d.paths, keyPaths(index.key)));
+        if (!wanted) continue;
+
+        if (indexBelongsToSchema(wanted.options, index)) continue;
+
+        await model.collection.dropIndex(index.name);
+        replaced.push(index.name);
+      }
+
+      if (replaced.length) {
+        await model.syncIndexes();
+      }
+
+      if (dropped.length || replaced.length) {
+        synced.push({ model: name, dropped, replaced });
+      }
+    } catch (error) {
+      logger.error({ err: error, model: name }, "Index sync failed for model");
+      throw error;
+    }
+  }
+
+  if (synced.length) {
+    logger.info({ synced }, "Replaced stale indexes with the current schema");
+  } else {
+    logger.info("Indexes already match the schemas.");
+  }
+
+  return { skipped: false, synced };
+}
+
+/**
+ * Whether a live index already matches what the schema asks for.
+ *
+ * Compares only the properties that change enforcement: uniqueness and the
+ * partial filter. MongoDB echoes key order back differently from how it was
+ * written, so key shapes are deliberately not compared.
+ */
+/** The field paths an index covers, order-independent. */
+function keyPaths(keys) {
+  const flat = Array.isArray(keys) ? Object.assign({}, ...keys) : keys;
+  return Object.keys(flat).sort().join(",");
+}
+
+function samePaths(a, b) {
+  return a === b;
+}
+
+function indexBelongsToSchema(wanted, existing) {
+  if (Boolean(wanted.unique) !== Boolean(existing.unique)) {
+    return false;
+  }
+
+  const wantedPartial = wanted.partialFilterExpression;
+  const existingPartial = existing.partialFilterExpression;
+
+  if (!wantedPartial && !existingPartial) {
+    return true;
+  }
+  if (!wantedPartial || !existingPartial) {
+    return false;
+  }
+
+  return JSON.stringify(wantedPartial) === JSON.stringify(existingPartial);
+}
+
 /** Close the connection and reset state. Used by scripts and test teardown. */
 async function disconnectDB() {
   connectPromise = null;
@@ -130,6 +254,7 @@ function registerConnectionListeners() {
 }
 
 module.exports = {
+  syncIndexes,
   connectDB,
   disconnectDB,
   isDbConnected,

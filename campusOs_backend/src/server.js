@@ -10,7 +10,12 @@
 const { createApp } = require("./app");
 const { getEnv } = require("./config/env");
 const { logger } = require("./config/logger");
-const { connectDB, disconnectDB, registerConnectionListeners } = require("./config/db");
+const {
+  connectDB,
+  disconnectDB,
+  registerConnectionListeners,
+  syncIndexes,
+} = require("./config/db");
 
 /**
  * Boot sequence.
@@ -25,6 +30,13 @@ async function startServer({ mongoUri } = {}) {
   registerConnectionListeners();
 
   await connectDB(mongoUri);
+
+  // Development and test only — `syncIndexes()` refuses to run in production.
+  //
+  // `autoIndex` creates missing indexes but never removes stale ones, so a
+  // corrected index definition would otherwise never reach a database that
+  // already exists. See the comment on syncIndexes() in config/db.js.
+  await syncIndexes();
 
   const app = createApp();
 

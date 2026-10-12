@@ -275,6 +275,9 @@ async function createOrder({ user, invoiceId, req }) {
     currency: invoice.currency,
     razorpayOrderId: order.orderId,
     status: PAYMENT_STATUS.CREATED,
+    // Recorded on the payment so the receipt can state plainly whether it
+    // documents a live payment, a Razorpay test payment, or a local mock.
+    mode: gateway.isMock ? "MOCK" : (gateway.mode ?? "LIVE"),
     notes: gateway.isMock ? "Created against the MOCK gateway" : undefined,
   });
 
@@ -304,6 +307,7 @@ async function createOrder({ user, invoiceId, req }) {
     // The publishable key is public by design; the secret never leaves the server.
     keyId: gateway.publishableKey,
     isMock: gateway.isMock,
+    mode: payment.mode,
   };
 }
 
@@ -539,6 +543,22 @@ async function creditInvoice(payment) {
       "Invoice changed during crediting — reconciling later"
     );
     return;
+  }
+
+  // Issue the receipt here — the single point at which a payment becomes
+  // settled. Issuing it on request instead would mean the document a student
+  // downloads today is not the one they were given at the time.
+  const receiptService = require("./receipt.service");
+  try {
+    await receiptService.issueReceipt({ paymentId: payment._id.toString() });
+  } catch (error) {
+    // A receipt failure must not undo a settled payment. The money has moved;
+    // the ledger records the payment regardless, and reconciliation will show a
+    // captured payment with no receipt.
+    logger.error(
+      { err: error, paymentId: payment._id },
+      "Payment settled but receipt issuance failed"
+    );
   }
 
   await auditService.record({

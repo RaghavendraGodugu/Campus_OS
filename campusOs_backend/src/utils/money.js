@@ -31,6 +31,14 @@ const CURRENCIES = Object.freeze({
 });
 
 /**
+ * Currency symbol used in generated PDFs.
+ *
+ * See formatForDocument(): U+20B9 has no glyph in the standard PDF fonts and
+ * renders as a stray digit beside the amount.
+ */
+const DOCUMENT_CURRENCY_SYMBOL = "Rs. ";
+
+/**
  * Largest amount representable exactly as a JS integer, in minor units.
  * ₹1,000,000 (one million rupees) is far beyond any institutional fee, and
  * leaves enormous headroom below the 2^53 ceiling.
@@ -202,6 +210,29 @@ function format(amount, { currency = "INR" } = {}) {
   return `${negative ? "-" : ""}${config.symbol}${grouped}.${fraction}`;
 }
 
+/**
+ * Format minor units for a PDF or printed document.
+ *
+ * PDFKit's built-in fonts are WinAnsi-encoded and have no glyph for U+20B9
+ * (₹). Rather than render nothing, PDFKit substitutes from the private-use
+ * area and the symbol comes out as a spurious digit — a ₹5,900.00 receipt
+ * printed "15,900.00", which is a wrong figure on a financial document.
+ *
+ * Embedding a font that carries the glyph would fix the appearance, but it
+ * means shipping and licensing a binary font that must also exist inside any
+ * container. "Rs." is unambiguous on an Indian financial document, renders in
+ * every PDF viewer, and cannot corrupt the digits next to it.
+ *
+ * @param {number} amount Minor units.
+ * @returns {string} e.g. "Rs.5,900.00"
+ */
+function formatForDocument(amount, { currency = "INR" } = {}) {
+  return format(amount, { currency }).replace(
+    CURRENCIES[currency].symbol,
+    DOCUMENT_CURRENCY_SYMBOL
+  );
+}
+
 /** Are these two amounts the same, to the paisa? */
 function equals(a, b) {
   return Number(a) === Number(b);
@@ -258,6 +289,7 @@ module.exports = {
   round,
   toRupees,
   format,
+  formatForDocument,
   equals,
   isPositive,
   isPayableAmount,
