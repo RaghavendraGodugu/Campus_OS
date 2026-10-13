@@ -97,6 +97,23 @@ const userSchema = new mongoose.Schema(
       index: true,
     },
 
+    /**
+     * Set when an administrator provisions the account and hands over a
+     * generated temporary password.
+     *
+     * The alternative — letting the administrator choose the first password —
+     * means the institute holds a credential that works for a real person, and
+     * it is usually chosen once and never rotated. A generated one is shown to
+     * the administrator exactly once, is never stored in plaintext, and this
+     * flag makes the account useless until its owner replaces it.
+     *
+     * Cleared by `changePassword`, never by the person signing in.
+     */
+    mustChangePassword: {
+      type: Boolean,
+      default: false,
+    },
+
     lastLoginAt: {
       type: Date,
       default: null,
@@ -238,6 +255,12 @@ userSchema.methods.toPublicJSON = function toPublicJSON() {
     department: this.department ?? null,
     student: this.student ?? null,
     isActive: this.isActive,
+    /**
+     * Reported so a provisioned account can be held at the password screen
+     * until its owner replaces the generated one. It describes the account
+     * being returned, never anyone else's.
+     */
+    mustChangePassword: this.mustChangePassword ?? false,
     lastLoginAt: this.lastLoginAt ?? null,
     createdAt: this.createdAt,
   };

@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 13 October 2026
-- **Verified:** 435 backend tests, 71 frontend tests, lint and build clean
+- **Verified:** 472 backend tests, 96 frontend tests, lint and build clean
 
 ---
 
@@ -69,11 +69,16 @@ means the note that follows it)
 
 ## 5. Departments, programmes, request types
 
-- [x] Read via the directory API
+- [x] Read via the directory API, and readable by any signed-in role because
+      request forms need the list
 - [x] Request types: read, create, deactivate (`POST /request-types`)
 - [ ] Request-type administration screen
-- [ ] Department and programme management APIs and screens
+- [x] Departments: create, rename, retire and restore — refusing to retire one
+      that still has staff, programmes or students on it
+- [x] Programmes: create, edit, retire and restore — refusing to retire one with
+      students still enrolled
 - [ ] Academic term/session setup and rollover
+- [ ] Department heads can be assigned from the interface (the field exists)
 
 ## 6. Requests
 
@@ -204,12 +209,13 @@ means the note that follows it)
 
 ## 15. Quality gates
 
-- [x] Backend: 435 tests passing
-- [x] Frontend: 71 tests passing
+- [x] Backend: 472 tests passing
+- [x] Frontend: 96 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep
-- [x] `npm run verify:roles` — real-browser per-role sweep, profile included
+- [x] `npm run verify:roles` — real-browser per-role sweep including the
+      super administrator, whose pages no other role can reach
 - [x] The sweep detects a failed page by `role="alert"`, not by searching for
       words, and is itself covered by a test so it cannot quietly stop failing
 - [ ] CI running these gates on every push
@@ -246,7 +252,6 @@ audit, and the profile section for every role.
 
 ## What is not
 
-The public certificate verification page and the anonymous complaint tracking
-code, both of which have an API but no interface; user, department and
-programme administration; and the proven Razorpay capture lifecycle. Those are
-the honest remainder.
+The anonymous complaint tracking code (an API with no interface); the
+request-type administration screen; student bulk import; and the proven Razorpay
+capture lifecycle. Those are the honest remainder.

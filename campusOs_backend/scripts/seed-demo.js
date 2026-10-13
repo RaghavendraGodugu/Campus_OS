@@ -327,6 +327,21 @@ async function main() {
       fullName: `${DEMO_PREFIX} Principal`,
       role: ROLES.PRINCIPAL,
     },
+    /*
+     * A demo administrator, and only for the demo database.
+     *
+     * In a real deployment the first super administrator is created by
+     * `npm run create-admin` on the server, because an endpoint anyone can
+     * reach would let whoever found it first claim the institution. Seeding one
+     * is safe precisely because this script only ever runs against demo data —
+     * but it is worth being explicit that this role is otherwise unreachable
+     * through the API.
+     */
+    {
+      email: "demo.admin@campusos.local",
+      fullName: `${DEMO_PREFIX} Administrator`,
+      role: ROLES.SUPER_ADMIN,
+    },
   ];
 
   const staff = {};

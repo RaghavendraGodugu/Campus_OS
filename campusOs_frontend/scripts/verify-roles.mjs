@@ -76,6 +76,25 @@ const ROLES = [
     ],
   },
   {
+    /*
+     * The super administrator, because the administration screens are
+     * unreachable from every other role. Their absence from this sweep is why a
+     * whole section of the application could be broken without anything here
+     * turning red.
+     */
+    role: "admin",
+    email: "demo.admin@campusos.local",
+    pages: [
+      ["dashboard", "/", "ok"],
+      ["profile", "/profile", "ok"],
+      ["people", "/admin/people", "ok"],
+      ["departments", "/admin/departments", "ok"],
+      ["programmes", "/admin/programmes", "ok"],
+      ["reports", "/reports", "ok"],
+      ["audit", "/audit", "ok"],
+    ],
+  },
+  {
     role: "dean",
     email: "demo.dean@campusos.local",
     pages: [

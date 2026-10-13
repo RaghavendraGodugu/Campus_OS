@@ -489,6 +489,11 @@ function buildSessionPayload(user, student) {
       : null,
     permissions: permissionInfo.permissions,
     scopes: permissionInfo.scopes,
+    // An administrator-provisioned account, holding a generated password, is
+    // not really signed in until its owner replaces it. The client gates on
+    // this; the server still enforces every permission normally, because a
+    // flag in a cookie is a hint, not a control.
+    mustChangePassword: Boolean(user.mustChangePassword),
   };
 }
 

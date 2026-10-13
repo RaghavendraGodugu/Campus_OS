@@ -101,6 +101,28 @@ export const NAV_ITEMS = [
 
   { section: "Oversight" },
   {
+    to: "/admin/people",
+    label: "People",
+    icon: "Settings",
+    section: "Administration",
+    permission: "user:read:institution",
+  },
+  {
+    to: "/admin/departments",
+    label: "Departments",
+    icon: "Building2",
+    section: "Administration",
+    permission: "department:manage:institution",
+  },
+  {
+    to: "/admin/programmes",
+    label: "Programmes",
+    icon: "GraduationCap",
+    section: "Administration",
+    permission: "program:manage:institution",
+  },
+
+  {
     to: "/reports",
     label: "Reports",
     icon: "BarChart3",
@@ -171,5 +193,16 @@ export const DEMO_ACCOUNTS = [
     email: "demo.principal@campusos.local",
     label: "Principal",
     name: "Institution-wide",
+  },
+  {
+    /*
+     * Seeded only into demo data. In a real deployment the first super
+     * administrator comes from `npm run create-admin` on the server, because an
+     * endpoint anyone could reach would let whoever found it first claim the
+     * institution.
+     */
+    email: "demo.admin@campusos.local",
+    label: "Administrator",
+    name: "Accounts and structure",
   },
 ];

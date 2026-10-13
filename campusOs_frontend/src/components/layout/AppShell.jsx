@@ -3,18 +3,21 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import {
   BarChart3,
   BadgeCheck,
+  Building2,
   FileText,
+  GraduationCap,
   Inbox,
   IndianRupee,
   LayoutDashboard,
   LogOut,
-  User,
-  Megaphone,
   Menu,
+  Megaphone,
   Receipt,
   ScrollText,
+  Settings,
   ShieldAlert,
   Undo2,
+  User,
   X,
 } from "lucide-react";
 
@@ -35,6 +38,9 @@ const ICONS = {
   IndianRupee,
   BarChart3,
   ScrollText,
+  Settings,
+  Building2,
+  GraduationCap,
   User,
 };
 

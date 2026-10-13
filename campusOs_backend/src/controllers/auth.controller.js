@@ -168,6 +168,10 @@ const changePassword = asyncHandler(async (req, res) => {
   }
 
   await user.setPassword(newPassword);
+  // The point at which a provisioned account stops being a temporary one.
+  // Cleared here and nowhere else: signing in must never clear it, or the
+  // gate in the client would be skipped by simply refreshing.
+  user.mustChangePassword = false;
   await user.save();
 
   await authService.revokeAllSessions(user._id.toString(), "password-change", req);

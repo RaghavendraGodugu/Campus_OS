@@ -8,6 +8,10 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import ApplyCertificate from "./pages/ApplyCertificate";
 import VerifyCertificate from "./pages/VerifyCertificate";
+import SetPassword from "./pages/SetPassword";
+import People from "./pages/admin/People";
+import Departments from "./pages/admin/Departments";
+import Programmes from "./pages/admin/Programmes";
 import Announcements from "./pages/Announcements";
 import AnnouncementDetail from "./pages/AnnouncementDetail";
 import Complaints from "./pages/Complaints";
@@ -42,6 +46,20 @@ export default function App() {
 
       <Route path="/login" element={<Login />} />
 
+      {/*
+        Reachable while signed in, but deliberately outside the shell: a person
+        who owes a password change should not see navigation to pages they are
+        not meant to be using yet.
+      */}
+      <Route
+        path="/set-password"
+        element={
+          <RequireAuth allowUnchangedPassword>
+            <SetPassword />
+          </RequireAuth>
+        }
+      />
+
       <Route
         element={
           <RequireAuth>
@@ -52,6 +70,33 @@ export default function App() {
         <Route index element={<Dashboard />} />
         {/* Available to every signed-in role; the content varies by role. */}
         <Route path="profile" element={<Profile />} />
+
+        {/* Administration. Gated on permissions the server re-checks on every
+            request — the guard here is for the reader, not a control. */}
+        <Route
+          path="admin/people"
+          element={
+            <RequirePermission permissions={["user:read:institution"]}>
+              <People />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="admin/departments"
+          element={
+            <RequirePermission permissions={["department:manage:institution"]}>
+              <Departments />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="admin/programmes"
+          element={
+            <RequirePermission permissions={["program:manage:institution"]}>
+              <Programmes />
+            </RequirePermission>
+          }
+        />
 
         {/* Declared before the two-segment route below, so "new" is never read
             as a request reference. */}
