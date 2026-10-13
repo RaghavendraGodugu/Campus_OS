@@ -19,6 +19,7 @@ const announcementRoutes = require("./announcement.routes");
 const reportRoutes = require("./report.routes");
 const directoryRoutes = require("./directory.routes");
 const documentRoutes = require("./document.routes");
+const profileRoutes = require("./profile.routes");
 const auditRoutes = require("./audit.routes");
 
 const router = express.Router();
@@ -43,6 +44,7 @@ router.use("/api/v1", announcementRoutes);
 router.use("/api/v1", reportRoutes);
 router.use("/api/v1", directoryRoutes);
 router.use("/api/v1", documentRoutes);
+router.use("/api/v1", profileRoutes);
 router.use("/api/v1", auditRoutes);
 
 module.exports = router;

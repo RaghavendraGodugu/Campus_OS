@@ -46,6 +46,8 @@ const ROLES = [
     email: "demo.student.democs001@campusos.local",
     pages: [
       ["dashboard", "/", "ok"],
+      // Every role has a profile, so every role is checked on it.
+      ["profile", "/profile", "ok"],
       ["my requests", "/requests", "ok"],
       ["new request", "/requests/new", "ok"],
       ["my complaints", "/complaints", "ok"],
@@ -63,6 +65,7 @@ const ROLES = [
     email: "demo.hod@campusos.local",
     pages: [
       ["dashboard", "/", "ok"],
+      ["profile", "/profile", "ok"],
       ["assigned requests", "/management/requests", "ok"],
       ["reports", "/reports", "ok"],
       ["audit", "/audit", "ok"],
@@ -76,6 +79,7 @@ const ROLES = [
     email: "demo.dean@campusos.local",
     pages: [
       ["dashboard", "/", "ok"],
+      ["profile", "/profile", "ok"],
       ["reports", "/reports", "ok"],
       ["audit", "/audit", "ok"],
       ["complaints", "/management/complaints", "ok"],
@@ -84,6 +88,23 @@ const ROLES = [
     ],
   },
 ];
+
+/**
+ * The `ErrorState` component marks itself with `role="alert"`.
+ *
+ * Asking the DOM for that attribute, rather than hunting for prose, is the whole
+ * point. This script once reported a profile page as PASS while it was
+ * displaying "Profile not available — Route GET /api/v1/profile does not
+ * exist": the page rendered, so the script saw text, and the words it happened
+ * to look for were not on the page. Widening the word list then made it worse —
+ * "not available" turned out to be a perfectly normal value in the audit log,
+ * and a healthy page was reported as broken.
+ *
+ * A word list will always drift from the components. A role attribute will not.
+ * A verification script that cannot fail is worse than none, because it gets
+ * believed.
+ */
+const ERROR_SELECTOR = 'main [role="alert"], [role="alert"][class*="red"]';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const findChrome = () => CHROME_CANDIDATES.find((path) => existsSync(path));
@@ -193,9 +214,12 @@ async function sweep(spec, port) {
       await go(url);
       const text = (await mainText()).replace(/\s+/g, " ");
       const refused = /do not have access/i.test(text);
-      const broken = /Something went wrong|could not confirm|REFUSING/i.test(
-        text,
+      const alertText = await evaluate(
+        `Array.from(document.querySelectorAll(${JSON.stringify(ERROR_SELECTOR)}))
+           .map((node) => node.innerText.replace(/\\s+/g, " ").trim())
+           .join(" | ")`,
       );
+      const broken = alertText.length > 0;
       const heading =
         (text.match(/^([A-Z][\w' ]{3,44})/) || [])[1] || text.slice(0, 44);
 
@@ -206,6 +230,9 @@ async function sweep(spec, port) {
       console.log(
         `   ${good ? "PASS" : "FAIL"}  ${label.padEnd(16)} [${actual}] ${heading}`,
       );
+      if (process.env.VERIFY_DEBUG && alertText) {
+        console.log(`        alert: ${alertText.slice(0, 160)}`);
+      }
     }
   }
 

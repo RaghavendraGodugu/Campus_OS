@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import {
   BarChart3,
   BadgeCheck,
@@ -8,6 +8,7 @@ import {
   IndianRupee,
   LayoutDashboard,
   LogOut,
+  User,
   Megaphone,
   Menu,
   Receipt,
@@ -34,6 +35,7 @@ const ICONS = {
   IndianRupee,
   BarChart3,
   ScrollText,
+  User,
 };
 
 /**
@@ -119,7 +121,11 @@ export default function AppShell() {
           </nav>
 
           <div className="border-t border-ink-100 p-3">
-            <div className="flex items-center gap-3 rounded-lg px-2 py-2">
+            {/* The identity block doubles as the way in to your own profile. */}
+            <Link
+              to="/profile"
+              className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-ink-50"
+            >
               <span
                 aria-hidden="true"
                 className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-100 text-xs font-semibold text-brand-800"
@@ -130,9 +136,9 @@ export default function AppShell() {
                 <p className="truncate text-sm font-medium text-ink-800">
                   {user?.fullName}
                 </p>
-                <p className="truncate text-xs text-ink-500">{user?.email}</p>
+                <p className="truncate text-xs text-ink-500">View profile</p>
               </div>
-            </div>
+            </Link>
             <button
               type="button"
               onClick={logout}

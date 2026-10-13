@@ -5,6 +5,7 @@ import RequirePermission from "./components/RequirePermission";
 import AppShell from "./components/layout/AppShell";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
 import Announcements from "./pages/Announcements";
 import AnnouncementDetail from "./pages/AnnouncementDetail";
 import Complaints from "./pages/Complaints";
@@ -43,6 +44,8 @@ export default function App() {
         }
       >
         <Route index element={<Dashboard />} />
+        {/* Available to every signed-in role; the content varies by role. */}
+        <Route path="profile" element={<Profile />} />
 
         {/* Declared before the two-segment route below, so "new" is never read
             as a request reference. */}

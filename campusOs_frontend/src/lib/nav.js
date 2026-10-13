@@ -14,6 +14,15 @@ export const NAV_ITEMS = [
     permission: null,
     end: true,
   },
+  {
+    to: "/profile",
+    label: "Profile",
+    icon: "User",
+    // Not gated: every role has one, and there is nothing here to gate. The
+    // page shows different content per role, and the server decides what is
+    // editable regardless of what this nav decides to show.
+    permission: null,
+  },
 
   {
     to: "/requests",
