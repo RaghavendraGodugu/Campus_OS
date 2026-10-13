@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { GraduationCap, ShieldCheck } from "lucide-react";
+import { Link, Navigate, useLocation } from "react-router-dom";
+import { BadgeCheck, ShieldCheck, Sparkles } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
 import { DEMO_ACCOUNTS } from "../lib/nav";
@@ -65,25 +65,66 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="relative flex min-h-screen overflow-hidden">
       {/* ===== Brand panel ===== */}
-      <div className="relative hidden w-1/2 flex-col justify-between bg-brand-800 p-12 text-white lg:flex">
-        <div className="flex items-center gap-3">
-          <GraduationCap className="size-8" aria-hidden="true" />
+      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-brand-ink p-12 text-white lg:flex">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-linear-to-br from-brand-700/55 via-brand-800/25 to-accent-600/30"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-28 -right-24 size-96 rounded-full bg-accent-400/25 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="grid-texture pointer-events-none absolute inset-0 opacity-40"
+        />
+
+        <div className="relative flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="grid size-11 place-items-center rounded-xl bg-linear-to-br from-white/25 to-white/10 text-base font-bold ring-1 ring-white/25 ring-inset backdrop-blur-sm"
+          >
+            C
+          </span>
           <span className="text-xl font-semibold tracking-tight">CampusOS</span>
         </div>
 
-        <div className="max-w-md">
-          <h1 className="text-3xl font-semibold leading-tight">
+        <div className="relative max-w-md">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-xs font-medium text-brand-100 ring-1 ring-white/20 ring-inset">
+            <Sparkles className="size-3" aria-hidden="true" />
+            One system, eight roles
+          </span>
+          <h1 className="mt-5 text-4xl leading-[1.1] font-semibold tracking-tight">
             One place for requests, certificates and fees.
           </h1>
-          <p className="mt-4 text-brand-100">
+          <p className="mt-4 text-[0.9375rem] leading-relaxed text-brand-100/90">
             Every action is recorded, and you always see exactly what you are
             entitled to — nothing more, nothing less.
           </p>
+
+          <ul className="mt-8 space-y-3">
+            {[
+              "Apply for a certificate and track it to issue",
+              "Raise a grievance that is confidential from the moment it is filed",
+              "See every rupee owed, paid and refunded",
+            ].map((line) => (
+              <li
+                key={line}
+                className="flex items-start gap-2.5 text-sm text-brand-100/85"
+              >
+                <BadgeCheck
+                  className="mt-0.5 size-4 shrink-0 text-accent-300"
+                  aria-hidden="true"
+                />
+                {line}
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <p className="flex items-center gap-2 text-xs text-brand-200">
+        <p className="relative flex items-center gap-2 text-xs text-brand-200/80">
           <ShieldCheck className="size-4" aria-hidden="true" />
           Session cookies are HttpOnly. No password is ever stored in this
           browser.
@@ -91,70 +132,94 @@ export default function Login() {
       </div>
 
       {/* ===== Form ===== */}
-      <div className="flex w-full flex-col justify-center px-6 py-12 lg:w-1/2">
+      <div className="relative flex w-full flex-col justify-center px-6 py-12 lg:w-1/2">
         <div className="mx-auto w-full max-w-sm">
-          <div className="mb-8 lg:hidden">
-            <div className="flex items-center gap-2">
-              <GraduationCap
-                className="size-7 text-brand-700"
-                aria-hidden="true"
-              />
-              <span className="text-lg font-semibold text-brand-700">
-                CampusOS
-              </span>
-            </div>
+          <div className="mb-8 flex items-center gap-2 lg:hidden">
+            <span
+              aria-hidden="true"
+              className="aurora grid size-9 place-items-center rounded-xl text-sm font-bold text-white shadow-brand"
+            >
+              C
+            </span>
+            <span className="text-lg font-semibold tracking-tight text-ink-900">
+              CampusOS
+            </span>
           </div>
 
-          <h2 className="text-xl font-semibold text-ink-900">Sign in</h2>
-          <p className="mt-1 text-sm text-ink-500">Use your college account.</p>
-
-          <form onSubmit={submit} className="mt-8 space-y-5" noValidate>
-            <Field label="Email" htmlFor="email" required>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="username"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className={inputClass}
-                placeholder="you@college.edu"
-              />
-            </Field>
-
-            <Field label="Password" htmlFor="password" required>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className={inputClass}
-                placeholder="••••••••"
-              />
-            </Field>
-
-            {error && (
-              <p
-                role="alert"
-                className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
-              >
-                {error}
-              </p>
-            )}
-
-            <Button
-              type="submit"
-              size="lg"
-              loading={submitting}
-              className="w-full"
-            >
+          <div className="surface-raised p-6 sm:p-7">
+            <h2 className="text-xl font-semibold tracking-tight text-ink-900">
               Sign in
-            </Button>
-          </form>
+            </h2>
+            <p className="mt-1 text-sm text-ink-500">
+              Use your college account.
+            </p>
+
+            <form onSubmit={submit} className="mt-8 space-y-5" noValidate>
+              <Field label="Email" htmlFor="email" required>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="username"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className={inputClass}
+                  placeholder="you@college.edu"
+                />
+              </Field>
+
+              <Field label="Password" htmlFor="password" required>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className={inputClass}
+                  placeholder="••••••••"
+                />
+              </Field>
+
+              {error && (
+                <p
+                  role="alert"
+                  className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+                >
+                  {error}
+                </p>
+              )}
+
+              <Button
+                type="submit"
+                size="lg"
+                loading={submitting}
+                className="w-full"
+              >
+                Sign in
+              </Button>
+            </form>
+
+            {/* Someone holding a paper certificate is the other kind of visitor
+              to this page, and they have no account. */}
+            <div className="mt-6 rounded-2xl border border-dashed border-brand-200 bg-brand-50/60 p-4">
+              <p className="text-sm font-medium text-ink-800">
+                Just checking a certificate?
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-ink-500">
+                Verify one by its printed code — no account needed.
+              </p>
+              <Link
+                to="/verify"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 transition-colors hover:text-brand-900"
+              >
+                Verify a certificate
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
 
           {import.meta.env.VITE_SHOW_DEMO_BANNER === "true" && (
             <div className="mt-10 border-t border-ink-200 pt-6">
@@ -171,7 +236,7 @@ export default function Login() {
                     key={account.email}
                     type="button"
                     onClick={() => applyDemoAccount(account.email)}
-                    className="rounded-lg border border-ink-200 px-2.5 py-2 text-left text-xs transition-colors hover:border-brand-300 hover:bg-brand-50"
+                    className="rounded-xl border border-ink-200/90 bg-surface px-2.5 py-2 text-left text-xs shadow-card transition-all duration-150 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-raised"
                   >
                     <span className="block font-medium text-ink-800">
                       {account.label}

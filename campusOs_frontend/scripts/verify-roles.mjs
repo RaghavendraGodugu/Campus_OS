@@ -110,8 +110,15 @@ const ERROR_SELECTOR = 'main [role="alert"], [role="alert"][class*="red"]';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const findChrome = () => CHROME_CANDIDATES.find((path) => existsSync(path));
 
-async function sweep(spec, port) {
-  const profile = mkdtempSync(join(tmpdir(), `campusos-${spec.role}-`));
+/**
+ * Start a headless Chrome and hand back a small CDP client.
+ *
+ * Extracted because two callers need it: the per-role sweeps, and the public
+ * verification check, which must run with no session and so cannot reuse a
+ * browser that has signed in.
+ */
+async function launchBrowser(name, port) {
+  const profile = mkdtempSync(join(tmpdir(), `campusos-${name}-`));
   const browser = spawn(
     findChrome(),
     [
@@ -184,6 +191,21 @@ async function sweep(spec, port) {
     evaluate(`(document.querySelector('main')||{}).innerText||'(no main)'`);
 
   await send("Page.enable");
+
+  const close = async () => {
+    browser.kill();
+    await sleep(300);
+  };
+
+  return { evaluate, go, mainText, send, close };
+}
+
+async function sweep(spec, port) {
+  const { evaluate, go, mainText, send, close } = await launchBrowser(
+    spec.role,
+    port,
+  );
+
   await send("Runtime.enable");
 
   await go("/", 3800);
@@ -237,9 +259,44 @@ async function sweep(spec, port) {
     }
   }
 
-  browser.kill();
-  await sleep(300);
+  await close();
   return failures;
+}
+
+/**
+ * The public verification page, checked with no session at all.
+ *
+ * This is the one page a non-user can reach, and its whole purpose is being
+ * usable by someone holding a piece of paper who will never sign in. A guard
+ * added here "for consistency" would break it invisibly: the route is outside
+ * the shell, so no role sweep would notice, and the page would simply redirect
+ * to a login that person cannot pass.
+ */
+async function checkPublicVerification(port) {
+  const { evaluate, go, mainText, close } = await launchBrowser("public", port);
+
+  await go("/verify");
+  const text = (await mainText()).replace(/\s+/g, " ");
+
+  const reachable = await evaluate(
+    `/genuine|verification code/i.test(document.body.innerText)`,
+  );
+  const stayedOnVerify = await evaluate(`location.pathname === "/verify"`);
+  const signInShown = await evaluate(
+    `/password/i.test(document.body.innerText)`,
+  );
+
+  await close();
+
+  const good = reachable && stayedOnVerify && !signInShown;
+
+  console.log(
+    `\nPUBLIC — no session\n   ${good ? "PASS" : "FAIL"}  verify (public) [${good ? "ok" : "error"}] reachable without signing in`,
+  );
+
+  if (!good) console.log(`        saw: ${text.slice(0, 120)}`);
+
+  return good ? 0 : 1;
 }
 
 async function main() {
@@ -253,13 +310,14 @@ async function main() {
 
   let failures = 0;
   let port = 9360;
+  failures += await checkPublicVerification(port++);
   for (const spec of ROLES) {
     failures += await sweep(spec, port++);
   }
 
   console.log(
     failures === 0
-      ? "\n  PASS  every page behaved as its role's permissions require"
+      ? "\n  PASS  every page behaved as its role's permissions require, and the public page needs no account"
       : `\n  FAIL  ${failures} page(s) did not behave as expected`,
   );
   process.exitCode = failures === 0 ? 0 : 1;

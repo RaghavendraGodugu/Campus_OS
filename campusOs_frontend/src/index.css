@@ -8,69 +8,102 @@
  * theme a variable swap rather than a second stylesheet.
  */
 @theme {
-  --color-brand-50: oklch(0.97 0.014 254);
-  --color-brand-100: oklch(0.93 0.032 254);
-  --color-brand-200: oklch(0.88 0.06 254);
-  --color-brand-300: oklch(0.8 0.1 254);
-  --color-brand-400: oklch(0.7 0.14 254);
-  --color-brand-500: oklch(0.62 0.17 254);
-  --color-brand-600: oklch(0.55 0.18 254);
-  --color-brand-700: oklch(0.48 0.16 254);
-  --color-brand-800: oklch(0.42 0.13 254);
-  --color-brand-900: oklch(0.37 0.1 254);
-
   /*
-   * Surfaces are tinted very slightly blue rather than being pure neutral grey.
-   * Pure grey next to white reads as flat and institutional; a few thousandths
-   * of blue gives white cards somewhere to sit.
-   */
-  --color-ink-50: oklch(0.985 0.003 250);
-  --color-ink-100: oklch(0.967 0.004 250);
-  --color-ink-200: oklch(0.927 0.005 250);
-  --color-ink-300: oklch(0.87 0.007 250);
-  --color-ink-400: oklch(0.7 0.012 250);
-  --color-ink-500: oklch(0.55 0.015 250);
-  --color-ink-600: oklch(0.45 0.015 250);
-  --color-ink-700: oklch(0.37 0.018 250);
-  --color-ink-800: oklch(0.28 0.02 250);
-  --color-ink-900: oklch(0.21 0.022 250);
-
-  /*
-   * Elevation as tinted, layered shadows rather than one flat grey.
+   * The palette, and why it is not blue.
    *
-   * A single `shadow-sm` is part of what makes an interface look dated: the
-   * shadow is the same value as the border, so the card looks stamped rather
-   * than lifted. A tight contact shadow plus a wide diffuse one reads as light
-   * falling on the card.
+   * Blue-on-white is the default of every admin panel ever built, which is
+   * precisely why it reads as institutional and old. Violet carries the same
+   * authority but has a temperature to it, and it sits beside a warm coral
+   * accent that no status colour competes with — so the accent can be used for
+   * emphasis rather than only for error.
+   */
+  --color-brand-50: oklch(0.97 0.018 300);
+  --color-brand-100: oklch(0.93 0.045 300);
+  --color-brand-200: oklch(0.88 0.08 300);
+  --color-brand-300: oklch(0.81 0.13 301);
+  --color-brand-400: oklch(0.72 0.18 302);
+  --color-brand-500: oklch(0.63 0.21 303);
+  --color-brand-600: oklch(0.55 0.22 304);
+  --color-brand-700: oklch(0.48 0.2 305);
+  --color-brand-800: oklch(0.41 0.17 306);
+  --color-brand-900: oklch(0.35 0.14 307);
+  --color-brand-950: oklch(0.26 0.1 308);
+
+  /* Deep plum for the sidebar and anything that wants to feel substantial. */
+  --color-brand-ink: oklch(0.22 0.055 306);
+
+  /*
+   * The accent. Coral, not orange: orange is already amber's job in the status
+   * vocabulary, and reusing it for emphasis makes an alert look like decoration.
+   */
+  --color-accent-50: oklch(0.97 0.02 25);
+  --color-accent-100: oklch(0.93 0.05 25);
+  --color-accent-200: oklch(0.87 0.09 25);
+  --color-accent-300: oklch(0.79 0.14 27);
+  --color-accent-400: oklch(0.71 0.18 30);
+  --color-accent-500: oklch(0.64 0.2 33);
+  --color-accent-600: oklch(0.57 0.19 35);
+
+  /*
+   * Neutrals carry a trace of the brand's hue (300) rather than being the cold
+   * blue-grey every framework ships. Pure grey next to white is what makes an
+   * interface look like a spreadsheet; a few hundredths of violet gives white
+   * something to sit against.
+   */
+  --color-ink-50: oklch(0.985 0.004 300);
+  --color-ink-100: oklch(0.967 0.006 300);
+  --color-ink-200: oklch(0.93 0.008 300);
+  --color-ink-300: oklch(0.88 0.01 300);
+  --color-ink-400: oklch(0.71 0.014 300);
+  --color-ink-500: oklch(0.56 0.018 300);
+  --color-ink-600: oklch(0.46 0.02 300);
+  --color-ink-700: oklch(0.38 0.024 302);
+  --color-ink-800: oklch(0.28 0.028 304);
+  --color-ink-900: oklch(0.21 0.032 306);
+
+  /*
+   * Porcelain: the surface cards are painted on. Not #fff — a hair of violet
+   * and a trace of warmth, so a white card has an edge you can perceive.
+   */
+  --color-surface: oklch(0.995 0.003 300);
+  --color-canvas: oklch(0.975 0.012 302);
+
+  /*
+   * Elevation as coloured, layered light. One flat shadow reads as a border;
+   * a tight contact shadow under a wide diffuse one reads as the card floating
+   * above the page. Each shadow carries brand hue so depth feels like it comes
+   * from the same light as the accent.
    */
   --shadow-card:
-    0 1px 2px -1px oklch(0.21 0.022 250 / 0.07),
-    0 4px 16px -4px oklch(0.21 0.022 250 / 0.08);
+    0 1px 2px -1px oklch(0.21 0.032 306 / 0.06),
+    0 4px 14px -4px oklch(0.3 0.05 305 / 0.1);
   --shadow-raised:
-    0 2px 4px -2px oklch(0.21 0.022 250 / 0.08),
-    0 12px 32px -8px oklch(0.21 0.022 250 / 0.12);
+    0 2px 4px -2px oklch(0.21 0.032 306 / 0.07),
+    0 14px 32px -10px oklch(0.3 0.06 305 / 0.18);
   --shadow-pop:
-    0 8px 16px -6px oklch(0.21 0.022 250 / 0.1),
-    0 24px 48px -12px oklch(0.21 0.022 250 / 0.16);
+    0 8px 16px -6px oklch(0.21 0.032 306 / 0.1),
+    0 28px 56px -14px oklch(0.3 0.07 305 / 0.24);
   --shadow-brand:
-    0 1px 2px -1px oklch(0.42 0.13 254 / 0.3),
-    0 6px 20px -6px oklch(0.55 0.18 254 / 0.45);
+    0 1px 2px -1px oklch(0.41 0.17 306 / 0.28),
+    0 8px 24px -6px oklch(0.55 0.22 304 / 0.42);
+  --shadow-accent:
+    0 1px 2px -1px oklch(0.57 0.19 35 / 0.3),
+    0 8px 24px -6px oklch(0.64 0.2 33 / 0.4);
 
-  /* Larger, consistent radii. Mixed 8px/12px corners read as dated. */
-  --radius-card: 1rem;
+  /* One radius scale. Mixed 8px and 12px corners are half the reason a UI
+     looks assembled rather than designed. */
+  --radius-card: 1.125rem;
 
-  /*
-   * Motion. One scale for the whole app, so nothing appears to move at twice
-   * the speed of the element beside it.
-   */
+  /* One motion scale, so nothing moves at twice the speed of its neighbour. */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --animate-rise: rise 0.35s var(--ease-out-soft) both;
-  --animate-fade: fade 0.25s var(--ease-out-soft) both;
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-rise: rise 0.4s var(--ease-out-soft) both;
+  --animate-fade: fade 0.28s var(--ease-out-soft) both;
 
   @keyframes rise {
     from {
       opacity: 0;
-      transform: translateY(6px);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
@@ -95,19 +128,39 @@
 
   body {
     /*
-     * A faint brand wash at the top, so the page has a light source. Without
-     * it a long page reads as a flat grey sheet with cards floating in it.
+     * The canvas is lit, not painted.
+     *
+     * A flat white page is the single clearest signal that an interface was
+     * assembled rather than designed: there is no light source, so every card
+     * floats in nothing and depth has to be faked with a border. Four soft
+     * colour fields sit behind the content — violet top-left, coral top-right,
+     * a violet lift at the foot — and the canvas itself is porcelain rather
+     * than white, so a white card still has an edge.
+     *
+     * Fixed attachment so the light stays put while the page scrolls, which is
+     * what makes it read as a room you are in rather than a texture moving.
      */
-    @apply bg-ink-50 text-ink-800 antialiased;
+    @apply text-ink-800 antialiased;
+    background-color: var(--color-canvas);
     background-image:
       radial-gradient(
-        ellipse 80rem 40rem at 50% -12rem,
-        oklch(0.55 0.18 254 / 0.07),
-        transparent 70%
+        ellipse 60rem 32rem at 4% -10rem,
+        oklch(0.63 0.21 303 / 0.32),
+        transparent 60%
       ),
       radial-gradient(
-        ellipse 60rem 30rem at 100% 0%,
-        oklch(0.7 0.14 254 / 0.05),
+        ellipse 48rem 28rem at 98% -6rem,
+        oklch(0.72 0.17 30 / 0.28),
+        transparent 58%
+      ),
+      radial-gradient(
+        ellipse 70rem 36rem at 50% 112%,
+        oklch(0.55 0.22 304 / 0.22),
+        transparent 62%
+      ),
+      radial-gradient(
+        ellipse 40rem 30rem at 88% 42%,
+        oklch(0.72 0.14 330 / 0.14),
         transparent 60%
       );
     background-attachment: fixed;
@@ -125,7 +178,7 @@
     @apply outline-2 outline-offset-2 outline-brand-600;
   }
 
-  /* Respect a stated preference for less motion. */
+  /* Honour a stated preference for less motion. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -141,5 +194,61 @@
 @layer utilities {
   .skip-link {
     @apply absolute left-4 top-4 z-50 -translate-y-24 rounded-md bg-brand-700 px-4 py-2 text-sm font-medium text-white transition-transform focus:translate-y-0;
+  }
+
+  /*
+   * The glass panel: the default surface for anything floating over the canvas.
+   *
+   * Translucent white plus a backdrop blur, so the colour fields behind show
+   * through faintly and the card belongs to the page instead of sitting on top
+   * of it. The ring is what actually draws the edge — a white card on a near
+   * white canvas has almost no luminance difference to describe.
+   */
+  .surface {
+    @apply rounded-card border border-white/70 bg-surface/92 shadow-card backdrop-blur-xl;
+  }
+
+  /** The heavier version, for menus and panels that must sit clearly above. */
+  .surface-raised {
+    @apply rounded-card border border-white/70 bg-surface/92 shadow-pop backdrop-blur-2xl;
+  }
+
+  /**
+   * A gradient that follows the brand: violet through to indigo, angled so it
+   * has a light side and a dark side. Used for headers, empty states and the
+   * public verification seal, never behind body text.
+   */
+  .aurora {
+    background-image: linear-gradient(
+      135deg,
+      var(--color-brand-500) 0%,
+      var(--color-brand-600) 42%,
+      var(--color-brand-800) 100%
+    );
+  }
+
+  .aurora-warm {
+    background-image: linear-gradient(
+      135deg,
+      var(--color-accent-400) 0%,
+      var(--color-accent-600) 55%,
+      var(--color-brand-700) 130%
+    );
+  }
+
+  /** Fine grid, for the public-facing surfaces that want some texture. */
+  .grid-texture {
+    background-image:
+      linear-gradient(
+        to right,
+        oklch(0.55 0.22 304 / 0.06) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        oklch(0.55 0.22 304 / 0.06) 1px,
+        transparent 1px
+      );
+    background-size: 56px 56px;
   }
 }

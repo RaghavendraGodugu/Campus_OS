@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import ApplyCertificate from "./pages/ApplyCertificate";
+import VerifyCertificate from "./pages/VerifyCertificate";
 import Announcements from "./pages/Announcements";
 import AnnouncementDetail from "./pages/AnnouncementDetail";
 import Complaints from "./pages/Complaints";
@@ -35,6 +36,10 @@ import NotFound from "./pages/NotFound";
 export default function App() {
   return (
     <Routes>
+      {/* Public: no session, and deliberately outside the signed-in shell. A
+          bank counter is not going to have a CampusOS login. */}
+      <Route path="/verify" element={<VerifyCertificate />} />
+
       <Route path="/login" element={<Login />} />
 
       <Route

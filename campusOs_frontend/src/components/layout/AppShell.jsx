@@ -59,102 +59,115 @@ export default function AppShell() {
 
       {/* ===== Sidebar ===== */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-ink-200/80 bg-white/85 backdrop-blur-xl transition-transform lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 lg:static lg:translate-x-0 ${
           navOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center justify-between px-5">
-            <span className="flex items-center gap-2.5">
-              <span
-                aria-hidden="true"
-                className="grid size-8 place-items-center rounded-xl bg-linear-to-br from-brand-500 to-brand-700 text-[0.8125rem] font-bold text-white shadow-brand"
-              >
-                C
-              </span>
-              <span className="text-[0.9375rem] font-semibold tracking-tight text-ink-900">
-                CampusOS
-              </span>
-            </span>
-            <button
-              type="button"
-              className="rounded-md p-1 text-ink-500 hover:bg-ink-100 lg:hidden"
-              onClick={() => setNavOpen(false)}
-              aria-label="Close navigation"
-            >
-              <X className="size-5" aria-hidden="true" />
-            </button>
-          </div>
+        <div className="relative flex h-full flex-col overflow-hidden bg-brand-ink">
+          {/* Two colour fields so the rail has depth rather than being a
+              silhouette. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-linear-to-b from-brand-700/45 via-brand-800/10 to-accent-600/20"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-24 -right-20 size-72 rounded-full bg-accent-500/25 blur-3xl"
+          />
 
-          {/* The label is on the nav, not the aside: an aside is a
+          <div className="relative flex h-full flex-col">
+            <div className="flex h-16 items-center justify-between px-5">
+              <span className="flex items-center gap-2.5">
+                <span
+                  aria-hidden="true"
+                  className="grid size-9 place-items-center rounded-xl bg-linear-to-br from-white/25 to-white/10 text-sm font-bold text-white ring-1 ring-white/25 ring-inset backdrop-blur-sm"
+                >
+                  C
+                </span>
+                <span className="text-[0.9375rem] font-semibold tracking-tight text-white">
+                  CampusOS
+                </span>
+              </span>
+              <button
+                type="button"
+                className="rounded-md p-1 text-ink-500 hover:bg-ink-100 lg:hidden"
+                onClick={() => setNavOpen(false)}
+                aria-label="Close navigation"
+              >
+                <X className="size-5" aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* The label is on the nav, not the aside: an aside is a
               `complementary` landmark, and the navigation landmark is what a
               screen-reader user jumps to. */}
-          <nav
-            aria-label="Main navigation"
-            className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-4"
-          >
-            {items.map((item, index) => {
-              if (item.section) {
+            <nav
+              aria-label="Main navigation"
+              className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-4"
+            >
+              {items.map((item, index) => {
+                if (item.section) {
+                  return (
+                    <p
+                      key={`section-${item.section}`}
+                      className="px-3 pt-6 pb-2 text-[0.6875rem] font-semibold tracking-[0.08em] text-white/40 uppercase"
+                    >
+                      {item.section}
+                    </p>
+                  );
+                }
+
+                const Icon = ICONS[item.icon] ?? FileText;
+
                 return (
-                  <p
-                    key={`section-${item.section}`}
-                    className="px-3 pt-6 pb-2 text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-400 uppercase"
+                  <NavLink
+                    key={`${item.to}-${index}`}
+                    to={item.to}
+                    end={item.end}
+                    onClick={() => setNavOpen(false)}
+                    className={({ isActive }) =>
+                      `group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150 ${
+                        isActive
+                          ? "bg-white/15 font-semibold text-white shadow-card ring-1 ring-white/15 ring-inset"
+                          : "text-white/65 hover:translate-x-0.5 hover:bg-white/10 hover:text-white"
+                      }`
+                    }
                   >
-                    {item.section}
-                  </p>
+                    <Icon className="size-4 shrink-0" aria-hidden="true" />
+                    {item.label}
+                  </NavLink>
                 );
-              }
+              })}
+            </nav>
 
-              const Icon = ICONS[item.icon] ?? FileText;
-
-              return (
-                <NavLink
-                  key={`${item.to}-${index}`}
-                  to={item.to}
-                  end={item.end}
-                  onClick={() => setNavOpen(false)}
-                  className={({ isActive }) =>
-                    `group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150 ${
-                      isActive
-                        ? "bg-linear-to-r from-brand-50 to-brand-50/40 font-semibold text-brand-800"
-                        : "text-ink-600 hover:translate-x-0.5 hover:bg-ink-100/70 hover:text-ink-900"
-                    }`
-                  }
-                >
-                  <Icon className="size-4 shrink-0" aria-hidden="true" />
-                  {item.label}
-                </NavLink>
-              );
-            })}
-          </nav>
-
-          <div className="border-t border-ink-100 p-3">
-            {/* The identity block doubles as the way in to your own profile. */}
-            <Link
-              to="/profile"
-              className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-ink-50"
-            >
-              <span
-                aria-hidden="true"
-                className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-100 text-xs font-semibold text-brand-800"
+            <div className="relative border-t border-white/10 p-3">
+              {/* The identity block doubles as the way in to your own profile. */}
+              <Link
+                to="/profile"
+                className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-white/10"
               >
-                {initials(user?.fullName)}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-ink-800">
-                  {user?.fullName}
-                </p>
-                <p className="truncate text-xs text-ink-500">View profile</p>
-              </div>
-            </Link>
-            <button
-              type="button"
-              onClick={logout}
-              className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 hover:bg-ink-50 hover:text-ink-900"
-            >
-              <LogOut className="size-4" aria-hidden="true" />
-              Sign out
-            </button>
+                <span
+                  aria-hidden="true"
+                  className="grid size-9 shrink-0 place-items-center rounded-full bg-linear-to-br from-accent-400 to-accent-600 text-xs font-semibold text-white ring-2 ring-white/20"
+                >
+                  {initials(user?.fullName)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-white">
+                    {user?.fullName}
+                  </p>
+                  <p className="truncate text-xs text-white/55">View profile</p>
+                </div>
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-white/65 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <LogOut className="size-4" aria-hidden="true" />
+                Sign out
+              </button>
+            </div>
           </div>
         </div>
       </aside>

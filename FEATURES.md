@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 13 October 2026
-- **Verified:** 435 backend tests, 63 frontend tests, lint and build clean
+- **Verified:** 435 backend tests, 71 frontend tests, lint and build clean
 
 ---
 
@@ -107,7 +107,9 @@ means the note that follows it)
       option), and it creates a real record end to end in the browser
 - [x] Entry points to it from the certificates list, the empty state and the
       dashboard
-- [ ] **Public verification page** — the API exists and there is no page
+- [x] **Public verification page** at `/verify`, outside the signed-in shell, for
+      someone holding a paper certificate with no account; it keeps "not
+      recognised", "revoked" and "authentic" apart, and discloses no holder name
 - [ ] Certificate templates beyond the built-in one
 - [ ] Bulk issuance
 
@@ -184,8 +186,17 @@ means the note that follows it)
 - [x] Card, button, field and badge primitives restyled; every page that uses
       them updated at once
 - [x] Page background carries a light source rather than a flat grey sheet
-- [x] Sidebar, top bar, notification panel and empty/error states brought onto
-      the same tokens
+- [x] Palette rebuilt on violet with a coral accent, chosen because blue-on-white
+      is the default of every admin panel ever built; neutrals carry the brand hue
+      so white has something to sit against
+- [x] Sidebar inverted to a dark gradient rail, giving the layout a spine
+- [x] Canvas is lit — four colour fields plus fixed attachment — rather than a
+      flat painted sheet
+- [x] Sign-in page rebuilt around the new palette, and links to public verification
+- [x] Top bar, notification panel and empty/error states brought onto the same
+      tokens
+- [x] Browser sweep proves the public page needs no account, which a per-role
+      sweep structurally cannot check
 - [ ] A dark theme
 - [ ] Responsive re-check below 375px
 - [ ] Loading skeletons instead of spinners on slow pages
@@ -194,7 +205,7 @@ means the note that follows it)
 ## 15. Quality gates
 
 - [x] Backend: 435 tests passing
-- [x] Frontend: 63 tests passing
+- [x] Frontend: 71 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep

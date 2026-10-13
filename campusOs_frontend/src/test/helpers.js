@@ -43,6 +43,13 @@ export function stubApiRecording(routes) {
     requests.push({
       method: (config.method ?? "get").toLowerCase(),
       path,
+      // The query string matters as often as the path — asserting that a
+      // verification code was normalised to upper case means reading it.
+      url: String(config.url ?? ""),
+      // axios takes `?a=b` either as part of the url or as `params`, and the
+      // client uses whichever is idiomatic at the call site. Record both, or a
+      // test asserting on a query value fails for no visible reason.
+      params: config.params ?? null,
       body: parseBody(config.data),
     });
 
