@@ -17,7 +17,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "verify:login": "node scripts/verify-login.mjs",
+    "verify:roles": "node scripts/verify-roles.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

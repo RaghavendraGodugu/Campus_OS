@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
+import { cspPlugin, DEV_CSP } from "./build/csp";
+
 /**
  * The dev server proxies /api to the backend rather than calling it from a
  * different origin.
@@ -14,9 +16,13 @@ import tailwindcss from "@tailwindcss/vite";
  * defaults.
  */
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  // cspPlugin injects the strict production policy into the built HTML.
+  plugins: [react(), tailwindcss(), cspPlugin()],
   server: {
     port: 5173,
+    // Dev needs 'unsafe-inline' for Vite's Fast Refresh preamble; production
+    // never sees it. See build/csp.js.
+    headers: { "Content-Security-Policy": DEV_CSP },
     proxy: {
       "/api": {
         target: process.env.VITE_PROXY_TARGET ?? "http://localhost:5000",

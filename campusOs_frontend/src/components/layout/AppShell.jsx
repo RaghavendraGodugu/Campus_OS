@@ -44,10 +44,10 @@ const ICONS = {
  * because a keyboard user is not hovering anything.
  */
 export default function AppShell() {
-  const { user, can, logout } = useAuth();
+  const { user, canAny, logout } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
 
-  const items = visibleNavItems(can);
+  const items = visibleNavItems(canAny);
 
   return (
     <div className="min-h-screen lg:flex">

@@ -12,6 +12,7 @@ import NewComplaint from "./pages/NewComplaint";
 import Certificates from "./pages/Certificates";
 import Reports from "./pages/Reports";
 import AuditTrail from "./pages/AuditTrail";
+import ComposeAnnouncement from "./pages/ComposeAnnouncement";
 import Requests from "./pages/Requests";
 import NewRequest from "./pages/NewRequest";
 import RequestDetail from "./pages/RequestDetail";
@@ -143,19 +144,34 @@ export default function App() {
             </RequirePermission>
           }
         />
+        {/* Any read scope. Gated on the assigned variant alone, only support
+            staff could ever open it. */}
         <Route
           path="management/certificates"
           element={
-            <RequirePermission permission="certificate:read:assigned">
+            <RequirePermission
+              permissions={[
+                "certificate:read:assigned",
+                "certificate:read:department",
+                "certificate:read:institution",
+              ]}
+            >
               <Certificates mode="assigned" />
             </RequirePermission>
           }
         />
 
+        {/* Any scope qualifies. The server narrows what a report contains;
+            the client must not refuse the Dean a page the server would serve. */}
         <Route
           path="reports"
           element={
-            <RequirePermission permission="report:read:department">
+            <RequirePermission
+              permissions={[
+                "report:read:institution",
+                "report:read:department",
+              ]}
+            >
               <Reports />
             </RequirePermission>
           }
@@ -163,8 +179,18 @@ export default function App() {
         <Route
           path="audit"
           element={
-            <RequirePermission permission="audit:read:department">
+            <RequirePermission
+              permissions={["audit:read:institution", "audit:read:department"]}
+            >
               <AuditTrail />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="management/announcements"
+          element={
+            <RequirePermission permission="announcement:manage:institution">
+              <ComposeAnnouncement />
             </RequirePermission>
           }
         />

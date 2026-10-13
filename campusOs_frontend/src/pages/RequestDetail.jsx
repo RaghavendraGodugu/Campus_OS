@@ -186,7 +186,14 @@ export default function RequestDetail() {
       </Card>
 
       {/* ===== Comment ===== */}
-      {can("request:comment:own") || can("request:update:assigned") ? (
+      {/*
+        The comments endpoint requires authentication, not a named permission —
+        it scopes by ownership in the service. So this is gated on being able to
+        see the request at all, rather than on a permission string that does not
+        exist (it never did, so this comment was simply always false and the box
+        never rendered).
+      */}
+      {can("request:read:own") || can("request:read:assigned") ? (
         <Card title="Add a comment">
           <form
             onSubmit={(event) => {

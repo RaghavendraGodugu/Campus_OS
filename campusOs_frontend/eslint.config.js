@@ -44,8 +44,9 @@ export default [
       "prefer-const": "error",
     },
   },
+  // Test and script files run under Node, not in a browser.
   {
-    files: ["src/test/**/*.{js,jsx}"],
+    files: ["src/test/**/*.{js,jsx}", "scripts/**/*.{js,mjs}"],
     languageOptions: { globals: { ...globals.node } },
   },
 ];

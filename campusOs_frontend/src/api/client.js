@@ -29,7 +29,32 @@
 
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "/api";
+/**
+ * The API base, including the version segment.
+ *
+ * `/v1` is part of the base rather than something prepended per call, so it is
+ * asserted here instead of trusted. Getting it wrong is silent and total: every
+ * request 404s, the session probe fails, and the application shows "we could
+ * not confirm your session" while the API is perfectly healthy. Failing loudly
+ * on the first request turns that into a one-line cause.
+ */
+const CONFIGURED_BASE = import.meta.env.VITE_API_URL ?? "/api/v1";
+
+function resolveBaseUrl() {
+  const base = CONFIGURED_BASE.replace(/\/+$/, "");
+
+  if (!/(^|\/)v\d+$/.test(base) && !/^https?:\/\//.test(base)) {
+    throw new Error(
+      `VITE_API_URL is "${CONFIGURED_BASE}", which has no API version segment. ` +
+        `Every request would 404 and the app would appear to have a server problem. ` +
+        `Use "/api/v1" in development, or the full https URL including "/api/v1" in production.`,
+    );
+  }
+
+  return base;
+}
+
+const BASE_URL = resolveBaseUrl();
 
 /** Name of the readable CSRF cookie, set by the server. */
 const CSRF_COOKIE = "cos_ct";

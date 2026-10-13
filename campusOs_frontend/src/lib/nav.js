@@ -71,7 +71,11 @@ export const NAV_ITEMS = [
     to: "/management/certificates",
     label: "Certificates",
     icon: "BadgeCheck",
-    permission: "certificate:read:assigned",
+    permissions: [
+      "certificate:read:assigned",
+      "certificate:read:department",
+      "certificate:read:institution",
+    ],
   },
   {
     to: "/management/finance",
@@ -101,11 +105,18 @@ export const NAV_ITEMS = [
   },
 ];
 
-/** Items this user may see, with empty sections removed. */
-export function visibleNavItems(can) {
+/**
+ * Items this user may see, with empty sections removed.
+ *
+ * Takes `canAny`, because an item may be gated on any one of several
+ * permissions — an institution-wide reader does not hold the department-scoped
+ * variant of anything.
+ */
+export function visibleNavItems(canAny) {
   return NAV_ITEMS.filter((item) => {
     if (item.section) return true;
-    return item.permission === null || can(item.permission);
+    if (item.permissions) return canAny(...item.permissions);
+    return item.permission === null || canAny(item.permission);
   }).filter((item, index, list) => {
     // Drop a section heading that no longer introduces anything.
     if (!item.section) return true;
