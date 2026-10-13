@@ -17,6 +17,7 @@ const financeRoutes = require("./finance.routes");
 const notificationRoutes = require("./notification.routes");
 const announcementRoutes = require("./announcement.routes");
 const reportRoutes = require("./report.routes");
+const directoryRoutes = require("./directory.routes");
 const auditRoutes = require("./audit.routes");
 
 const router = express.Router();
@@ -39,6 +40,7 @@ router.use("/api/v1", financeRoutes);
 router.use("/api/v1", notificationRoutes);
 router.use("/api/v1", announcementRoutes);
 router.use("/api/v1", reportRoutes);
+router.use("/api/v1", directoryRoutes);
 router.use("/api/v1", auditRoutes);
 
 module.exports = router;

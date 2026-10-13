@@ -9,6 +9,8 @@ import { formatDateTime, humanise } from "../lib/format";
 import { Card } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
+import Field from "../components/ui/Field";
+import TransitionPanel from "../components/TransitionPanel";
 import { ErrorState, Loading } from "../components/ui/States";
 
 /**
@@ -24,28 +26,27 @@ import { ErrorState, Loading } from "../components/ui/States";
  */
 export default function RequestDetail() {
   const { reference } = useParams();
-  const { can, user } = useAuth();
+  const { can, canAny } = useAuth();
   const queryClient = useQueryClient();
 
   const [comment, setComment] = useState("");
-  const [actionError, setActionError] = useState(null);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["request", reference],
     queryFn: () => apiGet(`/requests/${reference}`),
   });
 
-  const request = data?.data;
-
-  const transition = useMutation({
-    mutationFn: (to) => apiPost(`/requests/${reference}/transition`, { to }),
-    onSuccess: () => {
-      setActionError(null);
-      queryClient.invalidateQueries({ queryKey: ["request", reference] });
-      queryClient.invalidateQueries({ queryKey: ["requests"] });
-    },
-    onError: (failure) => setActionError(failure.message),
+  // Only fetched when the viewer could actually assign, so a student never
+  // causes a staff directory request they have no use for.
+  const staff = useQuery({
+    queryKey: ["staff-directory"],
+    queryFn: () => apiGet("/users/staff"),
+    enabled: canAny("request:assign:department", "request:assign:institution"),
   });
+
+  const assignable = staff.data?.data ?? [];
+
+  const request = data?.data;
 
   const addComment = useMutation({
     mutationFn: () =>
@@ -140,22 +141,41 @@ export default function RequestDetail() {
         </Card>
       )}
 
-      {/* ===== Actions ===== */}
-      <RequestActions
-        request={request}
-        viewerRole={user?.role}
-        can={can}
-        onTransition={(to) => transition.mutate(to)}
-        pending={transition.isPending}
+      {/* ===== Actions, exactly as the server permits them ===== */}
+      <TransitionPanel
+        endpoint="/requests"
+        record={request}
+        transitions={request.availableTransitions}
+        onDone={() =>
+          queryClient.invalidateQueries({ queryKey: ["request", reference] })
+        }
+        emptyNote={
+          request.status === "COMPLETED"
+            ? "This request is complete. There is nothing further to do."
+            : "No actions are available to you at this stage."
+        }
       />
 
-      {actionError && (
-        <p
-          role="alert"
-          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
-        >
-          {actionError}
-        </p>
+      {canAny("request:assign:department", "request:assign:institution") &&
+        !request.assignedTo && (
+          <AssignPanel
+            request={request}
+            staff={assignable}
+            onDone={() =>
+              queryClient.invalidateQueries({
+                queryKey: ["request", reference],
+              })
+            }
+          />
+        )}
+
+      {can("request:internal-note:institution") && (
+        <InternalNotePanel
+          request={request}
+          onDone={() =>
+            queryClient.invalidateQueries({ queryKey: ["request", reference] })
+          }
+        />
       )}
 
       {/* ===== Timeline ===== */}
@@ -185,7 +205,29 @@ export default function RequestDetail() {
         </ol>
       </Card>
 
-      {/* ===== Comment ===== */}
+      {canAny("request:assign:department", "request:assign:institution") &&
+        !request.assignedTo && (
+          <AssignPanel
+            request={request}
+            staff={assignable}
+            onDone={() =>
+              queryClient.invalidateQueries({
+                queryKey: ["request", reference],
+              })
+            }
+          />
+        )}
+
+      {can("request:internal-note:institution") && (
+        <InternalNotePanel
+          request={request}
+          onDone={() =>
+            queryClient.invalidateQueries({ queryKey: ["request", reference] })
+          }
+        />
+      )}
+
+      {/* ===== Comment, visible to the student ===== */}
       {/*
         The comments endpoint requires authentication, not a named permission —
         it scopes by ownership in the service. So this is gated on being able to
@@ -232,62 +274,124 @@ export default function RequestDetail() {
 }
 
 /**
- * The transitions this viewer may attempt.
+ * Who may take this on.
  *
- * Derived from the status rather than offering everything and letting the server
- * refuse: a row of greyed-out buttons teaches a user the rules of a workflow
- * they do not need. Anything the server still refuses shows its refusal.
+ * Assignment is its own action rather than a status move, so it is offered
+ * separately from the transition panel.
  */
-function RequestActions({ request, viewerRole, can, onTransition, pending }) {
-  const isStaff = viewerRole !== "STUDENT";
+function AssignPanel({ request, staff, onDone }) {
+  const [userId, setUserId] = useState("");
+  const [error, setError] = useState(null);
 
-  const actions = [];
-
-  if (
-    isStaff &&
-    can("request:process:assigned") &&
-    request.status === "ASSIGNED"
-  ) {
-    actions.push({ to: "UNDER_REVIEW", label: "Start review" });
-  }
-
-  if (isStaff && can("request:complete:assigned")) {
-    if (request.status === "APPROVED")
-      actions.push({ to: "PROCESSING", label: "Start processing" });
-    if (request.status === "PROCESSING")
-      actions.push({ to: "COMPLETED", label: "Mark completed" });
-    if (request.status === "APPROVAL_PENDING")
-      actions.push({ to: "APPROVED", label: "Approve" });
-  }
-
-  if (
-    can("request:approve:institution") &&
-    request.status === "APPROVAL_PENDING"
-  ) {
-    actions.push({ to: "APPROVED", label: "Approve" });
-  }
-
-  if (actions.length === 0) return null;
+  const assign = useMutation({
+    mutationFn: () =>
+      apiPost(`/requests/${request.reference}/assign`, {
+        assignTo: userId,
+        // Guards against a stale view: the server refuses if the request has
+        // moved on since this page was loaded.
+        expectedFrom: request.status,
+      }),
+    onSuccess: () => {
+      setUserId("");
+      setError(null);
+      onDone?.();
+    },
+    onError: (failure) => setError(failure.message),
+  });
 
   return (
-    <Card title="Actions">
-      <div className="flex flex-wrap gap-2">
-        {actions.map((action) => (
-          <Button
-            key={action.to}
-            variant={
-              action.to === "COMPLETED" || action.to === "APPROVED"
-                ? "primary"
-                : "secondary"
-            }
-            size="sm"
-            loading={pending}
-            onClick={() => onTransition(action.to)}
+    <Card title="Assign" description="Who is handling this.">
+      <div className="space-y-3">
+        <Field label="Staff member" htmlFor="assignee" required>
+          <select
+            id="assignee"
+            value={userId}
+            onChange={(event) => setUserId(event.target.value)}
+            className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 focus:ring-2 focus:ring-brand-600"
           >
-            {action.label}
+            <option value="">Choose someone…</option>
+            {staff.map((member) => (
+              <option
+                key={member._id ?? member.id}
+                value={member._id ?? member.id}
+              >
+                {member.fullName} — {humanise(member.role)}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        {error && (
+          <p
+            role="alert"
+            className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            {error}
+          </p>
+        )}
+
+        <div className="flex justify-end">
+          <Button
+            size="sm"
+            loading={assign.isPending}
+            disabled={!userId}
+            onClick={() => assign.mutate()}
+          >
+            Assign
           </Button>
-        ))}
+        </div>
       </div>
+    </Card>
+  );
+}
+
+/** An internal note: staff-only, and never shown to the student. */
+function InternalNotePanel({ request, onDone }) {
+  const [note, setNote] = useState("");
+
+  const save = useMutation({
+    mutationFn: () =>
+      apiPost(`/requests/${request.reference}/internal-notes`, { body: note }),
+    onSuccess: () => {
+      setNote("");
+      onDone?.();
+    },
+  });
+
+  return (
+    <Card
+      title="Internal note"
+      description="Staff only. Never shown to the student and never sent as a notification."
+    >
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (note.trim()) save.mutate();
+        }}
+        className="space-y-3"
+      >
+        <label htmlFor="internal-note" className="sr-only">
+          Internal note
+        </label>
+        <textarea
+          id="internal-note"
+          rows={3}
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+          placeholder="Context for whoever picks this up…"
+          className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 placeholder:text-ink-400 focus:ring-2 focus:ring-brand-600"
+        />
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            size="sm"
+            loading={save.isPending}
+            disabled={!note.trim()}
+          >
+            Save note
+          </Button>
+        </div>
+      </form>
     </Card>
   );
 }

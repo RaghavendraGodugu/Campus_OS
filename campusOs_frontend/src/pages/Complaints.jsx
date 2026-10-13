@@ -86,7 +86,7 @@ export default function Complaints({ mode = "own" }) {
             {items.map((complaint) => (
               <li key={complaint._id ?? complaint.id}>
                 <Link
-                  to={`/complaints/${complaint.reference}`}
+                  to={`${mode === "own" ? "/complaints" : "/management/complaints"}/${complaint.reference}`}
                   className="flex flex-wrap items-center gap-3 px-5 py-4 hover:bg-ink-50"
                 >
                   <div className="min-w-0 flex-1">

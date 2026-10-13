@@ -136,7 +136,7 @@ export default function Requests({ mode = "own" }) {
             {items.map((request) => (
               <li key={request._id ?? request.id}>
                 <Link
-                  to={`/requests/${request.reference}`}
+                  to={`${mode === "assigned" ? "/management/requests" : "/requests"}/${request.reference}`}
                   className="flex flex-wrap items-center gap-3 px-5 py-4 hover:bg-ink-50"
                 >
                   <div className="min-w-0 flex-1">

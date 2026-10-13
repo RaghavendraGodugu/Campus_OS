@@ -13,10 +13,13 @@ import Certificates from "./pages/Certificates";
 import Reports from "./pages/Reports";
 import AuditTrail from "./pages/AuditTrail";
 import ComposeAnnouncement from "./pages/ComposeAnnouncement";
+import CertificateDetail from "./pages/CertificateDetail";
+import ComplaintDetail from "./pages/ComplaintDetail";
 import Requests from "./pages/Requests";
 import NewRequest from "./pages/NewRequest";
 import RequestDetail from "./pages/RequestDetail";
 import Invoices from "./pages/Invoices";
+import InvoiceDetail from "./pages/InvoiceDetail";
 import Refunds from "./pages/Refunds";
 import NotFound from "./pages/NotFound";
 
@@ -93,6 +96,70 @@ export default function App() {
           }
         />
 
+        {/* Detail routes, one permission set per audience. Declared after the
+            list routes so "new" is never parsed as a reference. */}
+        <Route
+          path="certificates/:reference"
+          element={
+            <RequirePermission permissions={["certificate:apply:own"]}>
+              <CertificateDetail />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="complaints/:reference"
+          element={
+            <RequirePermission permissions={["complaint:create:own"]}>
+              <ComplaintDetail />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="requests/:reference"
+          element={
+            <RequirePermission
+              permissions={["request:read:own", "request:read:assigned"]}
+            >
+              <RequestDetail />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="management/certificates/:reference"
+          element={
+            <RequirePermission
+              permissions={[
+                "certificate:read:assigned",
+                "certificate:read:department",
+                "certificate:read:institution",
+              ]}
+            >
+              <CertificateDetail />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="management/complaints/:reference"
+          element={
+            <RequirePermission
+              permissions={[
+                "complaint:read:assigned",
+                "complaint:read:institution",
+              ]}
+            >
+              <ComplaintDetail />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="management/requests/:reference"
+          element={
+            <RequirePermission permissions={["request:read:assigned"]}>
+              <RequestDetail />
+            </RequirePermission>
+          }
+        />
+
         <Route
           path="management/requests"
           element={
@@ -124,6 +191,14 @@ export default function App() {
           element={
             <RequirePermission permission="invoice:read:own">
               <Invoices />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="finance/invoices/:reference"
+          element={
+            <RequirePermission permission="invoice:read:own">
+              <InvoiceDetail />
             </RequirePermission>
           }
         />

@@ -27,6 +27,7 @@ const mongoose = require("mongoose");
 const { connectDB, disconnectDB } = require("../src/config/db");
 const { getEnv } = require("../src/config/env");
 const { ROLES } = require("../src/config/constants");
+const { nextReference } = require("../src/services/finance.service");
 const {
   Department,
   Program,
@@ -36,13 +37,81 @@ const {
   Request,
   Complaint,
   Certificate,
+  Invoice,
+  Payment,
+  Refund,
+  Notification,
+  AuditLog,
 } = require("../src/models");
 
 /** Prefix applied to every demo record so it is never mistaken for real. */
 const DEMO_PREFIX = "DEMO";
 
+/**
+ * A reference in the *production* format: PREFIX-YYYY-NNNNNN.
+ *
+ * The seeder used to invent its own shape (`DEMO-REQ-0001`). That reads fine in
+ * the list and then fails the moment anyone opens the record: every identifier
+ * schema requires `[A-Z]+-\d{4}-\d{4,}`, so seeded requests and complaints were
+ * unopenable — a 400 on the detail view for every one of them, with no clue
+ * why. Two reference formats in one system is the underlying problem.
+ *
+ * So demo data goes through the same `nextReference` the application uses.
+ *
+ * The prefix carries a `DM` marker rather than being identical to production.
+ * Sharing the prefix would mean two independent counters emitting the same
+ * series — the demo counter reaching REQ-2026-000002 and colliding with a real
+ * request created through the API, which is a duplicate-key error on a unique
+ * index. `DMREQ-2026-000001` satisfies the pattern, cannot collide, and still
+ * reads as demo data in a log.
+ */
+const demoReference = (prefix) =>
+  nextReference(`demo-${prefix.toLowerCase()}`, `DM${prefix}`);
+
 /** Shared password for all demo accounts. Documented, never used in production. */
 const DEMO_PASSWORD = "Demo@Campus123";
+
+/**
+ * Remove records created by a previous run of this script.
+ *
+ * Scoped to `isDemo`, which only this script ever sets, and to the models it
+ * owns. A real request, complaint or certificate is never a candidate however
+ * old it is, and nothing runs unless --force was given.
+ *
+ * Without this the seeder accumulates: a record written by an older version
+ * keeps its original reference forever. Three complaints created as
+ * DEMO-CMP-0001 survived a re-seed alongside newer canonical ones, and every
+ * one of them 400s when opened because the identifier schema requires the
+ * canonical format.
+ */
+async function purgeDemoRecords() {
+  const removed = { total: 0 };
+
+  const targets = [
+    ["requests", Request],
+    ["complaints", Complaint],
+    ["certificates", Certificate],
+    ["invoices", Invoice],
+    ["payments", Payment],
+    ["refunds", Refund],
+    ["notifications", Notification],
+    ["auditlogs", AuditLog],
+  ];
+
+  for (const [label, Model] of targets) {
+    if (!Model) continue;
+    // Sequential on purpose: a failure then names the collection it stopped on,
+    // rather than leaving several half-cleared with nothing to say which.
+    // eslint-disable-next-line no-await-in-loop
+    const result = await Model.deleteMany({ isDemo: true });
+    if (result.deletedCount > 0) {
+      removed[label] = result.deletedCount;
+      removed.total += result.deletedCount;
+    }
+  }
+
+  return removed;
+}
 
 /**
  * Refuse to pollute a database that already contains real accounts.
@@ -124,10 +193,33 @@ async function main() {
 
   await connectDB();
 
-  // NOTE: this script never deletes. It only upserts by natural key, so
-  // re-running is safe and existing real data is preserved.
   if (!force) {
     await assertDatabaseIsSafeToSeed();
+  }
+
+  // ===== Clear previous demo records =====
+  //
+  // The seeder upserts by natural key, which is safe but not self-healing: a
+  // record created by an older version of this script keeps its original
+  // reference forever. That is exactly what happened — three complaints written
+  // as DEMO-CMP-0001 survived a re-seed alongside the new canonical ones, and
+  // every one of them 400s when opened, because the identifier schema requires
+  // the canonical format.
+  //
+  // Only records flagged `isDemo` are removed, and only under --force, so real
+  // data is never touched and a casual run still refuses to destroy anything.
+  if (force) {
+    const removed = await purgeDemoRecords();
+    if (removed.total > 0) {
+      process.stdout.write(
+        `  cleared ${removed.total} demo record(s) from a previous run: ` +
+          Object.entries(removed)
+            .filter(([key]) => key !== "total")
+            .map(([key, count]) => `${key}=${count}`)
+            .join(" ") +
+          "\n"
+      );
+    }
   }
 
   // ===== Departments =====
@@ -463,10 +555,10 @@ async function main() {
     seq += 1;
     const now = new Date();
     await Request.findOneAndUpdate(
-      { reference: `${DEMO_PREFIX}-REQ-000${seq}` },
+      { reference: await demoReference("REQ") },
       {
         $set: {
-          reference: `${DEMO_PREFIX}-REQ-000${seq}`,
+          reference: await demoReference("REQ"),
           requestType: sample.type._id,
           student: sample.student.student._id,
           department: sample.type.department,
@@ -533,10 +625,10 @@ async function main() {
       slaPolicy.responseHoursFor(sample.category) - sample.hoursOverdue
     );
     await Complaint.findOneAndUpdate(
-      { reference: `${DEMO_PREFIX}-CMP-000${cseq}` },
+      { reference: await demoReference("CMP") },
       {
         $set: {
-          reference: `${DEMO_PREFIX}-CMP-000${cseq}`,
+          reference: await demoReference("CMP"),
           student: sample.student.student._id,
           department: sample.student.student.department,
           subject: sample.subject,
@@ -568,14 +660,28 @@ async function main() {
     { type: "BONAFIDE", purpose: "Bank loan application", issue: true },
     { type: "TRANSCRIPT", purpose: "Postgraduate admission", issue: false },
   ]) {
-    const student = students[0];
+    /**
+     * Re-read the student from the database rather than using the in-memory
+     * record captured earlier in this run.
+     *
+     * On a database that already held demo data the cached copy was populated
+     * and happened to work. On an empty one the `student` link is unset, so
+     * `apply` correctly refused a non-student account and seeding aborted. The
+     * certificate service checks `user.student`, so the applicant has to come
+     * from a fresh read rather than from whatever the seed loop held.
+     */
+    const applicant = await Student.findOne({})
+      .sort({ rollNumber: 1 })
+      .populate("user")
+      .exec();
+
     let certificate = await Certificate.findOne({
-      reference: `${DEMO_PREFIX}-CERT-000${generatedCertificates + 1}`,
+      reference: await demoReference("CERT"),
     });
 
     if (!certificate) {
       certificate = await certificateService.apply({
-        user: student.user,
+        user: applicant.user,
         type: spec.type,
         purpose: spec.purpose,
       });

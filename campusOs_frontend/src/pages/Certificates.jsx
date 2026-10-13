@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { BadgeCheck, Download } from "lucide-react";
 
@@ -73,6 +74,12 @@ export default function Certificates({ mode = "own" }) {
           <ul className="divide-y divide-ink-100">
             {items.map((certificate) => (
               <li key={certificate._id ?? certificate.id} className="px-5 py-4">
+                <Link
+                  to={`${mode === "own" ? "/certificates" : "/management/certificates"}/${certificate.reference}`}
+                  className="mb-2 block text-sm font-medium text-brand-700 hover:underline"
+                >
+                  Open {certificate.reference}
+                </Link>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-ink-900">
