@@ -53,6 +53,7 @@ const ROLES = [
       ["my complaints", "/complaints", "ok"],
       ["new complaint", "/complaints/new", "ok"],
       ["my certificates", "/certificates", "ok"],
+      ["apply for a certificate", "/certificates/new", "ok"],
       ["invoices", "/finance/invoices", "ok"],
       ["refunds", "/finance/refunds", "ok"],
       ["announcements", "/announcements", "ok"],

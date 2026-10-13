@@ -56,7 +56,7 @@ export default function Announcements() {
             <li key={announcement.id}>
               <Link
                 to={`/announcements/${announcement.reference}`}
-                className="block rounded-xl bg-white px-5 py-4 shadow-sm ring-1 ring-ink-200/70 transition-colors hover:bg-ink-50"
+                className="block rounded-2xl bg-white px-5 py-4 shadow-card ring-1 ring-ink-200/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-raised hover:ring-brand-200"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   {announcement.pinned && (

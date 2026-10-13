@@ -90,7 +90,7 @@ export default function Reports() {
             id="range"
             value={days}
             onChange={(event) => setDays(Number(event.target.value))}
-            className="rounded-lg border-0 px-3 py-1.5 text-sm shadow-sm ring-1 ring-inset ring-ink-300 focus:ring-2 focus:ring-brand-600"
+            className="h-9 rounded-xl border-0 bg-white px-3 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
           >
             {RANGES.map((option) => (
               <option key={option.days} value={option.days}>

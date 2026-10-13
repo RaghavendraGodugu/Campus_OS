@@ -6,6 +6,7 @@ import AppShell from "./components/layout/AppShell";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import ApplyCertificate from "./pages/ApplyCertificate";
 import Announcements from "./pages/Announcements";
 import AnnouncementDetail from "./pages/AnnouncementDetail";
 import Complaints from "./pages/Complaints";
@@ -95,6 +96,16 @@ export default function App() {
           element={
             <RequirePermission permission="certificate:apply:own">
               <Certificates mode="own" />
+            </RequirePermission>
+          }
+        />
+
+        {/* Declared before the reference route so "new" is never read as one. */}
+        <Route
+          path="certificates/new"
+          element={
+            <RequirePermission permission="certificate:apply:own">
+              <ApplyCertificate />
             </RequirePermission>
           }
         />

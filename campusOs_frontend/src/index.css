@@ -19,16 +19,73 @@
   --color-brand-800: oklch(0.42 0.13 254);
   --color-brand-900: oklch(0.37 0.1 254);
 
-  --color-ink-50: oklch(0.985 0.002 250);
-  --color-ink-100: oklch(0.967 0.003 250);
-  --color-ink-200: oklch(0.927 0.006 250);
-  --color-ink-300: oklch(0.87 0.01 250);
-  --color-ink-400: oklch(0.7 0.02 250);
-  --color-ink-500: oklch(0.55 0.02 250);
-  --color-ink-600: oklch(0.45 0.02 250);
-  --color-ink-700: oklch(0.37 0.02 250);
+  /*
+   * Surfaces are tinted very slightly blue rather than being pure neutral grey.
+   * Pure grey next to white reads as flat and institutional; a few thousandths
+   * of blue gives white cards somewhere to sit.
+   */
+  --color-ink-50: oklch(0.985 0.003 250);
+  --color-ink-100: oklch(0.967 0.004 250);
+  --color-ink-200: oklch(0.927 0.005 250);
+  --color-ink-300: oklch(0.87 0.007 250);
+  --color-ink-400: oklch(0.7 0.012 250);
+  --color-ink-500: oklch(0.55 0.015 250);
+  --color-ink-600: oklch(0.45 0.015 250);
+  --color-ink-700: oklch(0.37 0.018 250);
   --color-ink-800: oklch(0.28 0.02 250);
-  --color-ink-900: oklch(0.21 0.02 250);
+  --color-ink-900: oklch(0.21 0.022 250);
+
+  /*
+   * Elevation as tinted, layered shadows rather than one flat grey.
+   *
+   * A single `shadow-sm` is part of what makes an interface look dated: the
+   * shadow is the same value as the border, so the card looks stamped rather
+   * than lifted. A tight contact shadow plus a wide diffuse one reads as light
+   * falling on the card.
+   */
+  --shadow-card:
+    0 1px 2px -1px oklch(0.21 0.022 250 / 0.07),
+    0 4px 16px -4px oklch(0.21 0.022 250 / 0.08);
+  --shadow-raised:
+    0 2px 4px -2px oklch(0.21 0.022 250 / 0.08),
+    0 12px 32px -8px oklch(0.21 0.022 250 / 0.12);
+  --shadow-pop:
+    0 8px 16px -6px oklch(0.21 0.022 250 / 0.1),
+    0 24px 48px -12px oklch(0.21 0.022 250 / 0.16);
+  --shadow-brand:
+    0 1px 2px -1px oklch(0.42 0.13 254 / 0.3),
+    0 6px 20px -6px oklch(0.55 0.18 254 / 0.45);
+
+  /* Larger, consistent radii. Mixed 8px/12px corners read as dated. */
+  --radius-card: 1rem;
+
+  /*
+   * Motion. One scale for the whole app, so nothing appears to move at twice
+   * the speed of the element beside it.
+   */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-rise: rise 0.35s var(--ease-out-soft) both;
+  --animate-fade: fade 0.25s var(--ease-out-soft) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 }
 
 @layer base {
@@ -37,7 +94,23 @@
   }
 
   body {
+    /*
+     * A faint brand wash at the top, so the page has a light source. Without
+     * it a long page reads as a flat grey sheet with cards floating in it.
+     */
     @apply bg-ink-50 text-ink-800 antialiased;
+    background-image:
+      radial-gradient(
+        ellipse 80rem 40rem at 50% -12rem,
+        oklch(0.55 0.18 254 / 0.07),
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 60rem 30rem at 100% 0%,
+        oklch(0.7 0.14 254 / 0.05),
+        transparent 60%
+      );
+    background-attachment: fixed;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 

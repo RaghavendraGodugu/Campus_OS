@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 13 October 2026
-- **Verified:** 435 backend tests, 49 frontend tests, lint and build clean
+- **Verified:** 435 backend tests, 63 frontend tests, lint and build clean
 
 ---
 
@@ -102,7 +102,11 @@ means the note that follows it)
 - [x] Public verification endpoint (`GET /certificates/verify`)
 - [x] Student certificate list and detail screens
 - [x] Staff issuance screen
-- [ ] **Application form** — the API exists and there is no screen for it
+- [x] **Application form** — nine types as a card picker, with live summary;
+      a real radiogroup (arrow keys, roving tab index, one concise name per
+      option), and it creates a real record end to end in the browser
+- [x] Entry points to it from the certificates list, the empty state and the
+      dashboard
 - [ ] **Public verification page** — the API exists and there is no page
 - [ ] Certificate templates beyond the built-in one
 - [ ] Bulk issuance
@@ -173,10 +177,24 @@ means the note that follows it)
 - [ ] Security headers report run against a live host
 - [ ] Dependency audit recorded as a gate
 
-## 14. Quality gates
+## 14. Interface
+
+- [x] One design system: layered tinted elevation, consistent 1rem radii, a
+      single motion scale
+- [x] Card, button, field and badge primitives restyled; every page that uses
+      them updated at once
+- [x] Page background carries a light source rather than a flat grey sheet
+- [x] Sidebar, top bar, notification panel and empty/error states brought onto
+      the same tokens
+- [ ] A dark theme
+- [ ] Responsive re-check below 375px
+- [ ] Loading skeletons instead of spinners on slow pages
+- [ ] No motion/transitions audit on the finance tables
+
+## 15. Quality gates
 
 - [x] Backend: 435 tests passing
-- [x] Frontend: 49 tests passing
+- [x] Frontend: 63 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep
@@ -186,7 +204,7 @@ means the note that follows it)
 - [ ] CI running these gates on every push
 - [ ] Coverage thresholds enforced
 
-## 15. Operations
+## 16. Operations
 
 - [x] Structured logging
 - [x] Health endpoint
@@ -217,6 +235,7 @@ audit, and the profile section for every role.
 
 ## What is not
 
-The three screens listed in sections 7, 8 and 15 that have an API but no
-interface; user, department and programme administration; and the proven
-Razorpay capture lifecycle. Those are the honest remainder.
+The public certificate verification page and the anonymous complaint tracking
+code, both of which have an API but no interface; user, department and
+programme administration; and the proven Razorpay capture lifecycle. Those are
+the honest remainder.

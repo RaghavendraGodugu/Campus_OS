@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { BadgeCheck, Download } from "lucide-react";
+import { BadgeCheck, Download, Plus } from "lucide-react";
 
 import { apiGet, fetchDocument } from "../api/client";
 import { formatDate } from "../lib/format";
@@ -45,15 +45,29 @@ export default function Certificates({ mode = "own" }) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
-          Certificates
-        </h1>
-        <p className="mt-1 text-sm text-ink-500">
-          {mode === "own"
-            ? "Applications you have made, and the documents issued."
-            : "Certificate applications in your department."}
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+            Certificates
+          </h1>
+          <p className="mt-1 text-sm text-ink-500">
+            {mode === "own"
+              ? "Applications you have made, and the documents issued."
+              : "Certificate applications in your department."}
+          </p>
+        </div>
+
+        {/* Only a student can apply, which is the same condition the API
+            enforces, so the button never leads to a 403. */}
+        {mode === "own" && (
+          <Link
+            to="/certificates/new"
+            className="inline-flex h-11 items-center gap-2 rounded-xl bg-linear-to-b from-brand-500 to-brand-600 px-5 text-sm font-medium text-white shadow-brand ring-1 ring-brand-600/20 transition-all duration-150 hover:to-brand-700 hover:shadow-raised active:scale-[0.98]"
+          >
+            <Plus className="size-4" aria-hidden="true" />
+            Apply for a certificate
+          </Link>
+        )}
       </header>
 
       {isLoading && <Loading label="Loading certificates" />}
@@ -64,8 +78,19 @@ export default function Certificates({ mode = "own" }) {
       {!isLoading && !isError && items.length === 0 && (
         <EmptyState
           icon={BadgeCheck}
-          title="No certificates"
-          description="Applied-for certificates will appear here once they are issued."
+          title="No certificates yet"
+          description="You have not applied for anything yet. Choose the certificate you need and it will be issued from your student record."
+          action={
+            mode === "own" ? (
+              <Link
+                to="/certificates/new"
+                className="inline-flex h-9.5 items-center gap-2 rounded-xl bg-linear-to-b from-brand-500 to-brand-600 px-4 text-sm font-medium text-white shadow-brand ring-1 ring-brand-600/20 transition-all duration-150 hover:to-brand-700 hover:shadow-raised active:scale-[0.98]"
+              >
+                <Plus className="size-4" aria-hidden="true" />
+                Apply for a certificate
+              </Link>
+            ) : null
+          }
         />
       )}
 

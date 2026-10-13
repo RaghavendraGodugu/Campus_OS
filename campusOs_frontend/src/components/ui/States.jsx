@@ -22,7 +22,7 @@ export function Loading({ label = "Loading" }) {
 
 export function EmptyState({ title, description, action, icon: Icon = Inbox }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-ink-200 px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-ink-200 bg-white/50 px-6 py-16 text-center">
       <Icon className="size-8 text-ink-300" aria-hidden="true" />
       <h3 className="text-sm font-semibold text-ink-800">{title}</h3>
       {description && (
@@ -50,7 +50,7 @@ export function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-1 rounded-lg bg-white px-3.5 py-2 text-sm font-medium text-red-800 ring-1 ring-red-300 hover:bg-red-100"
+          className="mt-1 rounded-xl bg-white px-4 py-2 text-sm font-medium text-red-800 shadow-card ring-1 ring-red-200 transition-all duration-150 hover:bg-red-50 hover:shadow-raised"
         >
           Try again
         </button>

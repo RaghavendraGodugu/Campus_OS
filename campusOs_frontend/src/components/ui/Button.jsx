@@ -6,20 +6,26 @@
  * how a "Cancel" ends up creating a record.
  */
 const VARIANTS = {
+  // A gradient rather than a flat fill: a large flat block of one colour is the
+  // single most dated thing a button can be. The gradient is barely perceptible
+  // but stops the control reading as a rectangle of paint.
   primary:
-    "bg-brand-600 text-white hover:bg-brand-700 focus-visible:outline-brand-700 disabled:bg-brand-300",
+    "bg-linear-to-b from-brand-500 to-brand-600 text-white shadow-brand ring-1 ring-brand-600/20 hover:from-brand-500 hover:to-brand-700 hover:shadow-raised focus-visible:outline-brand-700 active:from-brand-600 active:to-brand-700 disabled:from-brand-300 disabled:to-brand-300 disabled:shadow-none",
   secondary:
-    "bg-white text-ink-700 ring-1 ring-ink-200 hover:bg-ink-50 focus-visible:outline-ink-400 disabled:text-ink-400",
+    "bg-white text-ink-700 shadow-card ring-1 ring-ink-200 hover:bg-ink-50 hover:ring-ink-300 focus-visible:outline-ink-400 active:bg-ink-100 disabled:text-ink-400 disabled:shadow-none disabled:ring-ink-200",
   danger:
-    "bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-700 disabled:bg-red-300",
+    "bg-linear-to-b from-red-500 to-red-600 text-white shadow-card ring-1 ring-red-600/20 hover:to-red-700 focus-visible:outline-red-700 active:to-red-700 disabled:from-red-300 disabled:to-red-300",
   ghost:
-    "text-ink-600 hover:bg-ink-100 focus-visible:outline-ink-400 disabled:text-ink-400",
+    "text-ink-600 hover:bg-ink-100/80 hover:text-ink-900 focus-visible:outline-ink-400 active:bg-ink-200/60 disabled:text-ink-400",
+  /** For destructive actions that should not be the obvious thing to click. */
+  subtle:
+    "bg-ink-100/70 text-ink-600 hover:bg-ink-200/70 hover:text-ink-900 focus-visible:outline-ink-400 disabled:text-ink-400",
 };
 
 const SIZES = {
-  sm: "px-2.5 py-1.5 text-xs",
-  md: "px-3.5 py-2 text-sm",
-  lg: "px-5 py-2.5 text-sm",
+  sm: "h-8 rounded-lg px-3 text-xs",
+  md: "h-9.5 rounded-xl px-4 text-sm",
+  lg: "h-11 rounded-xl px-5 text-sm",
 };
 
 export default function Button({
@@ -37,7 +43,7 @@ export default function Button({
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors disabled:cursor-not-allowed ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:active:scale-100 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       {...rest}
     >
       {loading && (
