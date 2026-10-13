@@ -12,6 +12,7 @@ import Button from "../components/ui/Button";
 import TransitionPanel, {
   DangerousAction,
 } from "../components/TransitionPanel";
+import DocumentPanel from "../components/DocumentPanel";
 import { ErrorState, Loading } from "../components/ui/States";
 
 /**
@@ -157,6 +158,8 @@ export default function CertificateDetail() {
           )}
         </Card>
       )}
+
+      <DocumentPanel endpoint="/certificates" parentReference={reference} />
 
       {/* ===== Actions ===== */}
       <TransitionPanel

@@ -29,9 +29,9 @@ const { getEnv } = require("../src/config/env");
 const { ROLES } = require("../src/config/constants");
 const { nextReference } = require("../src/services/finance.service");
 const {
+  Student,
   Department,
   Program,
-  Student,
   User,
   RequestType,
   Request,
@@ -102,7 +102,6 @@ async function purgeDemoRecords() {
     if (!Model) continue;
     // Sequential on purpose: a failure then names the collection it stopped on,
     // rather than leaving several half-cleared with nothing to say which.
-    // eslint-disable-next-line no-await-in-loop
     const result = await Model.deleteMany({ isDemo: true });
     if (result.deletedCount > 0) {
       removed[label] = result.deletedCount;
@@ -221,6 +220,8 @@ async function main() {
       );
     }
   }
+
+  const students = [];
 
   // ===== Departments =====
   const departmentSpecs = [
@@ -383,7 +384,6 @@ async function main() {
     },
   ];
 
-  const students = [];
   for (const spec of studentSpecs) {
     const email = `demo.student.${spec.roll.toLowerCase().replace(/[^a-z0-9]/g, "")}@campusos.local`;
     const user = await seedUser({
@@ -414,6 +414,9 @@ async function main() {
 
     // Back-link the profile to the account.
     await User.updateOne({ _id: user._id }, { $set: { student: student._id } });
+
+    // Kept for the sample requests and complaints below, which are attached to
+    // specific students rather than picked afresh each time.
     students.push({ user, student });
   }
   process.stdout.write(`  student accounts : ${students.length}\n`);
@@ -550,9 +553,7 @@ async function main() {
     },
   ];
 
-  let seq = 0;
   for (const sample of sampleRequests) {
-    seq += 1;
     const now = new Date();
     await Request.findOneAndUpdate(
       { reference: await demoReference("REQ") },
@@ -616,9 +617,7 @@ async function main() {
 
   const { addBusinessHours } = require("../src/utils/sla");
   const slaPolicy = require("../src/utils/slaPolicy");
-  let cseq = 0;
   for (const sample of sampleComplaints) {
-    cseq += 1;
     const now = new Date();
     const dueAt = addBusinessHours(
       now,

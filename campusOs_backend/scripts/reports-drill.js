@@ -105,10 +105,7 @@ const WIDE = `from=${new Date(Date.now() - 180 * 86400000).toISOString()}&to=${n
   }
 
   // ===== Institution-only reports =====
-  for (const [who, label] of [
-    ["hod", "HOD"],
-    ["dean", "dean"],
-  ]) {
+  for (const who of ["hod", "dean"]) {
     const complaints = await call(who, "GET", `/reports/complaints?${WIDE}`);
     const finance = await call(who, "GET", `/reports/finance?${WIDE}`);
 

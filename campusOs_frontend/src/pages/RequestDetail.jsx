@@ -11,6 +11,7 @@ import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
 import Field from "../components/ui/Field";
 import TransitionPanel from "../components/TransitionPanel";
+import DocumentPanel from "../components/DocumentPanel";
 import { ErrorState, Loading } from "../components/ui/States";
 
 /**
@@ -177,6 +178,13 @@ export default function RequestDetail() {
           }
         />
       )}
+
+      {/*
+        Documents, if the service for this request type asked for any. The
+        required list comes from the server, so publishing a new service that
+        needs a document needs no change here.
+      */}
+      <DocumentPanel endpoint="/requests" parentReference={reference} />
 
       {/* ===== Timeline ===== */}
       <Card title="History" description="Every step, in order.">
