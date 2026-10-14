@@ -91,6 +91,7 @@ const ROLES = [
       ["departments", "/admin/departments", "ok"],
       ["programmes", "/admin/programmes", "ok"],
       ["services", "/admin/services", "ok"],
+      ["import students", "/admin/students", "ok"],
       ["reports", "/reports", "ok"],
       ["audit", "/audit", "ok"],
     ],

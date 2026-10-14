@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 13 October 2026
-- **Verified:** 500 backend tests, 112 frontend tests, lint and build clean
+- **Verified:** 541 backend tests, 125 frontend tests, lint and build clean
 
 ---
 
@@ -65,7 +65,14 @@ means the note that follows it)
 - [x] Academic record is institution-owned and not self-editable
 - [ ] User administration: create, deactivate, change role (permissions exist;
       no API and no screen)
-- [ ] Bulk import of students from CSV
+- [x] Bulk import of students from CSV — check, then import; a dry run reports
+      every bad row with its line number and writes nothing
+- [x] All-or-nothing: one bad row refuses the whole file, and a mid-write
+      failure rolls back rather than leaving half a cohort
+- [x] A hand-written RFC 4180 reader (quotes, embedded commas and newlines,
+      CRLF, BOM), tested against the cases a naive `split(",")` gets wrong
+- [x] Each imported student gets a generated password, stored only as a bcrypt
+      hash and downloadable once as a CSV; never in the audit trail
 
 ## 5. Departments, programmes, request types
 
@@ -224,8 +231,8 @@ means the note that follows it)
 
 ## 15. Quality gates
 
-- [x] Backend: 500 tests passing
-- [x] Frontend: 112 tests passing
+- [x] Backend: 541 tests passing
+- [x] Frontend: 125 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep

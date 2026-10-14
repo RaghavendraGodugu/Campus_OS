@@ -275,6 +275,28 @@ const listRequestTypesSchema = z
 
 const requestTypeIdentifier = z.object({ id: objectId }).strict();
 
+// ===== Student import =====
+
+/**
+ * The file arrives as text in the body rather than as a multipart upload.
+ *
+ * A CSV is text and small; base64-multiparting it costs a third more bytes and
+ * a second place for the parser to disagree with the server about. The cap is
+ * enforced here as well as in the service, because the body parser runs before
+ * anything else.
+ */
+const studentImportSchema = z
+  .object({
+    csv: z
+      .string()
+      .min(1, "No file was supplied")
+      .max(
+        4 * 1024 * 1024,
+        "That file is larger than 4MB. Split it, or import it in batches."
+      ),
+  })
+  .strict();
+
 // ===== Programmes =====
 
 const createProgramSchema = z
@@ -351,6 +373,7 @@ module.exports = {
   setRequestTypeActiveSchema,
   listRequestTypesSchema,
   requestTypeIdentifier,
+  studentImportSchema,
   createProgramSchema,
   updateProgramSchema,
   setProgramActiveSchema,

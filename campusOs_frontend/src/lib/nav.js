@@ -115,6 +115,13 @@ export const NAV_ITEMS = [
     permission: "request-type:manage:institution",
   },
   {
+    to: "/admin/students",
+    label: "Import",
+    icon: "Upload",
+    section: "Administration",
+    permission: "user:manage:institution",
+  },
+  {
     to: "/admin/departments",
     label: "Departments",
     icon: "Building2",

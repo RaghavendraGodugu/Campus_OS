@@ -18,6 +18,7 @@ import {
   Settings,
   ShieldAlert,
   Undo2,
+  Upload,
   User,
   X,
 } from "lucide-react";
@@ -41,6 +42,7 @@ const ICONS = {
   ListChecks,
   ScrollText,
   Settings,
+  Upload,
   Building2,
   GraduationCap,
   User,

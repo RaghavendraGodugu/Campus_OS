@@ -14,6 +14,7 @@ import People from "./pages/admin/People";
 import Departments from "./pages/admin/Departments";
 import Programmes from "./pages/admin/Programmes";
 import RequestTypes from "./pages/admin/RequestTypes";
+import StudentImport from "./pages/admin/StudentImport";
 import Announcements from "./pages/Announcements";
 import AnnouncementDetail from "./pages/AnnouncementDetail";
 import Complaints from "./pages/Complaints";
@@ -94,6 +95,14 @@ export default function App() {
               permissions={["request-type:manage:institution"]}
             >
               <RequestTypes />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="admin/students"
+          element={
+            <RequirePermission permissions={["user:manage:institution"]}>
+              <StudentImport />
             </RequirePermission>
           }
         />

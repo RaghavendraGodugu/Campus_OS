@@ -1,5 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { Building2, GraduationCap, ListChecks, Users } from "lucide-react";
+import {
+  Building2,
+  GraduationCap,
+  ListChecks,
+  Upload,
+  Users,
+} from "lucide-react";
 
 /**
  * The administration area.
@@ -14,6 +20,7 @@ import { Building2, GraduationCap, ListChecks, Users } from "lucide-react";
 const TABS = [
   { to: "/admin/people", label: "People", icon: Users },
   { to: "/admin/services", label: "Services", icon: ListChecks },
+  { to: "/admin/students", label: "Import", icon: Upload },
   { to: "/admin/departments", label: "Departments", icon: Building2 },
   { to: "/admin/programmes", label: "Programmes", icon: GraduationCap },
 ];

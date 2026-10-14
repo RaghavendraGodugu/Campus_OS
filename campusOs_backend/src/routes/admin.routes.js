@@ -50,6 +50,7 @@ const {
   setRequestTypeActiveSchema,
   listRequestTypesSchema,
   requestTypeIdentifier,
+  studentImportSchema,
 } = require("../validators/admin.validator");
 
 const router = express.Router();
@@ -194,6 +195,34 @@ router.post(
   requirePermission(P.REQUEST_TYPE_MANAGE),
   validate({ params: requestTypeIdentifier, body: setRequestTypeActiveSchema }),
   adminController.setRequestTypeActive
+);
+
+// ===== Student import =====
+
+/**
+ * Gated on USER_MANAGE rather than a permission of its own.
+ *
+ * An import creates accounts. It is the same act as adding a user, at scale,
+ * and a separate permission would only be one more thing to grant by accident
+ * to somebody who was meant to be able to help one person and now can add two
+ * hundred.
+ */
+router.post(
+  "/admin/students/import/validate",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.USER_MANAGE),
+  validate({ body: studentImportSchema }),
+  adminController.validateStudentImport
+);
+
+router.post(
+  "/admin/students/import/commit",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.USER_MANAGE),
+  validate({ body: studentImportSchema }),
+  adminController.commitStudentImport
 );
 
 // ===== Programmes =====

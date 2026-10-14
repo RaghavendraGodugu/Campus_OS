@@ -6,6 +6,7 @@
  */
 
 const adminService = require("../services/admin.service");
+const studentImportService = require("../services/studentImport.service");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { sendSuccess } = require("../utils/response");
 
@@ -204,6 +205,35 @@ const setRequestTypeActive = asyncHandler(async (req, res) => {
   return sendSuccess(res, { message: "Request type updated", data: requestType });
 });
 
+// ===== Student import =====
+
+/** POST /admin/students/import/validate — a dry run. Writes nothing. */
+const validateStudentImport = asyncHandler(async (req, res) => {
+  const report = await studentImportService.validateImport({
+    csv: req.validated.body.csv,
+  });
+
+  return sendSuccess(res, { message: report.message, data: report });
+});
+
+/** POST /admin/students/import/commit — all rows or none. */
+const commitStudentImport = asyncHandler(async (req, res) => {
+  const result = await studentImportService.commitImport({
+    csv: req.validated.body.csv,
+    user: req.user,
+    req,
+  });
+
+  return sendSuccess(res, {
+    status: 201,
+    message: `${result.imported} student${result.imported === 1 ? "" : "s"} imported`,
+    data: { imported: result.imported },
+    // Outside `data` so it is never cached or picked up by a client that
+    // spreads the payload around. This is the only time it exists in clear.
+    meta: { credentials: result.credentials, notice: result.notice },
+  });
+});
+
 // ===== Programmes =====
 
 const listPrograms = asyncHandler(async (req, res) => {
@@ -255,6 +285,8 @@ const setProgramActive = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  validateStudentImport,
+  commitStudentImport,
   listRequestTypes,
   createRequestType,
   updateRequestType,
