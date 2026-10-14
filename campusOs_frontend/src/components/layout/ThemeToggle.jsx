@@ -37,7 +37,7 @@ export default function ThemeToggle({ className = "" }) {
             role="radio"
             aria-checked={selected}
             onClick={() => setTheme(option.value)}
-            className={`grid size-7 place-items-center rounded-lg transition-all duration-150 ${
+            className={`grid size-9 place-items-center rounded-lg transition-all duration-150 ${
               selected
                 ? "bg-surface text-brand-700 shadow-card ring-1 ring-ink-200/70 dark:text-brand-300 dark:ring-ink-600"
                 : "text-ink-500 hover:text-ink-800 dark:hover:text-ink-200"

@@ -213,12 +213,25 @@ async function launchBrowser(name, port) {
 
   await send("Page.enable");
 
+  /**
+   * Resize the page. Used by the narrow-width check, which needs the same
+   * browser to be a phone and then a desktop without signing out in between.
+   */
+  const setViewport = async (width, height, mobile) => {
+    await send("Emulation.setDeviceMetricsOverride", {
+      width,
+      height,
+      deviceScaleFactor: 1,
+      mobile,
+    });
+  };
+
   const close = async () => {
     browser.kill();
     await sleep(300);
   };
 
-  return { evaluate, go, mainText, send, close };
+  return { evaluate, go, mainText, send, setViewport, close };
 }
 
 async function sweep(spec, port) {
@@ -282,6 +295,88 @@ async function sweep(spec, port) {
 
   await close();
   return failures;
+}
+
+/**
+ * Overflow at phone widths.
+ *
+ * Nothing about a page breaks loudly when it is too wide for a phone: the card
+ * just runs off the side and the reader scrolls sideways, with nothing
+ * indicating there is more. And `scrollWidth > clientWidth` is exactly the
+ * signal a CSS layout review misses — a `flex` row without `min-w-0` looks
+ * fine at 1440px and is broken at 375.
+ *
+ * The threshold is 375 because that is the narrowest phone this is likely to
+ * meet, and 320 is checked too: a page that only fits 375 usually fails 320 by
+ * a handful of pixels that nobody looks at until someone opens it on an old
+ * handset.
+ */
+async function checkNarrowWidths(port) {
+  const widths = [375, 320];
+  const pages = [
+    "/",
+    "/requests",
+    "/complaints",
+    "/certificates",
+    "/certificates/new",
+  ];
+
+  const { evaluate, go, setViewport, close } = await launchBrowser(
+    "narrow",
+    port,
+  );
+  const problems = [];
+
+  for (const width of widths) {
+    await setViewport(width, 900, false);
+
+    for (const path of pages) {
+      await go(path, 1800);
+
+      const result = await evaluate(`(() => {
+        const doc = document.documentElement;
+        const overflow = doc.scrollWidth > doc.clientWidth + 1;
+        if (!overflow) return JSON.stringify({ overflow: false });
+        // Name the widest offenders, so the failure is actionable.
+        const wide = [];
+        document.querySelectorAll('main *').forEach((el) => {
+          const box = el.getBoundingClientRect();
+          if (getComputedStyle(el).position === 'fixed') return;
+          if (box.right > doc.clientWidth + 1) {
+            wide.push(el.tagName.toLowerCase() + '.' + String(el.className || '').slice(0, 60));
+          }
+        });
+        return JSON.stringify({
+          overflow: true,
+          scrollWidth: doc.scrollWidth,
+          clientWidth: doc.clientWidth,
+          wide: wide.slice(0, 3),
+        });
+      })()`);
+
+      const parsed = JSON.parse(result);
+      if (parsed.overflow) {
+        problems.push(
+          `${path} at ${width}px: scrolls to ${parsed.scrollWidth} in ${parsed.clientWidth}`,
+        );
+        for (const wide of parsed.wide) problems.push(`    ${wide}`);
+      }
+    }
+  }
+
+  await close();
+
+  console.log("\nNARROW — 375px and 320px");
+  if (problems.length === 0) {
+    console.log(
+      `   PASS  ${pages.length} pages fit with no sideways scrolling`,
+    );
+    return 0;
+  }
+
+  console.log(`   FAIL  ${problems.length} problem(s):`);
+  for (const problem of problems) console.log(`     ${problem}`);
+  return problems.length;
 }
 
 /**
@@ -350,6 +445,7 @@ async function main() {
   let failures = 0;
   let port = 9360;
   failures += await checkPublicVerification(port++);
+  failures += await checkNarrowWidths(port++);
   for (const spec of ROLES) {
     failures += await sweep(spec, port++);
   }

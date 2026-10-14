@@ -233,7 +233,11 @@ means the note that follows it)
       provider so components cannot disagree about it
 - [x] Every surface, status colour, card, field and callout carries a dark
       variant; verified in a real browser rather than by reading the classes
-- [ ] Responsive re-check below 375px
+- [x] Responsive at 375px and 320px, checked automatically: the browser sweep
+      now fails the build if any page scrolls sideways at either width, and
+      signs in first so it cannot pass by measuring the login page five times
+- [x] Tap targets on the top bar raised to 36px, and the theme toggle corrected
+      where `hidden sm:inline-flex` had silently not worked
 - [ ] Loading skeletons instead of spinners on slow pages
 - [ ] No motion/transitions audit on the finance tables
 
@@ -245,7 +249,8 @@ means the note that follows it)
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep
 - [x] `npm run verify:roles` — real-browser per-role sweep including the
-      super administrator, whose pages no other role can reach
+      super administrator, whose pages no other role can reach, plus the two
+      public pages with no session and a narrow-viewport overflow check
 - [x] The sweep detects a failed page by `role="alert"`, not by searching for
       words, and is itself covered by a test so it cannot quietly stop failing
 - [~] CI workflow running lint, format, tests, the browser sweep and an image

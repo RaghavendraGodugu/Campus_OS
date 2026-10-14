@@ -206,9 +206,16 @@ export default function AppShell() {
 
           <div className="flex-1" />
 
-          {/* On small screens the three buttons cost more room than they are
-              worth, so they live in the profile page there. */}
-          <ThemeToggle className="hidden sm:inline-flex" />
+          {/*
+            Visible at every width, deliberately.
+
+            It was `hidden sm:inline-flex` for a while, which did not hide it:
+            this component's root already carries `inline-flex`, and Tailwind
+            emits `display` utilities in a fixed order, so `inline-flex` won and
+            the control stayed on the bar at 375px. Hiding it would also have
+            been the wrong call — a phone has no other way to change the theme.
+          */}
+          <ThemeToggle />
 
           <RolePill />
 
