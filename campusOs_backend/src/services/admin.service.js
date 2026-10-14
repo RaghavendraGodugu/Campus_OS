@@ -31,6 +31,7 @@ const User = require("../models/User");
 const Student = require("../models/Student");
 const Department = require("../models/Department");
 const Program = require("../models/Program");
+const RequestType = require("../models/RequestType");
 
 const { ApiError } = require("../utils/ApiError");
 const { ROLES, AUDIT_ACTION } = require("../config/constants");
@@ -724,6 +725,195 @@ async function setProgramActive({ programId, changes, user: actor, req }) {
   return programme.toJSON();
 }
 
+// ===== Request types =====
+
+/**
+ * The catalogue of services a student can ask for.
+ *
+ * A request type is not cosmetic: it defines the fields the submission form
+ * asks for, and the documents it will demand. Editing one changes what tens of
+ * thousands of students will be asked for next time, so a retired type is
+ * hidden from the catalogue rather than deleted, and the reason is recorded.
+ */
+async function listRequestTypes({ query, user: actor }) {
+  const filter = {};
+  if (!query.includeInactive) filter.isActive = true;
+  if (query.department) filter.department = query.department;
+
+  if (query.search) {
+    const safe = query.search.replace(/[.*+?^${}()|()[\]\\]/g, "\\$&");
+    filter.$or = [
+      { name: { $regex: safe, $options: "i" } },
+      { code: { $regex: safe, $options: "i" } },
+    ];
+  }
+
+  const requestTypes = await RequestType.find(filter)
+    .populate("department", "name code")
+    .sort({ name: 1 })
+    .lean();
+
+  await auditService.record({
+    action: AUDIT_ACTION.READ,
+    entity: "RequestType",
+    metadata: { scope: "admin-list", resultCount: requestTypes.length },
+    actor,
+  });
+
+  return {
+    requestTypes: requestTypes.map((entry) => ({
+      ...entry,
+      id: entry._id,
+      _id: undefined,
+    })),
+  };
+}
+
+async function createRequestType({ payload, user: actor, req }) {
+  // A SELECT with no options renders as an empty dropdown in the submission
+  // form, which reads as a broken form rather than as an unfinished definition.
+  for (const field of payload.fields ?? []) {
+    if (field.type === "SELECT" && !field.options?.length) {
+      throw ApiError.badRequest(
+        `Field "${field.name}" is a dropdown but declares no options`,
+        { details: [{ field: "fields", message: `"${field.name}" has no options` }] }
+      );
+    }
+  }
+
+  const clash = await RequestType.findOne({
+    $or: [{ name: payload.name }, { code: payload.code }],
+  });
+
+  if (clash) {
+    const field = clash.name === payload.name ? "name" : "code";
+    throw ApiError.conflict(
+      field === "name"
+        ? "A request type with that name already exists"
+        : "A request type with that code already exists",
+      { details: [{ field, message: "Already in use" }] }
+    );
+  }
+
+  const requestType = await RequestType.create(payload);
+
+  await auditService.record({
+    action: AUDIT_ACTION.CREATE,
+    entity: "RequestType",
+    entityId: requestType._id,
+    entityRef: requestType.code,
+    metadata: {
+      name: requestType.name,
+      code: requestType.code,
+      fieldCount: (payload.fields ?? []).length,
+    },
+    actor,
+    req,
+  });
+
+  return requestType.toJSON();
+}
+
+async function updateRequestType({ requestTypeId, changes, user: actor, req }) {
+  const requestType = await RequestType.findById(requestTypeId);
+  if (!requestType) throw ApiError.notFound("Request type not found");
+
+  const nextFields = changes.fields ?? requestType.fields ?? [];
+  for (const field of nextFields) {
+    if (field.type === "SELECT" && !field.options?.length) {
+      throw ApiError.badRequest(
+        `Field "${field.name}" is a dropdown but declares no options`,
+        { details: [{ field: "fields", message: `"${field.name}" has no options` }] }
+      );
+    }
+  }
+
+  if (changes.name || changes.code) {
+    const clash = await RequestType.findOne({
+      _id: { $ne: requestType._id },
+      $or: [
+        changes.name ? { name: changes.name } : null,
+        changes.code ? { code: changes.code } : null,
+      ].filter(Boolean),
+    });
+
+    if (clash) {
+      throw ApiError.conflict("Another request type already uses that", {
+        details: [
+          {
+            field: clash.name === changes.name ? "name" : "code",
+            message: "Already in use",
+          },
+        ],
+      });
+    }
+  }
+
+  const before = { name: requestType.name, code: requestType.code };
+  Object.assign(requestType, changes);
+  await requestType.save();
+
+  await auditService.record({
+    action: AUDIT_ACTION.UPDATE,
+    entity: "RequestType",
+    entityId: requestType._id,
+    entityRef: requestType.code,
+    metadata: { fields: Object.keys(changes), before },
+    actor,
+    req,
+  });
+
+  return requestType.toJSON();
+}
+
+/**
+ * Retiring hides the type from the catalogue. It does not remove it, because
+ * requests already filed against it must keep resolving to the definition they
+ * were filed under — otherwise an old request's form would change meaning.
+ */
+async function setRequestTypeActive({ requestTypeId, changes, user: actor, req }) {
+  const requestType = await RequestType.findById(requestTypeId);
+  if (!requestType) throw ApiError.notFound("Request type not found");
+
+  if (!changes.isActive) {
+    const Request = require("../models/Request");
+    const open = await Request.countDocuments({
+      requestType: requestType._id,
+      status: { $nin: ["RESOLVED", "REJECTED", "WITHDRAWN"] },
+    });
+
+    if (open > 0) {
+      throw ApiError.badRequest(
+        `This service still has ${open} open request${open === 1 ? "" : "s"} ` +
+          "against it. Close them first — otherwise a student's in-flight " +
+          "request would point at a definition they can no longer see.",
+        { details: [{ field: "isActive", message: `${open} open` }] }
+      );
+    }
+  }
+
+  const from = requestType.isActive;
+  requestType.isActive = changes.isActive;
+  await requestType.save();
+
+  await auditService.record({
+    action: AUDIT_ACTION.UPDATE,
+    entity: "RequestType",
+    entityId: requestType._id,
+    entityRef: requestType.code,
+    metadata: {
+      change: "isActive",
+      from,
+      to: changes.isActive,
+      reason: changes.reason,
+    },
+    actor,
+    req,
+  });
+
+  return requestType.toJSON();
+}
+
 /**
  * What this account would gain, in one call.
  *
@@ -747,6 +937,10 @@ async function describeRolePermissions({ role, user: actor }) {
 
 module.exports = {
   generateTemporaryPassword,
+  listRequestTypes,
+  createRequestType,
+  updateRequestType,
+  setRequestTypeActive,
   listUsers,
   createUser,
   updateUserDetails,

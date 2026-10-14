@@ -128,7 +128,48 @@ const feedbackSchema = z
   })
   .strict();
 
+/**
+ * The public, unauthenticated grievance endpoints.
+ *
+ * `confidential` is absent by design. It is derived from the category by the
+ * model, because a caller who could set it could downgrade a harassment report
+ * to an ordinary one by flipping a flag.
+ */
+const anonymousComplaintSchema = z
+  .object({
+    category: z.string().trim().min(2).max(60),
+    subject: z
+      .string()
+      .trim()
+      .min(5, "Give the report a short subject")
+      .max(200, "Subject cannot exceed 200 characters"),
+    description: z
+      .string()
+      .trim()
+      .min(30, "Please describe what happened in a little more detail")
+      .max(5000, "Description cannot exceed 5000 characters"),
+    subCategory: z.string().trim().max(100).optional(),
+  })
+  .strict();
+
+const trackingCodeSchema = z
+  .object({
+    code: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .min(8, "Enter the tracking code")
+      .max(24, "That is longer than a tracking code")
+      .regex(
+        /^[A-Z0-9-]+$/,
+        "A tracking code contains only letters, numbers and a hyphen"
+      ),
+  })
+  .strict();
+
 module.exports = {
+  anonymousComplaintSchema,
+  trackingCodeSchema,
   createComplaintSchema,
   listComplaintsSchema,
   getComplaintSchema,

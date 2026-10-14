@@ -19,6 +19,9 @@
 const { z } = require("zod");
 
 const { ROLES } = require("../config/constants");
+// Reused rather than restated: the catalogue definition is the single source of
+// what a request type is, and a second copy of that rule is a second opinion.
+const { createRequestTypeSchema } = require("./request.validator");
 
 const objectId = z
   .string()
@@ -217,6 +220,61 @@ const departmentIdentifier = z.object({ id: objectId }).strict();
 
 const roleIdentifier = z.object({ role: roleEnum }).strict();
 
+/**
+ * Build an "edit" schema out of a "create" one, field for field.
+ *
+ * Two things make this worth doing rather than hand-writing a second schema:
+ * the rules cannot drift apart, and the defaults go.
+ *
+ * The defaults are the part that matters. `fields` defaults to `[]` and
+ * `requiredDocuments` likewise, so a naive `.partial()` would fill them back in
+ * on every edit — an administrator changing a service's name would silently
+ * delete every question and every document it used to ask for.
+ */
+function partialStrict(schema, { dropDefaults = true } = {}) {
+  const shape = {};
+
+  for (const [key, field] of Object.entries(schema.shape)) {
+    // Zod 4 keys the discriminator as `_def.type`, not `typeName`.
+    const unwrapped =
+      dropDefaults && field._def?.type === "default" ? field._def.innerType : field;
+    shape[key] = unwrapped.optional();
+  }
+
+  return z.object(shape).strict();
+}
+
+// ===== Request types =====
+
+const updateRequestTypeSchema = partialStrict(createRequestTypeSchema).refine(
+  (value) => Object.keys(value).length > 0,
+  { message: "Nothing to update" }
+);
+
+const setRequestTypeActiveSchema = z
+  .object({
+    isActive: z.boolean(),
+    reason: z
+      .string()
+      .trim()
+      .min(10, "Give a reason of at least 10 characters")
+      .max(500, "Reason cannot exceed 500 characters"),
+  })
+  .strict();
+
+const listRequestTypesSchema = z
+  .object({
+    department: objectId.optional(),
+    includeInactive: z
+      .enum(["true", "false", "1", "0"])
+      .transform((value) => value === "true" || value === "1")
+      .optional(),
+    search: z.string().trim().max(150).optional(),
+  })
+  .strict();
+
+const requestTypeIdentifier = z.object({ id: objectId }).strict();
+
 // ===== Programmes =====
 
 const createProgramSchema = z
@@ -288,6 +346,11 @@ module.exports = {
   listDepartmentsSchema,
   departmentIdentifier,
   roleIdentifier,
+  createRequestTypeSchema,
+  updateRequestTypeSchema,
+  setRequestTypeActiveSchema,
+  listRequestTypesSchema,
+  requestTypeIdentifier,
   createProgramSchema,
   updateProgramSchema,
   setProgramActiveSchema,

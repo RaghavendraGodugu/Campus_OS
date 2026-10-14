@@ -154,6 +154,56 @@ const setDepartmentActive = asyncHandler(async (req, res) => {
   return sendSuccess(res, { message: "Department updated", data: department });
 });
 
+// ===== Request types =====
+
+const listRequestTypes = asyncHandler(async (req, res) => {
+  const result = await adminService.listRequestTypes({
+    query: req.validated.query,
+    user: req.user,
+  });
+
+  return sendSuccess(res, {
+    message: "Request types retrieved successfully",
+    data: result.requestTypes,
+  });
+});
+
+const createRequestType = asyncHandler(async (req, res) => {
+  const requestType = await adminService.createRequestType({
+    payload: req.validated.body,
+    user: req.user,
+    req,
+  });
+
+  return sendSuccess(res, {
+    status: 201,
+    message: "Request type created",
+    data: requestType,
+  });
+});
+
+const updateRequestType = asyncHandler(async (req, res) => {
+  const requestType = await adminService.updateRequestType({
+    requestTypeId: req.validated.params.id,
+    changes: req.validated.body,
+    user: req.user,
+    req,
+  });
+
+  return sendSuccess(res, { message: "Request type updated", data: requestType });
+});
+
+const setRequestTypeActive = asyncHandler(async (req, res) => {
+  const requestType = await adminService.setRequestTypeActive({
+    requestTypeId: req.validated.params.id,
+    changes: req.validated.body,
+    user: req.user,
+    req,
+  });
+
+  return sendSuccess(res, { message: "Request type updated", data: requestType });
+});
+
 // ===== Programmes =====
 
 const listPrograms = asyncHandler(async (req, res) => {
@@ -205,6 +255,10 @@ const setProgramActive = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  listRequestTypes,
+  createRequestType,
+  updateRequestType,
+  setRequestTypeActive,
   listUsers,
   createUser,
   updateUserDetails,

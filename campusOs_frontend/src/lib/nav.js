@@ -108,6 +108,13 @@ export const NAV_ITEMS = [
     permission: "user:read:institution",
   },
   {
+    to: "/admin/services",
+    label: "Services",
+    icon: "ListChecks",
+    section: "Administration",
+    permission: "request-type:manage:institution",
+  },
+  {
     to: "/admin/departments",
     label: "Departments",
     icon: "Building2",

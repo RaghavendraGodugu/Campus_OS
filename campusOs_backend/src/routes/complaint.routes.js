@@ -9,9 +9,18 @@
  */
 
 const express = require("express");
+const { z } = require("zod");
 
 const complaintController = require("../controllers/complaint.controller");
+const {
+  anonymousComplaintSchema,
+  trackingCodeSchema,
+} = require("../validators/complaint.validator");
 const { validate } = require("../middleware/validate");
+const {
+  anonymousFilingLimiter,
+  complaintTrackingLimiter,
+} = require("../middleware/rateLimit");
 const {
   authenticate,
   requirePermission,
@@ -51,6 +60,32 @@ router.post(
   requireStudentAccount,
   validate({ body: createComplaintSchema }),
   complaintController.fileComplaint
+);
+
+/**
+ * POST /api/v1/complaints/anonymous
+ *
+ * Declared before `/:id` so the word "anonymous" is never parsed as a
+ * reference, and deliberately outside `authenticate`.
+ */
+router.post(
+  "/complaints/anonymous",
+  anonymousFilingLimiter,
+  validate({ body: anonymousComplaintSchema }),
+  complaintController.fileAnonymousComplaint
+);
+
+/**
+ * GET /api/v1/complaints/track/:code
+ *
+ * Also public, also declared before `/:id`. Returns the state of a grievance
+ * and nothing else.
+ */
+router.get(
+  "/complaints/track/:code",
+  complaintTrackingLimiter,
+  validate({ params: z.object({ code: trackingCodeSchema.shape.code }).strict() }),
+  complaintController.trackComplaint
 );
 
 /** GET /api/v1/complaints/:id */

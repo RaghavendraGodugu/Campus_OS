@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 13 October 2026
-- **Verified:** 472 backend tests, 96 frontend tests, lint and build clean
+- **Verified:** 500 backend tests, 112 frontend tests, lint and build clean
 
 ---
 
@@ -72,7 +72,10 @@ means the note that follows it)
 - [x] Read via the directory API, and readable by any signed-in role because
       request forms need the list
 - [x] Request types: read, create, deactivate (`POST /request-types`)
-- [ ] Request-type administration screen
+- [x] Request-type administration screen, with the shape of each service's form
+      shown at a glance (questions, which are mandatory, documents required)
+- [x] Editing a service's name no longer wipes its questions — the edit schema
+      drops the create schema's defaults, and a test says so
 - [x] Departments: create, rename, retire and restore — refusing to retire one
       that still has staff, programmes or students on it
 - [x] Programmes: create, edit, retire and restore — refusing to retire one with
@@ -95,9 +98,21 @@ means the note that follows it)
 - [x] **Confidential by default**: staff see it only once assigned
 - [x] Acknowledgement SLA with escalation
 - [x] Resolve, reject and withdraw
-- [x] Anonymous reporting permitted for students
+- [x] **Anonymous reporting** at `/grievance`, public and unauthenticated: no
+      account, no name, and no IP address stored
+- [x] Tracking by code — returns the state of the report and nothing else: no
+      subject, no category, no description, no assigned officer
+- [x] The code is stored only as a SHA-256 hash, so a database dump is not a
+      list of working codes; shown once, and lookup tolerates a mistyped case or
+      a missing hyphen
+- [x] What anonymity costs is stated before the first keystroke, with the
+      signed-in route offered for anyone who needs a reply
+- [x] Confidential categories cannot be downgraded by the caller; the model
+      derives it and the API refuses the field
+- [~] Anonymous grievances reach an officer's queue, but there is no way to
+      reply to one — inherent to the feature, and said so on the page
 - [x] Screens for complainant and handler
-- [ ] Anonymous complaint tracking code (for following status without an account)
+- [ ] Anonymous complaint tracking code
 
 ## 8. Certificates
 
@@ -209,8 +224,8 @@ means the note that follows it)
 
 ## 15. Quality gates
 
-- [x] Backend: 472 tests passing
-- [x] Frontend: 96 tests passing
+- [x] Backend: 500 tests passing
+- [x] Frontend: 112 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep
@@ -252,6 +267,6 @@ audit, and the profile section for every role.
 
 ## What is not
 
-The anonymous complaint tracking code (an API with no interface); the
-request-type administration screen; student bulk import; and the proven Razorpay
-capture lifecycle. Those are the honest remainder.
+Student bulk import; a way for an office to reply to an anonymous grievance
+without breaking anonymity; and the proven Razorpay capture lifecycle. Those are
+the honest remainder.

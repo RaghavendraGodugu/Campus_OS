@@ -20,7 +20,14 @@ const Complaint = require("../models/Complaint");
 const Counter = require("../models/Counter");
 const { ApiError, ERROR_CODE } = require("../utils/ApiError");
 const { userHasPermission, P } = require("../utils/permissions");
-const { ROLES, COMPLAINT_STATUS, AUDIT_ACTION } = require("../config/constants");
+const crypto = require("crypto");
+
+const {
+  ROLES,
+  COMPLAINT_STATUS,
+  COMPLAINT_PRIORITY,
+  AUDIT_ACTION,
+} = require("../config/constants");
 const complaintWorkflow = require("../utils/complaintWorkflow");
 const slaPolicy = require("../utils/slaPolicy");
 const slaUtils = require("../utils/sla");
@@ -651,8 +658,47 @@ function slaStatusFor(complaint) {
   };
 }
 
+/**
+ * A tracking code: 16 characters from an alphabet with no look-alike glyphs, so
+ * it survives being read off a phone screen and copied from a printed note.
+ *
+ * 16 characters of base32 is 80 bits. Guessing one is not a practical attack,
+ * which is why the code is still hashed before storage — not to make guessing
+ * impossible, but so that a stolen database is not a list of working codes.
+ */
+function generateTrackingCode() {
+  // Excludes 0/O and 1/I/L.
+  const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 16; i += 1) {
+    code += alphabet[crypto.randomInt(alphabet.length)];
+  }
+  return `${code.slice(0, 8)}-${code.slice(8)}`;
+}
+
+/**
+ * SHA-256, so the same code always produces the same digest and a lookup is a
+ * single indexed query rather than a scan.
+ *
+ * The hyphen is a display convenience for reading a code aloud or copying it
+ * from a printed note, so it is stripped before hashing. A code that stops
+ * working because somebody dropped a hyphen is the kind of failure that makes a
+ * person conclude their report was lost.
+ */
+function hashTrackingCode(code) {
+  const normalised = String(code)
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+
+  return crypto.createHash("sha256").update(normalised).digest("hex");
+}
+
 module.exports = {
   fileComplaint,
+  fileAnonymousComplaint,
+  trackComplaint,
+  generateTrackingCode,
   listComplaints,
   getComplaint,
   transition,
@@ -664,3 +710,120 @@ module.exports = {
   canRead,
   generateReference,
 };
+
+// ===== Anonymous grievances and tracking =====
+
+/**
+ * File a grievance without an account.
+ *
+ * ## What the record deliberately does not have
+ *
+ * No student, no user, no email, no IP. The IP is tempting to keep for abuse
+ * investigation, but keeping it means the "anonymous" grievance is attached to
+ * a person by whoever holds the database — which is the one thing the person
+ * filing it was promised would not happen. Abuse is handled with rate limiting
+ * and by the fact that the endpoint returns a code, not a receipt.
+ *
+ * ## What the person gets instead
+ *
+ * A tracking code, once. It is the only handle on the record, and it is shown
+ * one time because the stored value is a hash and cannot be read back.
+ */
+async function fileAnonymousComplaint({ payload, req }) {
+  const reference = await generateReference();
+  const now = new Date();
+
+  const trackingCode = generateTrackingCode();
+
+  const complaint = await Complaint.create({
+    reference,
+    subject: payload.subject,
+    description: payload.description,
+    category: payload.category,
+    subCategory: payload.subCategory?.trim(),
+    // Set by the model's category rule, never by the caller. A person must not
+    // be able to downgrade a harassment report by passing a flag.
+    confidential:
+      ["SAFETY", "HARASSMENT", "MISCONDUCT"].includes(payload.category) || undefined,
+    isAnonymous: true,
+    student: null,
+    trackingCodeHash: hashTrackingCode(trackingCode),
+    status: COMPLAINT_STATUS.OPEN,
+    submittedAt: now,
+    priority: COMPLAINT_PRIORITY.HIGH,
+    statusHistory: [
+      {
+        from: null,
+        to: COMPLAINT_STATUS.OPEN,
+        actor: null,
+        actorRole: null,
+        at: now,
+      },
+    ],
+  });
+
+  // Recorded without an actor, because there is not one. A null actor is the
+  // honest entry; inventing a system user would be a lie in the audit trail.
+  await auditService.record({
+    action: AUDIT_ACTION.CREATE,
+    entity: "Complaint",
+    entityId: complaint._id,
+    entityRef: complaint.reference,
+    metadata: { anonymous: true, category: complaint.category },
+    req,
+  });
+
+  return {
+    reference: complaint.reference,
+    trackingCode,
+    confidential: complaint.confidential,
+    notice:
+      "Write this code down now. It is the only way to check on this report, " +
+      "and it cannot be recovered or sent to you.",
+  };
+}
+
+/**
+ * Look up a grievance by tracking code.
+ *
+ * Returns the state of the matter and nothing else — no subject, no category,
+ * no description, no assigned officer, no internal notes, and no dates beyond
+ * when it arrived and when it last moved.
+ *
+ * That restraint is the feature. Someone who has been handed a tracking code
+ * is being shown that a grievance exists; they are not being given the right to
+ * read it. The complainant chose anonymity precisely so that the *content* would
+ * not follow them around.
+ */
+async function trackComplaint({ code }) {
+  const hashed = hashTrackingCode(code);
+
+  const complaint = await Complaint.findOne({ trackingCodeHash: hashed })
+    .select(
+      "+trackingCodeHash reference status submittedAt statusHistory confidential priority"
+    )
+    .lean();
+
+  if (!complaint) return { found: false };
+
+  const lastActivity = complaint.statusHistory?.length
+    ? complaint.statusHistory[complaint.statusHistory.length - 1]?.at
+    : complaint.submittedAt;
+
+  return {
+    found: true,
+    reference: complaint.reference,
+    status: complaint.status,
+    submittedAt: complaint.submittedAt,
+    lastActivityAt: lastActivity ?? complaint.submittedAt,
+    // The category is withheld. It is the single most identifying field on a
+    // grievance, and someone holding a code is not necessarily its author.
+    confidential: complaint.confidential,
+    resolved: ["RESOLVED", "REJECTED", "WITHDRAWN"].includes(complaint.status),
+    /**
+     * A count, not the text. Enough to tell whether anything is happening
+     * without describing what was said.
+     */
+    updateCount: Math.max(0, (complaint.statusHistory?.length ?? 1) - 1),
+  };
+}

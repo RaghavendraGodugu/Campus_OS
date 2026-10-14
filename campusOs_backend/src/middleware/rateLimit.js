@@ -127,6 +127,29 @@ const refreshLimiter = createLimiter({
 });
 
 /** Broad ceiling across the API. */
+/**
+ * The public grievance endpoints.
+ *
+ * Filing one is unauthenticated by definition, so the only thing standing
+ * between the endpoint and an inbox of spam is this. Tracking is read-only and
+ * returns almost nothing, but a tight limit is still worth having: without one,
+ * the codes are being probed, and a probe that succeeds is a disclosure about
+ * somebody else's grievance.
+ */
+const anonymousFilingLimiter = createLimiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  message: "Too many anonymous reports from this connection. Please try later.",
+  keyGenerator: defaultKeyGenerator,
+});
+
+const complaintTrackingLimiter = createLimiter({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  message: "Too many lookups. Please try again in a few minutes.",
+  keyGenerator: defaultKeyGenerator,
+});
+
 const globalLimiter = createLimiter({
   windowMs: 60 * 1000,
   limit: 300,
@@ -139,6 +162,8 @@ module.exports = {
   loginLimiter,
   loginPerAccountLimiter,
   refreshLimiter,
+  anonymousFilingLimiter,
+  complaintTrackingLimiter,
   globalLimiter,
   defaultKeyGenerator,
   emailKeyGenerator,

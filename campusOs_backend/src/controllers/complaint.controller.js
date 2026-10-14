@@ -6,6 +6,7 @@
  * no way to widen access without editing that service, which is the point.
  */
 
+const { ApiError } = require("../utils/ApiError");
 const complaintService = require("../services/complaint.service");
 const complaintWorkflow = require("../utils/complaintWorkflow");
 const { asyncHandler } = require("../utils/asyncHandler");
@@ -178,7 +179,54 @@ const getSlaPolicy = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * POST /api/v1/complaints/anonymous
+ *
+ * No session, no CSRF: there is no account to protect and no cookie to forge.
+ * The trade is rate limiting and a code, and the trade is stated to the person
+ * on the page before they file.
+ */
+const fileAnonymousComplaint = asyncHandler(async (req, res) => {
+  const result = await complaintService.fileAnonymousComplaint({
+    payload: req.validated.body,
+    req,
+  });
+
+  return sendCreated(res, {
+    message: "Report filed",
+    data: {
+      reference: result.reference,
+      confidential: result.confidential,
+    },
+    meta: {
+      // Outside `data`: the one time this is visible, and never stored in a
+      // form that could be read back.
+      trackingCode: result.trackingCode,
+      notice: result.notice,
+    },
+  });
+});
+
+/** GET /api/v1/complaints/track/:code — status only, never the content. */
+const trackComplaint = asyncHandler(async (req, res) => {
+  const result = await complaintService.trackComplaint({
+    code: req.validated.params.code,
+  });
+
+  if (!result.found) {
+    // The same wording the certificate verification uses, and for the same
+    // reason: an endpoint that says "no such code" versus "wrong format"
+    // distinguishes nothing useful, and confirming which codes exist is itself
+    // a disclosure.
+    throw ApiError.notFound("No report matches that tracking code");
+  }
+
+  return sendSuccess(res, { message: "Report found", data: result });
+});
+
 module.exports = {
+  fileAnonymousComplaint,
+  trackComplaint,
   fileComplaint,
   listComplaints,
   getComplaint,

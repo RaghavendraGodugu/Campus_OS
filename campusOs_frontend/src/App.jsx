@@ -9,9 +9,11 @@ import Profile from "./pages/Profile";
 import ApplyCertificate from "./pages/ApplyCertificate";
 import VerifyCertificate from "./pages/VerifyCertificate";
 import SetPassword from "./pages/SetPassword";
+import Grievance from "./pages/Grievance";
 import People from "./pages/admin/People";
 import Departments from "./pages/admin/Departments";
 import Programmes from "./pages/admin/Programmes";
+import RequestTypes from "./pages/admin/RequestTypes";
 import Announcements from "./pages/Announcements";
 import AnnouncementDetail from "./pages/AnnouncementDetail";
 import Complaints from "./pages/Complaints";
@@ -43,6 +45,10 @@ export default function App() {
       {/* Public: no session, and deliberately outside the signed-in shell. A
           bank counter is not going to have a CampusOS login. */}
       <Route path="/verify" element={<VerifyCertificate />} />
+
+      {/* Public, like /verify: the person who most needs to report something is
+          often the person least able to file it under their own name. */}
+      <Route path="/grievance" element={<Grievance />} />
 
       <Route path="/login" element={<Login />} />
 
@@ -78,6 +84,16 @@ export default function App() {
           element={
             <RequirePermission permissions={["user:read:institution"]}>
               <People />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="admin/services"
+          element={
+            <RequirePermission
+              permissions={["request-type:manage:institution"]}
+            >
+              <RequestTypes />
             </RequirePermission>
           }
         />

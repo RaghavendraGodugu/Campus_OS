@@ -40,12 +40,50 @@ const complaintSchema = new mongoose.Schema(
       index: true,
     },
 
-    /** Complainant. The owner of the record. */
+    /**
+     * Complainant. The owner of the record.
+     *
+     * Not always present: an anonymous grievance is filed without an account,
+     * and there is deliberately nothing else on the record that identifies who
+     * wrote it. The requirement is therefore conditional rather than absolute.
+     */
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
-      required: [true, "Complaint must belong to a student"],
+      default: null,
       index: true,
+    },
+
+    /**
+     * Filed without an account.
+     *
+     * The consequences are real and are stated to the person before they file,
+     * not discovered afterwards: there is no one to contact, nothing can be
+     * discussed by email, and the office cannot ask a follow-up question.
+     */
+    isAnonymous: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
+    /**
+     * Hash of the tracking code, never the code itself.
+     *
+     * Stored hashed so that a database dump does not hand over working
+     * tracking codes — with them, anyone could read the status of somebody
+     * else's grievance. The code itself is shown once, at filing, and the
+     * complainant keeps it. Lookups hash what they type and match on the
+     * digest, so the stored value is useless without the code.
+     *
+     * Indexed, because it is a lookup key.
+     */
+    trackingCodeHash: {
+      type: String,
+      default: null,
+      index: true,
+      sparse: true,
+      select: false,
     },
 
     /**
@@ -168,8 +206,17 @@ const complaintSchema = new mongoose.Schema(
           default: null,
         },
         to: { type: String, required: true, enum: { values: COMPLAINT_STATUS_VALUES } },
-        actor: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-        actorRole: { type: String, required: true },
+        /**
+         * Who moved it.
+         *
+         * Not always anybody: the opening entry of an anonymous grievance was
+         * made by whoever filed it, and there is deliberately no record of
+         * them. Those two fields are therefore optional, and their absence is
+         * itself the fact — the entry records that the report arrived with no
+         * one attached.
+         */
+        actor: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+        actorRole: { type: String, default: null },
         note: {
           type: String,
           trim: true,
@@ -340,7 +387,32 @@ complaintSchema.index(
  * Every read filters on `confidential`; this index serves both the
  * `confidential: false` list and the restricted list.
  */
+/**
+ * A grievance that is not anonymous must belong to somebody; an anonymous one
+ * must not.
+ *
+ * Expressed as a validator rather than a field-level `required`, because the
+ * rule is about the pair. Field-level requiredness cannot say "this one, unless
+ * that flag is set".
+ */
+complaintSchema.pre("validate", function hasComplainant() {
+  // Synchronous: Mongoose's document middleware here takes no callback, so
+  // throwing is how a hook reports a problem.
+  if (this.isAnonymous) {
+    if (this.student) {
+      throw new Error("An anonymous grievance cannot be tied to a student account");
+    }
+    return;
+  }
+
+  if (!this.student) {
+    throw new Error("Complaint must belong to a student");
+  }
+});
+
 complaintSchema.index({ confidential: 1, department: 1, status: 1 });
+/** The officer's queue for anonymous grievances. */
+complaintSchema.index({ isAnonymous: 1, status: 1, submittedAt: 1 });
 
 const Complaint = mongoose.model("Complaint", complaintSchema);
 

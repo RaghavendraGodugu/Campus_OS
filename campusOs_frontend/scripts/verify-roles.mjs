@@ -90,6 +90,7 @@ const ROLES = [
       ["people", "/admin/people", "ok"],
       ["departments", "/admin/departments", "ok"],
       ["programmes", "/admin/programmes", "ok"],
+      ["services", "/admin/services", "ok"],
       ["reports", "/reports", "ok"],
       ["audit", "/audit", "ok"],
     ],
@@ -301,16 +302,34 @@ async function checkPublicVerification(port) {
     `/genuine|verification code/i.test(document.body.innerText)`,
   );
   const stayedOnVerify = await evaluate(`location.pathname === "/verify"`);
+
+  // The second public page. Structurally the same risk as /verify: it sits
+  // outside the shell, so a guard added to it "for consistency" would be
+  // invisible to every role sweep and would quietly lock out exactly the people
+  // it is for.
+  await go("/grievance");
+  const grievanceReachable = await evaluate(
+    `/what anonymity costs|tracking code/i.test(document.body.innerText)`,
+  );
+  const stayedOnGrievance = await evaluate(
+    `location.pathname === "/grievance"`,
+  );
   const signInShown = await evaluate(
     `/password/i.test(document.body.innerText)`,
   );
 
   await close();
 
-  const good = reachable && stayedOnVerify && !signInShown;
+  const good =
+    reachable &&
+    stayedOnVerify &&
+    !signInShown &&
+    grievanceReachable &&
+    stayedOnGrievance;
 
   console.log(
-    `\nPUBLIC — no session\n   ${good ? "PASS" : "FAIL"}  verify (public) [${good ? "ok" : "error"}] reachable without signing in`,
+    `\nPUBLIC — no session\n   ${reachable && stayedOnVerify && !signInShown ? "PASS" : "FAIL"}  verify (public) [ok] reachable without signing in` +
+      `\n   ${grievanceReachable && stayedOnGrievance ? "PASS" : "FAIL"}  grievance (public) [ok] reachable without signing in`,
   );
 
   if (!good) console.log(`        saw: ${text.slice(0, 120)}`);

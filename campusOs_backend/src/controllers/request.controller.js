@@ -9,6 +9,7 @@
 const requestService = require("../services/request.service");
 const workflowService = require("../services/workflow.service");
 const RequestType = require("../models/RequestType");
+const adminService = require("../services/admin.service");
 const User = require("../models/User");
 const { asyncHandler } = require("../utils/asyncHandler");
 const {
@@ -20,7 +21,6 @@ const {
 const { ApiError, ERROR_CODE } = require("../utils/ApiError");
 const { userHasPermission, P } = require("../utils/permissions");
 const workflow = require("../utils/workflow");
-const auditService = require("../services/audit.service");
 
 /**
  * POST /api/v1/requests
@@ -254,27 +254,19 @@ const getRequestType = asyncHandler(async (req, res) => {
  * accepts becomes the validation contract every future submission is checked
  * against, so the schema is strict.
  */
+/**
+ * Kept at the original path for the existing clients, but the rules now live in
+ * one place.
+ *
+ * This route used to talk to the model directly, which meant it skipped the
+ * duplicate-name/code check the administration screen uses. Two ways to create
+ * one thing with different rules is how a catalogue ends up with two services
+ * called "Bonafide".
+ */
 const createRequestType = asyncHandler(async (req, res) => {
-  const payload = req.validated.body;
-
-  // SELECT fields must declare their options, otherwise the submission form
-  // would offer an empty choice list.
-  payload.fields.forEach((field) => {
-    if (field.type === "SELECT" && !field.options?.length) {
-      throw ApiError.badRequest(
-        `Field "${field.name}" is a SELECT but declares no options`
-      );
-    }
-  });
-
-  const requestType = await RequestType.create(payload);
-
-  await auditService.record({
-    action: "CREATE",
-    entity: "RequestType",
-    entityId: requestType._id,
-    entityRef: requestType.code,
-    actor: req.user,
+  const requestType = await adminService.createRequestType({
+    payload: req.validated.body,
+    user: req.user,
     req,
   });
 

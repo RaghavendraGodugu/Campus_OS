@@ -45,6 +45,11 @@ const {
   setProgramActiveSchema,
   listProgramsSchema,
   programIdentifier,
+  createRequestTypeSchema,
+  updateRequestTypeSchema,
+  setRequestTypeActiveSchema,
+  listRequestTypesSchema,
+  requestTypeIdentifier,
 } = require("../validators/admin.validator");
 
 const router = express.Router();
@@ -152,6 +157,43 @@ router.post(
   requirePermission(P.DEPARTMENT_MANAGE),
   validate({ params: departmentIdentifier, body: setDepartmentActiveSchema }),
   adminController.setDepartmentActive
+);
+
+// ===== Request types =====
+
+router.get(
+  "/admin/request-types",
+  authenticate,
+  requirePermission(P.REQUEST_TYPE_MANAGE),
+  validate({ query: listRequestTypesSchema }),
+  adminController.listRequestTypes
+);
+
+router.post(
+  "/admin/request-types",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.REQUEST_TYPE_MANAGE),
+  validate({ body: createRequestTypeSchema }),
+  adminController.createRequestType
+);
+
+router.patch(
+  "/admin/request-types/:id",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.REQUEST_TYPE_MANAGE),
+  validate({ params: requestTypeIdentifier, body: updateRequestTypeSchema }),
+  adminController.updateRequestType
+);
+
+router.post(
+  "/admin/request-types/:id/active",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.REQUEST_TYPE_MANAGE),
+  validate({ params: requestTypeIdentifier, body: setRequestTypeActiveSchema }),
+  adminController.setRequestTypeActive
 );
 
 // ===== Programmes =====

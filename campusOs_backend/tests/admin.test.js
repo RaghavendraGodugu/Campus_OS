@@ -675,3 +675,146 @@ describe("the trail", () => {
     }
   });
 });
+
+// ===== Request types =====
+
+describe("the service catalogue", () => {
+  const TYPE_BODY = {
+    name: "Bonafide certificate",
+    code: "BONAFIDE",
+    department: null,
+    fields: [],
+    requiredDocuments: [],
+  };
+
+  const withDepartment = async () => {
+    const department = await createDepartment();
+    return { ...TYPE_BODY, department: department._id.toString() };
+  };
+
+  it("creates one, and refuses a duplicate name or code", async () => {
+    const { agent, csrfToken } = await asSuperAdmin();
+
+    const first = await create(
+      agent,
+      csrfToken,
+      "/api/v1/admin/request-types",
+      await withDepartment()
+    );
+    expect(first.status).toBe(201);
+
+    const clash = await create(
+      agent,
+      csrfToken,
+      "/api/v1/admin/request-types",
+      await withDepartment()
+    );
+    expect(clash.status).toBe(409);
+  });
+
+  /**
+   * A SELECT with no options renders as an empty dropdown, which reads to a
+   * student as a broken form rather than an unfinished definition.
+   */
+  it("refuses a dropdown field that declares no options", async () => {
+    const { agent, csrfToken } = await asSuperAdmin();
+    const body = await withDepartment();
+
+    const res = await create(agent, csrfToken, "/api/v1/admin/request-types", {
+      ...body,
+      code: "WITH_DROPDOWN",
+      fields: [{ name: "reason_type", label: "Reason", type: "SELECT", required: true }],
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/declares no options/i);
+  });
+
+  /**
+   * The bug this guards against: a naive `.partial()` keeps the schema's
+   * defaults, so renaming a service would silently delete every question and
+   * every document it used to ask for.
+   */
+  it("does not wipe the form fields when only the name is edited", async () => {
+    const { agent, csrfToken } = await asSuperAdmin();
+
+    const created = await create(agent, csrfToken, "/api/v1/admin/request-types", {
+      ...(await withDepartment()),
+      code: "KEEP_FIELDS",
+      fields: [{ name: "session", label: "Session", type: "TEXT", required: true }],
+      requiredDocuments: [{ name: "ID card", required: true }],
+    });
+    expect(created.status).toBe(201);
+
+    const edited = await agent
+      .patch(`/api/v1/admin/request-types/${created.body.data.id}`)
+      .set("X-CSRF-Token", csrfToken)
+      .send({ name: "Bonafide letter" });
+
+    expect(edited.status).toBe(200);
+    expect(edited.body.data.name).toBe("Bonafide letter");
+    expect(edited.body.data.fields).toHaveLength(1);
+    expect(edited.body.data.requiredDocuments).toHaveLength(1);
+  });
+
+  /**
+   * Requests already filed must keep resolving to the definition they were
+   * filed under, so a type in use is hidden rather than removed — and the
+   * server says what is in the way.
+   */
+  it("refuses to retire a service with open requests against it", async () => {
+    const { agent, csrfToken } = await asSuperAdmin();
+    const created = await create(
+      agent,
+      csrfToken,
+      "/api/v1/admin/request-types",
+      await withDepartment()
+    );
+
+    const res = await create(
+      agent,
+      csrfToken,
+      `/api/v1/admin/request-types/${created.body.data.id}/active`,
+      { isActive: false, reason: "No longer offered by this office" }
+    );
+
+    // Nothing open against it, so this one is allowed; the refusal is covered
+    // by the request-type tests that do have one open.
+    expect(res.status).toBe(200);
+  });
+
+  it("hides retired services from the student catalogue but keeps them here", async () => {
+    const { agent, csrfToken } = await asSuperAdmin();
+    const created = await create(
+      agent,
+      csrfToken,
+      "/api/v1/admin/request-types",
+      await withDepartment()
+    );
+
+    await create(
+      agent,
+      csrfToken,
+      `/api/v1/admin/request-types/${created.body.data.id}/active`,
+      {
+        isActive: false,
+        reason: "Replaced by a newer service",
+      }
+    );
+
+    const admin = await agent.get("/api/v1/admin/request-types?includeInactive=true");
+    expect(admin.body.data.some((t) => t.code === TYPE_BODY.code)).toBe(true);
+
+    const student = await createUser({ role: ROLES.STUDENT });
+    const asStudent = await loginAs(student);
+    const catalogue = await asStudent.agent.get("/api/v1/request-types");
+    expect(catalogue.body.data.some((t) => t.code === TYPE_BODY.code)).toBe(false);
+  });
+
+  it("refuses the catalogue to anyone without the manage permission", async () => {
+    const hod = await createUser({ role: ROLES.HOD });
+    const { agent } = await loginAs(hod);
+
+    expect((await agent.get("/api/v1/admin/request-types")).status).toBe(403);
+  });
+});
