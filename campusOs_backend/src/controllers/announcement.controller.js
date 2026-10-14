@@ -6,6 +6,7 @@
  */
 
 const announcementService = require("../services/announcement.service");
+const announcementImageService = require("../services/announcementImage.service");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { sendSuccess, sendCreated, sendPaginated } = require("../utils/response");
 
@@ -29,6 +30,15 @@ function present(announcement) {
         }
       : null,
     hasAttachment: Boolean(announcement.attachment?.storageKey),
+    /**
+     * Only the *type*, never the key.
+     *
+     * The UI needs to know whether to render the attachment inline as an image
+     * or offer it as a download. The storage key is never sent to a client: it
+     * is an unguessable path, and leaking it to anyone who can read the
+     * announcement would leak it to everyone in the audience.
+     */
+    attachmentMimeType: announcement.attachment?.mimeType ?? null,
     notifiedCount: announcement.notifiedCount,
     fanOutTruncated: announcement.fanOutTruncated,
     createdAt: announcement.createdAt,
@@ -130,6 +140,32 @@ const pinAnnouncement = asyncHandler(async (req, res) => {
 });
 
 /** GET /api/v1/announcements/:id/attachment — private download. */
+/**
+ * POST /api/v1/announcements/:id/image
+ *
+ * Separate from create so the create endpoint stays strict JSON.
+ */
+const uploadImage = asyncHandler(async (req, res) => {
+  const attachment = await announcementImageService.attachImage({
+    announcementId: req.params.id,
+    file: req.file,
+    user: req.user,
+    req,
+  });
+
+  res.status(201).json({ success: true, data: { attachment } });
+});
+
+/** DELETE /api/v1/announcements/:id/image */
+const deleteImage = asyncHandler(async (req, res) => {
+  const removed = await announcementImageService.removeImage({
+    announcementId: req.params.id,
+    user: req.user,
+  });
+
+  res.json({ success: true, data: { removed } });
+});
+
 const downloadAttachment = asyncHandler(async (req, res) => {
   const resolved = await announcementService.resolveAttachment({
     user: req.user,
@@ -160,4 +196,6 @@ module.exports = {
   archiveAnnouncement,
   pinAnnouncement,
   downloadAttachment,
+  uploadImage,
+  deleteImage,
 };

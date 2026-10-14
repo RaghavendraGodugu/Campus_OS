@@ -13,6 +13,7 @@ const announcementController = require("../controllers/announcement.controller")
 const { validate } = require("../middleware/validate");
 const { authenticate, requirePermission } = require("../middleware/auth");
 const { csrfProtection } = require("../middleware/csrf");
+const { parseSingleFile, requireFile } = require("../middleware/upload");
 const { P } = require("../utils/permissions");
 const {
   createAnnouncementSchema,
@@ -40,6 +41,33 @@ router.get(
   authenticate,
   validate({ query: listAnnouncementsSchema }),
   announcementController.listAnnouncements
+);
+
+/**
+ * POST /api/v1/announcements/:id/image
+ *
+ * Officers only, and declared before `/:id` for the same reason as the
+ * attachment route below: so the literal segment is never captured as an id.
+ */
+router.post(
+  "/announcements/:id/image",
+  authenticate,
+  csrfProtection,
+  parseSingleFile("image"),
+  requireFile,
+  requirePermission(P.ANNOUNCEMENT_MANAGE),
+  validate({ params: announcementIdentifier }),
+  announcementController.uploadImage
+);
+
+/** DELETE /api/v1/announcements/:id/image */
+router.delete(
+  "/announcements/:id/image",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.ANNOUNCEMENT_MANAGE),
+  validate({ params: announcementIdentifier }),
+  announcementController.deleteImage
 );
 
 /**

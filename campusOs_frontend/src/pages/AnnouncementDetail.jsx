@@ -28,6 +28,15 @@ export default function AnnouncementDetail() {
     queryFn: () => apiGet(`/announcements/${reference}`),
   });
 
+  // The envelope nests the record one level deeper: data.announcement.
+  // Reading data.data alone yields an object with no title, no body and no
+  // audience — which renders as a blank notice rather than as an error.
+  const announcement = data?.data?.announcement;
+  const isImage = Boolean(
+    announcement?.hasAttachment &&
+    announcement?.attachmentMimeType?.startsWith("image/"),
+  );
+
   const download = async () => {
     // A blob keeps a private document inside the app, so an authorisation
     // failure surfaces as a message rather than a blank tab.
@@ -57,8 +66,6 @@ export default function AnnouncementDetail() {
         onRetry={() => refetch()}
       />
     );
-
-  const announcement = data.data;
 
   return (
     <article className="mx-auto max-w-3xl space-y-6">
@@ -91,12 +98,35 @@ export default function AnnouncementDetail() {
         </p>
       </header>
 
+      {/*
+        Pointed straight at the endpoint rather than at a blob URL.
+
+        The endpoint already authenticates the reader and applies the same
+        audience rule as the notice itself, and an <img> on the same origin
+        sends the session cookie without help. So there is nothing to fetch,
+        nothing to keep, and no object URL to revoke — and blob URLs proved
+        genuinely fragile here: under React's development double-mount, a
+        cleanup revokes the URL and the remount is handed the same cached,
+        now-dead one. The image then fails to decode with no error anywhere.
+      */}
+      {isImage && (
+        <figure className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-ink-200/70 dark:bg-surface dark:ring-ink-600">
+          <img
+            src={`/api/v1/announcements/${reference}/attachment`}
+            alt={`Image attached to the notice "${announcement.title}"`}
+            loading="lazy"
+            decoding="async"
+            className="max-h-[28rem] w-full bg-ink-50 object-cover dark:bg-ink-100/50"
+          />
+        </figure>
+      )}
+
       <div className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="space-y-4 text-sm leading-relaxed whitespace-pre-wrap text-ink-700">
           {announcement.body}
         </div>
 
-        {announcement.hasAttachment && (
+        {announcement.hasAttachment && !isImage && (
           <div className="mt-6 border-t border-ink-100 dark:border-ink-700/50 pt-4">
             <Button variant="secondary" onClick={download}>
               <Paperclip className="size-4" aria-hidden="true" />

@@ -206,6 +206,29 @@ export async function apiDelete(path, config) {
 }
 
 /**
+ * POST a multipart body with one file.
+ *
+ * Axios sets the boundary itself when the body is FormData, so the caller must
+ * NOT set Content-Type by hand — doing so drops the boundary and the server
+ * sees an empty body, which surfaces as "no file was uploaded" rather than as
+ * anything resembling the real problem.
+ *
+ * @param {string} path
+ * @param {{field?: string, file: File}} args
+ * @param {object} [config]
+ */
+export async function apiUpload(path, { field = "file", file }, config) {
+  const body = new FormData();
+  body.append(field, file);
+
+  const response = await http.post(path, body, {
+    ...config,
+    headers: { ...(config?.headers ?? {}), "Content-Type": undefined },
+  });
+  return response.data;
+}
+
+/**
  * Fetch a private document and hand back a blob URL.
  *
  * Certificates and receipts are stored privately and served only after the

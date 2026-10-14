@@ -250,6 +250,18 @@ means the note that follows it)
       provider so components cannot disagree about it
 - [x] Every surface, status colour, card, field and callout carries a dark
       variant; verified in a real browser rather than by reading the classes
+- [x] **Announcement image upload.** An image can be attached to a notice and is
+      rendered inline for everyone in the audience. Images route to Cloudinary's
+      `image` pipeline, so they are transcoded on delivery; the stored MIME type
+      is sniffed from the bytes, never taken from the client's label, and the
+      allowlist is JPEG and PNG only because an announcement image is displayed
+      inline and a PDF has nothing to display
+- [x] **Fixed: the announcement detail page rendered a blank notice.** The API
+      nests the record under `data.announcement` while every other endpoint
+      spreads it into `data`, and the page read `data.data`. Nothing threw — it
+      rendered an empty notice with em-dashes and reported itself healthy. Two
+      regression tests now cover the envelope, and one was confirmed to fail
+      against the old code
 - [x] Responsive at 375px and 320px, checked automatically: the browser sweep
       now fails the build if any page scrolls sideways at either width, and
       signs in first so it cannot pass by measuring the login page five times

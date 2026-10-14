@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { apiGet, apiPost } from "../api/client";
+import { apiGet, apiPost, apiUpload } from "../api/client";
 import Button from "../components/ui/Button";
 import Field, { inputClass } from "../components/ui/Field";
 import { Card } from "../components/ui/Card";
@@ -49,13 +50,81 @@ export default function ComposeAnnouncement() {
   const [department, setDepartment] = useState("");
   const [errors, setErrors] = useState({});
 
+  /**
+   * The chosen image, and a local preview of it.
+   *
+   * The preview comes from the File the browser already has, so the officer
+   * sees the image before it is uploaded rather than after. The object URL is
+   * revoked when it is replaced or the component unmounts — leaking one per
+   * selection pins the whole image in memory for the life of the tab.
+   */
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [imageNote, setImageNote] = useState("");
+
+  /**
+   * The object URL lives in state for rendering and in a ref for cleanup.
+   * Reading a ref during render is not allowed, and rendering from state is.
+   */
+  const previewRef = useRef(null);
+
+  // Revoke on unmount, or the last previewed image stays in memory for the
+  // life of the tab.
+  useEffect(
+    () => () => {
+      if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    },
+    [],
+  );
+
+  const chooseImage = (event) => {
+    const file = event.target.files?.[0] ?? null;
+
+    if (previewRef.current) {
+      URL.revokeObjectURL(previewRef.current);
+      previewRef.current = null;
+    }
+    setPreview(null);
+    setImageNote("");
+
+    if (!file) {
+      setImage(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    previewRef.current = url;
+    setPreview(url);
+    setImage(file);
+  };
+
   const departments = useQuery({
     queryKey: ["departments"],
     queryFn: () => apiGet("/departments"),
   });
 
   const post = useMutation({
-    mutationFn: (payload) => apiPost("/announcements", payload),
+    mutationFn: async (payload) => {
+      const response = await apiPost("/announcements", payload);
+
+      // The image is a second request. The notice is already published by the
+      // time this runs, so a failed image must not undo it — the officer gets
+      // the notice plus an explanation, rather than losing both.
+      if (payload.image) {
+        try {
+          await apiUpload(
+            `/announcements/${response.data.announcement.id}/image`,
+            { field: "image", file: payload.image },
+          );
+        } catch {
+          setImageNote(
+            "The notice was posted, but the image could not be uploaded.",
+          );
+        }
+      }
+
+      return response;
+    },
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["announcements"] });
       navigate(`/announcements/${response.data.announcement.reference}`);
@@ -73,7 +142,7 @@ export default function ComposeAnnouncement() {
     if (scope === "ROLES") audience.roles = roles;
     if (scope === "DEPARTMENT") audience.department = department;
 
-    post.mutate({ title, body, priority, pinned, audience });
+    post.mutate({ title, body, priority, pinned, audience, image });
   };
 
   return (
@@ -137,6 +206,58 @@ export default function ComposeAnnouncement() {
                 </label>
               </div>
             </div>
+          </div>
+        </Card>
+
+        {/*
+          The image is optional and separate. It is not part of the notice
+          itself, so it gets its own card rather than a field buried at the
+          bottom of the text ones.
+        */}
+        <Card
+          title="Image"
+          description="Optional. Shown above the notice for everyone in the audience."
+        >
+          <div className="space-y-4">
+            <label
+              htmlFor="announcement-image"
+              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-card border border-dashed border-ink-300 bg-ink-50/60 px-6 py-8 text-center transition-colors hover:border-brand-600 hover:bg-brand-50/50 focus-within:border-brand-600 dark:border-ink-600 dark:bg-ink-100/40 dark:hover:border-brand-500 dark:hover:bg-brand-500/10"
+            >
+              <ImageIcon
+                className="size-6 text-ink-500 dark:text-ink-400"
+                aria-hidden="true"
+              />
+              <span className="text-sm font-medium text-ink-800 dark:text-ink-100">
+                {image ? image.name : "Choose a JPEG or PNG"}
+              </span>
+              <span className="text-xs text-ink-500 dark:text-ink-400">
+                Up to 5 MB. Square or wide images work best.
+              </span>
+              <input
+                id="announcement-image"
+                type="file"
+                accept="image/jpeg,image/png"
+                onChange={chooseImage}
+                className="sr-only"
+              />
+            </label>
+
+            {image && preview && (
+              <img
+                src={preview}
+                alt={`Preview of the image chosen for this notice: ${image.name}`}
+                className="max-h-56 w-full rounded-card object-cover"
+              />
+            )}
+
+            {imageNote && (
+              <p
+                role="status"
+                className="text-sm text-accent-700 dark:text-accent-300"
+              >
+                {imageNote}
+              </p>
+            )}
           </div>
         </Card>
 
