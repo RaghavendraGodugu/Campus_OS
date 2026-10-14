@@ -76,19 +76,19 @@ export default function RequestDetail() {
     <div className="mx-auto max-w-4xl space-y-6">
       <Link
         to={can("request:read:assigned") ? "/management/requests" : "/requests"}
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-800"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         All requests
       </Link>
 
-      <header className="rounded-xl bg-white px-6 py-5 shadow-sm ring-1 ring-ink-200/70">
+      <header className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-lg font-semibold tracking-tight text-ink-900">
               {request.title}
             </h1>
-            <p className="mt-1 text-xs text-ink-500">
+            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
               {request.reference}
               {request.requestType?.name && ` · ${request.requestType.name}`}
               {request.department?.name && ` · ${request.department.name}`}
@@ -103,7 +103,7 @@ export default function RequestDetail() {
           </p>
         )}
 
-        <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-ink-100 pt-4 sm:grid-cols-4">
+        <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-ink-100 dark:border-ink-700/50 pt-4 sm:grid-cols-4">
           <Detail label="Raised" value={formatDateTime(request.createdAt)} />
           <Detail label="Due" value={formatDateTime(request.dueAt)} />
           <Detail
@@ -126,7 +126,7 @@ export default function RequestDetail() {
               .filter(([key]) => !key.startsWith("__"))
               .map(([key, value]) => (
                 <div key={key}>
-                  <dt className="text-xs tracking-wide text-ink-500 uppercase">
+                  <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
                     {humanise(key)}
                   </dt>
                   <dd className="mt-0.5 text-sm text-ink-800">
@@ -194,7 +194,7 @@ export default function RequestDetail() {
               <div className="flex flex-col items-center">
                 <span className="mt-1.5 size-2.5 shrink-0 rounded-full bg-brand-600" />
                 {index < history.length - 1 && (
-                  <span className="mt-1 w-px flex-1 bg-ink-200" />
+                  <span className="mt-1 w-px flex-1 bg-ink-200 dark:bg-ink-700/50" />
                 )}
               </div>
               <div className="pb-1">
@@ -202,7 +202,7 @@ export default function RequestDetail() {
                   {entry.from ? `${humanise(entry.from)} → ` : ""}
                   {humanise(entry.to)}
                 </p>
-                <p className="mt-0.5 text-xs text-ink-500">
+                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                   {formatDateTime(entry.at)}
                   {entry.actorRole && ` · ${humanise(entry.actorRole)}`}
                   {entry.note && ` · ${entry.note}`}
@@ -261,7 +261,7 @@ export default function RequestDetail() {
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               placeholder="Add something for the handler…"
-              className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 placeholder:text-ink-400 focus:ring-2 focus:ring-brand-600"
+              className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 dark:ring-ink-500 placeholder:text-ink-400 focus:ring-2 focus:ring-brand-600"
             />
             <div className="flex justify-end">
               <Button
@@ -315,7 +315,7 @@ function AssignPanel({ request, staff, onDone }) {
             id="assignee"
             value={userId}
             onChange={(event) => setUserId(event.target.value)}
-            className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 focus:ring-2 focus:ring-brand-600"
+            className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 dark:ring-ink-500 focus:ring-2 focus:ring-brand-600"
           >
             <option value="">Choose someone…</option>
             {staff.map((member) => (
@@ -332,7 +332,7 @@ function AssignPanel({ request, staff, onDone }) {
         {error && (
           <p
             role="alert"
-            className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+            className="rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
           >
             {error}
           </p>
@@ -387,7 +387,7 @@ function InternalNotePanel({ request, onDone }) {
           value={note}
           onChange={(event) => setNote(event.target.value)}
           placeholder="Context for whoever picks this up…"
-          className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 placeholder:text-ink-400 focus:ring-2 focus:ring-brand-600"
+          className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 dark:ring-ink-500 placeholder:text-ink-400 focus:ring-2 focus:ring-brand-600"
         />
         <div className="flex justify-end">
           <Button
@@ -407,7 +407,9 @@ function InternalNotePanel({ request, onDone }) {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 uppercase">{label}</dt>
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+        {label}
+      </dt>
       <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
     </div>
   );

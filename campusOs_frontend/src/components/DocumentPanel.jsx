@@ -144,14 +144,19 @@ export default function DocumentPanel({
     >
       <div className="space-y-5">
         {missing.length > 0 && (
-          <div className="rounded-lg bg-amber-50 px-3 py-2.5">
-            <p className="text-xs font-medium text-amber-900">Still needed:</p>
+          <div className="rounded-lg bg-amber-50 dark:bg-amber-500/12 px-3 py-2.5">
+            <p className="text-xs font-medium text-amber-900 dark:text-amber-200">
+              Still needed:
+            </p>
             <ul className="mt-1 space-y-0.5">
               {missing.map((item) => (
-                <li key={item.name} className="text-xs text-amber-800">
+                <li
+                  key={item.name}
+                  className="text-xs text-amber-800 dark:text-amber-200"
+                >
                   • {item.name}
                   {item.description && (
-                    <span className="text-amber-700">
+                    <span className="text-amber-700 dark:text-amber-300">
                       {" "}
                       — {item.description}
                     </span>
@@ -163,16 +168,20 @@ export default function DocumentPanel({
         )}
 
         {missing.length === 0 && documents.length > 0 && (
-          <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+          <p className="rounded-lg bg-emerald-50 dark:bg-emerald-500/12 px-3 py-2 text-xs text-emerald-800 dark:text-emerald-200">
             Everything this application asked for has been attached.
           </p>
         )}
 
         {isLoading && (
-          <p className="text-sm text-ink-500">Loading documents…</p>
+          <p className="text-sm text-ink-500 dark:text-ink-400">
+            Loading documents…
+          </p>
         )}
         {isError && (
-          <p className="text-sm text-red-600">Could not load the documents.</p>
+          <p className="text-sm text-red-600 dark:text-red-400">
+            Could not load the documents.
+          </p>
         )}
 
         {!isLoading && documents.length === 0 && (
@@ -191,14 +200,14 @@ export default function DocumentPanel({
                 className="flex flex-wrap items-center gap-3 py-3 first:pt-0"
               >
                 <FileText
-                  className="size-4 shrink-0 text-ink-400"
+                  className="size-4 shrink-0 text-ink-400 dark:text-ink-500"
                   aria-hidden="true"
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-ink-800">
                     {document.label ?? document.originalName}
                   </p>
-                  <p className="text-xs text-ink-500">
+                  <p className="text-xs text-ink-500 dark:text-ink-400">
                     {size(document.size)} ·{" "}
                     {document.mimeType.replace("application/", "")}
                   </p>
@@ -230,7 +239,7 @@ export default function DocumentPanel({
         )}
 
         {canUpload && (
-          <div className="space-y-3 border-t border-ink-100 pt-4">
+          <div className="space-y-3 border-t border-ink-100 dark:border-ink-700/50 pt-4">
             <Field
               label="What is this?"
               htmlFor="document-label"
@@ -268,7 +277,7 @@ export default function DocumentPanel({
 
         {upload.isPending && (
           <p
-            className="flex items-center gap-2 text-xs text-ink-500"
+            className="flex items-center gap-2 text-xs text-ink-500 dark:text-ink-400"
             role="status"
           >
             <Upload className="size-3.5 animate-pulse" aria-hidden="true" />
@@ -279,7 +288,7 @@ export default function DocumentPanel({
         {notice && (
           <p
             role="status"
-            className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800"
+            className="rounded-lg bg-emerald-50 dark:bg-emerald-500/12 px-3 py-2 text-xs text-emerald-800 dark:text-emerald-200"
           >
             {notice}
           </p>
@@ -288,7 +297,7 @@ export default function DocumentPanel({
         {error && (
           <p
             role="alert"
-            className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700"
+            className="rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-xs text-red-700 dark:text-red-300"
           >
             {error}
           </p>

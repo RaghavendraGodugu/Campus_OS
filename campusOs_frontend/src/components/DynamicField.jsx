@@ -143,19 +143,21 @@ export default function DynamicField({ field, value, error, onChange }) {
             type="checkbox"
             checked={Boolean(value)}
             onChange={(event) => onChange(event.target.checked)}
-            className="mt-0.5 size-4 rounded border-ink-300 text-brand-600 focus:ring-brand-600"
+            className="mt-0.5 size-4 rounded border-ink-300 dark:border-ink-600 text-brand-600 focus:ring-brand-600"
             {...described}
           />
           <div>
             <label htmlFor={id} className="text-sm font-medium text-ink-700">
               {field.label}
-              {field.required && <span className="ml-0.5 text-red-600">*</span>}
+              {field.required && (
+                <span className="ml-0.5 text-red-600 dark:text-red-400">*</span>
+              )}
             </label>
             {error && (
               <p
                 id={`${id}-error`}
                 role="alert"
-                className="mt-1 text-xs text-red-600"
+                className="mt-1 text-xs text-red-600 dark:text-red-400"
               >
                 {error}
               </p>

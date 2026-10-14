@@ -102,7 +102,7 @@ export default function Profile() {
         <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
           Your profile
         </h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           What the college knows about you, and what you may change.
         </p>
       </header>
@@ -110,7 +110,7 @@ export default function Profile() {
       {notice && (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+          className="flex items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/12 px-3 py-2 text-sm text-emerald-800 dark:text-emerald-200"
         >
           <Check className="size-4" aria-hidden="true" />
           {notice}
@@ -119,7 +119,7 @@ export default function Profile() {
       {error && (
         <p
           role="alert"
-          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
         >
           {error}
         </p>
@@ -268,11 +268,11 @@ export default function Profile() {
         </Button>
       </Card>
 
-      <details className="rounded-xl bg-white px-5 py-4 shadow-sm ring-1 ring-ink-200/70">
+      <details className="rounded-xl bg-white dark:bg-surface px-5 py-4 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <summary className="cursor-pointer text-sm font-medium text-ink-800">
           What my role can do ({profile.permissions.length})
         </summary>
-        <p className="mt-2 text-xs text-ink-500">
+        <p className="mt-2 text-xs text-ink-500 dark:text-ink-400">
           Decided by the server from your role, and re-checked on every request.
           This list is here so you can see it, not to control it.
         </p>
@@ -280,7 +280,7 @@ export default function Profile() {
           {profile.permissions.map((permission) => (
             <li
               key={permission}
-              className="rounded bg-ink-50 px-2 py-0.5 font-mono text-[11px] text-ink-600"
+              className="rounded bg-ink-50 dark:bg-ink-100/40 px-2 py-0.5 font-mono text-[11px] text-ink-600"
             >
               {permission}
             </li>
@@ -336,14 +336,14 @@ function PasswordSection() {
       {notice && (
         <p
           role="status"
-          className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+          className="mb-3 rounded-lg bg-emerald-50 dark:bg-emerald-500/12 px-3 py-2 text-sm text-emerald-800 dark:text-emerald-200"
         >
           {notice}
         </p>
       )}
 
       {!open ? (
-        <p className="text-sm text-ink-500">
+        <p className="text-sm text-ink-500 dark:text-ink-400">
           Last changed — the audit trail records when.
         </p>
       ) : (
@@ -404,7 +404,7 @@ function PasswordSection() {
           {error && (
             <p
               role="alert"
-              className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+              className="rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
             >
               {error}
             </p>
@@ -435,7 +435,7 @@ function PasswordSection() {
       )}
 
       {!open && (
-        <p className="mt-3 flex items-start gap-2 text-xs text-ink-400">
+        <p className="mt-3 flex items-start gap-2 text-xs text-ink-400 dark:text-ink-500">
           <AlertTriangle
             className="mt-0.5 size-3.5 shrink-0"
             aria-hidden="true"
@@ -450,7 +450,9 @@ function PasswordSection() {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 uppercase">{label}</dt>
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+        {label}
+      </dt>
       <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
     </div>
   );

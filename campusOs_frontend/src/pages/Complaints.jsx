@@ -41,7 +41,7 @@ export default function Complaints({ mode = "own" }) {
           <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
             {mode === "assigned" ? "Complaints" : "Your complaints"}
           </h1>
-          <p className="mt-1 text-sm text-ink-500">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
             Confidential. Handled by a small number of staff.
           </p>
         </div>
@@ -87,14 +87,14 @@ export default function Complaints({ mode = "own" }) {
               <li key={complaint._id ?? complaint.id}>
                 <Link
                   to={`${mode === "own" ? "/complaints" : "/management/complaints"}/${complaint.reference}`}
-                  className="flex flex-wrap items-center gap-3 px-5 py-4 hover:bg-ink-50"
+                  className="flex flex-wrap items-center gap-3 px-5 py-4 hover:bg-ink-50 dark:hover:bg-ink-200/40"
                 >
                   <div className="min-w-0 flex-1">
                     {/* The subject is a category label, not the grievance text. */}
                     <p className="truncate text-sm font-medium text-ink-900">
                       {complaint.subject ?? "Complaint"}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500">
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                       {complaint.reference}
                       {complaint.category &&
                         ` · ${complaint.category.replace(/_/g, " ").toLowerCase()}`}
@@ -108,7 +108,7 @@ export default function Complaints({ mode = "own" }) {
                   </div>
 
                   {complaint.escalationLevel > 0 && (
-                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                    <span className="rounded-full bg-red-100 dark:bg-red-500/15 px-2 py-0.5 text-xs font-medium text-red-800 dark:text-red-200">
                       Escalated L{complaint.escalationLevel}
                     </span>
                   )}

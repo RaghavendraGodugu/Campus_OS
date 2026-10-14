@@ -63,17 +63,17 @@ export default function NewComplaint() {
         <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
           Raise a complaint
         </h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Treated confidentially from the moment it is filed.
         </p>
       </header>
 
-      <div className="flex items-start gap-3 rounded-xl bg-brand-50 px-4 py-3 ring-1 ring-brand-200">
+      <div className="flex items-start gap-3 rounded-xl bg-brand-50 dark:bg-brand-500/15 px-4 py-3 ring-1 ring-brand-200 dark:ring-brand-400/25">
         <ShieldAlert
-          className="mt-0.5 size-4 shrink-0 text-brand-700"
+          className="mt-0.5 size-4 shrink-0 text-brand-700 dark:text-brand-300"
           aria-hidden="true"
         />
-        <p className="text-xs text-brand-900">
+        <p className="text-xs text-brand-900 dark:text-brand-100">
           Only the officers handling grievances can read this. They are chosen
           for that role and do not gain access through it to any other data
           about you. What you write is never copied into notifications or the
@@ -110,7 +110,7 @@ export default function NewComplaint() {
             </Field>
 
             {chosen?.slaHours && (
-              <p className="rounded-lg bg-ink-50 px-3 py-2 text-xs text-ink-600">
+              <p className="rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3 py-2 text-xs text-ink-600">
                 A first response is due within{" "}
                 <strong className="font-medium">{chosen.slaHours} hours</strong>{" "}
                 of this being filed.
@@ -157,11 +157,11 @@ export default function NewComplaint() {
                 type="checkbox"
                 checked={confidential}
                 onChange={(event) => setConfidential(event.target.checked)}
-                className="mt-0.5 size-4 rounded border-ink-300 text-brand-600 focus:ring-brand-600"
+                className="mt-0.5 size-4 rounded border-ink-300 dark:border-ink-600 text-brand-600 focus:ring-brand-600"
               />
               <span className="text-sm text-ink-700">
                 Mark as strictly confidential
-                <span className="mt-0.5 block text-xs text-ink-500">
+                <span className="mt-0.5 block text-xs text-ink-500 dark:text-ink-400">
                   Restricts this to the Dean and Principal. Use this for
                   anything sensitive.
                 </span>
@@ -171,7 +171,7 @@ export default function NewComplaint() {
             {submit.isError && !Object.keys(errors).length && (
               <p
                 role="alert"
-                className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+                className="rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
               >
                 {submit.error?.message}
               </p>

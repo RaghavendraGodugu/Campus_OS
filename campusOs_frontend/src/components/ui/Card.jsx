@@ -22,7 +22,9 @@ export function Card({
       {(title || actions) && (
         <header
           className={`flex flex-wrap items-start justify-between gap-3 ${
-            inset ? "px-5 pt-4" : "border-b border-ink-200/60 px-5 py-4 sm:px-6"
+            inset
+              ? "px-5 pt-4"
+              : "border-b border-ink-200/60 dark:border-ink-700/50 px-5 py-4 sm:px-6"
           }`}
         >
           <div className="min-w-0">
@@ -32,7 +34,7 @@ export function Card({
               </h2>
             )}
             {description && (
-              <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-500">
+              <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400">
                 {description}
               </p>
             )}
@@ -62,20 +64,20 @@ export function Card({
 export function Stat({ label, value, hint, tone = "default", icon: Icon }) {
   const tones = {
     default: "text-ink-900",
-    good: "text-emerald-700",
-    warn: "text-amber-700",
-    bad: "text-red-700",
+    good: "text-emerald-700 dark:text-emerald-300",
+    warn: "text-amber-700 dark:text-amber-300",
+    bad: "text-red-700 dark:text-red-300",
   };
 
   return (
     <div className="surface group px-5 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-raised">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[0.6875rem] font-semibold tracking-[0.06em] text-ink-500 uppercase">
+        <p className="text-[0.6875rem] font-semibold tracking-[0.06em] text-ink-500 dark:text-ink-400 uppercase">
           {label}
         </p>
         {Icon && (
           <Icon
-            className="size-4 text-ink-300 transition-colors duration-200 group-hover:text-brand-500"
+            className="size-4 text-ink-300 dark:text-ink-500 transition-colors duration-200 group-hover:text-brand-500"
             aria-hidden="true"
           />
         )}
@@ -85,7 +87,9 @@ export function Stat({ label, value, hint, tone = "default", icon: Icon }) {
       >
         {value}
       </p>
-      {hint && <p className="mt-1 text-xs text-ink-500">{hint}</p>}
+      {hint && (
+        <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">{hint}</p>
+      )}
     </div>
   );
 }

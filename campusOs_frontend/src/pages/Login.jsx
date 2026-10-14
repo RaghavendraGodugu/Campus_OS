@@ -92,14 +92,14 @@ export default function Login() {
         </div>
 
         <div className="relative max-w-md">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-xs font-medium text-brand-100 ring-1 ring-white/20 ring-inset">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1.5 text-xs font-medium text-brand-100 dark:text-brand-200 ring-1 ring-white/20 ring-inset">
             <Sparkles className="size-3" aria-hidden="true" />
             One system, eight roles
           </span>
           <h1 className="mt-5 text-4xl leading-[1.1] font-semibold tracking-tight">
             One place for requests, certificates and fees.
           </h1>
-          <p className="mt-4 text-[0.9375rem] leading-relaxed text-brand-100/90">
+          <p className="mt-4 text-[0.9375rem] leading-relaxed text-brand-100/90 dark:text-brand-200/90">
             Every action is recorded, and you always see exactly what you are
             entitled to — nothing more, nothing less.
           </p>
@@ -112,7 +112,7 @@ export default function Login() {
             ].map((line) => (
               <li
                 key={line}
-                className="flex items-start gap-2.5 text-sm text-brand-100/85"
+                className="flex items-start gap-2.5 text-sm text-brand-100/85 dark:text-brand-200/85"
               >
                 <BadgeCheck
                   className="mt-0.5 size-4 shrink-0 text-accent-300"
@@ -124,7 +124,7 @@ export default function Login() {
           </ul>
         </div>
 
-        <p className="relative flex items-center gap-2 text-xs text-brand-200/80">
+        <p className="relative flex items-center gap-2 text-xs text-brand-200/80 dark:text-brand-100/80">
           <ShieldCheck className="size-4" aria-hidden="true" />
           Session cookies are HttpOnly. No password is ever stored in this
           browser.
@@ -150,7 +150,7 @@ export default function Login() {
             <h2 className="text-xl font-semibold tracking-tight text-ink-900">
               Sign in
             </h2>
-            <p className="mt-1 text-sm text-ink-500">
+            <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
               Use your college account.
             </p>
 
@@ -186,7 +186,7 @@ export default function Login() {
               {error && (
                 <p
                   role="alert"
-                  className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+                  className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
                 >
                   {error}
                 </p>
@@ -204,16 +204,16 @@ export default function Login() {
 
             {/* Someone holding a paper certificate is the other kind of visitor
               to this page, and they have no account. */}
-            <div className="mt-6 rounded-2xl border border-dashed border-brand-200 bg-brand-50/60 p-4">
+            <div className="mt-6 rounded-2xl border border-dashed border-brand-200 dark:border-brand-400/25 bg-brand-50/60 dark:bg-brand-500/12 p-4">
               <p className="text-sm font-medium text-ink-800">
                 Just checking a certificate?
               </p>
-              <p className="mt-1 text-xs leading-relaxed text-ink-500">
+              <p className="mt-1 text-xs leading-relaxed text-ink-500 dark:text-ink-400">
                 Verify one by its printed code — no account needed.
               </p>
               <Link
                 to="/verify"
-                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 transition-colors hover:text-brand-900"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 dark:text-brand-300 transition-colors hover:text-brand-900"
               >
                 Verify a certificate
                 <span aria-hidden="true">→</span>
@@ -222,11 +222,11 @@ export default function Login() {
           </div>
 
           {import.meta.env.VITE_SHOW_DEMO_BANNER === "true" && (
-            <div className="mt-10 border-t border-ink-200 pt-6">
-              <p className="text-xs font-medium tracking-wide text-ink-500 uppercase">
+            <div className="mt-10 border-t border-ink-200 dark:border-ink-700/70 pt-6">
+              <p className="text-xs font-medium tracking-wide text-ink-500 dark:text-ink-400 uppercase">
                 Demo accounts
               </p>
-              <p className="mt-1 text-xs text-ink-500">
+              <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
                 Shared password{" "}
                 <code className="font-mono">Demo@Campus123</code>
               </p>
@@ -236,12 +236,12 @@ export default function Login() {
                     key={account.email}
                     type="button"
                     onClick={() => applyDemoAccount(account.email)}
-                    className="rounded-xl border border-ink-200/90 bg-surface px-2.5 py-2 text-left text-xs shadow-card transition-all duration-150 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-raised"
+                    className="rounded-xl border border-ink-200/90 dark:border-ink-700/70 bg-surface px-2.5 py-2 text-left text-xs shadow-card transition-all duration-150 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-raised"
                   >
                     <span className="block font-medium text-ink-800">
                       {account.label}
                     </span>
-                    <span className="block truncate text-[11px] text-ink-500">
+                    <span className="block truncate text-[11px] text-ink-500 dark:text-ink-400">
                       {account.name}
                     </span>
                   </button>

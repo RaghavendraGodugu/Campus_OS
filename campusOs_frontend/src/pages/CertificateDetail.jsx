@@ -77,20 +77,20 @@ export default function CertificateDetail() {
             ? "/management/certificates"
             : "/certificates"
         }
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-800"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         All certificates
       </Link>
 
-      <header className="rounded-xl bg-white px-6 py-5 shadow-sm ring-1 ring-ink-200/70">
+      <header className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-lg font-semibold tracking-tight text-ink-900">
               {humanise(certificate.type)}
               {certificate.copies > 1 && ` · ${certificate.copies} copies`}
             </h1>
-            <p className="mt-1 text-xs text-ink-500">
+            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
               {certificate.reference}
               {certificate.purpose && ` · ${certificate.purpose}`}
             </p>
@@ -98,7 +98,7 @@ export default function CertificateDetail() {
           <Badge status={certificate.status} />
         </div>
 
-        <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-ink-100 pt-4 sm:grid-cols-4">
+        <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-ink-100 dark:border-ink-700/50 pt-4 sm:grid-cols-4">
           <Detail
             label="Applied"
             value={formatDateTime(certificate.submittedAt)}
@@ -115,13 +115,13 @@ export default function CertificateDetail() {
         </dl>
 
         {certificate.rejectionReason && (
-          <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+          <p className="mt-4 rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-800 dark:text-red-200">
             Declined: {certificate.rejectionReason}
           </p>
         )}
 
         {certificate.revocation && (
-          <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+          <div className="mt-4 rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-800 dark:text-red-200">
             <p className="flex items-center gap-1.5 font-medium">
               <ShieldCheck className="size-4" aria-hidden="true" />
               Revoked {formatDateTime(certificate.revocation.revokedAt)}
@@ -151,7 +151,7 @@ export default function CertificateDetail() {
           {downloadError && (
             <p
               role="alert"
-              className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+              className="mt-3 rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
             >
               {downloadError}
             </p>
@@ -205,7 +205,7 @@ export default function CertificateDetail() {
               <div className="flex flex-col items-center">
                 <span className="mt-1.5 size-2.5 shrink-0 rounded-full bg-brand-600" />
                 {index < certificate.statusHistory.length - 1 && (
-                  <span className="mt-1 w-px flex-1 bg-ink-200" />
+                  <span className="mt-1 w-px flex-1 bg-ink-200 dark:bg-ink-700/50" />
                 )}
               </div>
               <div className="pb-1">
@@ -213,7 +213,7 @@ export default function CertificateDetail() {
                   {entry.from ? `${humanise(entry.from)} → ` : ""}
                   {humanise(entry.to)}
                 </p>
-                <p className="mt-0.5 text-xs text-ink-500">
+                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                   {formatDateTime(entry.at)}
                   {entry.actorRole && ` · ${humanise(entry.actorRole)}`}
                   {entry.note && ` · ${entry.note}`}
@@ -230,7 +230,9 @@ export default function CertificateDetail() {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 uppercase">{label}</dt>
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+        {label}
+      </dt>
       <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
     </div>
   );

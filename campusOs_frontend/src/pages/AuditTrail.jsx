@@ -49,7 +49,7 @@ export default function AuditTrail() {
           <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
             {deniedOnly ? "Access-denied trail" : "Audit trail"}
           </h1>
-          <p className="mt-1 text-sm text-ink-500">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
             Every privileged action, who took it and when.
           </p>
         </div>
@@ -74,7 +74,7 @@ export default function AuditTrail() {
               setPage(1);
             }}
             aria-label="Filter by action"
-            className="h-9 rounded-xl border-0 bg-white px-3 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
+            className="h-9 rounded-xl border-0 bg-white dark:bg-surface px-3 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200 dark:ring-ink-600 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
           >
             <option value="">All actions</option>
             {[
@@ -103,12 +103,12 @@ export default function AuditTrail() {
 
       {/* The scope banner. Stated before the entries, not buried under them. */}
       {scope && scope !== "INSTITUTION" && (
-        <div className="flex items-start gap-3 rounded-xl bg-amber-50 px-4 py-3 ring-1 ring-amber-200">
+        <div className="flex items-start gap-3 rounded-xl bg-amber-50 dark:bg-amber-500/12 px-4 py-3 ring-1 ring-amber-200 dark:ring-amber-400/25">
           <ShieldAlert
-            className="mt-0.5 size-4 shrink-0 text-amber-700"
+            className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-300"
             aria-hidden="true"
           />
-          <div className="text-xs text-amber-900">
+          <div className="text-xs text-amber-900 dark:text-amber-200">
             <p className="font-medium">
               {scope === "DEPARTMENT_OWN_ACTIONS"
                 ? "Showing your own actions only"
@@ -143,7 +143,7 @@ export default function AuditTrail() {
                 actions unless you hold institution-wide access.
               </caption>
               <thead>
-                <tr className="border-b border-ink-200 bg-ink-50 text-left">
+                <tr className="border-b border-ink-200 dark:border-ink-700/70 bg-ink-50 dark:bg-ink-100/40 text-left">
                   <th
                     scope="col"
                     className="px-5 py-2.5 text-xs font-semibold tracking-wide text-ink-600 uppercase"
@@ -183,11 +183,11 @@ export default function AuditTrail() {
                           "System"}
                       </span>
                       {entry.actor?.deleted && (
-                        <span className="ml-1.5 text-xs text-ink-400">
+                        <span className="ml-1.5 text-xs text-ink-400 dark:text-ink-500">
                           (removed)
                         </span>
                       )}
-                      <span className="block text-xs text-ink-500">
+                      <span className="block text-xs text-ink-500 dark:text-ink-400">
                         {humanise(entry.actor?.role)}
                       </span>
                     </td>
@@ -207,7 +207,7 @@ export default function AuditTrail() {
                     <td className="px-3 py-2.5 text-ink-700">
                       {entry.entity}
                       {entry.entityRef && (
-                        <span className="ml-1.5 font-mono text-xs text-ink-500">
+                        <span className="ml-1.5 font-mono text-xs text-ink-500 dark:text-ink-400">
                           {entry.entityRef}
                         </span>
                       )}

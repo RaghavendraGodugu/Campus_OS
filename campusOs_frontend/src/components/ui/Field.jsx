@@ -40,7 +40,7 @@ export default function Field({
           </span>
         )}
         {optional && !required && (
-          <span className="ml-1.5 text-xs font-normal text-ink-400">
+          <span className="ml-1.5 text-xs font-normal text-ink-400 dark:text-ink-500">
             Optional
           </span>
         )}
@@ -49,7 +49,10 @@ export default function Field({
       <div className="mt-1.5">{children}</div>
 
       {hint && !error && (
-        <p id={`${htmlFor}-hint`} className="mt-1.5 text-xs text-ink-500">
+        <p
+          id={`${htmlFor}-hint`}
+          className="mt-1.5 text-xs text-ink-500 dark:text-ink-400"
+        >
           {hint}
         </p>
       )}
@@ -58,7 +61,7 @@ export default function Field({
         <p
           id={`${htmlFor}-error`}
           role="alert"
-          className="mt-1.5 text-xs text-red-600"
+          className="mt-1.5 text-xs text-red-600 dark:text-red-400"
         >
           {error}
         </p>
@@ -78,4 +81,4 @@ export default function Field({
  * needing a brightness jump.
  */
 export const inputClass =
-  "block w-full rounded-xl border-0 bg-surface px-3.5 py-2.5 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200/90 transition-all duration-150 placeholder:text-ink-400 hover:ring-ink-300 hover:shadow-card focus:bg-white focus:ring-2 focus:ring-brand-500 focus:shadow-raised aria-[invalid=true]:ring-red-400 aria-[invalid=true]:focus:ring-red-500 disabled:bg-ink-100/70 disabled:text-ink-400";
+  "block w-full rounded-xl border-0 bg-surface px-3.5 py-2.5 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200/90 dark:ring-ink-600 transition-all duration-150 placeholder:text-ink-400 hover:ring-ink-300 hover:shadow-card focus:bg-white focus:ring-2 focus:ring-brand-500 focus:shadow-raised aria-[invalid=true]:ring-red-400 aria-[invalid=true]:focus:ring-red-500 disabled:bg-ink-100/70 disabled:text-ink-400";

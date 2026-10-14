@@ -92,7 +92,7 @@ export default function People() {
       }
     >
       <div className="surface overflow-hidden">
-        <div className="flex flex-wrap items-center gap-3 border-b border-ink-200/70 px-4 py-3.5 sm:px-5">
+        <div className="flex flex-wrap items-center gap-3 border-b border-ink-200/70 dark:border-ink-700/60 px-4 py-3.5 sm:px-5">
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -102,7 +102,7 @@ export default function People() {
             className="relative min-w-56 flex-1"
           >
             <Search
-              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400"
+              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400 dark:text-ink-500"
               aria-hidden="true"
             />
             <label htmlFor="user-search" className="sr-only">
@@ -259,7 +259,7 @@ function PersonRow({ person, isMe, onEdit, onDeactivate, onReset }) {
       <div className="flex min-w-0 flex-1 items-start gap-3.5">
         <span
           aria-hidden="true"
-          className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-brand-100 to-brand-50 text-xs font-semibold text-brand-700 ring-1 ring-brand-200 ring-inset"
+          className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-brand-100 to-brand-50 dark:to-brand-500/12 text-xs font-semibold text-brand-700 dark:text-brand-300 ring-1 ring-brand-200 dark:ring-brand-400/25 ring-inset"
         >
           {initials(person.fullName)}
         </span>
@@ -268,29 +268,31 @@ function PersonRow({ person, isMe, onEdit, onDeactivate, onReset }) {
           <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900">
             {person.fullName}
             {isMe && (
-              <span className="rounded-md bg-ink-100 px-1.5 py-0.5 text-[0.6875rem] font-medium text-ink-600">
+              <span className="rounded-md bg-ink-100 dark:bg-ink-200/40 px-1.5 py-0.5 text-[0.6875rem] font-medium text-ink-600">
                 You
               </span>
             )}
             {!person.isActive && (
-              <span className="rounded-md bg-red-50 px-1.5 py-0.5 text-[0.6875rem] font-medium text-red-700 ring-1 ring-red-200 ring-inset">
+              <span className="rounded-md bg-red-50 dark:bg-red-500/12 px-1.5 py-0.5 text-[0.6875rem] font-medium text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset">
                 Deactivated
               </span>
             )}
             {person.mustChangePassword && (
               <span
                 title="Still on the temporary password it was created with"
-                className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[0.6875rem] font-medium text-amber-800 ring-1 ring-amber-200 ring-inset"
+                className="rounded-md bg-amber-50 dark:bg-amber-500/12 px-1.5 py-0.5 text-[0.6875rem] font-medium text-amber-800 dark:text-amber-200 ring-1 ring-amber-200 dark:ring-amber-400/25 ring-inset"
               >
                 Awaiting password change
               </span>
             )}
           </p>
-          <p className="truncate text-xs text-ink-500">{person.email}</p>
+          <p className="truncate text-xs text-ink-500 dark:text-ink-400">
+            {person.email}
+          </p>
           <p className="mt-1.5 flex flex-wrap items-center gap-1.5">
             <Badge label={humanise(person.role)} status={person.role} />
             {person.department && (
-              <span className="inline-flex items-center gap-1 text-xs text-ink-500">
+              <span className="inline-flex items-center gap-1 text-xs text-ink-500 dark:text-ink-400">
                 <Building2 className="size-3" aria-hidden="true" />
                 {person.department.name}
               </span>
@@ -492,7 +494,7 @@ function CreateUserDialog({ open, onClose, departments, onCreated }) {
         {submit.isError && !Object.keys(errors).length && (
           <p
             role="alert"
-            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+            className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
           >
             {submit.error?.message}
           </p>
@@ -631,7 +633,7 @@ function ChangeRoleDialog({ person, departments, onClose, onDone }) {
         {submit.isError && !Object.keys(errors).length && (
           <p
             role="alert"
-            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+            className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
           >
             {submit.error?.message}
           </p>
@@ -701,9 +703,9 @@ function ReasonDialog({
         }}
         className="space-y-4"
       >
-        <p className="flex items-start gap-2.5 rounded-xl bg-ink-50 px-3.5 py-3 text-xs leading-relaxed text-ink-600 ring-1 ring-ink-200 ring-inset">
+        <p className="flex items-start gap-2.5 rounded-xl bg-ink-50 dark:bg-ink-100/40 px-3.5 py-3 text-xs leading-relaxed text-ink-600 ring-1 ring-ink-200 dark:ring-ink-600 ring-inset">
           <AlertTriangle
-            className="mt-0.5 size-4 shrink-0 text-ink-400"
+            className="mt-0.5 size-4 shrink-0 text-ink-400 dark:text-ink-500"
             aria-hidden="true"
           />
           {description}
@@ -728,7 +730,7 @@ function ReasonDialog({
         {submit.isError && (
           <p
             role="alert"
-            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+            className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
           >
             {submit.error?.message}
           </p>
@@ -791,7 +793,7 @@ function TemporaryPasswordDialog({ issued, onClose }) {
           </Button>
         </div>
 
-        <p className="rounded-xl bg-amber-50 px-3.5 py-3 text-xs leading-relaxed text-amber-900 ring-1 ring-amber-200 ring-inset">
+        <p className="rounded-xl bg-amber-50 dark:bg-amber-500/12 px-3.5 py-3 text-xs leading-relaxed text-amber-900 dark:text-amber-200 ring-1 ring-amber-200 dark:ring-amber-400/25 ring-inset">
           If you close this without copying it, the password cannot be recovered
           — only reset. That is deliberate: it is stored only as a hash, so
           nobody, including an administrator with database access, can read it

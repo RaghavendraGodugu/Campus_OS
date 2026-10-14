@@ -27,6 +27,7 @@ import { useAuth } from "../../context/AuthContext";
 import { visibleNavItems } from "../../lib/nav";
 import { initials } from "../../lib/format";
 import NotificationBell from "./NotificationBell";
+import ThemeToggle from "./ThemeToggle";
 
 const ICONS = {
   LayoutDashboard,
@@ -100,7 +101,7 @@ export default function AppShell() {
               </span>
               <button
                 type="button"
-                className="rounded-md p-1 text-ink-500 hover:bg-ink-100 lg:hidden"
+                className="rounded-md p-1 text-ink-500 dark:text-ink-400 hover:bg-ink-100 dark:hover:bg-ink-200/50 lg:hidden"
                 onClick={() => setNavOpen(false)}
                 aria-label="Close navigation"
               >
@@ -193,10 +194,10 @@ export default function AppShell() {
 
       {/* ===== Main ===== */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-ink-200/70 bg-white/70 px-4 backdrop-blur-xl sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-ink-200/70 dark:border-ink-700/60 bg-white/70 dark:bg-surface/85 px-4 backdrop-blur-xl sm:px-6">
           <button
             type="button"
-            className="rounded-xl p-2 text-ink-600 transition-colors hover:bg-ink-100 lg:hidden"
+            className="rounded-xl p-2 text-ink-600 transition-colors hover:bg-ink-100 dark:hover:bg-ink-200/50 lg:hidden"
             onClick={() => setNavOpen(true)}
             aria-label="Open navigation"
           >
@@ -204,6 +205,10 @@ export default function AppShell() {
           </button>
 
           <div className="flex-1" />
+
+          {/* On small screens the three buttons cost more room than they are
+              worth, so they live in the profile page there. */}
+          <ThemeToggle className="hidden sm:inline-flex" />
 
           <RolePill />
 
@@ -225,7 +230,7 @@ function RolePill() {
   const { user } = useAuth();
 
   return (
-    <span className="hidden items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 ring-1 ring-brand-200 ring-inset sm:inline-flex">
+    <span className="hidden items-center gap-1.5 rounded-full bg-brand-50 dark:bg-brand-500/15 px-3 py-1.5 text-xs font-medium text-brand-700 dark:text-brand-300 ring-1 ring-brand-200 dark:ring-brand-400/25 ring-inset sm:inline-flex">
       <span aria-hidden="true" className="size-1.5 rounded-full bg-brand-500" />
       {user?.role?.replace(/_/g, " ").toLowerCase()}
     </span>
@@ -240,9 +245,9 @@ function RolePill() {
  */
 function DemoBanner() {
   return (
-    <div className="border-b border-amber-200/80 bg-linear-to-r from-amber-100 to-amber-50 px-4 py-2 text-center text-xs font-medium text-amber-900 sm:px-6">
+    <div className="border-b border-amber-200/80 bg-linear-to-r from-amber-100 dark:from-amber-500/12 to-amber-50 dark:to-amber-500/12 px-4 py-2 text-center text-xs font-medium text-amber-900 dark:text-amber-200 sm:px-6">
       Demo data — these records are not real. Every account uses the password{" "}
-      <code className="rounded bg-amber-200 px-1 py-0.5 font-mono">
+      <code className="rounded bg-amber-200 dark:bg-amber-500/20 px-1 py-0.5 font-mono">
         Demo@Campus123
       </code>
     </div>

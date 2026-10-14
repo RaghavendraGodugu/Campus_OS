@@ -8,7 +8,10 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 13 October 2026
-- **Verified:** 541 backend tests, 125 frontend tests, lint and build clean
+- **Verified:** 541 backend tests, 137 frontend tests, lint and build clean
+- **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
+  screens, anonymous grievance, and bulk import all confirmed against it, plus a
+  green browser sweep across all four roles
 
 ---
 
@@ -225,7 +228,11 @@ means the note that follows it)
       tokens
 - [x] Browser sweep proves the public page needs no account, which a per-role
       sweep structurally cannot check
-- [ ] A dark theme
+- [x] Dark theme: light / dark / follow-the-system, applied before first paint by an
+      inline script so there is no flash of the wrong one, and held in one
+      provider so components cannot disagree about it
+- [x] Every surface, status colour, card, field and callout carries a dark
+      variant; verified in a real browser rather than by reading the classes
 - [ ] Responsive re-check below 375px
 - [ ] Loading skeletons instead of spinners on slow pages
 - [ ] No motion/transitions audit on the finance tables
@@ -233,7 +240,7 @@ means the note that follows it)
 ## 15. Quality gates
 
 - [x] Backend: 541 tests passing
-- [x] Frontend: 125 tests passing
+- [x] Frontend: 137 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep

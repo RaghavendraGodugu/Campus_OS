@@ -181,27 +181,29 @@ export default function PayDialog({ invoice, onClose, onVerified }) {
       aria-modal="true"
       aria-labelledby="pay-title"
     >
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-surface p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 id="pay-title" className="text-lg font-semibold text-ink-900">
               Pay {invoice.purpose}
             </h2>
-            <p className="mt-0.5 text-xs text-ink-500">{invoice.reference}</p>
+            <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+              {invoice.reference}
+            </p>
           </div>
           <button
             ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-md p-1 text-ink-400 hover:bg-ink-100"
+            className="rounded-md p-1 text-ink-400 dark:text-ink-500 hover:bg-ink-100 dark:hover:bg-ink-200/50"
           >
             <X className="size-5" aria-hidden="true" />
           </button>
         </div>
 
-        <div className="mt-5 rounded-xl bg-ink-50 px-4 py-4 text-center">
-          <p className="text-xs tracking-wide text-ink-500 uppercase">
+        <div className="mt-5 rounded-xl bg-ink-50 dark:bg-ink-100/40 px-4 py-4 text-center">
+          <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
             Amount due
           </p>
           <p className="mt-1 text-2xl font-semibold tabular-nums text-ink-900">
@@ -211,7 +213,7 @@ export default function PayDialog({ invoice, onClose, onVerified }) {
         </div>
 
         {order?.mode === "MOCK" && (
-          <p className="mt-4 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          <p className="mt-4 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-500/12 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
             <AlertTriangle
               className="mt-0.5 size-3.5 shrink-0"
               aria-hidden="true"
@@ -224,7 +226,7 @@ export default function PayDialog({ invoice, onClose, onVerified }) {
         {error && (
           <p
             role="alert"
-            className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+            className="mt-4 rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
           >
             {error}
           </p>
@@ -245,20 +247,20 @@ export default function PayDialog({ invoice, onClose, onVerified }) {
         </div>
 
         {phase === "verifying" && (
-          <p className="mt-3 flex items-center justify-center gap-2 text-xs text-ink-500">
+          <p className="mt-3 flex items-center justify-center gap-2 text-xs text-ink-500 dark:text-ink-400">
             <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
             Asking Razorpay whether the money arrived
           </p>
         )}
 
         {phase === "done" && (
-          <p className="mt-3 flex items-center justify-center gap-2 text-xs text-emerald-700">
+          <p className="mt-3 flex items-center justify-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
             <CheckCircle2 className="size-3.5" aria-hidden="true" />
             Payment confirmed and a receipt issued
           </p>
         )}
 
-        <p className="mt-4 text-center text-[11px] text-ink-400">
+        <p className="mt-4 text-center text-[11px] text-ink-400 dark:text-ink-500">
           This browser never decides that money was paid. The server checks with
           Razorpay first.
         </p>

@@ -59,7 +59,7 @@ export default function Requests({ mode = "own" }) {
           <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
             {mode === "assigned" ? "Assigned to you" : "Your requests"}
           </h1>
-          <p className="mt-1 text-sm text-ink-500">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
             {mode === "assigned"
               ? "Work currently with you."
               : "Everything you have raised, and where it has got to."}
@@ -90,7 +90,7 @@ export default function Requests({ mode = "own" }) {
             setStatus(event.target.value);
             setPage(1);
           }}
-          className="h-9 rounded-xl border-0 bg-white px-3 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
+          className="h-9 rounded-xl border-0 bg-white dark:bg-surface px-3 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200 dark:ring-ink-600 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
         >
           <option value="">All</option>
           {STATUSES.map((value) => (
@@ -137,13 +137,13 @@ export default function Requests({ mode = "own" }) {
               <li key={request._id ?? request.id}>
                 <Link
                   to={`${mode === "assigned" ? "/management/requests" : "/requests"}/${request.reference}`}
-                  className="flex flex-wrap items-center gap-3 px-5 py-4 hover:bg-ink-50"
+                  className="flex flex-wrap items-center gap-3 px-5 py-4 hover:bg-ink-50 dark:hover:bg-ink-200/40"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-ink-900">
                       {request.title}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500">
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                       {request.reference}
                       {request.requestType?.name &&
                         ` · ${request.requestType.name}`}
@@ -154,7 +154,7 @@ export default function Requests({ mode = "own" }) {
                   </div>
 
                   {request.assignedTo && (
-                    <span className="hidden text-xs text-ink-500 sm:inline">
+                    <span className="hidden text-xs text-ink-500 dark:text-ink-400 sm:inline">
                       {request.assignedTo.fullName}
                     </span>
                   )}

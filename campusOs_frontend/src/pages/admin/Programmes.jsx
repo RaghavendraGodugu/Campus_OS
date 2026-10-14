@@ -61,7 +61,7 @@ export default function Programmes() {
       }
     >
       <div className="surface overflow-hidden">
-        <div className="flex flex-wrap gap-3 border-b border-ink-200/70 px-4 py-3.5 sm:px-5">
+        <div className="flex flex-wrap gap-3 border-b border-ink-200/70 dark:border-ink-700/60 px-4 py-3.5 sm:px-5">
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -70,7 +70,7 @@ export default function Programmes() {
             className="relative min-w-56 flex-1"
           >
             <Search
-              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400"
+              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400 dark:text-ink-500"
               aria-hidden="true"
             />
             <label htmlFor="programme-search" className="sr-only">
@@ -130,7 +130,7 @@ export default function Programmes() {
                 <div className="flex min-w-0 items-start gap-3.5">
                   <span
                     aria-hidden="true"
-                    className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-brand-100 to-brand-50 text-brand-700 ring-1 ring-brand-200 ring-inset"
+                    className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-brand-100 to-brand-50 dark:to-brand-500/12 dark:to-brand-500/15 text-brand-700 dark:text-brand-300 ring-1 ring-brand-200 dark:ring-brand-400/25 ring-inset"
                   >
                     <GraduationCap className="size-5" />
                   </span>
@@ -138,12 +138,12 @@ export default function Programmes() {
                     <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900">
                       {programme.name}
                       {!programme.isActive && (
-                        <span className="rounded-md bg-red-50 px-1.5 py-0.5 text-[0.6875rem] font-medium text-red-700 ring-1 ring-red-200 ring-inset">
+                        <span className="rounded-md bg-red-50 dark:bg-red-500/12 px-1.5 py-0.5 text-[0.6875rem] font-medium text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset">
                           Retired
                         </span>
                       )}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500">
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                       <span className="font-mono">{programme.code}</span>
                       {" · "}
                       {humanise(programme.level)}
@@ -383,7 +383,7 @@ function ProgrammeForm({ open, programme, departments, onClose, onDone }) {
         {submit.isError && !Object.keys(errors).length && (
           <p
             role="alert"
-            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset sm:col-span-2"
+            className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset sm:col-span-2"
           >
             {submit.error?.message}
           </p>
@@ -474,7 +474,7 @@ function RetireProgrammeDialog({ programme, onClose, onDone }) {
         {submit.isError && (
           <p
             role="alert"
-            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+            className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
           >
             {submit.error?.message}
           </p>

@@ -89,7 +89,7 @@ export default function SetPassword() {
         </div>
 
         <div className="surface-raised p-6 sm:p-7">
-          <span className="grid size-12 place-items-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-200 ring-inset">
+          <span className="grid size-12 place-items-center rounded-2xl bg-amber-50 dark:bg-amber-500/12 text-amber-600 ring-1 ring-amber-200 dark:ring-amber-400/25 ring-inset">
             <KeyRound className="size-6" aria-hidden="true" />
           </span>
 
@@ -157,7 +157,7 @@ export default function SetPassword() {
             {error && (
               <p
                 role="alert"
-                className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+                className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
               >
                 {error}
               </p>
@@ -174,7 +174,7 @@ export default function SetPassword() {
             </Button>
 
             {touched && !ready && (
-              <p className="text-xs text-ink-500">
+              <p className="text-xs text-ink-500 dark:text-ink-400">
                 Enter the temporary password, then a new one of at least 12
                 characters, and confirm it.
               </p>
@@ -184,14 +184,14 @@ export default function SetPassword() {
           <button
             type="button"
             onClick={logout}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-800"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-500 dark:text-ink-400 transition-colors hover:bg-ink-100 dark:hover:bg-ink-200/50 hover:text-ink-800"
           >
             <LogOut className="size-4" aria-hidden="true" />
             Sign out instead
           </button>
         </div>
 
-        <p className="mt-4 flex items-start justify-center gap-2 px-2 text-center text-xs text-ink-500">
+        <p className="mt-4 flex items-start justify-center gap-2 px-2 text-center text-xs text-ink-500 dark:text-ink-400">
           <ShieldCheck
             className="mt-0.5 size-3.5 shrink-0"
             aria-hidden="true"

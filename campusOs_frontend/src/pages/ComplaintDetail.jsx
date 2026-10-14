@@ -68,18 +68,18 @@ export default function ComplaintDetail() {
     <div className="mx-auto max-w-3xl space-y-6">
       <Link
         to={backTo}
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-800"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         All complaints
       </Link>
 
-      <div className="flex items-start gap-3 rounded-xl bg-brand-50 px-4 py-3 ring-1 ring-brand-200">
+      <div className="flex items-start gap-3 rounded-xl bg-brand-50 dark:bg-brand-500/15 px-4 py-3 ring-1 ring-brand-200 dark:ring-brand-400/25">
         <ShieldAlert
-          className="mt-0.5 size-4 shrink-0 text-brand-700"
+          className="mt-0.5 size-4 shrink-0 text-brand-700 dark:text-brand-300"
           aria-hidden="true"
         />
-        <p className="text-xs text-brand-900">
+        <p className="text-xs text-brand-900 dark:text-brand-100">
           {complaint.confidential
             ? "Strictly confidential. Visible only to the Dean and Principal."
             : "Confidential. Visible only to the officers handling grievances."}{" "}
@@ -88,13 +88,13 @@ export default function ComplaintDetail() {
         </p>
       </div>
 
-      <header className="rounded-xl bg-white px-6 py-5 shadow-sm ring-1 ring-ink-200/70">
+      <header className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-lg font-semibold tracking-tight text-ink-900">
               {complaint.subject}
             </h1>
-            <p className="mt-1 text-xs text-ink-500">
+            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
               {complaint.reference} ·{" "}
               {String(complaint.category ?? "")
                 .replace(/_/g, " ")
@@ -104,7 +104,7 @@ export default function ComplaintDetail() {
           <Badge status={complaint.status} />
         </div>
 
-        <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-ink-100 pt-4 sm:grid-cols-4">
+        <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-ink-100 dark:border-ink-700/50 pt-4 sm:grid-cols-4">
           <Detail label="Filed" value={formatDateTime(complaint.submittedAt)} />
           <Detail label="Respond by" value={formatDateTime(complaint.dueAt)} />
           <Detail
@@ -115,7 +115,7 @@ export default function ComplaintDetail() {
         </dl>
 
         {complaint.escalationLevel > 0 && (
-          <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+          <p className="mt-4 rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-800 dark:text-red-200">
             Escalated to level {complaint.escalationLevel}
             {complaint.slaBreachMinutes > 0 &&
               ` — the response deadline passed by ${Math.round(complaint.slaBreachMinutes / 60)} hour(s)`}
@@ -134,9 +134,12 @@ export default function ComplaintDetail() {
         <Card title="Updates" description="Given to the person who raised it.">
           <ul className="space-y-3">
             {complaint.updates.map((update) => (
-              <li key={update._id} className="border-l-2 border-brand-200 pl-3">
+              <li
+                key={update._id}
+                className="border-l-2 border-brand-200 dark:border-brand-400/25 pl-3"
+              >
                 <p className="text-sm text-ink-700">{update.body}</p>
-                <p className="mt-0.5 text-xs text-ink-400">
+                <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500">
                   {formatDateTime(update.at)} · {humanise(update.authorRole)}
                 </p>
               </li>
@@ -275,7 +278,9 @@ function InternalNote({ reference, onDone }) {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 uppercase">{label}</dt>
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+        {label}
+      </dt>
       <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
     </div>
   );

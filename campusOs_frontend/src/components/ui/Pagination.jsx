@@ -13,10 +13,10 @@ export default function Pagination({ page, limit, total, onPage }) {
 
   return (
     <nav
-      className="flex items-center justify-between border-t border-ink-100 px-5 py-3"
+      className="flex items-center justify-between border-t border-ink-100 dark:border-ink-700/50 px-5 py-3"
       aria-label="Pagination"
     >
-      <p className="text-xs text-ink-500">
+      <p className="text-xs text-ink-500 dark:text-ink-400">
         Showing <span className="font-medium text-ink-700">{from}</span>–
         <span className="font-medium text-ink-700">{to}</span> of{" "}
         <span className="font-medium text-ink-700">{total}</span>
@@ -27,18 +27,18 @@ export default function Pagination({ page, limit, total, onPage }) {
           type="button"
           onClick={() => onPage(page - 1)}
           disabled={page <= 1}
-          className="rounded-lg px-3 py-1.5 text-xs font-medium text-ink-700 ring-1 ring-ink-200 hover:bg-ink-50 disabled:text-ink-300 disabled:ring-ink-100"
+          className="rounded-lg px-3 py-1.5 text-xs font-medium text-ink-700 ring-1 ring-ink-200 dark:ring-ink-600 hover:bg-ink-50 dark:hover:bg-ink-200/40 disabled:text-ink-300 disabled:ring-ink-100"
         >
           Previous
         </button>
-        <span className="text-xs text-ink-500">
+        <span className="text-xs text-ink-500 dark:text-ink-400">
           Page {page} of {pages}
         </span>
         <button
           type="button"
           onClick={() => onPage(page + 1)}
           disabled={page >= pages}
-          className="rounded-lg px-3 py-1.5 text-xs font-medium text-ink-700 ring-1 ring-ink-200 hover:bg-ink-50 disabled:text-ink-300 disabled:ring-ink-100"
+          className="rounded-lg px-3 py-1.5 text-xs font-medium text-ink-700 ring-1 ring-ink-200 dark:ring-ink-600 hover:bg-ink-50 dark:hover:bg-ink-200/40 disabled:text-ink-300 disabled:ring-ink-100"
         >
           Next
         </button>

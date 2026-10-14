@@ -100,24 +100,26 @@ export default function InvoiceDetail() {
     <div className="mx-auto max-w-3xl space-y-6">
       <Link
         to="/finance/invoices"
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-800"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         All invoices
       </Link>
 
-      <header className="rounded-xl bg-white px-6 py-5 shadow-sm ring-1 ring-ink-200/70">
+      <header className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-lg font-semibold tracking-tight text-ink-900">
               {invoice.purpose}
             </h1>
-            <p className="mt-1 text-xs text-ink-500">{invoice.reference}</p>
+            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+              {invoice.reference}
+            </p>
           </div>
           <Badge status={invoice.status} />
         </div>
 
-        <div className="mt-5 grid gap-4 border-t border-ink-100 pt-4 sm:grid-cols-3">
+        <div className="mt-5 grid gap-4 border-t border-ink-100 dark:border-ink-700/50 pt-4 sm:grid-cols-3">
           <Figure
             label="Total"
             value={invoice.totalFormatted ?? formatMoney(invoice.total)}
@@ -137,7 +139,7 @@ export default function InvoiceDetail() {
         </div>
 
         {invoice.dueAt && (
-          <p className="mt-4 text-xs text-ink-500">
+          <p className="mt-4 text-xs text-ink-500 dark:text-ink-400">
             Due {formatDate(invoice.dueAt)}
           </p>
         )}
@@ -154,7 +156,7 @@ export default function InvoiceDetail() {
               >
                 <div className="min-w-0">
                   <p className="text-sm text-ink-800">{item.description}</p>
-                  <p className="text-xs text-ink-500">
+                  <p className="text-xs text-ink-500 dark:text-ink-400">
                     {item.quantity} ×{" "}
                     {formatMoney(item.unitAmount, { showSymbol: false })}
                     {item.taxPercent > 0 &&
@@ -183,12 +185,12 @@ export default function InvoiceDetail() {
                   <p className="text-sm font-medium text-ink-900">
                     {formatMoney(payment.capturedAmount ?? payment.amount)}
                     {payment.refundedAmount > 0 && (
-                      <span className="ml-2 text-xs font-normal text-ink-500">
+                      <span className="ml-2 text-xs font-normal text-ink-500 dark:text-ink-400">
                         {formatMoney(payment.refundedAmount)} refunded
                       </span>
                     )}
                   </p>
-                  <p className="mt-0.5 text-xs text-ink-500">
+                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                     {payment.verifiedAt
                       ? `Confirmed ${formatDateTime(payment.verifiedAt)}`
                       : "Awaiting confirmation"}
@@ -230,7 +232,7 @@ export default function InvoiceDetail() {
       {actionError && (
         <p
           role="alert"
-          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
         >
           {actionError}
         </p>
@@ -316,12 +318,14 @@ export default function InvoiceDetail() {
 function Figure({ label, value, tone = "default" }) {
   const tones = {
     default: "text-ink-900",
-    good: "text-emerald-700",
-    warn: "text-amber-700",
+    good: "text-emerald-700 dark:text-emerald-300",
+    warn: "text-amber-700 dark:text-amber-300",
   };
   return (
     <div>
-      <p className="text-xs tracking-wide text-ink-500 uppercase">{label}</p>
+      <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+        {label}
+      </p>
       <p className={`mt-1 text-lg font-semibold tabular-nums ${tones[tone]}`}>
         {value}
       </p>

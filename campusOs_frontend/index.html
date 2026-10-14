@@ -4,7 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="color-scheme" content="light dark" />
     <title>CampusOS</title>
+
+    <!--
+      Set the theme before the bundle loads.
+
+      This runs before React exists, and that is the point: doing it in a React
+      effect means the page paints light, then jumps to dark a frame later. A
+      person who chose dark is looking at a white flash on every navigation.
+      Kept inline deliberately — an external file would itself be a request, and
+      might lose the race.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("campusos.theme");
+          var dark =
+            stored === "dark" ||
+            (stored !== "light" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        } catch (error) {
+          /* Storage blocked: fall through to the light theme, which is the
+             safe default because a dark page with no tokens would be worse. */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -47,16 +47,16 @@ export default function AnnouncementDetail() {
     <article className="mx-auto max-w-3xl space-y-6">
       <Link
         to="/announcements"
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-800"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         All announcements
       </Link>
 
-      <header className="rounded-xl bg-white px-6 py-5 shadow-sm ring-1 ring-ink-200/70">
+      <header className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="flex flex-wrap items-center gap-2">
           <Badge status={announcement.priority} />
-          <span className="text-xs text-ink-400">
+          <span className="text-xs text-ink-400 dark:text-ink-500">
             {announcement.reference} · {humanise(announcement.audience?.scope)}
           </span>
         </div>
@@ -65,7 +65,7 @@ export default function AnnouncementDetail() {
           {announcement.title}
         </h1>
 
-        <p className="mt-1 text-xs text-ink-500">
+        <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
           Published {formatDateTime(announcement.publishedAt)}
           {announcement.expiresAt &&
             ` · expires ${formatDateTime(announcement.expiresAt)}`}
@@ -74,13 +74,13 @@ export default function AnnouncementDetail() {
         </p>
       </header>
 
-      <div className="rounded-xl bg-white px-6 py-5 shadow-sm ring-1 ring-ink-200/70">
+      <div className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="space-y-4 text-sm leading-relaxed whitespace-pre-wrap text-ink-700">
           {announcement.body}
         </div>
 
         {announcement.hasAttachment && (
-          <div className="mt-6 border-t border-ink-100 pt-4">
+          <div className="mt-6 border-t border-ink-100 dark:border-ink-700/50 pt-4">
             <Button variant="secondary" onClick={download}>
               <Paperclip className="size-4" aria-hidden="true" />
               Download attachment

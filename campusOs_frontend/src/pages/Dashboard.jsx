@@ -75,7 +75,7 @@ export default function Dashboard() {
         <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
           Hello, {firstName}
         </h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           {isStudent && student
             ? `${humanise(user.role)} · Roll ${student.rollNumber}`
             : humanise(user?.role)}
@@ -109,7 +109,7 @@ export default function Dashboard() {
             actions={
               <Link
                 to="/requests"
-                className="text-xs font-medium text-brand-700 hover:underline"
+                className="text-xs font-medium text-brand-700 dark:text-brand-300 hover:underline"
               >
                 View all
               </Link>
@@ -142,7 +142,7 @@ export default function Dashboard() {
                       <p className="truncate text-sm font-medium text-ink-800">
                         {request.title}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-500">
+                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                         {request.reference} ·{" "}
                         {formatRelative(request.createdAt)}
                       </p>
@@ -161,7 +161,7 @@ export default function Dashboard() {
             actions={
               <Link
                 to="/finance/invoices"
-                className="text-xs font-medium text-brand-700 hover:underline"
+                className="text-xs font-medium text-brand-700 dark:text-brand-300 hover:underline"
               >
                 View all
               </Link>
@@ -186,7 +186,7 @@ export default function Dashboard() {
                       <p className="truncate text-sm font-medium text-ink-800">
                         {invoice.purpose}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-500">
+                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                         {invoice.reference} · due {formatDate(invoice.dueAt)}
                       </p>
                     </div>
@@ -221,8 +221,8 @@ function AnnouncementStrip({ items }) {
           to={`/announcements/${announcement.reference}`}
           className={`flex items-start gap-3 rounded-xl px-4 py-3 ring-1 transition-colors ${
             announcement.priority === "URGENT"
-              ? "bg-red-50 text-red-900 ring-red-200 hover:bg-red-100"
-              : "bg-white text-ink-800 ring-ink-200 hover:bg-ink-50"
+              ? "bg-red-50 dark:bg-red-500/12 text-red-900 dark:text-red-200 ring-red-200 dark:ring-red-400/25 hover:bg-red-100"
+              : "bg-white text-ink-800 ring-ink-200 dark:ring-ink-600 hover:bg-ink-50 dark:hover:bg-ink-200/40"
           }`}
         >
           <Megaphone className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
@@ -262,7 +262,9 @@ function StudentStrip({ student }) {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 uppercase">{label}</dt>
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+        {label}
+      </dt>
       <dd className="mt-0.5 text-sm font-medium text-ink-900">
         {value ?? "—"}
       </dd>
@@ -405,7 +407,7 @@ function QuickLinks() {
           <Link
             key={to}
             to={to}
-            className="inline-flex items-center gap-2 rounded-lg bg-ink-50 px-3.5 py-2 text-sm font-medium text-ink-700 ring-1 ring-ink-200 transition-colors hover:bg-white hover:text-brand-700 hover:ring-brand-300"
+            className="inline-flex items-center gap-2 rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3.5 py-2 text-sm font-medium text-ink-700 ring-1 ring-ink-200 dark:ring-ink-600 transition-colors hover:bg-white hover:text-brand-700 hover:ring-brand-300"
           >
             <Icon className="size-4" aria-hidden="true" />
             {label}

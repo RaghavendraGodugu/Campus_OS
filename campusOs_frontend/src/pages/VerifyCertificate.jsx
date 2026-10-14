@@ -97,7 +97,7 @@ export default function VerifyCertificate() {
         {/* ===== Hero ===== */}
         <div className="flex flex-1 flex-col justify-center py-12">
           <div className="mx-auto w-full max-w-xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-xs font-medium text-brand-700 shadow-card ring-1 ring-brand-200 ring-inset backdrop-blur-sm">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/70 dark:bg-surface/85 px-3 py-1.5 text-xs font-medium text-brand-700 dark:text-brand-300 shadow-card ring-1 ring-brand-200 dark:ring-brand-400/25 ring-inset backdrop-blur-sm">
               <ShieldQuestion className="size-3.5" aria-hidden="true" />
               Open to anyone — no account needed
             </span>
@@ -116,7 +116,7 @@ export default function VerifyCertificate() {
                 Verification code
               </label>
               <div className="surface-raised flex items-center gap-2 p-2">
-                <span className="grid size-10 shrink-0 place-items-center text-ink-400">
+                <span className="grid size-10 shrink-0 place-items-center text-ink-400 dark:text-ink-500">
                   <Hash className="size-5" aria-hidden="true" />
                 </span>
                 <input
@@ -142,7 +142,10 @@ export default function VerifyCertificate() {
                   Verify
                 </Button>
               </div>
-              <p id="code-hint" className="mt-2.5 text-xs text-ink-500">
+              <p
+                id="code-hint"
+                className="mt-2.5 text-xs text-ink-500 dark:text-ink-400"
+              >
                 Printed beneath the registrar's seal. Letters and numbers only.
               </p>
             </form>
@@ -161,7 +164,7 @@ export default function VerifyCertificate() {
           </div>
         </div>
 
-        <footer className="pb-2 text-center text-xs text-ink-500">
+        <footer className="pb-2 text-center text-xs text-ink-500 dark:text-ink-400">
           Verification confirms the certificate's status only. It does not
           disclose who it was issued to.
         </footer>
@@ -175,9 +178,9 @@ function NotRecognised({ message }) {
   return (
     <div
       role="alert"
-      className="surface mt-6 flex items-start gap-4 p-5 text-left ring-red-200"
+      className="surface mt-6 flex items-start gap-4 p-5 text-left ring-red-200 dark:ring-red-400/25"
     >
-      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-red-50 text-red-600 ring-1 ring-red-100 ring-inset">
+      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-red-50 dark:bg-red-500/12 text-red-600 dark:text-red-400 ring-1 ring-red-100 dark:ring-red-400/20 ring-inset">
         <Ban className="size-5" aria-hidden="true" />
       </span>
       <div>
@@ -202,14 +205,16 @@ function Result({ valid, data }) {
     <div className="mt-6 text-left">
       <div
         className={`surface-raised overflow-hidden ${
-          valid ? "ring-emerald-200" : "ring-red-200"
+          valid
+            ? "ring-emerald-200 dark:ring-emerald-400/25"
+            : "ring-red-200 dark:ring-red-400/25"
         }`}
       >
         <div
           className={`flex items-center gap-4 px-5 py-5 ${
             valid
-              ? "bg-linear-to-r from-emerald-50 to-surface"
-              : "bg-linear-to-r from-red-50 to-surface"
+              ? "bg-linear-to-r from-emerald-50 dark:from-emerald-500/15 dark:from-emerald-500/12 to-surface"
+              : "bg-linear-to-r from-red-50 dark:from-red-500/15 dark:from-red-500/12 to-surface"
           }`}
         >
           <span
@@ -227,7 +232,7 @@ function Result({ valid, data }) {
             )}
           </span>
           <div className="min-w-0">
-            <p className="text-xs font-semibold tracking-[0.08em] text-ink-500 uppercase">
+            <p className="text-xs font-semibold tracking-[0.08em] text-ink-500 dark:text-ink-400 uppercase">
               {valid ? "Authentic" : "Not valid"}
             </p>
             <p className="mt-0.5 text-lg font-semibold tracking-tight text-ink-900">
@@ -259,9 +264,9 @@ function Result({ valid, data }) {
         </dl>
       </div>
 
-      <p className="mt-3 flex items-start gap-2 px-1 text-xs leading-relaxed text-ink-500">
+      <p className="mt-3 flex items-start gap-2 px-1 text-xs leading-relaxed text-ink-500 dark:text-ink-400">
         <BadgeCheck
-          className="mt-0.5 size-3.5 shrink-0 text-emerald-600"
+          className="mt-0.5 size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
           aria-hidden="true"
         />
         Checked against the live register. A revoked certificate stays listed
@@ -275,12 +280,14 @@ function Row({ icon: Icon, label, value, muted = false }) {
   return (
     <div className="flex items-start gap-3">
       <Icon
-        className="mt-0.5 size-4 shrink-0 text-ink-400"
+        className="mt-0.5 size-4 shrink-0 text-ink-400 dark:text-ink-500"
         aria-hidden="true"
       />
       <div className="min-w-0">
-        <dt className="text-xs text-ink-500">{label}</dt>
-        <dd className={`text-sm ${muted ? "text-ink-400" : "text-ink-900"}`}>
+        <dt className="text-xs text-ink-500 dark:text-ink-400">{label}</dt>
+        <dd
+          className={`text-sm ${muted ? "text-ink-400 dark:text-ink-500" : "text-ink-900"}`}
+        >
           {value}
         </dd>
       </div>

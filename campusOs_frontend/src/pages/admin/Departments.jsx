@@ -51,7 +51,7 @@ export default function Departments() {
       }
     >
       <div className="surface overflow-hidden">
-        <div className="border-b border-ink-200/70 px-4 py-3.5 sm:px-5">
+        <div className="border-b border-ink-200/70 dark:border-ink-700/60 px-4 py-3.5 sm:px-5">
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -60,7 +60,7 @@ export default function Departments() {
             className="relative max-w-sm"
           >
             <Search
-              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400"
+              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400 dark:text-ink-500"
               aria-hidden="true"
             />
             <label htmlFor="department-search" className="sr-only">
@@ -103,7 +103,7 @@ export default function Departments() {
                 <div className="flex min-w-0 items-start gap-3.5">
                   <span
                     aria-hidden="true"
-                    className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-accent-100 to-accent-50 text-[0.6875rem] font-bold text-accent-700 ring-1 ring-accent-200 ring-inset"
+                    className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-accent-100 to-accent-50 text-[0.6875rem] font-bold text-accent-700 dark:text-accent-300 ring-1 ring-accent-200 dark:ring-accent-400/25 ring-inset"
                   >
                     {department.code?.slice(0, 3)}
                   </span>
@@ -111,16 +111,16 @@ export default function Departments() {
                     <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900">
                       {department.name}
                       {!department.isActive && (
-                        <span className="rounded-md bg-red-50 px-1.5 py-0.5 text-[0.6875rem] font-medium text-red-700 ring-1 ring-red-200 ring-inset">
+                        <span className="rounded-md bg-red-50 dark:bg-red-500/12 px-1.5 py-0.5 text-[0.6875rem] font-medium text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset">
                           Retired
                         </span>
                       )}
                     </p>
-                    <p className="mt-0.5 font-mono text-xs text-ink-500">
+                    <p className="mt-0.5 font-mono text-xs text-ink-500 dark:text-ink-400">
                       {department.code}
                     </p>
                     {department.hod && (
-                      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink-500">
+                      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink-500 dark:text-ink-400">
                         <UserRound className="size-3" aria-hidden="true" />
                         {department.hod.fullName}
                       </p>
@@ -277,7 +277,7 @@ function DepartmentForm({ open, department, onClose, onDone }) {
         {submit.isError && !Object.keys(errors).length && (
           <p
             role="alert"
-            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+            className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
           >
             {submit.error?.message}
           </p>
@@ -368,7 +368,7 @@ function RetireDialog({ department, onClose, onDone }) {
         {submit.isError && (
           <p
             role="alert"
-            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+            className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
           >
             {submit.error?.message}
           </p>

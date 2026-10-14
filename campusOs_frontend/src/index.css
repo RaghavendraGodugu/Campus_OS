@@ -1,6 +1,16 @@
 @import "tailwindcss";
 
 /*
+ * Dark mode, driven by a class on <html> rather than the OS preference.
+ *
+ * The automatic `prefers-color-scheme` variant is wrong here: a person who
+ * prefers a light system can still want this app dark at night, and a media
+ * query would refuse to let them choose. The theme is stored and applied
+ * before first paint, so there is no flash of the wrong one.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
  * CampusOS theme.
 
  * Colour is defined once as CSS variables and referenced by Tailwind utilities,
@@ -206,11 +216,16 @@
    */
   .surface {
     @apply rounded-card border border-white/70 bg-surface/92 shadow-card backdrop-blur-xl;
+    /* The border is what draws the edge of a card on a light canvas; on a dark
+       one, white at 70% is a bright outline, so it becomes a faint light line
+       against the panel instead. */
+    @apply dark:border-white/10 dark:bg-surface/85;
   }
 
   /** The heavier version, for menus and panels that must sit clearly above. */
   .surface-raised {
     @apply rounded-card border border-white/70 bg-surface/92 shadow-pop backdrop-blur-2xl;
+    @apply dark:border-white/12 dark:bg-surface/95;
   }
 
   /**
@@ -250,5 +265,75 @@
         transparent 1px
       );
     background-size: 56px 56px;
+  }
+}
+
+/**
+ * Dark theme.
+ *
+ * The whole palette is tokens, so this is a re-declaration rather than a second
+ * stylesheet — which is the reason the theme was built this way in the first
+ * place. Two things are deliberately *not* mirrored:
+ *
+ *  - **the brand ramp stays put.** Violet reads the same on both surfaces;
+ *    darkening it further would make it indistinguishable from the background.
+ *  - **the neutrals invert.** The light ramp is near-white at 50 and near-black
+ *    at 900; the dark ramp runs the other way, which is why `--color-ink-800`
+ *    becomes a light text colour and `--color-ink-50` a dark one. Swapping the
+ *    meaning rather than the values is what lets one set of `text-ink-800`
+ *    classes work in both themes.
+ */
+@layer base {
+  .dark {
+    --color-ink-50: oklch(0.19 0.022 305);
+    --color-ink-100: oklch(0.23 0.024 305);
+    --color-ink-200: oklch(0.28 0.026 305);
+    --color-ink-300: oklch(0.35 0.028 305);
+    --color-ink-400: oklch(0.52 0.022 303);
+    --color-ink-500: oklch(0.62 0.02 303);
+    --color-ink-600: oklch(0.71 0.018 302);
+    --color-ink-700: oklch(0.79 0.015 302);
+    --color-ink-800: oklch(0.87 0.012 301);
+    --color-ink-900: oklch(0.95 0.009 300);
+
+    /* Surfaces: not black. Pure #000 on a large field is harsh, and it is what
+       makes cheap "dark mode" implementations look broken. */
+    --color-surface: oklch(0.23 0.024 305);
+    --color-canvas: oklch(0.17 0.02 306);
+
+    /* Shadows do almost nothing on a dark surface, so they are replaced by
+       borders doing the work instead. */
+    --shadow-card:
+      0 1px 2px -1px oklch(0 0 0 / 0.4), 0 4px 16px -4px oklch(0 0 0 / 0.5);
+    --shadow-raised:
+      0 2px 4px -2px oklch(0 0 0 / 0.45), 0 14px 32px -10px oklch(0 0 0 / 0.6);
+    --shadow-pop:
+      0 8px 16px -6px oklch(0 0 0 / 0.5), 0 28px 56px -14px oklch(0 0 0 / 0.7);
+
+    background-image:
+      radial-gradient(
+        ellipse 60rem 32rem at 4% -10rem,
+        oklch(0.63 0.21 303 / 0.22),
+        transparent 62%
+      ),
+      radial-gradient(
+        ellipse 48rem 28rem at 98% -6rem,
+        oklch(0.72 0.17 30 / 0.14),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 70rem 36rem at 50% 112%,
+        oklch(0.55 0.22 304 / 0.16),
+        transparent 62%
+      );
+
+    color-scheme: dark;
+  }
+
+  /* The light equivalents, spelled out so the theme resets cleanly when the
+     class comes off. Without these, switching back leaves the dark neutrals in
+     place and the page renders light text on a light background. */
+  :root:not(.dark) {
+    color-scheme: light;
   }
 }

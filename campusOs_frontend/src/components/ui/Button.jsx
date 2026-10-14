@@ -12,14 +12,14 @@ const VARIANTS = {
   primary:
     "aurora bg-[length:100%_100%] text-white shadow-brand ring-1 ring-white/15 hover:shadow-pop hover:brightness-[1.08] focus-visible:outline-brand-700 active:brightness-95 disabled:bg-none disabled:bg-ink-200 disabled:text-ink-400 disabled:shadow-none disabled:ring-ink-300",
   secondary:
-    "bg-surface/90 text-ink-700 shadow-card ring-1 ring-ink-200/90 backdrop-blur-sm hover:bg-white hover:ring-brand-200 hover:shadow-raised focus-visible:outline-ink-400 active:bg-ink-50 disabled:text-ink-400 disabled:shadow-none disabled:ring-ink-200",
+    "bg-surface/90 text-ink-700 shadow-card ring-1 ring-ink-200/90 dark:ring-ink-600 backdrop-blur-sm hover:bg-white hover:ring-brand-200 hover:shadow-raised focus-visible:outline-ink-400 active:bg-ink-50 disabled:text-ink-400 disabled:shadow-none disabled:ring-ink-200",
   danger:
     "bg-linear-to-b from-red-500 to-red-600 text-white shadow-card ring-1 ring-red-700/20 hover:from-red-500 hover:to-red-700 hover:shadow-raised focus-visible:outline-red-700 active:to-red-700 disabled:from-red-300 disabled:to-red-300",
   ghost:
-    "text-ink-600 hover:bg-ink-100/80 hover:text-ink-900 focus-visible:outline-ink-400 active:bg-ink-200/60 disabled:text-ink-400",
+    "text-ink-600 hover:bg-ink-100/80 dark:hover:bg-ink-200/40 hover:text-ink-900 focus-visible:outline-ink-400 active:bg-ink-200/60 disabled:text-ink-400",
   /** For destructive actions that should not be the obvious thing to click. */
   subtle:
-    "bg-ink-100 text-ink-600 hover:bg-brand-50 hover:text-brand-800 focus-visible:outline-ink-400 disabled:text-ink-400",
+    "bg-ink-100 dark:bg-ink-200/40 text-ink-600 hover:bg-brand-50 dark:hover:bg-brand-500/20 hover:text-brand-800 focus-visible:outline-ink-400 disabled:text-ink-400",
   /** The one loud control on a page. Never more than one per screen. */
   accent:
     "aurora-warm text-white shadow-accent ring-1 ring-white/20 hover:brightness-[1.07] hover:shadow-pop focus-visible:outline-accent-600 active:brightness-95 disabled:bg-ink-200 disabled:text-ink-400 disabled:shadow-none",

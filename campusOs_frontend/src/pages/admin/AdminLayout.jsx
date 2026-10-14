@@ -33,7 +33,7 @@ export default function AdminLayout({ title, description, actions, children }) {
           <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
             {title}
           </h1>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-500">
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-500 dark:text-ink-400">
             {description}
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function AdminLayout({ title, description, actions, children }) {
       </header>
 
       <nav aria-label="Administration sections">
-        <div className="inline-flex gap-1 rounded-2xl bg-white/70 p-1.5 shadow-card ring-1 ring-ink-200/80 backdrop-blur-xl">
+        <div className="inline-flex gap-1 rounded-2xl bg-white/70 dark:bg-surface/85 p-1.5 shadow-card ring-1 ring-ink-200/80 dark:ring-ink-600 backdrop-blur-xl">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             return (

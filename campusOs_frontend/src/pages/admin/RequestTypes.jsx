@@ -60,7 +60,7 @@ export default function RequestTypes() {
       }
     >
       <div className="surface overflow-hidden">
-        <div className="border-b border-ink-200/70 px-4 py-3.5 sm:px-5">
+        <div className="border-b border-ink-200/70 dark:border-ink-700/60 px-4 py-3.5 sm:px-5">
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -69,7 +69,7 @@ export default function RequestTypes() {
             className="relative max-w-sm"
           >
             <Search
-              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400"
+              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400 dark:text-ink-500"
               aria-hidden="true"
             />
             <label htmlFor="service-search" className="sr-only">
@@ -113,13 +113,13 @@ export default function RequestTypes() {
                   <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900">
                     {type.name}
                     {!type.isActive && (
-                      <span className="rounded-md bg-red-50 px-1.5 py-0.5 text-[0.6875rem] font-medium text-red-700 ring-1 ring-red-200 ring-inset">
+                      <span className="rounded-md bg-red-50 dark:bg-red-500/12 px-1.5 py-0.5 text-[0.6875rem] font-medium text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset">
                         Retired
                       </span>
                     )}
                   </p>
 
-                  <p className="mt-0.5 text-xs text-ink-500">
+                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                     <span className="font-mono">{type.code}</span>
                     {type.department && ` · ${type.department.name}`}
                   </p>
@@ -132,7 +132,7 @@ export default function RequestTypes() {
 
                   {/* The shape of the form a student will actually fill in. */}
                   <p className="mt-2 flex flex-wrap gap-1.5">
-                    <span className="rounded-md bg-ink-100/80 px-1.5 py-0.5 text-[0.6875rem] text-ink-600">
+                    <span className="rounded-md bg-ink-100/80 dark:bg-ink-200/40 px-1.5 py-0.5 text-[0.6875rem] text-ink-600">
                       {(type.fields?.length ?? 0) === 0
                         ? "No extra questions"
                         : `${type.fields.length} question${type.fields.length === 1 ? "" : "s"}`}
@@ -144,14 +144,14 @@ export default function RequestTypes() {
                       .map((field) => (
                         <span
                           key={field.name}
-                          className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[0.6875rem] text-amber-800 ring-1 ring-amber-200 ring-inset"
+                          className="rounded-md bg-amber-50 dark:bg-amber-500/12 px-1.5 py-0.5 text-[0.6875rem] text-amber-800 dark:text-amber-200 ring-1 ring-amber-200 dark:ring-amber-400/25 ring-inset"
                         >
                           {field.label} required
                         </span>
                       ))}
 
                     {Number(type.requiredDocuments?.length ?? 0) > 0 && (
-                      <span className="rounded-md bg-brand-50 px-1.5 py-0.5 text-[0.6875rem] text-brand-700 ring-1 ring-brand-200 ring-inset">
+                      <span className="rounded-md bg-brand-50 dark:bg-brand-500/15 px-1.5 py-0.5 text-[0.6875rem] text-brand-700 dark:text-brand-300 ring-1 ring-brand-200 dark:ring-brand-400/25 ring-inset">
                         {type.requiredDocuments.length} document
                         {type.requiredDocuments.length === 1 ? "" : "s"}{" "}
                         required
@@ -368,7 +368,7 @@ function ServiceForm({ open, service, departments, onClose, onDone }) {
         </Field>
 
         {service && (
-          <p className="rounded-xl bg-ink-50 px-3.5 py-3 text-xs leading-relaxed text-ink-600 ring-1 ring-ink-200 ring-inset">
+          <p className="rounded-xl bg-ink-50 dark:bg-ink-100/40 px-3.5 py-3 text-xs leading-relaxed text-ink-600 ring-1 ring-ink-200 dark:ring-ink-600 ring-inset">
             This service asks {service.fields?.length ?? 0} question
             {(service.fields?.length ?? 0) === 1 ? "" : "s"} and requires{" "}
             {service.requiredDocuments?.length ?? 0} document
@@ -380,7 +380,7 @@ function ServiceForm({ open, service, departments, onClose, onDone }) {
         {submit.isError && !Object.keys(errors).length && (
           <p
             role="alert"
-            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+            className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
           >
             {submit.error?.message}
           </p>
@@ -469,7 +469,7 @@ function RetireDialog({ service, onClose, onDone }) {
         {submit.isError && (
           <p
             role="alert"
-            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+            className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
           >
             {submit.error?.message}
           </p>

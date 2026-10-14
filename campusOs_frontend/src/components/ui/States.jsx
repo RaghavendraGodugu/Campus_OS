@@ -11,7 +11,7 @@ import { AlertTriangle, Inbox, Loader2 } from "lucide-react";
 export function Loading({ label = "Loading" }) {
   return (
     <div
-      className="flex items-center justify-center gap-3 py-16 text-ink-500"
+      className="flex items-center justify-center gap-3 py-16 text-ink-500 dark:text-ink-400"
       role="status"
     >
       <Loader2 className="size-5 animate-spin" aria-hidden="true" />
@@ -22,11 +22,16 @@ export function Loading({ label = "Loading" }) {
 
 export function EmptyState({ title, description, action, icon: Icon = Inbox }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-ink-200 bg-white/50 px-6 py-16 text-center">
-      <Icon className="size-8 text-ink-300" aria-hidden="true" />
+    <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-ink-200 dark:border-ink-700/70 bg-white/50 dark:bg-surface px-6 py-16 text-center">
+      <Icon
+        className="size-8 text-ink-300 dark:text-ink-500"
+        aria-hidden="true"
+      />
       <h3 className="text-sm font-semibold text-ink-800">{title}</h3>
       {description && (
-        <p className="max-w-sm text-sm text-ink-500">{description}</p>
+        <p className="max-w-sm text-sm text-ink-500 dark:text-ink-400">
+          {description}
+        </p>
       )}
       {action}
     </div>
@@ -41,16 +46,22 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="flex flex-col items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-6 py-12 text-center"
+      className="flex flex-col items-center gap-3 rounded-xl border border-red-200 dark:border-red-400/25 bg-red-50 dark:bg-red-500/12 px-6 py-12 text-center"
     >
       <AlertTriangle className="size-8 text-red-500" aria-hidden="true" />
-      <h3 className="text-sm font-semibold text-red-900">{title}</h3>
-      {message && <p className="max-w-sm text-sm text-red-700">{message}</p>}
+      <h3 className="text-sm font-semibold text-red-900 dark:text-red-200">
+        {title}
+      </h3>
+      {message && (
+        <p className="max-w-sm text-sm text-red-700 dark:text-red-300">
+          {message}
+        </p>
+      )}
       {onRetry && (
         <button
           type="button"
           onClick={onRetry}
-          className="mt-1 rounded-xl bg-white px-4 py-2 text-sm font-medium text-red-800 shadow-card ring-1 ring-red-200 transition-all duration-150 hover:bg-red-50 hover:shadow-raised"
+          className="mt-1 rounded-xl bg-white dark:bg-surface px-4 py-2 text-sm font-medium text-red-800 dark:text-red-200 shadow-card ring-1 ring-red-200 dark:ring-red-400/25 transition-all duration-150 hover:bg-red-50 hover:shadow-raised"
         >
           Try again
         </button>
@@ -64,7 +75,7 @@ export function UnconfirmedState({ onRetry }) {
   return (
     <div className="mx-auto max-w-lg px-4 py-24 text-center">
       <AlertTriangle
-        className="mx-auto size-10 text-amber-500"
+        className="mx-auto size-10 text-amber-500 dark:text-amber-400"
         aria-hidden="true"
       />
       <h2 className="mt-4 text-lg font-semibold text-ink-900">

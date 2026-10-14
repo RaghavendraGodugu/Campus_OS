@@ -178,7 +178,7 @@ export default function StudentImport() {
   if (result) {
     return (
       <div className="surface-raised animate-rise p-6 sm:p-7">
-        <span className="grid size-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200 ring-inset">
+        <span className="grid size-12 place-items-center rounded-2xl bg-emerald-50 dark:bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-400/25 ring-inset">
           <CheckCircle2 className="size-6" aria-hidden="true" />
         </span>
 
@@ -191,8 +191,8 @@ export default function StudentImport() {
           in until they replace the password you are about to hand them.
         </p>
 
-        <div className="mt-6 rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/70 p-5">
-          <p className="text-xs font-semibold tracking-wide text-brand-700 uppercase">
+        <div className="mt-6 rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/70 dark:bg-brand-500/15 p-5">
+          <p className="text-xs font-semibold tracking-wide text-brand-700 dark:text-brand-300 uppercase">
             Temporary passwords
           </p>
           <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-700">
@@ -223,11 +223,11 @@ export default function StudentImport() {
   return (
     <div className="space-y-6">
       <div className="surface overflow-hidden">
-        <div className="border-b border-ink-200/70 px-4 py-3.5 sm:px-5">
+        <div className="border-b border-ink-200/70 dark:border-ink-700/60 px-4 py-3.5 sm:px-5">
           <h2 className="text-[0.9375rem] font-semibold tracking-tight text-ink-900">
             Choose a file
           </h2>
-          <p className="mt-1 text-[0.8125rem] text-ink-500">
+          <p className="mt-1 text-[0.8125rem] text-ink-500 dark:text-ink-400">
             Up to 2,000 students, 4MB. Nothing is written until you check it.
           </p>
         </div>
@@ -250,7 +250,7 @@ export default function StudentImport() {
             {fileName && (
               <p className="flex items-center gap-2 text-sm text-ink-600">
                 <FileSpreadsheet
-                  className="size-4 text-ink-400"
+                  className="size-4 text-ink-400 dark:text-ink-500"
                   aria-hidden="true"
                 />
                 {fileName}
@@ -260,21 +260,21 @@ export default function StudentImport() {
             <button
               type="button"
               onClick={() => download("campusos-students-template.csv", SAMPLE)}
-              className="ml-auto text-sm font-medium text-brand-700 transition-colors hover:text-brand-900"
+              className="ml-auto text-sm font-medium text-brand-700 dark:text-brand-300 transition-colors hover:text-brand-900"
             >
               Download the template
             </button>
           </div>
 
           {csv && (
-            <div className="mt-5 rounded-2xl bg-ink-50 p-4 ring-1 ring-ink-200 ring-inset">
+            <div className="mt-5 rounded-2xl bg-ink-50 dark:bg-ink-100/40 p-4 ring-1 ring-ink-200 dark:ring-ink-600 ring-inset">
               <p className="text-xs font-semibold tracking-wide text-ink-600 uppercase">
                 Columns expected
               </p>
               <p className="mt-2 font-mono text-xs leading-relaxed break-all text-ink-600">
                 {COLUMNS.join(", ")}
               </p>
-              <p className="mt-3 text-xs leading-relaxed text-ink-500">
+              <p className="mt-3 text-xs leading-relaxed text-ink-500 dark:text-ink-400">
                 Extra columns are ignored, so an export from another system is
                 fine. A value containing a comma must be wrapped in quotes.
               </p>
@@ -284,7 +284,7 @@ export default function StudentImport() {
           {error && (
             <p
               role="alert"
-              className="mt-4 rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-200 ring-inset"
+              className="mt-4 rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
             >
               {error}
             </p>
@@ -341,7 +341,7 @@ export default function StudentImport() {
           ].map((line) => (
             <li key={line} className="flex gap-2.5">
               <CheckCircle2
-                className="mt-0.5 size-4 shrink-0 text-emerald-600"
+                className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                 aria-hidden="true"
               />
               {line}
@@ -356,18 +356,18 @@ export default function StudentImport() {
 function Report({ report, onConfirm }) {
   if (!report.valid) {
     return (
-      <div className="surface overflow-hidden ring-red-200">
-        <div className="flex items-start gap-3.5 border-b border-red-200/70 bg-red-50/70 px-4 py-4 sm:px-5">
+      <div className="surface overflow-hidden ring-red-200 dark:ring-red-400/25">
+        <div className="flex items-start gap-3.5 border-b border-red-200/70 bg-red-50/70 dark:bg-red-500/12 px-4 py-4 sm:px-5">
           <ShieldAlert
-            className="mt-0.5 size-5 shrink-0 text-red-600"
+            className="mt-0.5 size-5 shrink-0 text-red-600 dark:text-red-400"
             aria-hidden="true"
           />
           <div>
-            <h3 className="text-[0.9375rem] font-semibold text-red-900">
+            <h3 className="text-[0.9375rem] font-semibold text-red-900 dark:text-red-200">
               {report.totals.problems} row
               {report.totals.problems === 1 ? "" : "s"} need attention
             </h3>
-            <p className="mt-1 text-[0.8125rem] leading-relaxed text-red-800">
+            <p className="mt-1 text-[0.8125rem] leading-relaxed text-red-800 dark:text-red-200">
               {report.message}
             </p>
           </div>
@@ -379,7 +379,7 @@ function Report({ report, onConfirm }) {
               <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900">
                 Line {problem.line}
                 {problem.rollNumber && (
-                  <span className="font-mono text-xs text-ink-500">
+                  <span className="font-mono text-xs text-ink-500 dark:text-ink-400">
                     {problem.rollNumber}
                   </span>
                 )}
@@ -388,7 +388,7 @@ function Report({ report, onConfirm }) {
                 {problem.issues.map((issue) => (
                   <li
                     key={issue}
-                    className="flex gap-2 text-[0.8125rem] text-red-700"
+                    className="flex gap-2 text-[0.8125rem] text-red-700 dark:text-red-300"
                   >
                     <span aria-hidden="true" className="text-red-300">
                       —
@@ -406,10 +406,10 @@ function Report({ report, onConfirm }) {
 
   return (
     <div className="surface overflow-hidden">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-ink-200/70 bg-emerald-50/60 px-4 py-4 sm:px-5">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-ink-200/70 dark:border-ink-700/60 bg-emerald-50/60 px-4 py-4 sm:px-5">
         <div className="flex items-start gap-3.5">
           <CheckCircle2
-            className="mt-0.5 size-5 shrink-0 text-emerald-600"
+            className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400"
             aria-hidden="true"
           />
           <div>
@@ -417,7 +417,7 @@ function Report({ report, onConfirm }) {
               {report.totals.toCreate} student
               {report.totals.toCreate === 1 ? "" : "s"} ready
             </h3>
-            <p className="mt-1 text-[0.8125rem] text-emerald-800">
+            <p className="mt-1 text-[0.8125rem] text-emerald-800 dark:text-emerald-200">
               {report.message} Nothing has been written yet.
             </p>
           </div>
@@ -434,7 +434,7 @@ function Report({ report, onConfirm }) {
           <caption className="sr-only">
             The first {report.preview.length} rows, as they will be imported
           </caption>
-          <thead className="border-b border-ink-200/70 bg-ink-50/60 text-xs text-ink-500">
+          <thead className="border-b border-ink-200/70 dark:border-ink-700/60 bg-ink-50/60 dark:bg-ink-100/35 text-xs text-ink-500 dark:text-ink-400">
             <tr>
               <th scope="col" className="px-4 py-2.5 font-medium sm:px-5">
                 Line
@@ -453,7 +453,7 @@ function Report({ report, onConfirm }) {
           <tbody className="divide-y divide-ink-100/90">
             {report.preview.map((row) => (
               <tr key={row.line}>
-                <td className="px-4 py-2.5 text-ink-500 tabular-nums sm:px-5">
+                <td className="px-4 py-2.5 text-ink-500 dark:text-ink-400 tabular-nums sm:px-5">
                   {row.line}
                 </td>
                 <td className="px-4 py-2.5 font-mono text-xs text-ink-800">
@@ -468,7 +468,7 @@ function Report({ report, onConfirm }) {
       </div>
 
       {report.preview.length < report.totals.rows && (
-        <p className="flex items-center gap-2 border-t border-ink-200/70 px-4 py-3 text-xs text-ink-500 sm:px-5">
+        <p className="flex items-center gap-2 border-t border-ink-200/70 dark:border-ink-700/60 px-4 py-3 text-xs text-ink-500 dark:text-ink-400 sm:px-5">
           <AlertTriangle className="size-3.5" aria-hidden="true" />
           Showing the first {report.preview.length} of {report.totals.rows}{" "}
           rows.

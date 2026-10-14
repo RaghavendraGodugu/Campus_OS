@@ -37,7 +37,7 @@ export default function Refunds() {
         <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
           Refunds
         </h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Refunds you have asked for, and what happened to them.
         </p>
       </header>
@@ -65,7 +65,7 @@ export default function Refunds() {
                     <p className="text-sm font-medium text-ink-900">
                       {refund.refundAmountFormatted ?? refund.refundAmount}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500">
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                       {refund.reference} · requested{" "}
                       {formatDateTime(refund.requestedAt ?? refund.createdAt)}
                     </p>
@@ -76,20 +76,20 @@ export default function Refunds() {
                 <p className="mt-2 text-sm text-ink-600">{refund.reason}</p>
 
                 {refund.rejectionReason && (
-                  <p className="mt-2 rounded-lg bg-ink-50 px-3 py-2 text-xs text-ink-600">
+                  <p className="mt-2 rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3 py-2 text-xs text-ink-600">
                     <span className="font-medium">Declined:</span>{" "}
                     {refund.rejectionReason}
                   </p>
                 )}
 
                 {refund.approvalNote && refund.status !== "REJECTED" && (
-                  <p className="mt-2 text-xs text-ink-500">
+                  <p className="mt-2 text-xs text-ink-500 dark:text-ink-400">
                     {refund.approvalNote}
                   </p>
                 )}
 
                 {refund.razorpayRefundId && (
-                  <p className="mt-2 text-[11px] text-ink-400">
+                  <p className="mt-2 text-[11px] text-ink-400 dark:text-ink-500">
                     Provider reference {refund.razorpayRefundId}
                   </p>
                 )}
@@ -108,7 +108,7 @@ export default function Refunds() {
         </Card>
       )}
 
-      <ol className="rounded-xl bg-white px-5 py-4 text-xs text-ink-500 shadow-sm ring-1 ring-ink-200/70">
+      <ol className="rounded-xl bg-white dark:bg-surface px-5 py-4 text-xs text-ink-500 dark:text-ink-400 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <li className="flex gap-2">
           <span className="font-semibold text-ink-700">1.</span> You ask for a
           refund on an invoice.

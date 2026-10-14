@@ -63,7 +63,7 @@ export default function TransitionPanel({
   if (!transitions || transitions.length === 0) {
     return (
       <Card title="Actions">
-        <p className="text-sm text-ink-500">{emptyNote}</p>
+        <p className="text-sm text-ink-500 dark:text-ink-400">{emptyNote}</p>
       </Card>
     );
   }
@@ -100,7 +100,7 @@ export default function TransitionPanel({
 
         {/* A reason, demanded only where the workflow says so. */}
         {pending && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <div className="rounded-lg border border-amber-200 dark:border-amber-400/25 bg-amber-50 dark:bg-amber-500/12 p-4">
             <Field
               label={pending.label ?? pending.to}
               htmlFor="transition-reason"
@@ -141,7 +141,7 @@ export default function TransitionPanel({
         {error && (
           <p
             role="alert"
-            className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+            className="rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
           >
             {error}
           </p>
@@ -194,7 +194,7 @@ export function DangerousAction({
           {buttonLabel}
         </Button>
       ) : (
-        <div className="space-y-3 rounded-lg border border-red-200 bg-red-50 p-4">
+        <div className="space-y-3 rounded-lg border border-red-200 dark:border-red-400/25 bg-red-50 dark:bg-red-500/12 p-4">
           {requiresReason && (
             <Field
               label="Reason"
@@ -214,7 +214,7 @@ export function DangerousAction({
           )}
 
           {error && (
-            <p role="alert" className="text-sm text-red-700">
+            <p role="alert" className="text-sm text-red-700 dark:text-red-300">
               {error}
             </p>
           )}

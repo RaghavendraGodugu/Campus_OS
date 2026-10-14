@@ -74,7 +74,7 @@ export default function Reports() {
           <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
             Reports
           </h1>
-          <p className="mt-1 text-sm text-ink-500">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
             {data.scope === "DEPARTMENT"
               ? "Your department"
               : "The whole institution"}{" "}
@@ -90,7 +90,7 @@ export default function Reports() {
             id="range"
             value={days}
             onChange={(event) => setDays(Number(event.target.value))}
-            className="h-9 rounded-xl border-0 bg-white px-3 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
+            className="h-9 rounded-xl border-0 bg-white dark:bg-surface px-3 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200 dark:ring-ink-600 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
           >
             {RANGES.map((option) => (
               <option key={option.days} value={option.days}>
@@ -177,7 +177,9 @@ export default function Reports() {
       {students.data && students.data.data.available !== false && (
         <Card title="Enrolment by department">
           {students.data.data.byDepartment.length === 0 ? (
-            <p className="text-sm text-ink-500">No students in this period.</p>
+            <p className="text-sm text-ink-500 dark:text-ink-400">
+              No students in this period.
+            </p>
           ) : (
             <BarList
               rows={students.data.data.byDepartment.map((d) => ({
@@ -204,7 +206,11 @@ function StatusBreakdown({ byStatus }) {
   const entries = Object.entries(byStatus ?? {}).sort((a, b) => b[1] - a[1]);
 
   if (entries.length === 0)
-    return <p className="text-sm text-ink-500">No requests in this period.</p>;
+    return (
+      <p className="text-sm text-ink-500 dark:text-ink-400">
+        No requests in this period.
+      </p>
+    );
 
   return (
     <ul className="space-y-2">
@@ -235,7 +241,7 @@ function BarList({ rows, total }) {
               {row.value}
             </span>
           </div>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink-100">
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-200/40">
             <div
               className="h-full rounded-full bg-brand-500"
               style={{ width: `${Math.round((row.value / max) * 100)}%` }}
@@ -243,7 +249,7 @@ function BarList({ rows, total }) {
           </div>
         </li>
       ))}
-      <li className="pt-1 text-xs text-ink-500">
+      <li className="pt-1 text-xs text-ink-500 dark:text-ink-400">
         Total {total.toLocaleString("en-IN")}
       </li>
     </ul>
@@ -253,17 +259,21 @@ function BarList({ rows, total }) {
 function Figure({ label, value, hint, tone = "default" }) {
   const tones = {
     default: "text-ink-900",
-    good: "text-emerald-700",
-    warn: "text-amber-700",
+    good: "text-emerald-700 dark:text-emerald-300",
+    warn: "text-amber-700 dark:text-amber-300",
   };
 
   return (
     <div>
-      <p className="text-xs tracking-wide text-ink-500 uppercase">{label}</p>
+      <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+        {label}
+      </p>
       <p className={`mt-1 text-lg font-semibold tabular-nums ${tones[tone]}`}>
         {value}
       </p>
-      {hint && <p className="mt-0.5 text-xs text-ink-400">{hint}</p>}
+      {hint && (
+        <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500">{hint}</p>
+      )}
     </div>
   );
 }

@@ -61,7 +61,7 @@ const TYPES = [
     blurb: "Confirms you are enrolled, with your dates of study.",
     for: "Bank accounts, passport applications",
     office: "Registrar",
-    tone: "from-brand-500/12 to-brand-500/0 text-brand-700 ring-brand-500/25",
+    tone: "from-brand-500/12 to-brand-500/0 text-brand-700 dark:text-brand-300 ring-brand-500/25",
   },
   {
     value: "STUDY",
@@ -79,7 +79,7 @@ const TYPES = [
     blurb: "A statement about conduct and attendance.",
     for: "Passport, visa and background check",
     office: "HoD",
-    tone: "from-violet-500/12 to-violet-500/0 text-violet-700 ring-violet-500/25",
+    tone: "from-violet-500/12 to-violet-500/0 text-violet-700 dark:text-violet-300 ring-violet-500/25",
   },
   {
     value: "TRANSCRIPT",
@@ -97,7 +97,7 @@ const TYPES = [
     blurb: "Confirms the programme was finished.",
     for: "Job applications and placements",
     office: "Examination cell",
-    tone: "from-emerald-500/12 to-emerald-500/0 text-emerald-700 ring-emerald-500/25",
+    tone: "from-emerald-500/12 to-emerald-500/0 text-emerald-700 dark:text-emerald-300 ring-emerald-500/25",
   },
   {
     value: "NO_DUES",
@@ -115,7 +115,7 @@ const TYPES = [
     blurb: "For moving to another institution mid-programme.",
     for: "Joining a different college or university",
     office: "Registrar",
-    tone: "from-amber-500/12 to-amber-500/0 text-amber-700 ring-amber-500/25",
+    tone: "from-amber-500/12 to-amber-500/0 text-amber-700 dark:text-amber-300 ring-amber-500/25",
   },
   {
     value: "MIGRATION",
@@ -238,14 +238,14 @@ export default function ApplyCertificate() {
 
         <div className="relative flex flex-wrap items-start justify-between gap-6">
           <div className="max-w-xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/12 px-2.5 py-1 text-[0.6875rem] font-medium tracking-wide text-brand-100 uppercase ring-1 ring-white/15 ring-inset">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/12 px-2.5 py-1 text-[0.6875rem] font-medium tracking-wide text-brand-100 dark:text-brand-200 uppercase ring-1 ring-white/15 ring-inset">
               <Sparkles className="size-3" aria-hidden="true" />
               New application
             </span>
             <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-[1.75rem]">
               Request a certificate
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-brand-100/90">
+            <p className="mt-2 text-sm leading-relaxed text-brand-100/90 dark:text-brand-200/90">
               Choose what you need and say who it is for. Your student record
               fills in the rest, so nothing is retyped and nothing can be
               mistyped.
@@ -254,16 +254,16 @@ export default function ApplyCertificate() {
 
           {student && (
             <dl className="min-w-56 rounded-xl bg-white/10 px-4 py-3 ring-1 ring-white/15 ring-inset backdrop-blur-sm">
-              <dt className="text-[0.6875rem] font-medium tracking-wide text-brand-200 uppercase">
+              <dt className="text-[0.6875rem] font-medium tracking-wide text-brand-200 dark:text-brand-100 uppercase">
                 Applying as
               </dt>
               <dd className="mt-1 text-sm font-medium text-white">
                 {student.rollNumber}
               </dd>
-              <dd className="text-xs text-brand-100/80">
+              <dd className="text-xs text-brand-100/80 dark:text-brand-200/80">
                 {student.program?.name ?? "Programme on record"}
               </dd>
-              <dd className="mt-1.5 text-xs text-brand-200">
+              <dd className="mt-1.5 text-xs text-brand-200 dark:text-brand-100">
                 {student.department?.name}
               </dd>
             </dl>
@@ -315,8 +315,8 @@ export default function ApplyCertificate() {
                   onKeyDown={(event) => onCardKeyDown(event, index)}
                   className={`group relative flex gap-3.5 rounded-2xl p-4 text-left transition-all duration-200 ${
                     selected
-                      ? "bg-white shadow-raised ring-2 ring-brand-500"
-                      : "bg-white/70 shadow-card ring-1 ring-ink-200/80 hover:-translate-y-0.5 hover:bg-white hover:shadow-raised hover:ring-ink-300"
+                      ? "bg-white dark:bg-surface shadow-raised ring-2 ring-brand-500"
+                      : "bg-white/70 dark:bg-surface/85 shadow-card ring-1 ring-ink-200/80 dark:ring-ink-600 hover:-translate-y-0.5 hover:bg-white hover:shadow-raised hover:ring-ink-300"
                   }`}
                 >
                   <span
@@ -354,14 +354,14 @@ export default function ApplyCertificate() {
                         </span>
                       )}
                     </span>
-                    <span className="mt-1 block text-xs leading-relaxed text-ink-500">
+                    <span className="mt-1 block text-xs leading-relaxed text-ink-500 dark:text-ink-400">
                       {option.blurb}
                     </span>
                     <span className="mt-2 flex flex-wrap gap-1.5">
-                      <span className="rounded-md bg-ink-100/80 px-1.5 py-0.5 text-[0.6875rem] text-ink-600">
+                      <span className="rounded-md bg-ink-100/80 dark:bg-ink-200/40 px-1.5 py-0.5 text-[0.6875rem] text-ink-600">
                         {option.office}
                       </span>
-                      <span className="rounded-md bg-ink-100/80 px-1.5 py-0.5 text-[0.6875rem] text-ink-500">
+                      <span className="rounded-md bg-ink-100/80 dark:bg-ink-200/40 px-1.5 py-0.5 text-[0.6875rem] text-ink-500 dark:text-ink-400">
                         {option.for}
                       </span>
                     </span>
@@ -375,14 +375,14 @@ export default function ApplyCertificate() {
             <p
               id="certificate-type-error"
               role="alert"
-              className="mt-3 flex items-center gap-1.5 text-xs font-medium text-red-600"
+              className="mt-3 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400"
             >
               {errors.type}
             </p>
           )}
 
           {!type && !errors.type && (
-            <p className="mt-3 text-xs text-ink-400">
+            <p className="mt-3 text-xs text-ink-400 dark:text-ink-500">
               Nothing selected yet — use the arrow keys to move between cards.
             </p>
           )}
@@ -420,7 +420,7 @@ export default function ApplyCertificate() {
               description="Each copy is issued and stamped separately."
             >
               <div className="flex items-center gap-4">
-                <div className="inline-flex items-center rounded-xl bg-ink-100/70 p-1 ring-1 ring-ink-200">
+                <div className="inline-flex items-center rounded-xl bg-ink-100/70 dark:bg-ink-200/40 p-1 ring-1 ring-ink-200 dark:ring-ink-600">
                   <button
                     type="button"
                     onClick={() => setCopies((n) => Math.max(1, n - 1))}
@@ -452,7 +452,7 @@ export default function ApplyCertificate() {
                   </button>
                 </div>
 
-                <p className="text-xs text-ink-500">
+                <p className="text-xs text-ink-500 dark:text-ink-400">
                   {copies === 1
                     ? "One stamped copy."
                     : `${copies} stamped copies, issued together.`}
@@ -487,10 +487,10 @@ export default function ApplyCertificate() {
                   value={String(copies)}
                 />
 
-                <div className="border-t border-ink-100/90 pt-4">
-                  <p className="flex items-start gap-2 text-xs leading-relaxed text-ink-500">
+                <div className="border-t border-ink-100/90 dark:border-ink-700/50 pt-4">
+                  <p className="flex items-start gap-2 text-xs leading-relaxed text-ink-500 dark:text-ink-400">
                     <Building2
-                      className="mt-0.5 size-3.5 shrink-0 text-ink-400"
+                      className="mt-0.5 size-3.5 shrink-0 text-ink-400 dark:text-ink-500"
                       aria-hidden="true"
                     />
                     Issued by the {chosen?.office ?? "relevant office"}, from
@@ -524,13 +524,13 @@ export default function ApplyCertificate() {
               {submit.isError && !Object.keys(errors).length && (
                 <p
                   role="alert"
-                  className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700 ring-1 ring-red-200 ring-inset"
+                  className="mt-3 rounded-xl bg-red-50 dark:bg-red-500/12 px-3 py-2 text-xs text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
                 >
                   {submit.error?.message}
                 </p>
               )}
 
-              <p className="mt-4 flex items-start gap-2 text-[0.6875rem] leading-relaxed text-ink-400">
+              <p className="mt-4 flex items-start gap-2 text-[0.6875rem] leading-relaxed text-ink-400 dark:text-ink-500">
                 <FileText
                   className="mt-0.5 size-3 shrink-0"
                   aria-hidden="true"
@@ -552,18 +552,18 @@ function SummaryRow({ icon: Icon, label, value, muted = false }) {
       <span
         className={`grid size-8 shrink-0 place-items-center rounded-lg ring-1 ring-inset ${
           muted
-            ? "bg-ink-50 text-ink-300 ring-ink-200"
-            : "bg-brand-50 text-brand-600 ring-brand-200"
+            ? "bg-ink-50 dark:bg-ink-100/40 text-ink-300 dark:text-ink-500 ring-ink-200 dark:ring-ink-600"
+            : "bg-brand-50 dark:bg-brand-500/15 text-brand-600 ring-brand-200 dark:ring-brand-400/25"
         }`}
       >
         <Icon className="size-4" aria-hidden="true" />
       </span>
       <div className="min-w-0">
-        <p className="text-[0.6875rem] font-medium tracking-wide text-ink-400 uppercase">
+        <p className="text-[0.6875rem] font-medium tracking-wide text-ink-400 dark:text-ink-500 uppercase">
           {label}
         </p>
         <p
-          className={`mt-0.5 text-sm ${muted ? "text-ink-400 italic" : "text-ink-800"}`}
+          className={`mt-0.5 text-sm ${muted ? "text-ink-400 dark:text-ink-500 italic" : "text-ink-800"}`}
         >
           {value}
         </p>

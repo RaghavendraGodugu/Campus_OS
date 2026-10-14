@@ -34,7 +34,9 @@ export default function Announcements() {
         <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
           Announcements
         </h1>
-        <p className="mt-1 text-sm text-ink-500">Notices addressed to you.</p>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          Notices addressed to you.
+        </p>
       </header>
 
       {isLoading && <Loading label="Loading announcements" />}
@@ -56,12 +58,12 @@ export default function Announcements() {
             <li key={announcement.id}>
               <Link
                 to={`/announcements/${announcement.reference}`}
-                className="block rounded-2xl bg-white px-5 py-4 shadow-card ring-1 ring-ink-200/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-raised hover:ring-brand-200"
+                className="block rounded-2xl bg-white dark:bg-surface px-5 py-4 shadow-card ring-1 ring-ink-200/80 dark:ring-ink-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-raised hover:ring-brand-200"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   {announcement.pinned && (
                     <Pin
-                      className="size-3.5 text-ink-400"
+                      className="size-3.5 text-ink-400 dark:text-ink-500"
                       aria-label="Pinned"
                     />
                   )}
@@ -77,7 +79,7 @@ export default function Announcements() {
                   {announcement.body}
                 </p>
 
-                <p className="mt-2 text-xs text-ink-400">
+                <p className="mt-2 text-xs text-ink-400 dark:text-ink-500">
                   {announcement.reference} ·{" "}
                   {formatDate(announcement.publishedAt)}
                   {announcement.author?.fullName &&

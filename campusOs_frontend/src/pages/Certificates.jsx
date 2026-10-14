@@ -50,7 +50,7 @@ export default function Certificates({ mode = "own" }) {
           <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
             Certificates
           </h1>
-          <p className="mt-1 text-sm text-ink-500">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
             {mode === "own"
               ? "Applications you have made, and the documents issued."
               : "Certificate applications in your department."}
@@ -101,7 +101,7 @@ export default function Certificates({ mode = "own" }) {
               <li key={certificate._id ?? certificate.id} className="px-5 py-4">
                 <Link
                   to={`${mode === "own" ? "/certificates" : "/management/certificates"}/${certificate.reference}`}
-                  className="mb-2 block text-sm font-medium text-brand-700 hover:underline"
+                  className="mb-2 block text-sm font-medium text-brand-700 dark:text-brand-300 hover:underline"
                 >
                   Open {certificate.reference}
                 </Link>
@@ -114,7 +114,7 @@ export default function Certificates({ mode = "own" }) {
                       {certificate.copies > 1 &&
                         ` · ${certificate.copies} copies`}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500">
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                       {certificate.reference}
                       {certificate.purpose && ` · ${certificate.purpose}`}
                     </p>
@@ -142,14 +142,14 @@ export default function Certificates({ mode = "own" }) {
                 </div>
 
                 {certificate.verificationCode && (
-                  <p className="mt-2 text-[11px] text-ink-400">
+                  <p className="mt-2 text-[11px] text-ink-400 dark:text-ink-500">
                     Verification code {certificate.verificationCode} · issued{" "}
                     {formatDate(certificate.issuedAt)}
                   </p>
                 )}
 
                 {certificate.rejectionReason && (
-                  <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-800">
+                  <p className="mt-2 rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-xs text-red-800 dark:text-red-200">
                     Declined: {certificate.rejectionReason}
                   </p>
                 )}

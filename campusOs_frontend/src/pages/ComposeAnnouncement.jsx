@@ -82,7 +82,7 @@ export default function ComposeAnnouncement() {
         <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
           Post a notice
         </h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Visible immediately to everyone in the audience you choose.
         </p>
       </header>
@@ -131,7 +131,7 @@ export default function ComposeAnnouncement() {
                     type="checkbox"
                     checked={pinned}
                     onChange={(e) => setPinned(e.target.checked)}
-                    className="size-4 rounded border-ink-300 text-brand-600 focus:ring-brand-600"
+                    className="size-4 rounded border-ink-300 dark:border-ink-600 text-brand-600 focus:ring-brand-600"
                   />
                   Pin to the top
                 </label>
@@ -166,7 +166,8 @@ export default function ComposeAnnouncement() {
             {scope === "ROLES" && (
               <fieldset>
                 <legend className="text-sm font-medium text-ink-700">
-                  Roles <span className="text-red-600">*</span>
+                  Roles{" "}
+                  <span className="text-red-600 dark:text-red-400">*</span>
                 </legend>
                 <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                   {ROLES.map(([value, label]) => (
@@ -184,14 +185,17 @@ export default function ComposeAnnouncement() {
                               : current.filter((r) => r !== value),
                           )
                         }
-                        className="size-4 rounded border-ink-300 text-brand-600 focus:ring-brand-600"
+                        className="size-4 rounded border-ink-300 dark:border-ink-600 text-brand-600 focus:ring-brand-600"
                       />
                       {label}
                     </label>
                   ))}
                 </div>
                 {errors["audience.roles"] && (
-                  <p role="alert" className="mt-1.5 text-xs text-red-600">
+                  <p
+                    role="alert"
+                    className="mt-1.5 text-xs text-red-600 dark:text-red-400"
+                  >
                     {errors["audience.roles"]}
                   </p>
                 )}
@@ -222,7 +226,7 @@ export default function ComposeAnnouncement() {
             )}
 
             {scope !== "ALL" && (
-              <p className="rounded-lg bg-ink-50 px-3 py-2 text-xs text-ink-600">
+              <p className="rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3 py-2 text-xs text-ink-600">
                 Only this audience will see the notice. Anyone else receives a
                 404 if they follow a link to it directly.
               </p>
@@ -233,7 +237,7 @@ export default function ComposeAnnouncement() {
         {post.isError && !Object.keys(errors).length && (
           <p
             role="alert"
-            className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+            className="rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
           >
             {post.error?.message}
           </p>

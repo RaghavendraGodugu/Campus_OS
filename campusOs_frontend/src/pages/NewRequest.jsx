@@ -100,7 +100,7 @@ export default function NewRequest() {
         <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
           Raise a request
         </h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Choose the service you need and answer its questions.
         </p>
       </header>
@@ -121,8 +121,8 @@ export default function NewRequest() {
                   key={type._id}
                   className={`flex cursor-pointer items-start gap-3 rounded-lg p-3 ring-1 transition-colors ${
                     typeId === type._id
-                      ? "bg-brand-50 ring-brand-400"
-                      : "ring-ink-200 hover:bg-ink-50"
+                      ? "bg-brand-50 dark:bg-brand-500/15 ring-brand-400"
+                      : "ring-ink-200 dark:ring-ink-600 hover:bg-ink-50 dark:hover:bg-ink-200/40"
                   }`}
                 >
                   <input
@@ -138,7 +138,7 @@ export default function NewRequest() {
                       {type.name}
                     </span>
                     {type.description && (
-                      <span className="mt-0.5 block text-xs text-ink-500">
+                      <span className="mt-0.5 block text-xs text-ink-500 dark:text-ink-400">
                         {type.description}
                       </span>
                     )}
@@ -170,7 +170,7 @@ export default function NewRequest() {
                 ))}
 
                 {selected.requiresPayment && (
-                  <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                  <p className="rounded-lg bg-amber-50 dark:bg-amber-500/12 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
                     This service carries a fee. You will be invoiced once it is
                     submitted.
                   </p>
@@ -179,7 +179,7 @@ export default function NewRequest() {
                 {submit.isError && !Object.keys(fieldErrors).length && (
                   <p
                     role="alert"
-                    className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+                    className="rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
                   >
                     {submit.error?.message}
                   </p>
