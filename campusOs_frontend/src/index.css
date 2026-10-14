@@ -19,86 +19,92 @@
  */
 @theme {
   /*
-   * The palette, and why it is not blue.
+   * The palette: deep emerald on warm sand, with coral for emphasis.
    *
-   * Blue-on-white is the default of every admin panel ever built, which is
-   * precisely why it reads as institutional and old. Violet carries the same
-   * authority but has a temperature to it, and it sits beside a warm coral
-   * accent that no status colour competes with — so the accent can be used for
-   * emphasis rather than only for error.
+   * ## Why the canvas is warm
+   *
+   * Every neutral here carries a trace of warm hue rather than the cold
+   * blue-grey a framework ships by default. A pure grey next to white has no
+   * temperature, and the result reads as a spreadsheet. A warm sand canvas
+   * gives white cards an edge you can actually see, and it is what lets a
+   * single green read as calm instead of cold.
    */
-  --color-brand-50: oklch(0.97 0.018 300);
-  --color-brand-100: oklch(0.93 0.045 300);
-  --color-brand-200: oklch(0.88 0.08 300);
-  --color-brand-300: oklch(0.81 0.13 301);
-  --color-brand-400: oklch(0.72 0.18 302);
-  --color-brand-500: oklch(0.63 0.21 303);
-  --color-brand-600: oklch(0.55 0.22 304);
-  --color-brand-700: oklch(0.48 0.2 305);
-  --color-brand-800: oklch(0.41 0.17 306);
-  --color-brand-900: oklch(0.35 0.14 307);
-  --color-brand-950: oklch(0.26 0.1 308);
+  --color-brand-50: oklch(0.972 0.015 160);
+  --color-brand-100: oklch(0.93 0.04 160);
+  --color-brand-200: oklch(0.865 0.078 160);
+  --color-brand-300: oklch(0.775 0.108 160);
+  --color-brand-400: oklch(0.66 0.115 160);
+  --color-brand-500: oklch(0.55 0.112 160);
+  --color-brand-600: oklch(0.3 0.095 161);
+  --color-brand-700: oklch(0.305 0.092 162);
+  --color-brand-800: oklch(0.245 0.075 163);
+  --color-brand-900: oklch(0.19 0.058 164);
+  --color-brand-950: oklch(0.135 0.044 165);
 
-  /* Deep plum for the sidebar and anything that wants to feel substantial. */
-  --color-brand-ink: oklch(0.22 0.055 306);
+  /* Deep green-black for the sidebar and anything that wants to feel solid. */
+  --color-brand-ink: oklch(0.235 0.033 165);
 
   /*
-   * The accent. Coral, not orange: orange is already amber's job in the status
-   * vocabulary, and reusing it for emphasis makes an alert look like decoration.
+   * The accent. Coral, used only for emphasis.
+   *
+   * ## The status colours own four hues, and this has to dodge all of them
+   *
+   * emerald = success, amber = pending, red = danger, sky = info. The accent
+   * is the one colour that must not collide with a status, or an alert starts
+   * to look like decoration. Coral is close enough to red to notice and far
+   * enough to read differently at a glance — but it is never used for a badge,
+   * and never to signal a state.
+   *
+   * Note that the brand green and the success green are the same hue. They
+   * coexist because they never appear in the same role: the brand is a filled
+   * button or a link, success is a pale tinted chip with a word in it. A solid
+   * dark green block and a mint chip with text are not confusable.
    */
-  --color-accent-50: oklch(0.97 0.02 25);
-  --color-accent-100: oklch(0.93 0.05 25);
-  --color-accent-200: oklch(0.87 0.09 25);
-  --color-accent-300: oklch(0.79 0.14 27);
-  --color-accent-400: oklch(0.71 0.18 30);
-  --color-accent-500: oklch(0.64 0.2 33);
-  --color-accent-600: oklch(0.57 0.19 35);
+  --color-accent-50: oklch(0.972 0.018 32);
+  --color-accent-100: oklch(0.935 0.047 32);
+  --color-accent-200: oklch(0.88 0.085 33);
+  --color-accent-300: oklch(0.8 0.128 34);
+  --color-accent-400: oklch(0.72 0.164 35);
+  --color-accent-500: oklch(0.645 0.184 36);
+  --color-accent-600: oklch(0.575 0.174 37);
+
+  /* Warm neutrals: low chroma, hue 70-75, so they sit with the sand canvas. */
+  --color-ink-50: oklch(0.987 0.003 72);
+  --color-ink-100: oklch(0.968 0.005 72);
+  --color-ink-200: oklch(0.932 0.007 72);
+  --color-ink-300: oklch(0.882 0.009 72);
+  --color-ink-400: oklch(0.47 0.012 72);
+  --color-ink-500: oklch(0.29 0.013 72);
+  --color-ink-600: oklch(0.27 0.014 72);
+  --color-ink-700: oklch(0.21 0.015 72);
+  --color-ink-800: oklch(0.16 0.015 72);
+  --color-ink-900: oklch(0.11 0.014 72);
+
+  /* Porcelain and sand. Not #fff — the hair of warmth gives a white card an
+     edge against the canvas rather than dissolving into it. */
+  --color-surface: oklch(0.996 0.004 85);
+  --color-canvas: oklch(0.972 0.013 85);
 
   /*
-   * Neutrals carry a trace of the brand's hue (300) rather than being the cold
-   * blue-grey every framework ships. Pure grey next to white is what makes an
-   * interface look like a spreadsheet; a few hundredths of violet gives white
-   * something to sit against.
-   */
-  --color-ink-50: oklch(0.985 0.004 300);
-  --color-ink-100: oklch(0.967 0.006 300);
-  --color-ink-200: oklch(0.93 0.008 300);
-  --color-ink-300: oklch(0.88 0.01 300);
-  --color-ink-400: oklch(0.71 0.014 300);
-  --color-ink-500: oklch(0.56 0.018 300);
-  --color-ink-600: oklch(0.46 0.02 300);
-  --color-ink-700: oklch(0.38 0.024 302);
-  --color-ink-800: oklch(0.28 0.028 304);
-  --color-ink-900: oklch(0.21 0.032 306);
-
-  /*
-   * Porcelain: the surface cards are painted on. Not #fff — a hair of violet
-   * and a trace of warmth, so a white card has an edge you can perceive.
-   */
-  --color-surface: oklch(0.995 0.003 300);
-  --color-canvas: oklch(0.975 0.012 302);
-
-  /*
-   * Elevation as coloured, layered light. One flat shadow reads as a border;
-   * a tight contact shadow under a wide diffuse one reads as the card floating
-   * above the page. Each shadow carries brand hue so depth feels like it comes
-   * from the same light as the accent.
+   * Elevation as coloured, layered light. One flat shadow reads as a border; a
+   * tight contact shadow under a wide diffuse one reads as a card floating
+   * above the page.
    */
   --shadow-card:
-    0 1px 2px -1px oklch(0.21 0.032 306 / 0.06),
-    0 4px 14px -4px oklch(0.3 0.05 305 / 0.1);
+    0 1px 2px -1px oklch(0.2 0.015 72 / 0.05),
+    0 4px 14px -4px oklch(0.26 0.035 80 / 0.09);
   --shadow-raised:
-    0 2px 4px -2px oklch(0.21 0.032 306 / 0.07),
-    0 14px 32px -10px oklch(0.3 0.06 305 / 0.18);
+    0 2px 4px -2px oklch(0.2 0.015 72 / 0.06),
+    0 14px 32px -10px oklch(0.26 0.04 80 / 0.16);
   --shadow-pop:
-    0 8px 16px -6px oklch(0.21 0.032 306 / 0.1),
-    0 28px 56px -14px oklch(0.3 0.07 305 / 0.24);
+    0 8px 16px -6px oklch(0.2 0.015 72 / 0.09),
+    0 28px 56px -14px oklch(0.26 0.05 80 / 0.2);
   --shadow-brand:
-    0 1px 2px -1px oklch(0.41 0.17 306 / 0.28),
-    0 8px 24px -6px oklch(0.55 0.22 304 / 0.42);
+    0 1px 2px -1px oklch(0.245 0.075 163 / 0.34),
+    0 8px 24px -6px oklch(0.4 0.1 161 / 0.42);
   --shadow-accent:
-    0 1px 2px -1px oklch(0.57 0.19 35 / 0.3),
-    0 8px 24px -6px oklch(0.64 0.2 33 / 0.4);
+    0 1px 2px -1px oklch(0.575 0.174 37 / 0.28),
+    0 8px 24px -6px oklch(0.645 0.184 36 / 0.36);
 
   /* One radius scale. Mixed 8px and 12px corners are half the reason a UI
      looks assembled rather than designed. */
@@ -138,41 +144,26 @@
 
   body {
     /*
-     * The canvas is lit, not painted.
+     * One soft field of colour, not a backdrop.
      *
-     * A flat white page is the single clearest signal that an interface was
-     * assembled rather than designed: there is no light source, so every card
-     * floats in nothing and depth has to be faked with a border. Four soft
-     * colour fields sit behind the content — violet top-left, coral top-right,
-     * a violet lift at the foot — and the canvas itself is porcelain rather
-     * than white, so a white card still has an edge.
+     * The earlier version painted four overlapping colour fields behind the
+     * content. It looked like a light show, and it competed with the thing the
+     * reader was actually looking at: every card sat on a different colour, so
+     * no card read as the same kind of object as any other.
      *
-     * Fixed attachment so the light stays put while the page scrolls, which is
-     * what makes it read as a room you are in rather than a texture moving.
+     * A single blurred blob in one corner gives the page a light source without
+     * decorating it. Everywhere else the content column runs over flat sand, so
+     * the cards are the only thing carrying depth.
+     *
+     * Fixed attachment so the light stays put while the page scrolls.
      */
     @apply text-ink-800 antialiased;
     background-color: var(--color-canvas);
-    background-image:
-      radial-gradient(
-        ellipse 60rem 32rem at 4% -10rem,
-        oklch(0.63 0.21 303 / 0.32),
-        transparent 60%
-      ),
-      radial-gradient(
-        ellipse 48rem 28rem at 98% -6rem,
-        oklch(0.72 0.17 30 / 0.28),
-        transparent 58%
-      ),
-      radial-gradient(
-        ellipse 70rem 36rem at 50% 112%,
-        oklch(0.55 0.22 304 / 0.22),
-        transparent 62%
-      ),
-      radial-gradient(
-        ellipse 40rem 30rem at 88% 42%,
-        oklch(0.72 0.14 330 / 0.14),
-        transparent 60%
-      );
+    background-image: radial-gradient(
+      ellipse 52rem 30rem at 6% -12rem,
+      oklch(0.72 0.13 160 / 0.3),
+      transparent 62%
+    );
     background-attachment: fixed;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
@@ -229,16 +220,21 @@
   }
 
   /**
-   * A gradient that follows the brand: violet through to indigo, angled so it
+   * A gradient that follows the brand: emerald deepening to pine, angled so it
    * has a light side and a dark side. Used for headers, empty states and the
    * public verification seal, never behind body text.
+   *
+   * It starts at 700 rather than 500 on purpose. Saturated green carries a lot
+   * of luminance, so white text on a mid-green sits around 2:1 — legible in a
+   * screenshot on a good screen, and unreadable in sunlight. The ramp is dark
+   * from 700 down precisely so buttons can carry white labels.
    */
   .aurora {
     background-image: linear-gradient(
       135deg,
-      var(--color-brand-500) 0%,
-      var(--color-brand-600) 42%,
-      var(--color-brand-800) 100%
+      var(--color-brand-700) 0%,
+      var(--color-brand-800) 48%,
+      var(--color-brand-900) 100%
     );
   }
 
@@ -282,7 +278,7 @@
     background-image: linear-gradient(
       90deg,
       transparent,
-      oklch(0.55 0.22 304 / 0.22),
+      oklch(0.55 0.12 165 / 0.24),
       transparent
     );
   }
@@ -298,12 +294,12 @@
     background-image:
       linear-gradient(
         to right,
-        oklch(0.55 0.22 304 / 0.06) 1px,
+        oklch(0.44 0.09 162 / 0.055) 1px,
         transparent 1px
       ),
       linear-gradient(
         to bottom,
-        oklch(0.55 0.22 304 / 0.06) 1px,
+        oklch(0.44 0.09 162 / 0.055) 1px,
         transparent 1px
       );
     background-size: 56px 56px;
@@ -317,7 +313,7 @@
  * stylesheet — which is the reason the theme was built this way in the first
  * place. Two things are deliberately *not* mirrored:
  *
- *  - **the brand ramp stays put.** Violet reads the same on both surfaces;
+ *  - **the brand ramp stays put.** Emerald reads the same on both surfaces;
  *    darkening it further would make it indistinguishable from the background.
  *  - **the neutrals invert.** The light ramp is near-white at 50 and near-black
  *    at 900; the dark ramp runs the other way, which is why `--color-ink-800`
@@ -327,21 +323,21 @@
  */
 @layer base {
   .dark {
-    --color-ink-50: oklch(0.19 0.022 305);
-    --color-ink-100: oklch(0.23 0.024 305);
-    --color-ink-200: oklch(0.28 0.026 305);
-    --color-ink-300: oklch(0.35 0.028 305);
-    --color-ink-400: oklch(0.52 0.022 303);
-    --color-ink-500: oklch(0.62 0.02 303);
-    --color-ink-600: oklch(0.71 0.018 302);
-    --color-ink-700: oklch(0.79 0.015 302);
-    --color-ink-800: oklch(0.87 0.012 301);
-    --color-ink-900: oklch(0.95 0.009 300);
+    --color-ink-50: oklch(0.19 0.008 72);
+    --color-ink-100: oklch(0.23 0.009 72);
+    --color-ink-200: oklch(0.28 0.01 72);
+    --color-ink-300: oklch(0.35 0.011 72);
+    --color-ink-400: oklch(0.52 0.011 72);
+    --color-ink-500: oklch(0.62 0.011 72);
+    --color-ink-600: oklch(0.71 0.01 72);
+    --color-ink-700: oklch(0.79 0.009 72);
+    --color-ink-800: oklch(0.87 0.008 72);
+    --color-ink-900: oklch(0.95 0.007 72);
 
     /* Surfaces: not black. Pure #000 on a large field is harsh, and it is what
        makes cheap "dark mode" implementations look broken. */
-    --color-surface: oklch(0.23 0.024 305);
-    --color-canvas: oklch(0.17 0.02 306);
+    --color-surface: oklch(0.225 0.009 78);
+    --color-canvas: oklch(0.165 0.008 78);
 
     /* Shadows do almost nothing on a dark surface, so they are replaced by
        borders doing the work instead. */
@@ -352,22 +348,14 @@
     --shadow-pop:
       0 8px 16px -6px oklch(0 0 0 / 0.5), 0 28px 56px -14px oklch(0 0 0 / 0.7);
 
-    background-image:
-      radial-gradient(
-        ellipse 60rem 32rem at 4% -10rem,
-        oklch(0.63 0.21 303 / 0.22),
-        transparent 62%
-      ),
-      radial-gradient(
-        ellipse 48rem 28rem at 98% -6rem,
-        oklch(0.72 0.17 30 / 0.14),
-        transparent 60%
-      ),
-      radial-gradient(
-        ellipse 70rem 36rem at 50% 112%,
-        oklch(0.55 0.22 304 / 0.16),
-        transparent 62%
-      );
+    /* The same single blob, dimmer. One light source in both themes, so
+       switching between them does not rearrange the page. */
+    background-image: radial-gradient(
+      ellipse 52rem 30rem at 6% -12rem,
+      oklch(0.45 0.1 165 / 0.26),
+      transparent 64%
+    );
+    background-attachment: fixed;
 
     color-scheme: dark;
   }
