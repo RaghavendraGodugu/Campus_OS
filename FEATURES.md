@@ -153,10 +153,11 @@ means the note that follows it)
 - [x] Receipts and refunds (partial and full) through the real SDK
 - [x] Refund requests and finance approval
 - [x] Reconciliation view
-- [~] **Razorpay capture is unproven end to end.** Order creation and
-      verification work against the live API; the capture → receipt → refund
-      lifecycle has not been driven through a real checkout, so those three
-      screens are built but not proven in production conditions.
+- [x] **Razorpay capture → receipt → refund verified end to end** against the live
+      API, including a real payment and a real refund. Verified by hand through
+      the checkout flow; the automated suites cover the server-side paths and the
+      drill scripts cover the API calls, so this one rests on that manual pass
+      rather than on a test.
 - [ ] Live webhook delivery (needs a public URL and `RAZORPAY_WEBHOOK_SECRET`)
 - [ ] Late-payment penalties and fee instalments
 - [ ] Tax/GST invoicing
@@ -240,7 +241,9 @@ means the note that follows it)
       super administrator, whose pages no other role can reach
 - [x] The sweep detects a failed page by `role="alert"`, not by searching for
       words, and is itself covered by a test so it cannot quietly stop failing
-- [ ] CI running these gates on every push
+- [~] CI workflow running lint, format, tests, the browser sweep and an image
+      build on every push — written, but never executed, because it has only
+      ever run locally
 - [ ] Coverage thresholds enforced
 
 ## 16. Operations
@@ -250,20 +253,26 @@ means the note that follows it)
 - [x] Database connection guard that refuses a non-Atlas URI in production
 - [x] Indexes synchronised on the Atlas cluster
 - [x] Demo seeder producing canonical references, with `--force` cleanup
-- [ ] Deployment configuration (no Dockerfile or hosting manifest)
-- [ ] Automated backups and restore drill
-- [ ] Uptime monitoring and alerting
-- [ ] Error tracking service
+- [~] Deployment configuration written: two multi-stage Dockerfiles, a compose
+      file with health-gated startup, an nginx config with the API proxy and
+      security headers, and DEPLOY.md documenting the environment contract. The
+      images have **not been built** — Docker is not installed on the machine
+      this was written on, so "it builds" is unproven.
+- [ ] Uptime monitoring and alerting (needs a host and an alert destination)
+- [ ] Error tracking service (needs a DSN)
 
 ---
 
 ## Known blockers
 
-1. **Razorpay lifecycle** needs one human checkout. Everything up to the order
-   and the settlement verification is proven against the live API.
-2. **Live webhooks** need a public URL and a signing secret.
-3. **Cloudinary** is configured but has never served a real file.
-4. **Deployment** is undefined, so backup and monitoring cannot be claimed.
+1. **Live webhooks** need a public URL and a signing secret. Direct server-side
+   verification works and is what the deployment uses by default.
+2. **Cloudinary** is configured but has never served a real file; local storage
+   is what has actually been exercised.
+3. **Malware scanning** is not installed. Uploads are allow-listed by magic
+   bytes, size-capped and served from private storage, but not scanned.
+
+Razorpay was verified by hand and is no longer on this list.
 
 ## What is genuinely finished
 
@@ -274,6 +283,8 @@ audit, and the profile section for every role.
 
 ## What is not
 
-Student bulk import; a way for an office to reply to an anonymous grievance
-without breaking anonymity; and the proven Razorpay capture lifecycle. Those are
-the honest remainder.
+The items still marked above with no box: email verification, password reset by
+email, two-factor authentication, avatar upload, academic term setup, report
+export and scheduling, malware scanning, dark theme, responsive re-checking below
+375px, loading skeletons, uptime monitoring and error tracking. Some need a host
+or a third-party account; the rest are simply not built.

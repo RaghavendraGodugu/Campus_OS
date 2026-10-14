@@ -1,0 +1,161 @@
+name: gates
+
+# The same gates run locally, on every push, and before a release. A gate that
+# only someone remembers to run is a gate that quietly stops being run.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A second push to the same branch supersedes the first: the queue is only
+# interesting for its latest state, and abandoned runs waste minutes on a
+# project this size.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint --workspace campusOs_backend
+
+      - name: Check formatting
+        run: npm run format:check --workspace campusOs_backend
+
+      - name: Test
+        run: npm run test --workspace campusOs_backend
+        env:
+          # In-memory Mongo, so no service container and no credentials. The
+          # tests never touch a real database by design, which is what makes
+          # this step safe to run on every push from a fork.
+          MONGOMS_SYSTEM_BINARY: ""
+          NODE_ENV: test
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint --workspace campusOs_frontend
+
+      - name: Check formatting
+        run: npm run format:check --workspace campusOs_frontend
+
+      - name: Test
+        run: npm run test --workspace campusOs_frontend
+
+      - name: Build
+        run: npm run build --workspace campusOs_frontend
+        env:
+          # The demo banner must never reach a production bundle.
+          VITE_SHOW_DEMO_BANNER: "false"
+
+  browser:
+    name: Browser sweep
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+          # The sweep refuses to run without a browser rather than reporting a
+          # pass it did not achieve, so a missing Chrome is a failure here too.
+          chromium-browser --version
+
+      # Database first. Seeding before this step exists is a connection error,
+      # and the demo accounts the sweep signs in with are what make it possible
+      # to check a page at all.
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.11.0
+        with:
+          mongodb-version: 7.0
+
+      - name: Seed a database
+        run: npm run seed:demo --workspace campusOs_backend
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/campusos
+          JWT_ACCESS_SECRET: ci-access-secret-not-used-in-production
+          JWT_REFRESH_SECRET: ci-refresh-secret-not-used-in-production
+          CSRF_SECRET: ci-csrf-secret-not-used-in-production
+          VITE_SHOW_DEMO_BANNER: "true"
+
+      - name: Start the API
+        run: |
+          npm start --workspace campusOs_backend &
+          npx wait-on http://127.0.0.1:5050/health --timeout 60000
+
+      - name: Start the web app
+        run: |
+          npm run dev --workspace campusOs_frontend &
+          npx wait-on http://127.0.0.1:5173 --timeout 60000
+
+      - name: Sweep every role
+        run: npm run verify:roles --workspace campusOs_frontend
+        env:
+          CHROME_PATH: /usr/bin/chromium-browser
+
+  images:
+    name: Container images build
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Built but not pushed. Publishing is a separate, deliberate step so that
+      # a green test run can never by itself put an image on a registry.
+      - name: Build the API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: campusOs_backend/Dockerfile
+          push: false
+          tags: campusos-api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build the web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: campusOs_frontend/Dockerfile
+          push: false
+          tags: campusos-web:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

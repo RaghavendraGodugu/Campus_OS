@@ -26,7 +26,9 @@
     "razorpay:live": "node scripts/check-razorpay-live.js",
     "finance:live": "node scripts/live-payment-drill.js",
     "comms:drill": "node scripts/comms-drill.js",
-    "reports:drill": "node scripts/reports-drill.js"
+    "reports:drill": "node scripts/reports-drill.js",
+    "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore-backup.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

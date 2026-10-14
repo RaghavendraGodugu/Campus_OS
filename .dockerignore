@@ -1,0 +1,33 @@
+# Anything that must never enter an image layer.
+#
+# A `.env` baked into a layer is in the image forever, even in a later layer
+# that deletes it — which is why this file is not optional politeness.
+
+.git
+.github
+node_modules
+**/node_modules
+
+# Secrets and local state
+.env
+.env.*
+**/.env
+**/.env.*
+!campusOs_backend/.env.example
+!campusOs_frontend/.env.example
+
+# Build output and local artefacts
+**/dist
+**/storage
+backups/
+**/coverage
+
+# Editor and OS noise
+.DS_Store
+*.log
+.vscode
+.idea
+
+# Docs are not needed to run the service
+FEATURES.md
+LICENSE

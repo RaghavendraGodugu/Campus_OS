@@ -44,3 +44,6 @@ tmp/
 *.pid
 # Local private file storage (certificates, uploads)
 storage/
+
+# Backup output. Contains every grievance and certificate in clear.
+backups/

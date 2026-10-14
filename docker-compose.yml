@@ -1,0 +1,85 @@
+# CampusOS — local stack.
+#
+#     docker compose up --build
+#     open http://localhost:8080
+#
+# This is a single-host deployment: one API, one static bundle, one database.
+# It is deliberately not a cluster. Everything that would need coordination —
+# a second node, a shared rate-limit store, a replica set — is called out in
+# docs/DEPLOY.md as the next step rather than half-configured here.
+
+name: campusos
+
+services:
+  db:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["--bind_ip_all"]
+    environment:
+      MONGO_INITDB_DATABASE: campusos
+    volumes:
+      - mongo-data:/data/db
+    # Not published to the host by default. The API reaches it over the internal
+    # network; publishing 27017 would put the database on every interface the
+    # machine has, and the port is scanned constantly.
+    expose:
+      - "27017"
+    healthcheck:
+      # `ping` rather than a find: it needs no credentials and no index, so it
+      # cannot fail for a reason unrelated to "is Mongo up".
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  api:
+    build:
+      context: .
+      dockerfile: campusOs_backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        # Wait for the database to actually accept queries, not merely to have
+        # started. Otherwise the API boots, fails to connect, and exits — and
+        # `restart: unless-stopped` turns that into a visible crash loop.
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "5050"
+      MONGO_URI: mongodb://db:27017/campusos
+      LOG_LEVEL: info
+      # Secrets come from a .env beside this file, not from here. Committing a
+      # value into a compose file is how test credentials reach production.
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET in .env}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET in .env}
+      CSRF_SECRET: ${CSRF_SECRET:?set CSRF_SECRET in .env}
+      # Leave Razorpay unset to run without payments; the finance pages then
+      # say so rather than failing at checkout.
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      # Set to true only when the deployment terminates TLS in front of this.
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+    expose:
+      - "5050"
+    volumes:
+      # Certificate PDFs and uploaded documents. A named volume rather than a
+      # bind mount, so the path means the same thing on a Mac and on Linux.
+      - app-storage:/app/storage
+
+  web:
+    build:
+      context: .
+      dockerfile: campusOs_frontend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      # Published: this is the only service a browser talks to.
+      - "${WEB_PORT:-8080}:8080"
+
+volumes:
+  mongo-data:
+  app-storage:
