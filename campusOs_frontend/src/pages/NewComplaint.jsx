@@ -7,7 +7,8 @@ import { apiGet, apiPost } from "../api/client";
 import Button from "../components/ui/Button";
 import Field, { inputClass } from "../components/ui/Field";
 import { Card } from "../components/ui/Card";
-import { ErrorState, Loading } from "../components/ui/States";
+import { ErrorState } from "../components/ui/States";
+import { SkeletonForm, SkeletonRegion } from "../components/ui/Skeleton";
 
 /**
  * Raise a complaint.
@@ -44,7 +45,14 @@ export default function NewComplaint() {
     submit.mutate({ category, subject, description, confidential });
   };
 
-  if (policy.isLoading) return <Loading label="Loading the complaint policy" />;
+  if (policy.isLoading)
+    return (
+      <SkeletonRegion label="Loading Loading the complaint policy">
+        <div className="surface p-5">
+          <SkeletonForm fields={4} />
+        </div>
+      </SkeletonRegion>
+    );
   if (policy.isError) {
     return (
       <ErrorState

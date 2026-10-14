@@ -22,7 +22,12 @@ import {
 } from "../lib/format";
 import { Card, Stat } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
-import { EmptyState, ErrorState, Loading } from "../components/ui/States";
+import { EmptyState, ErrorState } from "../components/ui/States";
+import {
+  SkeletonList,
+  SkeletonRegion,
+  SkeletonStats,
+} from "../components/ui/Skeleton";
 
 /**
  * The dashboard.
@@ -90,7 +95,11 @@ export default function Dashboard() {
 
       {canAny("report:read:department", "report:read:institution") && (
         <section aria-label="Key figures">
-          {overview.isLoading && <Loading label="Loading figures" />}
+          {overview.isLoading && (
+            <SkeletonRegion label="Loading figures">
+              <SkeletonStats count={3} />
+            </SkeletonRegion>
+          )}
           {overview.isError && (
             <ErrorState
               title="Could not load your figures"
@@ -115,7 +124,11 @@ export default function Dashboard() {
               </Link>
             }
           >
-            {myRequests.isLoading && <Loading />}
+            {myRequests.isLoading && (
+              <SkeletonRegion label="Loading your requests">
+                <SkeletonList rows={4} />
+              </SkeletonRegion>
+            )}
             {myRequests.data?.data?.length === 0 && (
               <EmptyState
                 icon={FileText}
@@ -167,7 +180,11 @@ export default function Dashboard() {
               </Link>
             }
           >
-            {myInvoices.isLoading && <Loading />}
+            {myInvoices.isLoading && (
+              <SkeletonRegion label="Loading your invoices">
+                <SkeletonList rows={4} />
+              </SkeletonRegion>
+            )}
             {myInvoices.data?.data?.length === 0 && (
               <EmptyState
                 icon={Receipt}

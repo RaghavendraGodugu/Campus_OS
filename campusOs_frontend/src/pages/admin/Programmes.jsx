@@ -7,7 +7,8 @@ import { humanise } from "../../lib/format";
 import Button from "../../components/ui/Button";
 import Field, { inputClass } from "../../components/ui/Field";
 import Modal from "../../components/ui/Modal";
-import { EmptyState, ErrorState, Loading } from "../../components/ui/States";
+import { EmptyState, ErrorState } from "../../components/ui/States";
+import { SkeletonList, SkeletonRegion } from "../../components/ui/Skeleton";
 import AdminLayout from "./AdminLayout";
 import { PROGRAM_LEVELS } from "./constants";
 
@@ -103,7 +104,11 @@ export default function Programmes() {
           </select>
         </div>
 
-        {list.isLoading && <Loading label="Loading programmes" />}
+        {list.isLoading && (
+          <SkeletonRegion label="Loading Loading programmes">
+            <SkeletonList rows={8} />
+          </SkeletonRegion>
+        )}
         {list.isError && (
           <div className="p-5">
             <ErrorState

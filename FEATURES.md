@@ -238,7 +238,12 @@ means the note that follows it)
       signs in first so it cannot pass by measuring the login page five times
 - [x] Tap targets on the top bar raised to 36px, and the theme toggle corrected
       where `hidden sm:inline-flex` had silently not worked
-- [ ] Loading skeletons instead of spinners on slow pages
+- [x] Loading skeletons on every page that waits for the server, shaped like
+      the content that replaces them — list rows for lists, panels for detail
+      pages, fields for forms — so the layout is already correct when the data
+      lands and nothing moves. Announced once via a polite live region; the
+      bars themselves are hidden from assistive technology, which would
+      otherwise read forty times instead of spinners on slow pages
 - [ ] No motion/transitions audit on the finance tables
 
 ## 15. Quality gates
@@ -248,6 +253,9 @@ means the note that follows it)
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep
+- [x] 143 frontend tests, including six on skeleton accessibility: the live
+      region is announced once, the decorative bars are not announced, and
+      list rows keep a constant height so the layout cannot jump
 - [x] `npm run verify:roles` — real-browser per-role sweep including the
       super administrator, whose pages no other role can reach, plus the two
       public pages with no session and a narrow-viewport overflow check

@@ -23,7 +23,8 @@ import { apiGet, apiPost } from "../api/client";
 import { Card } from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Field, { inputClass } from "../components/ui/Field";
-import { ErrorState, Loading } from "../components/ui/States";
+import { ErrorState } from "../components/ui/States";
+import { SkeletonForm, SkeletonRegion } from "../components/ui/Skeleton";
 
 /**
  * Apply for a certificate.
@@ -209,7 +210,14 @@ export default function ApplyCertificate() {
     submit.mutate({ type, purpose: purpose.trim() || undefined, copies });
   };
 
-  if (profile.isLoading) return <Loading label="Loading your details" />;
+  if (profile.isLoading)
+    return (
+      <SkeletonRegion label="Loading Loading your details">
+        <div className="surface p-5">
+          <SkeletonForm fields={4} />
+        </div>
+      </SkeletonRegion>
+    );
 
   if (profile.isError) {
     return (

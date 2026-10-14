@@ -6,7 +6,12 @@ import { apiGet, fetchDocument } from "../api/client";
 import { formatDateTime, humanise } from "../lib/format";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
-import { ErrorState, Loading } from "../components/ui/States";
+import { ErrorState } from "../components/ui/States";
+import {
+  SkeletonHeading,
+  SkeletonPanel,
+  SkeletonRegion,
+} from "../components/ui/Skeleton";
 
 /**
  * One announcement.
@@ -31,7 +36,19 @@ export default function AnnouncementDetail() {
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   };
 
-  if (isLoading) return <Loading label="Loading announcement" />;
+  if (isLoading)
+    return (
+      <SkeletonRegion label="Loading announcement">
+        <div className="space-y-6">
+          <SkeletonHeading />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SkeletonPanel lines={3} />
+            <SkeletonPanel lines={3} />
+          </div>
+          <SkeletonPanel lines={5} />
+        </div>
+      </SkeletonRegion>
+    );
   if (isError)
     return (
       <ErrorState

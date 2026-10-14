@@ -12,7 +12,12 @@ import Button from "../components/ui/Button";
 import Field from "../components/ui/Field";
 import TransitionPanel from "../components/TransitionPanel";
 import DocumentPanel from "../components/DocumentPanel";
-import { ErrorState, Loading } from "../components/ui/States";
+import { ErrorState } from "../components/ui/States";
+import {
+  SkeletonHeading,
+  SkeletonPanel,
+  SkeletonRegion,
+} from "../components/ui/Skeleton";
 
 /**
  * One request, and everything that has happened to it.
@@ -58,7 +63,19 @@ export default function RequestDetail() {
     },
   });
 
-  if (isLoading) return <Loading label="Loading request" />;
+  if (isLoading)
+    return (
+      <SkeletonRegion label="Loading request">
+        <div className="space-y-6">
+          <SkeletonHeading />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SkeletonPanel lines={3} />
+            <SkeletonPanel lines={3} />
+          </div>
+          <SkeletonPanel lines={5} />
+        </div>
+      </SkeletonRegion>
+    );
   if (isError) {
     return (
       <ErrorState

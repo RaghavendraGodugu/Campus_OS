@@ -5,7 +5,8 @@ import { BarChart3 } from "lucide-react";
 import { apiGet } from "../api/client";
 import { Card, Stat } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
-import { EmptyState, ErrorState, Loading } from "../components/ui/States";
+import { EmptyState, ErrorState } from "../components/ui/States";
+import { SkeletonForm, SkeletonRegion } from "../components/ui/Skeleton";
 
 /**
  * Reports.
@@ -53,7 +54,14 @@ export default function Reports() {
   // response above contains — and for a department-scoped reader it would
   // simply 403.
 
-  if (overview.isLoading) return <Loading label="Building your report" />;
+  if (overview.isLoading)
+    return (
+      <SkeletonRegion label="Loading Building your report">
+        <div className="surface p-5">
+          <SkeletonForm fields={4} />
+        </div>
+      </SkeletonRegion>
+    );
   if (overview.isError) {
     return (
       <ErrorState

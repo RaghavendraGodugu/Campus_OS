@@ -9,7 +9,8 @@ import { formatDate, formatRelative, humanise } from "../lib/format";
 import { Card } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Pagination from "../components/ui/Pagination";
-import { EmptyState, ErrorState, Loading } from "../components/ui/States";
+import { EmptyState, ErrorState } from "../components/ui/States";
+import { SkeletonList, SkeletonRegion } from "../components/ui/Skeleton";
 
 const STATUSES = [
   "SUBMITTED",
@@ -101,7 +102,11 @@ export default function Requests({ mode = "own" }) {
         </select>
       </div>
 
-      {isLoading && <Loading label="Loading requests" />}
+      {isLoading && (
+        <SkeletonRegion label="Loading requests">
+          <SkeletonList rows={6} />
+        </SkeletonRegion>
+      )}
       {isError && (
         <ErrorState message={error?.message} onRetry={() => refetch()} />
       )}

@@ -9,7 +9,8 @@ import { Card } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
 import Pagination from "../components/ui/Pagination";
-import { EmptyState, ErrorState, Loading } from "../components/ui/States";
+import { EmptyState, ErrorState } from "../components/ui/States";
+import { SkeletonList, SkeletonRegion } from "../components/ui/Skeleton";
 
 /**
  * Certificates.
@@ -70,7 +71,11 @@ export default function Certificates({ mode = "own" }) {
         )}
       </header>
 
-      {isLoading && <Loading label="Loading certificates" />}
+      {isLoading && (
+        <SkeletonRegion label="Loading certificates">
+          <SkeletonList rows={6} />
+        </SkeletonRegion>
+      )}
       {isError && (
         <ErrorState message={error?.message} onRetry={() => refetch()} />
       )}

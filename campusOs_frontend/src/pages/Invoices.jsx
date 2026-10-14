@@ -9,7 +9,8 @@ import { Card } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
 import Pagination from "../components/ui/Pagination";
-import { EmptyState, ErrorState, Loading } from "../components/ui/States";
+import { EmptyState, ErrorState } from "../components/ui/States";
+import { SkeletonList, SkeletonRegion } from "../components/ui/Skeleton";
 import PayDialog from "../components/PayDialog";
 
 /**
@@ -53,7 +54,11 @@ export default function Invoices() {
         </p>
       </header>
 
-      {isLoading && <Loading label="Loading invoices" />}
+      {isLoading && (
+        <SkeletonRegion label="Loading invoices">
+          <SkeletonList rows={6} />
+        </SkeletonRegion>
+      )}
       {isError && (
         <ErrorState message={error?.message} onRetry={() => refetch()} />
       )}

@@ -20,7 +20,8 @@ import Field, { inputClass } from "../../components/ui/Field";
 import Modal from "../../components/ui/Modal";
 import Badge from "../../components/ui/Badge";
 import Pagination from "../../components/ui/Pagination";
-import { EmptyState, ErrorState, Loading } from "../../components/ui/States";
+import { EmptyState, ErrorState } from "../../components/ui/States";
+import { SkeletonList, SkeletonRegion } from "../../components/ui/Skeleton";
 import AdminLayout from "./AdminLayout";
 import { ASSIGNABLE_ROLES, DEPARTMENT_REQUIRED_ROLES } from "./constants";
 
@@ -138,7 +139,11 @@ export default function People() {
           </select>
         </div>
 
-        {list.isLoading && <Loading label="Loading accounts" />}
+        {list.isLoading && (
+          <SkeletonRegion label="Loading Loading accounts">
+            <SkeletonList rows={8} />
+          </SkeletonRegion>
+        )}
 
         {list.isError && (
           <div className="p-5">

@@ -6,7 +6,8 @@ import { apiGet, apiPost } from "../api/client";
 import Button from "../components/ui/Button";
 import DynamicField from "../components/DynamicField";
 import { Card } from "../components/ui/Card";
-import { ErrorState, Loading } from "../components/ui/States";
+import { ErrorState } from "../components/ui/States";
+import { SkeletonForm, SkeletonRegion } from "../components/ui/Skeleton";
 
 /**
  * Raise a request.
@@ -82,7 +83,14 @@ export default function NewRequest() {
     });
   };
 
-  if (types.isLoading) return <Loading label="Loading the service catalogue" />;
+  if (types.isLoading)
+    return (
+      <SkeletonRegion label="Loading Loading the service catalogue">
+        <div className="surface p-5">
+          <SkeletonForm fields={4} />
+        </div>
+      </SkeletonRegion>
+    );
   if (types.isError) {
     return (
       <ErrorState

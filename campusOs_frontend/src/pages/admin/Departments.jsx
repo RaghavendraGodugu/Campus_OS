@@ -6,7 +6,8 @@ import { apiGet, apiPatch, apiPost } from "../../api/client";
 import Button from "../../components/ui/Button";
 import Field, { inputClass } from "../../components/ui/Field";
 import Modal from "../../components/ui/Modal";
-import { EmptyState, ErrorState, Loading } from "../../components/ui/States";
+import { EmptyState, ErrorState } from "../../components/ui/States";
+import { SkeletonList, SkeletonRegion } from "../../components/ui/Skeleton";
 import AdminLayout from "./AdminLayout";
 
 /**
@@ -76,7 +77,11 @@ export default function Departments() {
           </form>
         </div>
 
-        {list.isLoading && <Loading label="Loading departments" />}
+        {list.isLoading && (
+          <SkeletonRegion label="Loading Loading departments">
+            <SkeletonList rows={8} />
+          </SkeletonRegion>
+        )}
         {list.isError && (
           <div className="p-5">
             <ErrorState

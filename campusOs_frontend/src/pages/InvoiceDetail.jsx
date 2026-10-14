@@ -10,7 +10,12 @@ import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
 import Field, { inputClass } from "../components/ui/Field";
 import PayDialog from "../components/PayDialog";
-import { ErrorState, Loading } from "../components/ui/States";
+import { ErrorState } from "../components/ui/States";
+import {
+  SkeletonHeading,
+  SkeletonPanel,
+  SkeletonRegion,
+} from "../components/ui/Skeleton";
 
 /**
  * One invoice.
@@ -80,7 +85,19 @@ export default function InvoiceDetail() {
     }
   };
 
-  if (isLoading) return <Loading label="Loading invoice" />;
+  if (isLoading)
+    return (
+      <SkeletonRegion label="Loading invoice">
+        <div className="space-y-6">
+          <SkeletonHeading />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SkeletonPanel lines={3} />
+            <SkeletonPanel lines={3} />
+          </div>
+          <SkeletonPanel lines={5} />
+        </div>
+      </SkeletonRegion>
+    );
   if (isError) {
     return (
       <ErrorState

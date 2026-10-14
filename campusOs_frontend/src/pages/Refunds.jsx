@@ -7,7 +7,8 @@ import { formatDateTime } from "../lib/format";
 import { Card } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Pagination from "../components/ui/Pagination";
-import { EmptyState, ErrorState, Loading } from "../components/ui/States";
+import { EmptyState, ErrorState } from "../components/ui/States";
+import { SkeletonList, SkeletonRegion } from "../components/ui/Skeleton";
 
 /**
  * Refunds.
@@ -42,7 +43,11 @@ export default function Refunds() {
         </p>
       </header>
 
-      {isLoading && <Loading label="Loading refunds" />}
+      {isLoading && (
+        <SkeletonRegion label="Loading refunds">
+          <SkeletonList rows={6} />
+        </SkeletonRegion>
+      )}
       {isError && (
         <ErrorState message={error?.message} onRetry={() => refetch()} />
       )}

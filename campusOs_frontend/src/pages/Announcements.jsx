@@ -7,7 +7,8 @@ import { formatDate } from "../lib/format";
 import { Card } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Pagination from "../components/ui/Pagination";
-import { EmptyState, ErrorState, Loading } from "../components/ui/States";
+import { EmptyState, ErrorState } from "../components/ui/States";
+import { SkeletonList, SkeletonRegion } from "../components/ui/Skeleton";
 import { useState } from "react";
 
 /**
@@ -39,7 +40,11 @@ export default function Announcements() {
         </p>
       </header>
 
-      {isLoading && <Loading label="Loading announcements" />}
+      {isLoading && (
+        <SkeletonRegion label="Loading announcements">
+          <SkeletonList rows={6} />
+        </SkeletonRegion>
+      )}
       {isError && (
         <ErrorState message={error?.message} onRetry={() => refetch()} />
       )}

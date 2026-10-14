@@ -9,7 +9,8 @@ import { formatDate, formatRelative } from "../lib/format";
 import { Card } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Pagination from "../components/ui/Pagination";
-import { EmptyState, ErrorState, Loading } from "../components/ui/States";
+import { EmptyState, ErrorState } from "../components/ui/States";
+import { SkeletonList, SkeletonRegion } from "../components/ui/Skeleton";
 
 /**
  * Complaints.
@@ -57,7 +58,11 @@ export default function Complaints({ mode = "own" }) {
         )}
       </header>
 
-      {isLoading && <Loading label="Loading complaints" />}
+      {isLoading && (
+        <SkeletonRegion label="Loading complaints">
+          <SkeletonList rows={6} />
+        </SkeletonRegion>
+      )}
       {isError && (
         <ErrorState message={error?.message} onRetry={() => refetch()} />
       )}

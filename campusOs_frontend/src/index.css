@@ -251,6 +251,48 @@
     );
   }
 
+  /**
+   * The skeleton shimmer.
+   *
+   * A background-position sweep rather than an opacity fade. Fading makes every
+   * bar on the page pulse in unison, which reads as the whole page blinking; a
+   * sweep puts the motion in one place so the eye can follow it and the rest of
+   * the skeleton stays still.
+   *
+   * 2.4s, deliberately unhurried: a fast shimmer on a page holding six rows
+   * looks like a rendering fault rather than a placeholder.
+   */
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      oklch(1 0 0 / 0.55),
+      transparent
+    );
+    animation: shimmer-sweep 2.4s var(--ease-out-soft) infinite;
+  }
+
+  /* The dark equivalent of the same sweep: a dark bar cannot be swept with a
+     white highlight without glowing, so it gets a lighter brand tint instead. */
+  .dark .shimmer::after {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      oklch(0.55 0.22 304 / 0.22),
+      transparent
+    );
+  }
+
+  @keyframes shimmer-sweep {
+    to {
+      transform: translateX(100%);
+    }
+  }
+
   /** Fine grid, for the public-facing surfaces that want some texture. */
   .grid-texture {
     background-image:

@@ -1,7 +1,13 @@
 import { Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
-import { Loading, UnconfirmedState } from "./ui/States";
+import { UnconfirmedState } from "./ui/States";
+import {
+  SkeletonHeading,
+  SkeletonPanel,
+  SkeletonRegion,
+  SkeletonStats,
+} from "./ui/Skeleton";
 
 /**
  * Gate for signed-in routes.
@@ -37,8 +43,24 @@ export default function RequireAuth({
     useAuth();
   const location = useLocation();
 
+  /**
+   * A page-shaped shell rather than a spinner in a blank void.
+   *
+   * This renders on every single navigation, so it is the most-seen loading
+   * state in the app. A spinner here means the entire page collapses to one
+   * line of text and then expands back out, several times per session.
+   */
   if (isLoading) {
-    return <Loading label="Checking your session" />;
+    return (
+      <SkeletonRegion
+        label="Checking your session"
+        className="mx-auto max-w-4xl space-y-6"
+      >
+        <SkeletonHeading width="30%" />
+        <SkeletonStats count={3} />
+        <SkeletonPanel lines={4} />
+      </SkeletonRegion>
+    );
   }
 
   if (isUnconfirmed) {

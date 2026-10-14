@@ -20,6 +20,7 @@ import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
 
 import { ErrorState, EmptyState, Loading } from "../components/ui/States";
+import { SkeletonList, SkeletonRegion } from "../components/ui/Skeleton";
 
 /** The selector the sweep runs in the page, copied from the script. */
 const ERROR_SELECTOR = 'main [role="alert"], [role="alert"][class*="red"]';
@@ -65,6 +66,19 @@ describe("the sweep recognises a broken page", () => {
     );
 
     expect(classify(container)).toBe("ok");
+  });
+
+  it("does not mistake a skeleton or an empty state for a failure", () => {
+    // Every page now renders a skeleton while it waits, so the sweep's
+    // classifier sees one constantly. A skeleton is aria-hidden decoration plus
+    // one sr-only label — it has almost no text, so a classifier keying on
+    // character count would report a perfectly healthy page as broken.
+    const { container: skeleton } = render(
+      <SkeletonRegion label="Loading requests">
+        <SkeletonList rows={6} />
+      </SkeletonRegion>,
+    );
+    expect(classify(skeleton)).toBe("ok");
   });
 
   it("does not mistake a loading state or an empty state for a failure", () => {
