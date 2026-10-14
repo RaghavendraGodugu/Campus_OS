@@ -7,8 +7,8 @@ human step or a missing screen is left empty and says why.
 **Legend** — `[x]` working · `[ ]` not working · `[~]` partly working (the tick
 means the note that follows it)
 
-- **Last reviewed:** 13 October 2026
-- **Verified:** 541 backend tests, 137 frontend tests, lint and build clean
+- **Last reviewed:** 14 October 2026
+- **Verified:** 577 backend tests, 146 frontend tests, lint and build clean
 - **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
   screens, anonymous grievance, and bulk import all confirmed against it, plus a
   green browser sweep across all four roles
@@ -66,8 +66,10 @@ means the note that follows it)
 - [x] Student record: roll number, programme, department, semester, year,
       section, batch year, fee status
 - [x] Academic record is institution-owned and not self-editable
-- [ ] User administration: create, deactivate, change role (permissions exist;
-      no API and no screen)
+- [x] User administration: create a staff account, change a role, deactivate,
+      and reset a password — each its own permission and its own audit line, and
+      deliberately *not* grouped behind one "Manage" button, because that is how a
+      role change happens by someone aiming for Deactivate
 - [x] Bulk import of students from CSV — check, then import; a dry run reports
       every bad row with its line number and writes nothing
 - [x] All-or-nothing: one bad row refuses the whole file, and a mid-write
@@ -122,7 +124,6 @@ means the note that follows it)
 - [~] Anonymous grievances reach an officer's queue, but there is no way to
       reply to one — inherent to the feature, and said so on the page
 - [x] Screens for complainant and handler
-- [ ] Anonymous complaint tracking code
 
 ## 8. Certificates
 
@@ -212,7 +213,9 @@ means the note that follows it)
 - [~] **Cloudinary delivery is configured but not live-tested**; local storage is
       what has actually been exercised
 - [ ] Malware scanning of uploads
-- [ ] Image preview and thumbnail generation
+- [x] Image preview before upload, from the local `File`, so an officer sees it
+      before sending it
+- [ ] Thumbnail generation for stored documents
 
 ## 13. Security
 
@@ -234,12 +237,20 @@ means the note that follows it)
 - [x] Card, button, field and badge primitives restyled; every page that uses
       them updated at once
 - [x] Page background carries a light source rather than a flat grey sheet
-- [x] Palette rebuilt on violet with a coral accent, chosen because blue-on-white
-      is the default of every admin panel ever built; neutrals carry the brand hue
-      so white has something to sit against
+- [x] Palette rebuilt on deep emerald with a coral accent, over a warm sand
+      canvas. The accent dodges all four status hues (emerald success, amber
+      pending, red danger, sky info) so an alert can never be mistaken for
+      decoration
+- [x] **Contrast checked numerically, not by eye.** The first emerald palette
+      failed six checks — a green that looks elegant carries so much luminance
+      that white text on it sits near 2:1. The ramp is now dark from 700 down and
+      the primary button gradient starts there: body text 10.07:1, links 4.66:1,
+      button labels 4.60:1
 - [x] Sidebar inverted to a dark gradient rail, giving the layout a spine
-- [x] Canvas is lit — four colour fields plus fixed attachment — rather than a
-      flat painted sheet
+- [x] Canvas is lit by a single soft colour blob in one corner, fixed while the
+      page scrolls. The earlier four-field backdrop was wallpaper: every card sat
+      on a different colour, so no card read as the same kind of object as any
+      other. The same one blob appears in both themes
 - [x] Sign-in page rebuilt around the new palette, and links to public verification
 - [x] Top bar, notification panel and empty/error states brought onto the same
       tokens
@@ -277,14 +288,15 @@ means the note that follows it)
 
 ## 15. Quality gates
 
-- [x] Backend: 541 tests passing
-- [x] Frontend: 137 tests passing
+- [x] Backend: 577 tests passing
+- [x] Frontend: 146 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep
-- [x] 143 frontend tests, including six on skeleton accessibility: the live
-      region is announced once, the decorative bars are not announced, and
-      list rows keep a constant height so the layout cannot jump
+- [x] Skeleton accessibility covered: the live region is announced once, the
+      decorative bars are not announced, and list rows keep a constant height so
+      the layout cannot jump. The sweep's own page classifier is shown a skeleton
+      too, which it had never been before every page began showing one
 - [x] `npm run verify:roles` — real-browser per-role sweep including the
       super administrator, whose pages no other role can reach, plus the two
       public pages with no session and a narrow-viewport overflow check
@@ -334,7 +346,15 @@ audit, and the profile section for every role.
 ## What is not
 
 The items still marked above with no box: email verification, password reset by
-email, two-factor authentication, avatar upload, academic term setup, report
-export and scheduling, malware scanning, dark theme, responsive re-checking below
-375px, loading skeletons, uptime monitoring and error tracking. Some need a host
-or a third-party account; the rest are simply not built.
+email, two-factor authentication, avatar upload, academic term setup, HOD
+assignment from the interface, certificate templates, bulk certificate issuance,
+late-payment penalties and instalments, GST invoicing, email delivery of
+announcements, notification preferences, report export and scheduling, malware
+scanning, document thumbnails, account-lockout notification, a security headers
+report, a dependency-audit gate, coverage thresholds, a motion audit on the
+finance tables, uptime monitoring and error tracking. Some need a host or a
+third-party account; the rest are simply not built.
+
+Three more are marked done but rest on a human step rather than a test: the
+Razorpay capture-to-refund drill, the Docker image build, and Cloudinary delivery
+from real credentials.
