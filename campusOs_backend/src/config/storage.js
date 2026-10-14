@@ -46,6 +46,41 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024;
 /** How long a signed download URL stays valid. */
 const SIGNED_URL_TTL_SECONDS = 300;
 
+/**
+ * Cloudinary resource type, by MIME type.
+ *
+ * Images go to `image`, not `raw`. This is the difference between storing a
+ * picture and storing a file that happens to be a picture: Cloudinary's
+ * `image` pipeline can transcode, resize and re-encode on delivery, and a
+ * 4 MB phone photo never reaches a browser as 4 MB. Documents stay `raw`,
+ * because a PDF must be delivered byte-for-byte — recompressing a signed
+ * certificate would be indefensible.
+ */
+const CLOUDINARY_RESOURCE_TYPES = Object.freeze({
+  "image/jpeg": "image",
+  "image/png": "image",
+  "application/pdf": "raw",
+});
+
+/**
+ * The resource type for something already stored.
+ *
+ * The extension is authoritative here because `buildStorageKey` derives it from
+ * the sniffed MIME type — we did not take it from the client. A stored file
+ * whose extension we do not recognise is treated as a document, which is the
+ * conservative choice: `raw` delivers bytes unaltered.
+ */
+function resourceTypeForStored(key, mimeType) {
+  if (mimeType && CLOUDINARY_RESOURCE_TYPES[mimeType]) {
+    return CLOUDINARY_RESOURCE_TYPES[mimeType];
+  }
+  const extension = String(key ?? "").split(".").pop()?.toLowerCase();
+  if (extension === "jpg" || extension === "jpeg" || extension === "png") {
+    return "image";
+  }
+  return "raw";
+}
+
 /** Extension used when serving a file back to the browser. */
 const CONTENT_EXTENSIONS = Object.freeze({
   "application/pdf": "pdf",
@@ -261,13 +296,14 @@ class CloudinaryStorage {
   async save(buffer, { folder, filename, mimeType }) {
     assertStorable(buffer, mimeType);
     const key = buildStorageKey({ folder, filename, mimeType });
+    const resourceType = resourceTypeForStored(key, mimeType);
 
     const result = await new Promise((resolve, reject) => {
       const stream = this.cloudinary.uploader.upload_stream(
         {
           public_id: key,
           folder,
-          resource_type: "raw",
+          resource_type: resourceType,
           type: "authenticated", // private delivery
           overwrite: false,
         },
@@ -282,6 +318,8 @@ class CloudinaryStorage {
       adapter: this.name,
       assetId: result.asset_id,
       format: result.format,
+      resourceType,
+      mimeType,
     };
   }
 
@@ -298,12 +336,25 @@ class CloudinaryStorage {
    * Mint a short-lived signed delivery URL.
    * The signature proves recency, not the holder's right to read.
    */
-  async getSignedUrl(key, { expiresInSeconds = SIGNED_URL_TTL_SECONDS } = {}) {
+  /**
+   * @param {string} key Stored key.
+   * @param {{expiresInSeconds?: number, mimeType?: string, download?: boolean}} [options]
+   *   `download` forces an attachment disposition. Images default to inline so a
+   *   thumbnail renders in the page rather than downloading; documents default
+   *   to attachment, because nobody wants a certificate silently opening in a
+   *   new tab.
+   */
+  async getSignedUrl(
+    key,
+    { expiresInSeconds = SIGNED_URL_TTL_SECONDS, mimeType, download } = {}
+  ) {
+    const resourceType = resourceTypeForStored(key, mimeType);
+    const isImage = resourceType === "image";
     return this.cloudinary.utils.private_download_url(key, {
-      resource_type: "raw",
+      resource_type: resourceType,
       type: "authenticated",
       expires_at: Math.floor(Date.now() / 1000) + expiresInSeconds,
-      attachment: true,
+      attachment: (download ?? !isImage) === true ? true : false,
     });
   }
 
@@ -311,10 +362,10 @@ class CloudinaryStorage {
     return true;
   }
 
-  async delete(key) {
+  async delete(key, { mimeType } = {}) {
     try {
       await this.cloudinary.uploader.destroy(key, {
-        resource_type: "raw",
+        resource_type: resourceTypeForStored(key, mimeType),
         type: "authenticated",
       });
       return true;
@@ -380,4 +431,6 @@ module.exports = {
   MAX_FILE_BYTES,
   SIGNED_URL_TTL_SECONDS,
   CONTENT_EXTENSIONS,
+  CLOUDINARY_RESOURCE_TYPES,
+  resourceTypeForStored,
 };

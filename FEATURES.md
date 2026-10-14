@@ -192,6 +192,23 @@ means the note that follows it)
 - [x] Generated storage keys; the original filename never becomes a path
 - [x] Private storage, served only after an authorisation check
 - [x] `X-Content-Type-Options: nosniff` and script-free attachment responses
+- [x] **All image storage routes to Cloudinary.** Images upload through
+      Cloudinary's `image` resource type, so they are transcoded and optimised
+      on delivery; documents stay `raw`, delivered byte for byte, because
+      recompressing a signed certificate is indefensible. Images get inline
+      delivery so a thumbnail renders in place, documents get an attachment so
+      a certificate never silently opens in a new tab. An unrecognised
+      extension is treated as a document rather than guessed at
+- [x] **`cloudinary` is now a declared dependency.** It was imported by
+      `config/storage.js` but never listed in `package.json`, so a production
+      `npm ci` would have died on `MODULE_NOT_FOUND` the first time anyone
+      configured credentials — and it would have looked like a Cloudinary
+      outage rather than a missing package
+- [x] **23 tests cover the Cloudinary adapter**, which had none: it had never
+      been executed by anything. Images and documents are routed to the right
+      pipeline, delivery is always `authenticated`, signatures expire, deletes
+      target the right resource type and report failure instead of throwing,
+      and unsupported or oversized files are rejected before any network call
 - [~] **Cloudinary delivery is configured but not live-tested**; local storage is
       what has actually been exercised
 - [ ] Malware scanning of uploads
@@ -287,7 +304,8 @@ means the note that follows it)
 
 1. **Live webhooks** need a public URL and a signing secret. Direct server-side
    verification works and is what the deployment uses by default.
-2. **Cloudinary** is configured but has never served a real file; local storage
+2. **Cloudinary** is a working, tested adapter and a declared dependency, but
+   has still never served a real file from real credentials; local storage
    is what has actually been exercised.
 3. **Malware scanning** is not installed. Uploads are allow-listed by magic
    bytes, size-capped and served from private storage, but not scanned.
