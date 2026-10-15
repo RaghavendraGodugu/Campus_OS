@@ -7,6 +7,7 @@
  * ignored.
  */
 
+const mongoose = require("mongoose");
 const { z } = require("zod");
 
 /** Phone: digits, spaces, brackets and a leading +. Nothing else. */
@@ -61,4 +62,16 @@ const changePasswordSchema = z
   })
   .strict();
 
-module.exports = { updateProfileSchema, changePasswordSchema };
+/** GET /profile/avatar/:userId */
+const avatarIdentifier = z
+  .object({
+    userId: z
+      .string()
+      .refine((value) => mongoose.Types.ObjectId.isValid(value), {
+        message: "That is not a valid id",
+      }),
+  })
+  .strict();
+
+module.exports = {
+  avatarIdentifier, updateProfileSchema, changePasswordSchema };

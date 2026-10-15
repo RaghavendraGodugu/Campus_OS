@@ -16,6 +16,7 @@ import { formatDate, formatDateTime, humanise } from "../lib/format";
 import { Card, Stat } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
+import AvatarPicker from "../components/AvatarPicker";
 import Field, { inputClass } from "../components/ui/Field";
 import { ErrorState } from "../components/ui/States";
 import {
@@ -141,6 +142,19 @@ export default function Profile() {
           {error}
         </p>
       )}
+
+      {/*
+        The picture is its own card rather than a field inside "Your details".
+        It is an upload with a preview and a size limit, not a text value, and
+        burying it among editable fields makes it look like part of the same
+        single-purpose form.
+      */}
+      <Card title="Profile picture">
+        <AvatarPicker
+          userId={account.id}
+          hasAvatar={Boolean(account.hasAvatar)}
+        />
+      </Card>
 
       {/* ===== What you own ===== */}
       <Card

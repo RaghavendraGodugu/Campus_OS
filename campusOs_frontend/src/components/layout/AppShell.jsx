@@ -159,11 +159,25 @@ export default function AppShell() {
                 to="/profile"
                 className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-white/10"
               >
-                <span
-                  aria-hidden="true"
-                  className="grid size-9 shrink-0 place-items-center rounded-full bg-linear-to-br from-accent-400 to-accent-600 text-xs font-semibold text-white ring-2 ring-white/20"
-                >
-                  {initials(user?.fullName)}
+                {/*
+                  The picture is fetched from the endpoint rather than embedded
+                  as a URL, so the bytes are only ever served after the server
+                  has decided this reader may have them. Falls back to the
+                  monogram while it loads, or when there is no picture — an
+                  <img> that has not decoded should never leave a blank hole
+                  where a face should be.
+                */}
+                <span className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-linear-to-br from-accent-400 to-accent-600 text-xs font-semibold text-white ring-2 ring-white/20">
+                  <span aria-hidden="true">{initials(user?.fullName)}</span>
+                  {user?.hasAvatar && (
+                    <img
+                      src={`/api/v1/profile/avatar/${user.id}`}
+                      alt=""
+                      className="absolute inset-0 size-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-white">

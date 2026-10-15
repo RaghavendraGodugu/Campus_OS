@@ -66,6 +66,25 @@ const userSchema = new mongoose.Schema(
       default: undefined,
     },
 
+    /**
+     * Profile picture.
+     *
+     * Held as a storage key, never as a URL or a data blob. The key is an
+     * unguessable path; a URL would be a public address for somebody's face that
+     * nobody chose to publish, and a blob would put an image in the user
+     * document and in every query that does not need it.
+     *
+     * Images go through the same adapter as documents, which routes them to
+     * Cloudinary's `image` pipeline — so an avatar is transcoded and resized on
+     * delivery rather than served at whatever size it was uploaded.
+     */
+    avatar: {
+      storageKey: { type: String, default: null },
+      mimeType: { type: String, default: null },
+      bytes: { type: Number, default: null },
+      updatedAt: { type: Date, default: null },
+    },
+
     fullName: {
       type: String,
       required: [true, "Full name is required"],
@@ -255,6 +274,15 @@ userSchema.methods.toPublicJSON = function toPublicJSON() {
     department: this.department ?? null,
     student: this.student ?? null,
     isActive: this.isActive,
+    /**
+     * Whether a picture exists — never the storage key.
+     *
+     * The key is an unguessable path, and every read of a user would otherwise
+     * carry a handle to their file. The client needs to know whether to render
+     * a picture or a monogram; it fetches the bytes from the endpoint when it
+     * does.
+     */
+    hasAvatar: Boolean(this.avatar?.storageKey),
     /**
      * Reported so a provisioned account can be held at the password screen
      * until its owner replaces the generated one. It describes the account

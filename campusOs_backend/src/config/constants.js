@@ -241,6 +241,8 @@ const AUDIT_ACTION = {
    * by it. Folding that into a generic UPDATE would leave the audit trail
    * unable to answer "who changed the term this invoice belongs to".
    */
+  AVATAR_UPDATED: "AVATAR_UPDATED",
+  AVATAR_REMOVED: "AVATAR_REMOVED",
   HOD_ASSIGNED: "HOD_ASSIGNED",
   HOD_UNASSIGNED: "HOD_UNASSIGNED",
   ACADEMIC_TERM_CREATED: "ACADEMIC_TERM_CREATED",

@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 14 October 2026
-- **Verified:** 627 backend tests, 152 frontend tests, lint and build clean
+- **Verified:** 641 backend tests, 158 frontend tests, lint and build clean
 - **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
   screens, anonymous grievance, and bulk import all confirmed against it, plus a
   green browser sweep across all four roles
@@ -59,7 +59,22 @@ means the note that follows it)
 - [x] The role's permission list, labelled as informational
 - [x] Every update audited by field name, never by value
 - [x] Profile page at `/profile`, in the sidebar for every role
-- [ ] Avatar upload
+- [x] **Avatar upload**, shown in the profile page and the top bar. Stored as a
+      storage key and never as a URL or a data blob: a URL is a public address
+      for somebody's face that nobody chose to publish, and a blob would put
+      megabytes inside the user document that every unrelated query reads
+- [x] **Avatars are capped at 2 MB**, far below the 10 MB document limit, and are
+      routed to Cloudinary's `image` pipeline. An avatar is displayed at 40px in
+      the top bar; a 9 MB photograph there is a crop waiting to happen
+- [x] **WebP is accepted for avatars only.** The shared document sniffer does not
+      recognise it, and widening that allowlist to cover it would let a WebP into
+      a certificate upload
+- [x] **The picture is fetched through an endpoint, never a public URL**, so the
+      bytes are only served after the server has decided the reader may have
+      them. The profile exposes `hasAvatar` and never the storage key
+- [x] **Replacing a picture commits the new one before deleting the old**, so a
+      failure part-way leaks an orphaned object rather than a record pointing at
+      bytes that are gone — which would break the picture for every user
 
 ## 4. Students
 
@@ -328,7 +343,7 @@ means the note that follows it)
 ## 15. Quality gates
 
 - [x] Backend: 577 tests passing
-- [x] Frontend: 152 tests passing
+- [x] Frontend: 158 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep
