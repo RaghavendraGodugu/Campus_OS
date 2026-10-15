@@ -17,6 +17,7 @@ import { Card, Stat } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
 import AvatarPicker from "../components/AvatarPicker";
+import NotificationPreferences from "../components/NotificationPreferences";
 import Field, { inputClass } from "../components/ui/Field";
 import { ErrorState } from "../components/ui/States";
 import {
@@ -149,6 +150,15 @@ export default function Profile() {
         burying it among editable fields makes it look like part of the same
         single-purpose form.
       */}
+      <Card
+        title="Notifications"
+        description="Which things are allowed to ring the bell."
+      >
+        <NotificationPreferences
+          preferences={account.notificationPreferences}
+        />
+      </Card>
+
       <Card title="Profile picture">
         <AvatarPicker
           userId={account.id}

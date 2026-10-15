@@ -84,8 +84,28 @@ const readAvatar = asyncHandler(async (req, res) => {
   return res.send(buffer);
 });
 
+/**
+ * PATCH /api/v1/profile/notification-preferences
+ *
+ * Written on the user record rather than a separate collection: the settings are
+ * read on every notification delivered, and a lookup per notification for a
+ * document the user document already carries is the wrong trade.
+ */
+const updateNotificationPreferences = asyncHandler(async (req, res) => {
+  const preferences = await profileService.updateNotificationPreferences({
+    user: req.user,
+    changes: req.validated.body,
+  });
+
+  return sendSuccess(res, {
+    message: "Notification preferences saved",
+    data: { preferences },
+  });
+});
+
 module.exports = {
   getProfile,
+  updateNotificationPreferences,
   updateProfile,
   signOutEverywhere,
   uploadAvatar,

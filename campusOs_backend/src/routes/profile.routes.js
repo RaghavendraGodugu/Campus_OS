@@ -22,6 +22,7 @@ const {
   updateProfileSchema,
   changePasswordSchema,
   avatarIdentifier,
+  notificationPreferencesSchema,
 } = require("../validators/profile.validator");
 
 const router = express.Router();
@@ -44,6 +45,22 @@ router.patch(
  * Routed here rather than only under /auth so the profile page is the one place
  * a person goes to look after their password.
  */
+/**
+ * PATCH /api/v1/profile/notification-preferences
+ *
+ * Separate from the profile schema on purpose. That schema takes exactly two
+ * fields and its strictness is the feature — a person cannot change their own
+ * programme or role. Adding a third, nested, differently-shaped patch to it
+ * would weaken the guarantee it exists to provide.
+ */
+router.patch(
+  "/profile/notification-preferences",
+  authenticate,
+  csrfProtection,
+  validate({ body: notificationPreferencesSchema }),
+  profileController.updateNotificationPreferences
+);
+
 /**
  * Profile picture.
  *

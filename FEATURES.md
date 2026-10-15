@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 14 October 2026
-- **Verified:** 641 backend tests, 158 frontend tests, lint and build clean
+- **Verified:** 654 backend tests, 164 frontend tests, lint and build clean
 - **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
   screens, anonymous grievance, and bulk import all confirmed against it, plus a
   green browser sweep across all four roles
@@ -216,7 +216,21 @@ means the note that follows it)
 - [x] In-app notification list, unread count, mark read
 - [x] Announcement list and detail screens
 - [ ] Email or push delivery of announcements
-- [ ] Notification preferences
+- [x] **Notification preferences**, on the profile page. Five categories rather
+      than fourteen types — somebody can express "don't interrupt me about
+      money" in one tap, which fourteen switches never achieves
+- [x] **Muting stops the badge, never the delivery.** A muted notification is
+      still written and still listed; it is simply stored already read, so the
+      unread count ignores it and nothing else has to know preferences exist. A
+      student who mutes finance and then misses "your refund was processed" has
+      been harmed by a setting meant to stop noise. The screen says so in words,
+      because a switch labelled only "Finance" reads as "turn off messages"
+- [x] **A notification type with no category still badges.** Not filing a new
+      type must not silently mute it: a notification nobody receives is worse
+      than one badge too many
+- [x] **Every category is written, never merged.** A partial patch makes it
+      ambiguous whether an absent key means "leave it alone" or "switch it off",
+      and the second reading is the one that quietly mutes somebody
 
 ## 11. Reports and audit
 
@@ -343,7 +357,7 @@ means the note that follows it)
 ## 15. Quality gates
 
 - [x] Backend: 577 tests passing
-- [x] Frontend: 158 tests passing
+- [x] Frontend: 164 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep

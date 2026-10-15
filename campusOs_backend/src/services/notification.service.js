@@ -23,6 +23,7 @@
  */
 
 const Notification = require("../models/Notification");
+const preferenceService = require("./notificationPreference.service");
 const { NOTIFICATION_TYPE } = require("../config/constants");
 const { logger } = require("../config/logger");
 
@@ -50,6 +51,34 @@ async function notify({ userId, type, title, body, link, dedupeKey }) {
     const payload = { user: userId, type, title, body };
     if (link) payload.link = link;
     if (dedupeKey) payload.dedupeKey = dedupeKey;
+
+    /*
+     * Muting is implemented by storing the notification as already read.
+     *
+     * It is still delivered and still listed — a student who mutes finance and
+     * then misses "your refund was processed" has been harmed by a setting meant
+     * to stop noise — but it does not raise the badge, because the unread count
+     * is `readAt: null` and nothing else has to know about preferences.
+     *
+     * The cost is one indexed read of the recipient per notification. It is not
+     * cached deliberately: a cache would mean a notification delivered moments
+     * after somebody muted a category still badges, which is the exact moment
+     * they were trying to stop.
+     */
+    const recipient = await require("../models/User")
+      .findById(userId)
+      .select("notificationPreferences")
+      .lean();
+
+    if (
+      recipient &&
+      !preferenceService.shouldBadge({
+        preferences: recipient.notificationPreferences,
+        type,
+      })
+    ) {
+      payload.readAt = new Date();
+    }
 
     return await Notification.create(payload);
   } catch (error) {

@@ -67,6 +67,37 @@ const userSchema = new mongoose.Schema(
     },
 
     /**
+     * Which notifications this person wants.
+     *
+     * ## Categories, not individual types
+     *
+     * Fourteen notification types is a settings page nobody reads. Grouped by
+     * subject — requests, complaints, certificates, finance, announcements —
+     * somebody can express "don't interrupt me about money" in one tap.
+     *
+     * ## Defaults are stored, so "unset" is not ambiguous
+     *
+     * Every category is written out at creation rather than falling back to a
+     * hard-coded default at read time. Otherwise turning a category on and then
+     * back off would be indistinguishable from never having touched it, and the
+     * "what happens if I do nothing" question would have no stable answer.
+     *
+     * `muted` is per-category rather than a global off switch: somebody who
+     * wants silence about money but not about a certificate they are waiting on
+     * should be able to say so.
+     */
+    notificationPreferences: {
+      requests: { type: Boolean, default: true },
+      complaints: { type: Boolean, default: true },
+      certificates: { type: Boolean, default: true },
+      finance: { type: Boolean, default: true },
+      announcements: { type: Boolean, default: true },
+
+      /** Bumps the bell as well as adding to the list. */
+      unreadBadge: { type: Boolean, default: true },
+    },
+
+    /**
      * Profile picture.
      *
      * Held as a storage key, never as a URL or a data blob. The key is an

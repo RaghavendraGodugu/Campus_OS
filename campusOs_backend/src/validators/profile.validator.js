@@ -62,6 +62,24 @@ const changePasswordSchema = z
   })
   .strict();
 
+/**
+ * PATCH /profile/notification-preferences
+ *
+ * Every category is required rather than optional. A partial patch would leave
+ * it ambiguous whether an absent key means "leave it alone" or "switch it off",
+ * and the second reading is exactly the one that silently mutes somebody.
+ */
+const notificationPreferencesSchema = z
+  .object({
+    requests: z.boolean(),
+    complaints: z.boolean(),
+    certificates: z.boolean(),
+    finance: z.boolean(),
+    announcements: z.boolean(),
+    unreadBadge: z.boolean(),
+  })
+  .strict();
+
 /** GET /profile/avatar/:userId */
 const avatarIdentifier = z
   .object({
@@ -74,4 +92,6 @@ const avatarIdentifier = z
   .strict();
 
 module.exports = {
-  avatarIdentifier, updateProfileSchema, changePasswordSchema };
+  avatarIdentifier,
+  notificationPreferencesSchema,
+  updateProfileSchema, changePasswordSchema };

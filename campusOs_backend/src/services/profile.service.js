@@ -20,6 +20,8 @@
  * administrator, who verifies it out of band.
  */
 const User = require("../models/User");
+const preferenceService = require("./notificationPreference.service");
+const { CATEGORIES } = preferenceService;
 const Student = require("../models/Student");
 const Department = require("../models/Department");
 const Program = require("../models/Program");
@@ -134,6 +136,33 @@ async function getProfile({ user }) {
  * @param {object} params.changes At most fullName and phone.
  * @param {object} [params.req]
  */
+/**
+ * Replace a person's notification preferences.
+ *
+ * Every category is written, not merged. A partial patch leaves it ambiguous
+ * whether an absent key means "leave it alone" or "switch it off", and the
+ * second reading is the one that would quietly mute somebody.
+ *
+ * Nothing is delivered or discarded here — preferences only affect what raises
+ * a badge from this moment on. See notificationPreference.service for why
+ * muting never stops delivery.
+ */
+async function updateNotificationPreferences({ user, changes }) {
+  const update = {};
+  for (const key of CATEGORIES) {
+    update[`notificationPreferences.${key}`] = Boolean(changes[key]);
+  }
+  update["notificationPreferences.unreadBadge"] = Boolean(changes.unreadBadge);
+
+  const updated = await User.findByIdAndUpdate(
+    user._id,
+    { $set: update },
+    { new: true },
+  );
+
+  return preferenceService.present(updated);
+}
+
 async function updateProfile({ user, changes, req }) {
   const allowed = ["fullName", "phone"];
   const refused = Object.keys(changes).filter((key) => !allowed.includes(key));
@@ -194,6 +223,7 @@ async function signOutEverywhere({ user, req }) {
 module.exports = {
   getProfile,
   updateProfile,
+  updateNotificationPreferences,
   signOutEverywhere,
   editableFields: ["fullName", "phone"],
 };
