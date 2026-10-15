@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 14 October 2026
-- **Verified:** 654 backend tests, 164 frontend tests, lint and build clean
+- **Verified:** 677 backend tests, 164 frontend tests, lint and build clean
 - **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
   screens, anonymous grievance, and bulk import all confirmed against it, plus a
   green browser sweep across all four roles
@@ -183,8 +183,26 @@ means the note that follows it)
 - [x] **Public verification page** at `/verify`, outside the signed-in shell, for
       someone holding a paper certificate with no account; it keeps "not
       recognised", "revoked" and "authentic" apart, and discloses no holder name
-- [ ] Certificate templates beyond the built-in one
-- [ ] Bulk issuance
+- [x] **Certificate templates**, at `/management/certificate-templates`. Heading,
+      body and footer as plain text with `{{placeholders}}` — never markup,
+      because these files get downloaded and opened, and an uploaded logo would
+      be an unvetted file on an official-looking page
+- [x] **A preview renders against a sample student and creates nothing.** Issuing
+      a real certificate to check whether a template looks right would put a real
+      document in a real student's record
+- [x] **Unknown placeholders are shown, not swallowed.** `{{rollNo}}` against a
+      system that says `{{rollNumber}}` is left as literal text and flagged.
+      Blanking it would produce a printed certificate with a gap where a roll
+      number belongs, and nobody would know why
+- [x] **At most one default per type**, by partial unique index, and the previous
+      default is demoted *before* the write — demoting afterwards never runs,
+      because the index rejects the insert first
+- [x] **Bulk issuance**, from the certificates list. It can only turn *already
+      approved* work into issued documents and cannot approve anything — issuing
+      forty in one click is forty judgements at once, which is how a whole cohort
+      receives a certificate nobody checked
+- [x] **Every skip is named with a reason.** "38 issued" and silence about the
+      other two is how somebody assumes all forty went through
 
 ## 9. Finance
 

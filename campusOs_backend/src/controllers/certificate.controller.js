@@ -7,6 +7,7 @@
  */
 
 const certificateService = require("../services/certificate.service");
+const templateService = require("../services/certificateTemplate.service");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { sendSuccess, sendCreated, sendPaginated } = require("../utils/response");
 const { ApiError } = require("../utils/ApiError");
@@ -201,6 +202,78 @@ const verify = asyncHandler(async (req, res) => {
   });
 });
 
+
+/** GET /api/v1/certificate-templates */
+const listTemplates = asyncHandler(async (req, res) => {
+  const templates = await templateService.listTemplates({
+    type: req.validated.query?.type,
+  });
+  return sendSuccess(res, { message: "Templates listed", data: { templates } });
+});
+
+/** POST /api/v1/certificate-templates */
+const createTemplate = asyncHandler(async (req, res) => {
+  const template = await templateService.createTemplate({
+    user: req.user,
+    payload: req.validated.body,
+  });
+  return sendCreated(res, { message: "Template created", data: { template } });
+});
+
+/** PATCH /api/v1/certificate-templates/:id */
+const updateTemplate = asyncHandler(async (req, res) => {
+  const template = await templateService.updateTemplate({
+    user: req.user,
+    id: req.params.id,
+    payload: req.validated.body,
+  });
+  return sendSuccess(res, { message: "Template updated", data: { template } });
+});
+
+/** DELETE /api/v1/certificate-templates/:id */
+const deleteTemplate = asyncHandler(async (req, res) => {
+  await templateService.deleteTemplate({ user: req.user, id: req.params.id });
+  return sendSuccess(res, { message: "Template deleted", data: { removed: true } });
+});
+
+/**
+ * POST /api/v1/certificate-templates/preview
+ *
+ * Renders against a sample student without touching a real certificate record.
+ * Issuing one to see whether a template works would put a real document in a
+ * real student's file.
+ */
+const previewTemplate = asyncHandler(async (req, res) => {
+  const preview = await templateService.preview(req.validated.body);
+  return sendSuccess(res, { message: "Template previewed", data: preview });
+});
+
+/**
+ * POST /api/v1/certificates/bulk-issue
+ *
+ * Declared before `/:reference/...` so the literal segment is never captured as
+ * a certificate reference.
+ */
+const bulkIssue = asyncHandler(async (req, res) => {
+  const result = await templateService.bulkIssue({
+    certificateIds: req.validated.body.certificateIds,
+    user: req.user,
+    req,
+  });
+
+  return sendSuccess(res, {
+    message:
+      result.issued.length === 0
+        ? "No certificates were issued"
+        : `${result.issued.length} certificate(s) issued${
+            result.skipped.length
+              ? `, ${result.skipped.length} skipped`
+              : ""
+          }`,
+    data: result,
+  });
+});
+
 module.exports = {
   apply,
   list,
@@ -210,4 +283,11 @@ module.exports = {
   revoke,
   download,
   verify,
+
+  listTemplates,
+  createTemplate,
+  updateTemplate,
+  deleteTemplate,
+  previewTemplate,
+  bulkIssue,
 };

@@ -99,6 +99,12 @@ export const NAV_ITEMS = [
     permission: "announcement:manage:institution",
   },
   {
+    to: "/management/certificate-templates",
+    label: "Certificate templates",
+    icon: "FileText",
+    permission: "certificate:issue:institution",
+  },
+  {
     to: "/management/terms",
     label: "Academic terms",
     icon: "CalendarRange",

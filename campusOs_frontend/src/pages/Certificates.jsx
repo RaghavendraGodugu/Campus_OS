@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { BadgeCheck, Download, Plus } from "lucide-react";
 
 import { apiGet, fetchDocument } from "../api/client";
+import BulkIssueBar from "../components/BulkIssueBar";
 import { formatDate } from "../lib/format";
 import { Card } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
@@ -25,6 +26,7 @@ import { SkeletonList, SkeletonRegion } from "../components/ui/Skeleton";
  */
 export default function Certificates({ mode = "own" }) {
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState([]);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["certificates", mode, page],
@@ -99,67 +101,110 @@ export default function Certificates({ mode = "own" }) {
         />
       )}
 
+      <BulkIssueBar
+        selected={selected}
+        onClear={() => setSelected([])}
+        onIssued={() => {
+          setSelected([]);
+          refetch();
+        }}
+      />
+
       {items.length > 0 && (
         <Card className="overflow-hidden p-0">
           <ul className="divide-y divide-ink-100">
-            {items.map((certificate) => (
-              <li key={certificate._id ?? certificate.id} className="px-5 py-4">
-                <Link
-                  to={`${mode === "own" ? "/certificates" : "/management/certificates"}/${certificate.reference}`}
-                  className="mb-2 block text-sm font-medium text-brand-700 dark:text-brand-300 hover:underline"
-                >
-                  Open {certificate.reference}
-                </Link>
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-ink-900">
-                      {String(certificate.type ?? "")
-                        .replace(/_/g, " ")
-                        .toLowerCase()}
-                      {certificate.copies > 1 &&
-                        ` · ${certificate.copies} copies`}
-                    </p>
-                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
-                      {certificate.reference}
-                      {certificate.purpose && ` · ${certificate.purpose}`}
-                    </p>
+            {items.map((certificate) => {
+              const id = certificate._id ?? certificate.id;
+              // Only an APPROVED certificate can be bulk-issued, so only an
+              // approved one gets a checkbox. Offering one on a pending
+              // application would invite a click that is refused.
+              const approvable = certificate.status === "APPROVED";
+              const checked = selected.includes(id);
+
+              return (
+                <li key={id} className="flex items-start gap-3 px-5 py-4">
+                  {approvable ? (
+                    <input
+                      type="checkbox"
+                      className="mt-1 size-4 shrink-0 rounded border-ink-300 text-brand-600 focus:ring-brand-600 dark:border-ink-600"
+                      aria-label={`Select ${certificate.reference}`}
+                      checked={checked}
+                      onChange={(event) =>
+                        setSelected((prev) =>
+                          event.target.checked
+                            ? [...prev, id]
+                            : prev.filter((entry) => entry !== id),
+                        )
+                      }
+                    />
+                  ) : (
+                    <span aria-hidden="true" className="mt-1 size-4 shrink-0" />
+                  )}
+
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      to={`${mode === "own" ? "/certificates" : "/management/certificates"}/${certificate.reference}`}
+                      className="mb-2 block text-sm font-medium text-brand-700 dark:text-brand-300 hover:underline"
+                    >
+                      Open {certificate.reference}
+                    </Link>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-ink-900">
+                          {String(certificate.type ?? "")
+                            .replace(/_/g, " ")
+                            .toLowerCase()}
+                          {certificate.copies > 1 &&
+                            ` · ${certificate.copies} copies`}
+                        </p>
+                        <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                          {certificate.reference}
+                          {certificate.purpose && ` · ${certificate.purpose}`}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Badge status={certificate.status} />
+
+                        {/* Only a GENERATED certificate has a document to fetch. */}
+                        {certificate.status === "GENERATED" &&
+                          certificate.document && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              loading={download.isPending}
+                              onClick={() =>
+                                download.mutate(
+                                  certificate._id ?? certificate.id,
+                                )
+                              }
+                            >
+                              <Download
+                                className="size-3.5"
+                                aria-hidden="true"
+                              />
+                              PDF
+                            </Button>
+                          )}
+                      </div>
+                    </div>
+
+                    {certificate.verificationCode && (
+                      <p className="mt-2 text-[11px] text-ink-400 dark:text-ink-500">
+                        Verification code {certificate.verificationCode} ·
+                        issued {formatDate(certificate.issuedAt)}
+                      </p>
+                    )}
+
+                    {certificate.rejectionReason && (
+                      <p className="mt-2 rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-xs text-red-800 dark:text-red-200">
+                        Declined: {certificate.rejectionReason}
+                      </p>
+                    )}
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <Badge status={certificate.status} />
-
-                    {/* Only a GENERATED certificate has a document to fetch. */}
-                    {certificate.status === "GENERATED" &&
-                      certificate.document && (
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          loading={download.isPending}
-                          onClick={() =>
-                            download.mutate(certificate._id ?? certificate.id)
-                          }
-                        >
-                          <Download className="size-3.5" aria-hidden="true" />
-                          PDF
-                        </Button>
-                      )}
-                  </div>
-                </div>
-
-                {certificate.verificationCode && (
-                  <p className="mt-2 text-[11px] text-ink-400 dark:text-ink-500">
-                    Verification code {certificate.verificationCode} · issued{" "}
-                    {formatDate(certificate.issuedAt)}
-                  </p>
-                )}
-
-                {certificate.rejectionReason && (
-                  <p className="mt-2 rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-xs text-red-800 dark:text-red-200">
-                    Declined: {certificate.rejectionReason}
-                  </p>
-                )}
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
 
           {data?.meta && (

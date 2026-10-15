@@ -17,7 +17,7 @@
 
 const mongoose = require("mongoose");
 
-const { CERTIFICATE_STATUS, CERTIFICATE_STATUS_VALUES } = require("../config/constants");
+const { CERTIFICATE_TYPES, CERTIFICATE_STATUS, CERTIFICATE_STATUS_VALUES } = require("../config/constants");
 
 const certificateSchema = new mongoose.Schema(
   {
@@ -35,17 +35,7 @@ const certificateSchema = new mongoose.Schema(
       type: String,
       required: [true, "Certificate type is required"],
       enum: {
-        values: [
-          "BONAFIDE",
-          "STUDY",
-          "TRANSFER",
-          "MIGRATION",
-          "CHARACTER",
-          "COURSE_COMPLETION",
-          "NO_DUES",
-          "INTERNSHIP",
-          "TRANSCRIPT",
-        ],
+        values: CERTIFICATE_TYPES,
         message: "`{VALUE}` is not a valid certificate type",
       },
       index: true,

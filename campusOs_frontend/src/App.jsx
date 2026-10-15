@@ -24,6 +24,7 @@ import Reports from "./pages/Reports";
 import AuditTrail from "./pages/AuditTrail";
 import ComposeAnnouncement from "./pages/ComposeAnnouncement";
 import Terms from "./pages/admin/Terms";
+import CertificateTemplates from "./pages/admin/CertificateTemplates";
 import CertificateDetail from "./pages/CertificateDetail";
 import ComplaintDetail from "./pages/ComplaintDetail";
 import Requests from "./pages/Requests";
@@ -364,6 +365,14 @@ export default function App() {
           element={
             <RequirePermission permission="academic-term:manage:institution">
               <Terms />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="management/certificate-templates"
+          element={
+            <RequirePermission permission="certificate:issue:institution">
+              <CertificateTemplates />
             </RequirePermission>
           }
         />

@@ -13,11 +13,20 @@
 const express = require("express");
 
 const certificateController = require("../controllers/certificate.controller");
+const {
+  createTemplateSchema,
+  updateTemplateSchema,
+  templateIdentifier,
+  listTemplatesSchema,
+  bulkIssueSchema,
+  previewSchema,
+} = require("../validators/certificateTemplate.validator");
 const { validate } = require("../middleware/validate");
 const {
   authenticate,
   optionalAuthenticate,
   requirePermission,
+  requireAnyPermission,
   requireStudentAccount,
 } = require("../middleware/auth");
 const { csrfProtection } = require("../middleware/csrf");
@@ -117,6 +126,71 @@ router.post(
   requirePermission(P.CERTIFICATE_REVOKE),
   validate({ params: getSchema, body: revokeSchema }),
   certificateController.revoke
+);
+
+/**
+ * Certificate templates and bulk issuance.
+ *
+ * Templates are read by any staff who can issue; writing one is an
+ * institution-wide act, because the default for a certificate type decides what
+ * every subsequently issued document of that type says.
+ */
+router.get(
+  "/certificate-templates",
+  authenticate,
+  requireAnyPermission(P.CERTIFICATE_ISSUE),
+  validate({ query: listTemplatesSchema }),
+  certificateController.listTemplates
+);
+
+router.post(
+  "/certificate-templates/preview",
+  authenticate,
+  requireAnyPermission(P.CERTIFICATE_ISSUE),
+  validate({ body: previewSchema }),
+  certificateController.previewTemplate
+);
+
+router.post(
+  "/certificate-templates",
+  authenticate,
+  csrfProtection,
+  requireAnyPermission(P.CERTIFICATE_ISSUE),
+  validate({ body: createTemplateSchema }),
+  certificateController.createTemplate
+);
+
+router.patch(
+  "/certificate-templates/:id",
+  authenticate,
+  csrfProtection,
+  requireAnyPermission(P.CERTIFICATE_ISSUE),
+  validate({ params: templateIdentifier, body: updateTemplateSchema }),
+  certificateController.updateTemplate
+);
+
+router.delete(
+  "/certificate-templates/:id",
+  authenticate,
+  csrfProtection,
+  requireAnyPermission(P.CERTIFICATE_ISSUE),
+  validate({ params: templateIdentifier }),
+  certificateController.deleteTemplate
+);
+
+/**
+ * POST /api/v1/certificates/bulk-issue
+ *
+ * Declared before the `/:reference/...` routes below so the literal segment is
+ * never captured as a certificate reference.
+ */
+router.post(
+  "/certificates/bulk-issue",
+  authenticate,
+  csrfProtection,
+  requireAnyPermission(P.CERTIFICATE_ISSUE),
+  validate({ body: bulkIssueSchema }),
+  certificateController.bulkIssue
 );
 
 module.exports = router;

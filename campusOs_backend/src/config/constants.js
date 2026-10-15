@@ -209,6 +209,46 @@ const ANNOUNCEMENT_AUDIENCE = {
   YEARS: "YEARS",
 };
 
+/**
+ * The nine certificate types.
+ *
+ * Named here rather than inline on the model, because a template is validated
+ * against exactly the same vocabulary — and two lists that drift apart means a
+ * template can exist for a certificate type nothing will ever issue.
+ */
+const CERTIFICATE_TYPES = Object.freeze([
+  "BONAFIDE",
+  "STUDY",
+  "TRANSFER",
+  "MIGRATION",
+  "CHARACTER",
+  "COURSE_COMPLETION",
+  "NO_DUES",
+  "INTERNSHIP",
+  "TRANSCRIPT",
+]);
+
+/**
+ * Placeholders a certificate template may use.
+ *
+ * A closed list. An open one would let a template ask for a field that is not
+ * rendered, and the printer would silently produce a blank where a name belongs.
+ */
+const CERTIFICATE_TEMPLATE_TOKENS = Object.freeze([
+  "{{studentName}}",
+  "{{rollNumber}}",
+  "{{programme}}",
+  "{{department}}",
+  "{{semester}}",
+  "{{academicYear}}",
+  "{{certificateType}}",
+  "{{issueDate}}",
+  "{{reference}}",
+  "{{signatoryName}}",
+  "{{signatoryTitle}}",
+  "{{institutionName}}",
+]);
+
 /** Audit action namespace. Kept coarse; details live in metadata. */
 const AUDIT_ACTION = {
   CREATE: "CREATE",
@@ -241,6 +281,10 @@ const AUDIT_ACTION = {
    * by it. Folding that into a generic UPDATE would leave the audit trail
    * unable to answer "who changed the term this invoice belongs to".
    */
+  CERTIFICATE_TEMPLATE_CREATED: "CERTIFICATE_TEMPLATE_CREATED",
+  CERTIFICATE_TEMPLATE_UPDATED: "CERTIFICATE_TEMPLATE_UPDATED",
+  CERTIFICATE_TEMPLATE_DELETED: "CERTIFICATE_TEMPLATE_DELETED",
+  CERTIFICATE_BULK_ISSUED: "CERTIFICATE_BULK_ISSUED",
   AVATAR_UPDATED: "AVATAR_UPDATED",
   AVATAR_REMOVED: "AVATAR_REMOVED",
   HOD_ASSIGNED: "HOD_ASSIGNED",
@@ -279,6 +323,8 @@ module.exports = {
   ANNOUNCEMENT_PRIORITY,
   ANNOUNCEMENT_PRIORITY_VALUES,
   NOTIFICATION_TYPE,
+  CERTIFICATE_TYPES,
+  CERTIFICATE_TEMPLATE_TOKENS,
   ANNOUNCEMENT_AUDIENCE,
   AUDIT_ACTION,
 };
