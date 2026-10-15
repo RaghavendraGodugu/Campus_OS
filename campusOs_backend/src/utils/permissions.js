@@ -64,6 +64,8 @@ const P = {
   // ===== Institutional structure =====
   DEPARTMENT_READ: "department:read:institution",
   DEPARTMENT_MANAGE: "department:manage:institution",
+  ACADEMIC_TERM_MANAGE: "academic-term:manage:institution",
+  ACADEMIC_TERM_READ: "academic-term:read",
   PROGRAM_READ: "program:read:institution",
   PROGRAM_MANAGE: "program:manage:institution",
 
@@ -197,7 +199,12 @@ const P = {
  * Per-student data (profiles, requests, complaints, invoices, certificates)
  * never appears in this list and is always scope-checked.
  */
-const BASE_PERMISSIONS = [P.NOTIFICATION_READ_OWN, P.DEPARTMENT_READ, P.PROGRAM_READ];
+const BASE_PERMISSIONS = [
+  P.NOTIFICATION_READ_OWN,
+  P.DEPARTMENT_READ,
+  P.PROGRAM_READ,
+  P.ACADEMIC_TERM_READ,
+];
 
 /**
  * Role → permission map.
@@ -467,6 +474,8 @@ const ROLE_PERMISSIONS = {
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
     P.DEPARTMENT_MANAGE,
+    P.ACADEMIC_TERM_MANAGE,
+    P.ACADEMIC_TERM_READ,
     P.PROGRAM_MANAGE,
     P.REQUEST_READ_INSTITUTION,
     P.REQUEST_READ_ASSIGNED,

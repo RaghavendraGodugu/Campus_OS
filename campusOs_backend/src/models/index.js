@@ -8,7 +8,8 @@
  */
 
 // ===== Phase A: foundation =====
-const User = require("./User");
+const User = require("./User")
+require("./AcademicTerm");
 const Department = require("./Department");
 const Program = require("./Program");
 const Student = require("./Student");
@@ -60,6 +61,7 @@ async function initIndexes() {
 module.exports = {
   ...models,
   models,
+  AcademicTerm: require("./AcademicTerm"),
   initIndexes,
   // Re-exported counter helpers so callers need a single import path.
   counterKey: Counter.counterKey,

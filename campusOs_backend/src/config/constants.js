@@ -35,6 +35,24 @@ const STAFF_ROLES = Object.freeze(ROLE_VALUES.filter((role) => role !== ROLES.ST
  * `utils/workflow.js`, and every state change is validated against that table
  * before it reaches the database.
  */
+/**
+ * Academic terms.
+ *
+ * PLANNED exists so a term can be entered before it opens. A term that cannot be
+ * described until the day it starts is a term nobody has time to set up.
+ */
+const ACADEMIC_TERM_STATUS = Object.freeze({
+  PLANNED: "PLANNED",
+  OPEN: "OPEN",
+  CLOSED: "CLOSED",
+});
+
+const ACADEMIC_TERM_KINDS = Object.freeze({
+  SEMESTER: "SEMESTER",
+  TRIMESTER: "TRIMESTER",
+  ACADEMIC_YEAR: "ACADEMIC_YEAR",
+});
+
 const REQUEST_STATUS = {
   DRAFT: "DRAFT",
   SUBMITTED: "SUBMITTED",
@@ -215,6 +233,19 @@ const AUDIT_ACTION = {
   DOCUMENT_DOWNLOADED: "DOCUMENT_DOWNLOADED",
   CERTIFICATE_GENERATED: "CERTIFICATE_GENERATED",
   ACCESS_DENIED: "ACCESS_DENIED",
+  /**
+   * Academic terms get their own actions rather than reusing UPDATE.
+   *
+   * Opening and closing a term is the single most consequential thing an
+   * administrator does to the reporting: every figure from then on is labelled
+   * by it. Folding that into a generic UPDATE would leave the audit trail
+   * unable to answer "who changed the term this invoice belongs to".
+   */
+  ACADEMIC_TERM_CREATED: "ACADEMIC_TERM_CREATED",
+  ACADEMIC_TERM_UPDATED: "ACADEMIC_TERM_UPDATED",
+  ACADEMIC_TERM_OPENED: "ACADEMIC_TERM_OPENED",
+  ACADEMIC_TERM_CLOSED: "ACADEMIC_TERM_CLOSED",
+  ACADEMIC_TERM_DELETED: "ACADEMIC_TERM_DELETED",
 };
 
 module.exports = {
@@ -224,6 +255,8 @@ module.exports = {
   REQUEST_STATUS,
   REQUEST_STATUS_VALUES,
   TERMINAL_STATUSES,
+  ACADEMIC_TERM_STATUS,
+  ACADEMIC_TERM_KINDS,
   STUDENT_ACTIONABLE_STATUSES,
   COMPLAINT_STATUS,
   COMPLAINT_STATUS_VALUES,

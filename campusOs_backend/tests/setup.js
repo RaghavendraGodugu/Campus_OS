@@ -20,7 +20,8 @@
  * never to the database named in `.env`.
  */
 
-const { MongoMemoryServer } = require("mongodb-memory-server");
+const path = require("path");
+const { MongoMemoryReplSet } = require("mongodb-memory-server");
 
 /** Fixed port so the URI is knowable synchronously, before anything imports. */
 const TEST_PORT = 27018;
@@ -51,7 +52,9 @@ const TEST_ENV = {
 
 // Applied synchronously, at module scope, before the first application require.
 Object.assign(process.env, TEST_ENV, {
-  MONGO_URI: `mongodb://127.0.0.1:${TEST_PORT}/campusos_test`,
+  // A placeholder. The replica set binds an ephemeral port, so this is
+  // overwritten with the real URI before the first connection — see below.
+  MONGO_URI: `mongodb://127.0.0.1:${TEST_PORT}/campusos_test?replicaSet=rs0`,
 });
 
 let mongoServer;
@@ -62,9 +65,38 @@ beforeAll(async () => {
   // MONGOMS_SYSTEM_BINARY is read by mongodb-memory-server directly; this
   // hook only documents that the system binary is expected from the shell.
 
-  mongoServer = await MongoMemoryServer.create({
-    instance: { port: TEST_PORT, dbName: "campusos_test" },
+  /*
+   * A replica set, not a standalone.
+   *
+   * A standalone Mongo rejects transactions outright — "Transaction numbers
+   * are only allowed on a replica set member" — so any code using one would
+   * either be untested here or have quietly been written without them. Atlas is
+   * a replica set in production, so this makes the test environment match
+   * reality and lets atomicity be tested rather than assumed.
+   */
+  mongoServer = await MongoMemoryReplSet.create({
+    replSet: { count: 1, name: "rs0" },
   });
+
+  // The replica set binds an ephemeral port, so the URI is taken from it rather
+  // than assumed. This replaces the placeholder installed above, before
+  // connectDB() reads it.
+  process.env.MONGO_URI = mongoServer.getUri("campusos_test");
+
+  /*
+   * config/env caches its parsed result at module scope the first time anything
+   * reads it, so simply assigning the URI above is not enough — the connection
+   * would still be made to the placeholder port. Dropping the cached modules
+   * forces a re-parse against the value that is set now.
+   */
+  for (const key of Object.keys(require.cache)) {
+    if (
+      key.includes(`${path.sep}src${path.sep}config${path.sep}env`) ||
+      key.includes(`${path.sep}src${path.sep}config${path.sep}db`)
+    ) {
+      delete require.cache[key];
+    }
+  }
 
   const { connectDB, registerConnectionListeners } = require("../src/config/db");
   const { initIndexes } = require("../src/models");
@@ -97,10 +129,23 @@ afterAll(async () => {
  */
 beforeEach(() => {
   const activeUri = process.env.MONGO_URI ?? "";
-  if (!activeUri.includes(`:${TEST_PORT}/`)) {
+
+  /*
+   * The guard that stops a destructive test run against a real database.
+   *
+   * It matches on loopback and the test database name rather than a fixed port,
+   * because the replica set now binds an ephemeral one. What it is really
+   * asserting is "this is an ephemeral server on this machine", which a port
+   * number never established — a fixed port could equally well be a developer's
+   * own Atlas tunnel.
+   */
+  const isLoopback = /^mongodb:\/\/127\.0\.0\.1[:/]/.test(activeUri);
+  const isTestDatabase = activeUri.includes("/campusos_test");
+
+  if (!isLoopback || !isTestDatabase) {
     throw new Error(
-      `REFUSING TO RUN: MONGO_URI is "${activeUri}", which is not the ephemeral test ` +
-        `server on port ${TEST_PORT}. Tests call resetDatabase(), which deletes all ` +
+      `REFUSING TO RUN: MONGO_URI is "${activeUri}", which is not an ephemeral test ` +
+        `server on this machine. Tests call resetDatabase(), which deletes all ` +
         `documents — running against a real database would destroy it.`
     );
   }

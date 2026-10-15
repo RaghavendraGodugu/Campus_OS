@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 14 October 2026
-- **Verified:** 598 backend tests, 146 frontend tests, lint and build clean
+- **Verified:** 614 backend tests, 152 frontend tests, lint and build clean
 - **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
   screens, anonymous grievance, and bulk import all confirmed against it, plus a
   green browser sweep across all four roles
@@ -92,7 +92,25 @@ means the note that follows it)
       that still has staff, programmes or students on it
 - [x] Programmes: create, edit, retire and restore — refusing to retire one with
       students still enrolled
-- [ ] Academic term/session setup and rollover
+- [x] **Academic terms.** A term is a named window with dates, so "this
+      semester" is a record rather than a date range somebody typed. Exactly one
+      term can be current, enforced by a partial unique index rather than by
+      application code — a check-then-write races with itself under two
+      simultaneous clicks, which is exactly when a duplicate appears
+- [x] **Opening a term closes the previous one atomically**, in a transaction.
+      Leaving zero current terms would make every form that asks which term it
+      belongs to have nothing to offer
+- [x] **A closed term's dates are immutable.** Every total ever reported for it
+      was measured inside that window; moving it would silently re-label all of
+      them. Its name and notes stay correctable, because refusing everything
+      would make a typo permanent
+- [x] **Terms get their own audit actions.** Folding "open" and "close" into a
+      generic UPDATE would leave the audit trail unable to answer who changed the
+      term a figure belongs to
+- [x] **The test database now runs as a replica set.** A standalone Mongo
+      rejects transactions outright, so the atomicity above would have been
+      untestable — and no service in the codebase used one until now, meaning the
+      claim "transactions where a write spans documents" was untested
 - [ ] Department heads can be assigned from the interface (the field exists)
 
 ## 6. Requests
@@ -301,7 +319,7 @@ means the note that follows it)
 ## 15. Quality gates
 
 - [x] Backend: 577 tests passing
-- [x] Frontend: 146 tests passing
+- [x] Frontend: 152 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep

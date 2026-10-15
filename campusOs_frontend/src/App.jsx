@@ -23,6 +23,7 @@ import Certificates from "./pages/Certificates";
 import Reports from "./pages/Reports";
 import AuditTrail from "./pages/AuditTrail";
 import ComposeAnnouncement from "./pages/ComposeAnnouncement";
+import Terms from "./pages/admin/Terms";
 import CertificateDetail from "./pages/CertificateDetail";
 import ComplaintDetail from "./pages/ComplaintDetail";
 import Requests from "./pages/Requests";
@@ -355,6 +356,14 @@ export default function App() {
           element={
             <RequirePermission permission="announcement:manage:institution">
               <ComposeAnnouncement />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="management/terms"
+          element={
+            <RequirePermission permission="academic-term:manage:institution">
+              <Terms />
             </RequirePermission>
           }
         />

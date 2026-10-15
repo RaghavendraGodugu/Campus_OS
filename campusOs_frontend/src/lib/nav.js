@@ -98,6 +98,12 @@ export const NAV_ITEMS = [
     icon: "Megaphone",
     permission: "announcement:manage:institution",
   },
+  {
+    to: "/management/terms",
+    label: "Academic terms",
+    icon: "CalendarRange",
+    permission: "academic-term:manage:institution",
+  },
 
   { section: "Oversight" },
   {
