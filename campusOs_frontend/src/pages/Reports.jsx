@@ -7,6 +7,7 @@ import { Card, Stat } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import { EmptyState, ErrorState } from "../components/ui/States";
 import { SkeletonForm, SkeletonRegion } from "../components/ui/Skeleton";
+import ReportExport from "../components/ReportExport";
 
 /**
  * Reports.
@@ -108,6 +109,32 @@ export default function Reports() {
           </select>
         </div>
       </header>
+
+      {/*
+        One export control per report rather than a single global button, so
+        the file that arrives is the one the reader was looking at. The period
+        selector above is passed straight through, because an export silently
+        covering a different range from the screen is worse than no export.
+      */}
+      <div className="surface flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+        <div>
+          <h2 className="text-sm font-semibold text-ink-900 dark:text-ink-100">
+            Take these figures with you
+          </h2>
+          <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+            The same numbers, the same period, and the same access rules as this
+            page.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-6">
+          <ReportExport kind="overview" range={range} />
+          <ReportExport kind="requests" range={range} />
+          <ReportExport kind="students" range={range} />
+          {canSeeComplaints && <ReportExport kind="complaints" range={range} />}
+          {canSeeFinance && <ReportExport kind="finance" range={range} />}
+        </div>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {data.students && (

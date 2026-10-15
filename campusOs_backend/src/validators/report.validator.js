@@ -41,6 +41,21 @@ const scopedReportSchema = z
 /** GET /reports/complaints, /reports/finance */
 const institutionReportSchema = z.object(periodFields).strict();
 
+/**
+ * GET /reports/:kind/export
+ *
+ * `format` is validated rather than defaulted blindly, because the export path
+ * decides the Content-Type: an unrecognised value would otherwise fall through
+ * to the CSV branch and hand someone a PDF named `.csv`.
+ */
+const exportQuerySchema = z
+  .object({
+    ...periodFields,
+    department: objectId.optional(),
+    format: z.enum(["csv", "pdf"]).default("csv"),
+  })
+  .strict();
+
 /** GET /audit */
 const auditQuerySchema = z
   .object({
@@ -82,6 +97,7 @@ module.exports = {
   overviewSchema,
   scopedReportSchema,
   institutionReportSchema,
+  exportQuerySchema,
   auditQuerySchema,
   deniedQuerySchema,
   trailSchema,

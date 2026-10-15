@@ -17,6 +17,7 @@ const {
   overviewSchema,
   scopedReportSchema,
   institutionReportSchema,
+  exportQuerySchema,
 } = require("../validators/report.validator");
 
 const router = express.Router();
@@ -75,6 +76,20 @@ router.get(
   requireAnyPermission(P.REPORT_READ_INSTITUTION),
   validate({ query: institutionReportSchema }),
   reportController.finance
+);
+
+/**
+ * GET /api/v1/reports/:kind/export?format=csv|pdf
+ *
+ * Declared last so it cannot shadow the literal report paths above — `:kind`
+ * would otherwise match `overview` and then fail the builder lookup.
+ */
+router.get(
+  "/reports/:kind/export",
+  authenticate,
+  mayReadReports,
+  validate({ query: exportQuerySchema }),
+  reportController.exportReport
 );
 
 module.exports = router;

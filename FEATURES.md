@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 14 October 2026
-- **Verified:** 577 backend tests, 146 frontend tests, lint and build clean
+- **Verified:** 598 backend tests, 146 frontend tests, lint and build clean
 - **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
   screens, anonymous grievance, and bulk import all confirmed against it, plus a
   green browser sweep across all four roles
@@ -183,7 +183,19 @@ means the note that follows it)
 - [x] Audit entries for security-relevant events, including session revocation
 - [~] **Internal notes are not separately protected** — they are confidential
       within a complaint's visibility scope, but not access-controlled per note
-- [ ] Report export to PDF/CSV
+- [x] **Report export to CSV and PDF**, generated from the same service the
+      screen uses rather than from the database, so the two can never disagree
+      about who may see what. A spreadsheet is the artefact people actually
+      circulate, and a scope bug in one and not the other would hand one
+      department another department's requests
+- [x] **Spreadsheet-injection guard.** A student can put anything in a request
+      title, so a cell beginning `=`, `+`, `-`, `@`, tab or CR is prefixed —
+      otherwise a downloaded report is a way to run a formula in a colleague's
+      spreadsheet. 21 tests, including RFC 4180 quoting and the guard running
+      before quoting
+- [x] **An unavailable report exports a file that says so.** A CSV has nowhere
+      to put a footnote, and a file reading "scope: department" alone says
+      "nothing happened this period", which is a different and worse claim
 - [ ] Scheduled report delivery
 
 ## 12. Documents and files

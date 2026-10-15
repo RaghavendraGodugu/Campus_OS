@@ -206,6 +206,64 @@ export async function apiDelete(path, config) {
 }
 
 /**
+ * Download a generated report as a file.
+ *
+ * Fetched as a blob rather than navigated to, for two reasons. A navigation
+ * gives no signal at all: a 403 or a validation failure opens a blank tab and
+ * the user concludes the button is broken. And the export carries the same
+ * scope rules as the screen, so the failure that matters — "you cannot see this
+ * report" — has to arrive as a message the page can show.
+ *
+ * The caller must revoke the returned URL.
+ *
+ * @param {string} kind
+ * @param {{format?: "csv"|"pdf", days?: number, department?: string}} options
+ * @returns {Promise<{url: string, filename: string}>}
+ */
+export async function downloadReport(
+  kind,
+  { format = "csv", days, department } = {},
+) {
+  const params = new URLSearchParams({ format });
+  if (days) params.set("days", String(days));
+  if (department) params.set("department", department);
+
+  try {
+    const response = await http.get(`/reports/${kind}/export?${params}`, {
+      responseType: "blob",
+    });
+
+    const disposition = response.headers?.["content-disposition"] ?? "";
+    const match = /filename="?([^"]+)"?/.exec(disposition);
+
+    return {
+      url: URL.createObjectURL(response.data),
+      filename: match?.[1] ?? `campusos-${kind}.${format}`,
+    };
+  } catch (error) {
+    // The body is a blob on failure too, so the useful message has to be read
+    // back out of it before it is discarded.
+    if (error?.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text();
+        const parsed = JSON.parse(text);
+        throw new ApiError(
+          parsed.message ?? "The export could not be produced",
+          {
+            code: parsed.code,
+            status: error.response.status,
+          },
+        );
+      } catch (inner) {
+        if (inner instanceof ApiError) throw inner;
+        // A blob that is not JSON means the failure was not ours to describe.
+      }
+    }
+    throw error;
+  }
+}
+
+/**
  * POST a multipart body with one file.
  *
  * Axios sets the boundary itself when the body is FormData, so the caller must

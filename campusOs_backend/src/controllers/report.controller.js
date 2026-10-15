@@ -7,7 +7,9 @@
  * department-scoped caller.
  */
 
+const { ApiError } = require("../utils/ApiError");
 const reportService = require("../services/report.service");
+const reportExport = require("../services/reportExport.service");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { sendSuccess } = require("../utils/response");
 
@@ -81,4 +83,65 @@ const finance = asyncHandler(async (req, res) => {
   return sendSuccess(res, { message: "Finance report generated", data: report });
 });
 
-module.exports = { overview, requests, students, complaints, finance };
+/**
+ * GET /api/v1/reports/:kind/export?format=csv|pdf
+ *
+ * ## The report is built by the same service the screen uses
+ *
+ * The scope is resolved once, here, by calling exactly the function the
+ * on-screen report calls. If the export queried Mongo itself, a scoping bug in
+ * one and not the other would hand one department another department's requests
+ * in a spreadsheet — and a spreadsheet is the artefact people actually
+ * circulate.
+ */
+const exportReport = asyncHandler(async (req, res) => {
+  const kind = req.params.kind;
+  const { format = "csv", from, to, department } = req.validated.query;
+
+  const builders = {
+    overview: () => reportService.overview({ user: req.user, from, to }),
+    requests: () =>
+      reportService.requestsReport({ user: req.user, from, to, department }),
+    students: () =>
+      reportService.studentsReport({ user: req.user, from, to, department }),
+    complaints: () => reportService.complaintsReport({ user: req.user, from, to }),
+    finance: () => reportService.financeReport({ user: req.user, from, to }),
+  };
+
+  const build = builders[kind];
+  if (!build) {
+    throw ApiError.notFound("No such report");
+  }
+
+  const report = await build();
+  const table = reportExport.toTable(kind, report, [
+    { label: "generatedBy", value: req.user.email ?? req.user._id },
+  ]);
+
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  // A generated file must never be cached by a shared proxy: it is scoped to
+  // whoever asked for it.
+  res.setHeader("Cache-Control", "private, no-store");
+
+  if (format === "pdf") {
+    const buffer = await reportExport.toPdf(table);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${reportExport.exportFilename(kind, "pdf")}"`
+    );
+    return res.send(buffer);
+  }
+
+  const csv = reportExport.toCsv(table.headers, table.rows);
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${reportExport.exportFilename(kind, "csv")}"`
+  );
+  // The BOM is what makes Excel read UTF-8; without it a rupee sign arrives as
+  // mojibake in every spreadsheet on Windows.
+  return res.send(`\uFEFF${csv}`);
+});
+
+module.exports = { overview, requests, students, complaints, finance, exportReport };
