@@ -60,7 +60,9 @@ async function getById(id) {
 
 async function getByCode(code) {
   const term = await AcademicTerm.findOne({
-    code: String(code ?? "").trim().toUpperCase(),
+    code: String(code ?? "")
+      .trim()
+      .toUpperCase(),
   }).lean();
   if (!term) {
     throw ApiError.notFound("Term not found");
@@ -72,7 +74,9 @@ async function getByCode(code) {
 async function recountCounts(term) {
   const [students, invoices, certificates, requests] = await Promise.all([
     mongoose.model("Student").countDocuments({ academicYear: term.academicYear }),
-    mongoose.model("Invoice").countDocuments({ createdAt: { $gte: term.startsOn, $lte: term.endsOn } }),
+    mongoose
+      .model("Invoice")
+      .countDocuments({ createdAt: { $gte: term.startsOn, $lte: term.endsOn } }),
     mongoose.model("Certificate").countDocuments({
       createdAt: { $gte: term.startsOn, $lte: term.endsOn },
     }),
@@ -97,7 +101,7 @@ async function create({ user, payload }) {
   });
   if (existing) {
     throw ApiError.conflict(
-      `A term already exists with that ${existing.code === payload.code ? "code" : "name"}`,
+      `A term already exists with that ${existing.code === payload.code ? "code" : "name"}`
     );
   }
 
@@ -127,9 +131,12 @@ async function update({ user, id, payload, req }) {
 
   // A closed term is a historical record. Editing its dates afterwards would
   // move the window that every figure ever reported against it was measured in.
-  if (term.status === ACADEMIC_TERM_STATUS.CLOSED && (payload.startsOn || payload.endsOn)) {
+  if (
+    term.status === ACADEMIC_TERM_STATUS.CLOSED &&
+    (payload.startsOn || payload.endsOn)
+  ) {
     throw ApiError.conflict(
-      "A closed term's dates cannot be changed — its figures were measured against them",
+      "A closed term's dates cannot be changed — its figures were measured against them"
     );
   }
 

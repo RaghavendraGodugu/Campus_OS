@@ -67,7 +67,9 @@ function safeDisplayName(name) {
  * image upload 404 against a real, valid announcement.
  */
 async function loadAnnouncement(id) {
-  const reference = String(id ?? "").trim().toUpperCase();
+  const reference = String(id ?? "")
+    .trim()
+    .toUpperCase();
   if (!reference) {
     throw ApiError.notFound("Announcement not found");
   }

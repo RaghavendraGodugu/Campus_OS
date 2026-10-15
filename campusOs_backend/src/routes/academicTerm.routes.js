@@ -31,14 +31,19 @@ router.post(
   csrfProtection,
   requirePermission(P.ACADEMIC_TERM_MANAGE),
   validate({ body: createAcademicTermSchema }),
-  controller.create,
+  controller.create
 );
 
 /**
  * Declared after the literal routes above, so `current` is never captured as an
  * id and rejected as a malformed one.
  */
-router.get("/academic-terms/:id", authenticate, validate({ params: academicTermIdSchema }), controller.getOne);
+router.get(
+  "/academic-terms/:id",
+  authenticate,
+  validate({ params: academicTermIdSchema }),
+  controller.getOne
+);
 
 router.patch(
   "/academic-terms/:id",
@@ -46,7 +51,7 @@ router.patch(
   csrfProtection,
   requirePermission(P.ACADEMIC_TERM_MANAGE),
   validate({ params: academicTermIdSchema, body: updateAcademicTermSchema }),
-  controller.update,
+  controller.update
 );
 
 router.post(
@@ -55,7 +60,7 @@ router.post(
   csrfProtection,
   requirePermission(P.ACADEMIC_TERM_MANAGE),
   validate({ params: academicTermIdSchema }),
-  controller.open,
+  controller.open
 );
 
 router.post(
@@ -64,7 +69,7 @@ router.post(
   csrfProtection,
   requirePermission(P.ACADEMIC_TERM_MANAGE),
   validate({ params: academicTermIdSchema }),
-  controller.close,
+  controller.close
 );
 
 router.delete(
@@ -73,7 +78,7 @@ router.delete(
   csrfProtection,
   requirePermission(P.ACADEMIC_TERM_MANAGE),
   validate({ params: academicTermIdSchema }),
-  controller.remove,
+  controller.remove
 );
 
 module.exports = router;

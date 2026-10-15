@@ -144,6 +144,21 @@ const updateDepartment = asyncHandler(async (req, res) => {
   return sendSuccess(res, { message: "Department updated", data: department });
 });
 
+/** POST /api/v1/admin/departments/:id/hod — appoint or clear the head. */
+const assignHod = asyncHandler(async (req, res) => {
+  const department = await adminService.assignHod({
+    departmentId: req.params.id,
+    userId: req.validated.body.userId ?? null,
+    user: req.user,
+    req,
+  });
+
+  return sendSuccess(res, {
+    message: department.hod ? "Head of department updated" : "Head of department cleared",
+    data: { department },
+  });
+});
+
 const setDepartmentActive = asyncHandler(async (req, res) => {
   const department = await adminService.setDepartmentActive({
     departmentId: req.validated.params.id,
@@ -285,6 +300,7 @@ const setProgramActive = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  assignHod,
   validateStudentImport,
   commitStudentImport,
   listRequestTypes,

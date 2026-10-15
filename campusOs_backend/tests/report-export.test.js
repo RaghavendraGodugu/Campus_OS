@@ -19,7 +19,7 @@ describe("report export — CSV cells", () => {
     // "Bonafide certificate, urgently" must stay one column. A naive join
     // splits it into two and every column after it shifts left.
     expect(csvCell("Bonafide certificate, urgently")).toBe(
-      '"Bonafide certificate, urgently"',
+      '"Bonafide certificate, urgently"'
     );
   });
 
@@ -57,7 +57,7 @@ describe("report export — CSV cells", () => {
     // Order matters: the guard has to run before the quoting, or the leading
     // quote ends up inside the field and the sheet still evaluates it.
     expect(csvCell('=HYPERLINK("http://x","click")')).toBe(
-      '"\'=HYPERLINK(""http://x"",""click"")"',
+      '"\'=HYPERLINK(""http://x"",""click"")"'
     );
   });
 
@@ -92,7 +92,9 @@ describe("report export — table shaping", () => {
 
   it("carries the scope and period into the file", () => {
     // Without these, a file that circulates has no statement of what it covers.
-    const table = toTable("requests", available, [{ label: "generatedBy", value: "a@b.c" }]);
+    const table = toTable("requests", available, [
+      { label: "generatedBy", value: "a@b.c" },
+    ]);
     const flat = table.rows.flat().join(" | ");
     expect(flat).toContain("institution");
     expect(flat).toContain("2026-08-01");
@@ -112,13 +114,17 @@ describe("report export — table shaping", () => {
     // The failure this prevents: an empty table reads as "nothing happened this
     // period", which is a different and much worse claim than "you cannot see
     // this".
-    const table = toTable("requests", {
-      scope: "department",
-      period: {},
-      available: false,
-      reason: "Your account has no department set.",
-      totals: { total: 0 },
-    }, []);
+    const table = toTable(
+      "requests",
+      {
+        scope: "department",
+        period: {},
+        available: false,
+        reason: "Your account has no department set.",
+        totals: { total: 0 },
+      },
+      []
+    );
 
     expect(table.notes).toEqual(["Your account has no department set."]);
     expect(table.rows.flat().join(" ")).toContain("Your account has no department set.");
@@ -150,12 +156,16 @@ describe("report export — PDF", () => {
   });
 
   it("renders the unavailable note rather than dropping it", async () => {
-    const table = toTable("requests", {
-      scope: "department",
-      period: {},
-      available: false,
-      reason: "Not available at your access level.",
-    }, []);
+    const table = toTable(
+      "requests",
+      {
+        scope: "department",
+        period: {},
+        available: false,
+        reason: "Not available at your access level.",
+      },
+      []
+    );
 
     const buffer = await toPdf(table);
     expect(buffer.subarray(0, 5).toString("latin1")).toBe("%PDF-");
@@ -180,7 +190,8 @@ describe("report export — PDF", () => {
 
     // A 300-row table cannot fit one A4 landscape page.
     expect(buffer.length).toBeGreaterThan(2000);
-    const pageCount = (buffer.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
+    const pageCount = (buffer.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? [])
+      .length;
     expect(pageCount).toBeGreaterThan(1);
   });
 });

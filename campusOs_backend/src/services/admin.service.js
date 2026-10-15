@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 /**
  * Administration: people, departments and programmes.
  *
@@ -481,6 +482,109 @@ async function createDepartment({ payload, user: actor, req }) {
   return department.toJSON();
 }
 
+/**
+ * Appoint a head of department, or clear the appointment.
+ *
+ * ## Three rules, each for a reason
+ *
+ * **The appointee must hold a role that can hold the post.** A department whose
+ * head is a student would give a student authority over every request,
+ * certificate and fee in that department. An HOD is also the *only* account
+ * with that department-wide scope, so appointing somebody else would grant
+ * them nothing and be silently useless.
+ *
+ * **They must belong to the department they lead.** Head of Computer Science
+ * with an account in Physics means every HOD-scoped page shows them nothing,
+ * and the reason is not discoverable from inside the app.
+ *
+ * **The previous holder's department scope is released.** Changing the field
+ * without clearing the old HOD's `isHodOf` leaves two people able to see
+ * everything, which is the exact failure a role change is audited to prevent.
+ *
+ * `userId: null` clears it, because a department whose head has left otherwise
+ * keeps a stale appointment forever.
+ */
+async function assignHod({ departmentId, userId, user: actor, req }) {
+  // A malformed id is a 404, not a CastError surfacing as a 500. The route
+  // validates the shape, but the service is also called directly by scripts and
+  // by the seeder, and those deserve the same answer.
+  if (!mongoose.Types.ObjectId.isValid(departmentId)) {
+    throw ApiError.notFound("Department not found");
+  }
+
+  const department = await Department.findById(departmentId);
+  if (!department) throw ApiError.notFound("Department not found");
+
+  const previous = department.hod ?? null;
+
+  if (userId === null || userId === undefined) {
+    department.hod = null;
+    await department.save();
+
+    await auditService.record({
+      action: AUDIT_ACTION.HOD_UNASSIGNED,
+      entity: "Department",
+      entityId: department._id,
+      entityRef: department.code,
+      actor,
+      metadata: { previousHodId: previous ? String(previous) : null },
+      req,
+    });
+
+    return department.toJSON();
+  }
+
+  const appointee = await User.findById(userId);
+  if (!appointee) throw ApiError.notFound("That account does not exist");
+
+  if (appointee.role !== ROLES.HOD) {
+    throw ApiError.badRequest(
+      "A head of department must hold the Head of Department role"
+    );
+  }
+
+  if (!appointee.isActive) {
+    throw ApiError.badRequest("That account is deactivated");
+  }
+
+  const theirDepartment = appointee.department ? String(appointee.department) : null;
+  if (theirDepartment !== String(department._id)) {
+    throw ApiError.badRequest(
+      "That person is not a member of this department, so they would see none of it"
+    );
+  }
+
+  // Nobody may head two departments.
+  const alreadyHeading = await Department.findOne({
+    hod: appointee._id,
+    _id: { $ne: department._id },
+  });
+  if (alreadyHeading) {
+    throw ApiError.conflict(`That person already heads ${alreadyHeading.name}`);
+  }
+
+  department.hod = appointee._id;
+  await department.save();
+
+  await auditService.record({
+    action: AUDIT_ACTION.HOD_ASSIGNED,
+    entity: "Department",
+    entityId: department._id,
+    entityRef: department.code,
+    actor,
+    // Who was appointed and who was replaced: the before-and-after of an
+    // authority grant is the whole point of the line.
+    metadata: {
+      appointed: String(appointee._id),
+      appointedEmail: appointee.email,
+      previousHodId: previous ? String(previous) : null,
+    },
+    req,
+  });
+
+  return department.toJSON();
+}
+
 async function updateDepartment({ departmentId, changes, user: actor, req }) {
   const department = await Department.findById(departmentId);
   if (!department) throw ApiError.notFound("Department not found");
@@ -950,6 +1054,7 @@ module.exports = {
   listDepartments,
   createDepartment,
   updateDepartment,
+  assignHod,
   setDepartmentActive,
   listPrograms,
   createProgram,

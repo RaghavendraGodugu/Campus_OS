@@ -191,6 +191,19 @@ const createDepartmentSchema = z
   })
   .strict();
 
+/**
+ * Assigning a head of department.
+ *
+ * `userId: null` clears the appointment — a department whose HOD has left needs
+ * to be emptied, and a rule that only accepts a real user would leave the stale
+ * one in place forever.
+ */
+const assignHodSchema = z
+  .object({
+    userId: z.string().trim().nullable().optional(),
+  })
+  .strict();
+
 const updateDepartmentSchema = createDepartmentSchema
   .partial()
   .refine((value) => Object.keys(value).length > 0, { message: "Nothing to update" });
@@ -364,6 +377,7 @@ module.exports = {
   userIdentifier,
   createDepartmentSchema,
   updateDepartmentSchema,
+  assignHodSchema,
   setDepartmentActiveSchema,
   listDepartmentsSchema,
   departmentIdentifier,

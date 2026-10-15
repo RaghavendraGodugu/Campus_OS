@@ -147,7 +147,12 @@ function toTable(kind, report, meta) {
   }
 
   for (const item of report.byType ?? []) {
-    rows.push(["byType.label", item.label ?? item.name ?? "", "byType.count", item.count ?? 0]);
+    rows.push([
+      "byType.label",
+      item.label ?? item.name ?? "",
+      "byType.count",
+      item.count ?? 0,
+    ]);
   }
 
   for (const item of report.byDepartment ?? []) {
@@ -180,7 +185,11 @@ function toTable(kind, report, meta) {
 
   if (Array.isArray(report.rows)) {
     for (const entry of report.rows) {
-      rows.push(Object.values(entry).map((value) => (typeof value === "object" ? JSON.stringify(value) : value)));
+      rows.push(
+        Object.values(entry).map((value) =>
+          typeof value === "object" ? JSON.stringify(value) : value
+        )
+      );
     }
   }
 
@@ -245,7 +254,8 @@ function toPdf(table, { landscape = true } = {}) {
 
     // A row that would cross the page boundary starts a new page. Without this
     // a long export silently loses its header on every page after the first.
-    const needsNewPage = (rowHeight) => doc.y + rowHeight > doc.page.height - doc.page.margins.bottom;
+    const needsNewPage = (rowHeight) =>
+      doc.y + rowHeight > doc.page.height - doc.page.margins.bottom;
 
     const drawHeader = () => {
       if (needsNewPage(26)) doc.addPage();
@@ -265,7 +275,9 @@ function toPdf(table, { landscape = true } = {}) {
 
     doc.font("Helvetica").fontSize(8.5);
     for (const row of table.rows) {
-      const cells = row.map((value) => (value === null || value === undefined ? "" : String(value)));
+      const cells = row.map((value) =>
+        value === null || value === undefined ? "" : String(value)
+      );
       // Pad so every row has the same number of columns; a ragged row shifts
       // every value after it one column to the right.
       while (cells.length < columns) cells.push("");
@@ -306,7 +318,10 @@ function toPdf(table, { landscape = true } = {}) {
  */
 function exportFilename(kind, extension) {
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-  const safeKind = String(kind).replace(/[^a-z0-9_-]/gi, "").toLowerCase() || "report";
+  const safeKind =
+    String(kind)
+      .replace(/[^a-z0-9_-]/gi, "")
+      .toLowerCase() || "report";
   return `campusos-${safeKind}-${stamp}.${extension}`;
 }
 

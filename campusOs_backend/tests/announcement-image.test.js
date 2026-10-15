@@ -101,7 +101,11 @@ describe("announcement images", () => {
     await expect(
       announcementImageService.attachImage({
         announcementId: announcement.reference,
-        file: { buffer: Buffer.alloc(0), mimetype: "image/png", originalname: "empty.png" },
+        file: {
+          buffer: Buffer.alloc(0),
+          mimetype: "image/png",
+          originalname: "empty.png",
+        },
         user: author,
       })
     ).rejects.toThrow(/empty/);
@@ -185,12 +189,17 @@ describe("announcement images", () => {
     // Idempotent: a second delete should not throw, or a retried request from
     // the browser would show an error for a state the user already achieved.
     await expect(
-      announcementImageService.removeImage({ announcementId: announcement.reference, user: author })
+      announcementImageService.removeImage({
+        announcementId: announcement.reference,
+        user: author,
+      })
     ).resolves.toBe(false);
   });
 
   it("strips markup and control characters from the display name", () => {
-    const name = announcementImageService.safeDisplayName('<img src=x onerror="a()">\r\n<b>.png');
+    const name = announcementImageService.safeDisplayName(
+      '<img src=x onerror="a()">\r\n<b>.png'
+    );
     expect(name).not.toMatch(/[<>"\r\n]/);
   });
 

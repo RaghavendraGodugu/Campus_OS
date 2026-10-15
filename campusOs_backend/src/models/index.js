@@ -8,7 +8,7 @@
  */
 
 // ===== Phase A: foundation =====
-const User = require("./User")
+const User = require("./User");
 require("./AcademicTerm");
 const Department = require("./Department");
 const Program = require("./Program");

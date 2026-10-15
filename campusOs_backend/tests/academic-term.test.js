@@ -50,14 +50,14 @@ describe("academic terms", () => {
     await termService.create({ user: admin, payload: payload() });
 
     await expect(
-      termService.create({ user: admin, payload: payload({ name: "Spring 2027" }) }),
+      termService.create({ user: admin, payload: payload({ name: "Spring 2027" }) })
     ).rejects.toMatchObject({ statusCode: 409 });
 
     await expect(
       termService.create({
         user: admin,
         payload: payload({ name: "Spring 2027", code: "A26" }),
-      }),
+      })
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
@@ -144,7 +144,7 @@ describe("academic terms", () => {
         user: admin,
         id: term._id,
         payload: { endsOn: new Date(Date.now() + 30 * DAY) },
-      }),
+      })
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
@@ -171,7 +171,7 @@ describe("academic terms", () => {
         user: admin,
         id: term._id,
         payload: { startsOn: new Date("2027-01-01T00:00:00.000Z") },
-      }),
+      })
     ).rejects.toThrow(/end date must be after/);
   });
 
@@ -179,9 +179,11 @@ describe("academic terms", () => {
     const term = await termService.create({ user: admin, payload: payload() });
     await termService.open({ user: admin, id: term._id });
 
-    await expect(termService.remove({ user: admin, id: term._id })).rejects.toMatchObject({
-      statusCode: 409,
-    });
+    await expect(termService.remove({ user: admin, id: term._id })).rejects.toMatchObject(
+      {
+        statusCode: 409,
+      }
+    );
   });
 
   it("deletes a planned term", async () => {
@@ -193,9 +195,11 @@ describe("academic terms", () => {
 
   it("reports a missing term as a 404, not a server error", async () => {
     await expect(
-      termService.getById(new mongoose.Types.ObjectId()),
+      termService.getById(new mongoose.Types.ObjectId())
     ).rejects.toMatchObject({ statusCode: 404 });
-    await expect(termService.getById("not-an-id")).rejects.toMatchObject({ statusCode: 404 });
+    await expect(termService.getById("not-an-id")).rejects.toMatchObject({
+      statusCode: 404,
+    });
   });
 
   it("lists newest first", async () => {
@@ -238,7 +242,13 @@ describe("academic terms", () => {
     await termService.open({ user: admin, id: term._id });
 
     const AuditLog = require("../src/models/AuditLog");
-    const entries = await AuditLog.find({ action: { $in: Object.values(require("../src/config/constants").AUDIT_ACTION).filter((a) => a.startsWith("ACADEMIC_TERM_")) } }).lean();
+    const entries = await AuditLog.find({
+      action: {
+        $in: Object.values(require("../src/config/constants").AUDIT_ACTION).filter((a) =>
+          a.startsWith("ACADEMIC_TERM_")
+        ),
+      },
+    }).lean();
     const actions = entries.map((entry) => entry.action);
 
     expect(actions).toContain("ACADEMIC_TERM_CREATED");

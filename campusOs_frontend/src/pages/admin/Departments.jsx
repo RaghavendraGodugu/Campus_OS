@@ -28,6 +28,7 @@ export default function Departments() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState(null);
   const [retiring, setRetiring] = useState(null);
+  const [assigning, setAssigning] = useState(null);
 
   const list = useQuery({
     queryKey: ["admin", "departments", applied],
@@ -137,6 +138,14 @@ export default function Departments() {
                   <Button
                     size="sm"
                     variant="secondary"
+                    onClick={() => setAssigning(department)}
+                  >
+                    <UserRound className="size-3.5" aria-hidden="true" />
+                    {department.hod ? "Change HOD" : "Assign HOD"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
                     onClick={() => setEditing(department)}
                   >
                     Edit
@@ -155,6 +164,13 @@ export default function Departments() {
           </ul>
         )}
       </div>
+
+      {assigning && (
+        <AssignHodDialog
+          department={assigning}
+          onClose={() => setAssigning(null)}
+        />
+      )}
 
       <DepartmentForm
         open={creating}
@@ -379,6 +395,128 @@ function RetireDialog({ department, onClose, onDone }) {
           </p>
         )}
       </form>
+    </Modal>
+  );
+}
+
+/**
+ * Appoint a head of department.
+ *
+ * ## Only eligible people are offered
+ *
+ * The list is the department's own active HODs, because those are the only
+ * people the server will accept. Offering a broader list and refusing on save
+ * would be teaching the administrator the rules by letting them break them.
+ *
+ * When the department has nobody eligible, the dialog says so and explains why,
+ * rather than presenting an empty dropdown that looks like a failure to load.
+ */
+function AssignHodDialog({ department, onClose }) {
+  const queryClient = useQueryClient();
+
+  const candidates = useQuery({
+    queryKey: ["admin", "hod-candidates", department.id],
+    queryFn: () =>
+      apiGet(
+        `/admin/users?role=HOD&isActive=true&limit=100&department=${department.id}`,
+      ),
+    enabled: Boolean(department?.id),
+  });
+
+  const assign = useMutation({
+    mutationFn: (userId) =>
+      apiPost(`/admin/departments/${department.id}/hod`, {
+        userId: userId ?? null,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "departments"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      onClose();
+    },
+  });
+
+  const users = candidates.data?.data?.users ?? [];
+  const currentId = department.hod?.id ?? department.hod;
+
+  return (
+    <Modal
+      open
+      title={`Head of ${department.name}`}
+      description="The HOD sees every request, certificate and fee for this department."
+      onClose={onClose}
+      footer={
+        <>
+          {department.hod && (
+            <Button
+              variant="secondary"
+              onClick={() => assign.mutate(null)}
+              disabled={assign.isPending}
+            >
+              Remove head
+            </Button>
+          )}
+          <Button variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        {candidates.isLoading ? (
+          <SkeletonList rows={3} />
+        ) : candidates.isError ? (
+          <ErrorState
+            message={candidates.error?.message}
+            onRetry={() => candidates.refetch()}
+          />
+        ) : users.length === 0 ? (
+          <p className="text-sm text-ink-600 dark:text-ink-300">
+            Nobody in this department holds the Head of Department role. Create
+            an account with that role and set their department first — the
+            server will not appoint somebody from outside the department,
+            because every page scoped to the HOD would come back empty for them.
+          </p>
+        ) : (
+          <fieldset className="space-y-2">
+            <legend className="sr-only">Choose a head of department</legend>
+
+            {users.map((user) => (
+              <label
+                key={user.id}
+                className="flex cursor-pointer items-center gap-3 rounded-xl border border-ink-200 px-3 py-2.5 text-sm transition-colors hover:border-brand-600 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:border-ink-600 dark:hover:border-brand-500 dark:has-[:checked]:bg-brand-500/10"
+              >
+                <input
+                  type="radio"
+                  name="hod"
+                  className="size-4 border-ink-300 text-brand-600 focus:ring-brand-600 dark:border-ink-600"
+                  checked={String(currentId ?? "") === String(user.id)}
+                  onChange={() => assign.mutate(user.id)}
+                  disabled={assign.isPending}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block font-medium text-ink-900 dark:text-ink-100">
+                    {user.fullName}
+                  </span>
+                  <span className="block truncate text-xs text-ink-500 dark:text-ink-400">
+                    {user.email}
+                  </span>
+                </span>
+                {String(currentId ?? "") === String(user.id) && (
+                  <span className="text-xs font-medium text-brand-700 dark:text-brand-300">
+                    Current
+                  </span>
+                )}
+              </label>
+            ))}
+          </fieldset>
+        )}
+
+        {assign.isError && (
+          <p role="alert" className="text-sm text-red-700 dark:text-red-300">
+            {assign.error?.message}
+          </p>
+        )}
+      </div>
     </Modal>
   );
 }

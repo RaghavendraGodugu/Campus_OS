@@ -37,6 +37,7 @@ const {
   roleIdentifier,
   createDepartmentSchema,
   updateDepartmentSchema,
+  assignHodSchema,
   setDepartmentActiveSchema,
   listDepartmentsSchema,
   departmentIdentifier,
@@ -149,6 +150,21 @@ router.patch(
   requirePermission(P.DEPARTMENT_MANAGE),
   validate({ params: departmentIdentifier, body: updateDepartmentSchema }),
   adminController.updateDepartment
+);
+
+/**
+ * Appointing a head of department.
+ *
+ * Its own route and its own permission, deliberately: renaming a department is
+ * housekeeping and deciding who runs one is not.
+ */
+router.post(
+  "/admin/departments/:id/hod",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.HOD_ASSIGN),
+  validate({ params: departmentIdentifier, body: assignHodSchema }),
+  adminController.assignHod
 );
 
 router.post(

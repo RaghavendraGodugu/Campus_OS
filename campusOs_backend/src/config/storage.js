@@ -74,7 +74,10 @@ function resourceTypeForStored(key, mimeType) {
   if (mimeType && CLOUDINARY_RESOURCE_TYPES[mimeType]) {
     return CLOUDINARY_RESOURCE_TYPES[mimeType];
   }
-  const extension = String(key ?? "").split(".").pop()?.toLowerCase();
+  const extension = String(key ?? "")
+    .split(".")
+    .pop()
+    ?.toLowerCase();
   if (extension === "jpg" || extension === "jpeg" || extension === "png") {
     return "image";
   }

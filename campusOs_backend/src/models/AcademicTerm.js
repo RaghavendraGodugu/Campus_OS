@@ -163,4 +163,5 @@ academicTermSchema.methods.acceptsNewRecords = function acceptsNewRecords() {
   return this.isCurrent === true && this.status === ACADEMIC_TERM_STATUS.OPEN;
 };
 
-module.exports = mongoose.models.AcademicTerm || mongoose.model("AcademicTerm", academicTermSchema);
+module.exports =
+  mongoose.models.AcademicTerm || mongoose.model("AcademicTerm", academicTermSchema);

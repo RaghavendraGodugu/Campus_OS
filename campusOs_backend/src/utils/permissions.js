@@ -66,6 +66,14 @@ const P = {
   DEPARTMENT_MANAGE: "department:manage:institution",
   ACADEMIC_TERM_MANAGE: "academic-term:manage:institution",
   ACADEMIC_TERM_READ: "academic-term:read",
+  /**
+   * Assigning a head of department is separate from managing a department.
+   *
+   * Renaming a department is housekeeping; deciding who runs one is not. Its own
+   * permission means a deputy who may tidy the directory still cannot appoint
+   * somebody, and it gets its own audit line so the two are never confused.
+   */
+  HOD_ASSIGN: "department:assign-hod",
   PROGRAM_READ: "program:read:institution",
   PROGRAM_MANAGE: "program:manage:institution",
 
@@ -475,6 +483,7 @@ const ROLE_PERMISSIONS = {
     P.STUDENT_READ_INSTITUTION,
     P.DEPARTMENT_MANAGE,
     P.ACADEMIC_TERM_MANAGE,
+    P.HOD_ASSIGN,
     P.ACADEMIC_TERM_READ,
     P.PROGRAM_MANAGE,
     P.REQUEST_READ_INSTITUTION,

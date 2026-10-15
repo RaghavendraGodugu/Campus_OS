@@ -100,7 +100,10 @@ describe("CloudinaryStorage", () => {
     });
 
     it("sends jpeg through the same pipeline as png", async () => {
-      const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(32)]);
+      const jpeg = Buffer.concat([
+        Buffer.from([0xff, 0xd8, 0xff, 0xe0]),
+        Buffer.alloc(32),
+      ]);
       await storage.save(jpeg, {
         folder: "announcements",
         filename: "banner.jpg",
@@ -179,7 +182,9 @@ describe("CloudinaryStorage", () => {
 
     it("expires the signature", async () => {
       const before = Math.floor(Date.now() / 1000);
-      await storage.getSignedUrl("certificates/123-bonafide.pdf", { expiresInSeconds: 60 });
+      await storage.getSignedUrl("certificates/123-bonafide.pdf", {
+        expiresInSeconds: 60,
+      });
       const { expires_at: expiresAt } = cloudinary.calls.signed[0].options;
       expect(expiresAt).toBeGreaterThanOrEqual(before + 60);
       expect(expiresAt).toBeLessThanOrEqual(before + 65);
@@ -209,7 +214,7 @@ describe("CloudinaryStorage", () => {
   describe("refusing to hand out bytes", () => {
     it("does not return the file body through the CDN", async () => {
       await expect(storage.read("certificates/123-bonafide.pdf")).rejects.toThrow(
-        /signed download URL/,
+        /signed download URL/
       );
     });
   });
@@ -221,7 +226,7 @@ describe("CloudinaryStorage", () => {
           folder: "announcements",
           filename: "x.gif",
           mimeType: "image/gif",
-        }),
+        })
       ).rejects.toThrow(/not accepted/);
       expect(cloudinary.calls.uploads).toHaveLength(0);
     });
@@ -233,7 +238,7 @@ describe("CloudinaryStorage", () => {
           folder: "announcements",
           filename: "big.png",
           mimeType: "image/png",
-        }),
+        })
       ).rejects.toThrow(/exceeds the 10 MB limit/);
       expect(cloudinary.calls.uploads).toHaveLength(0);
     });
@@ -324,11 +329,11 @@ describe("getStorage adapter selection", () => {
 
     expect(
       resourceTypeForStored("x/1-a.png", "image/png"),
-      "images belong on the image pipeline",
+      "images belong on the image pipeline"
     ).toBe("image");
     expect(
       resourceTypeForStored("x/1-a.pdf", "application/pdf"),
-      "documents must be delivered byte for byte",
+      "documents must be delivered byte for byte"
     ).toBe("raw");
     expect(png.length).toBeGreaterThan(0);
     expect(pdf.length).toBeGreaterThan(0);

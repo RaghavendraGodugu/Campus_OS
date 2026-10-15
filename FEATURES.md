@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 14 October 2026
-- **Verified:** 614 backend tests, 152 frontend tests, lint and build clean
+- **Verified:** 627 backend tests, 152 frontend tests, lint and build clean
 - **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
   screens, anonymous grievance, and bulk import all confirmed against it, plus a
   green browser sweep across all four roles
@@ -111,7 +111,16 @@ means the note that follows it)
       rejects transactions outright, so the atomicity above would have been
       untestable — and no service in the codebase used one until now, meaning the
       claim "transactions where a write spans documents" was untested
-- [ ] Department heads can be assigned from the interface (the field exists)
+- [x] **Department heads can be appointed from the interface.** The `hod` field
+      existed with nothing able to set it. Three rules, each refusing a mistake
+      that would otherwise fail quietly: the appointee must hold the HOD role
+      (the only role with department-wide scope, so appointing anyone else grants
+      them nothing), must belong to the department (or every HOD-scoped page comes
+      back empty for them), and nobody may head two departments
+- [x] **Its own permission and its own audit action.** Renaming a department is
+      housekeeping; deciding who runs one is not. The audit line records both the
+      appointee and who was replaced, because the before-and-after of an
+      authority grant is the whole point
 
 ## 6. Requests
 
