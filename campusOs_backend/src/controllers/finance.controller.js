@@ -418,6 +418,63 @@ const getReceipt = asyncHandler(async (req, res) => {
   return res.send(buffer);
 });
 
+
+/** POST /api/v1/invoices/:id/schedule — split into instalments. */
+const scheduleInstalments = asyncHandler(async (req, res) => {
+  const instalments = await financeService.scheduleInstalments({
+    user: req.user,
+    invoiceId: req.params.id,
+    ...req.validated.body,
+    req,
+  });
+
+  return sendCreated(res, {
+    message: `Scheduled into ${instalments.length} instalments`,
+    data: { instalments },
+  });
+});
+
+/** GET /api/v1/invoices/:id/schedule */
+const getSchedule = asyncHandler(async (req, res) => {
+  const schedule = await financeService.getSchedule({ invoiceId: req.params.id });
+  return sendSuccess(res, { message: "Schedule retrieved", data: schedule });
+});
+
+/** PATCH /api/v1/invoices/:id/penalty-policy */
+const setPenaltyPolicy = asyncHandler(async (req, res) => {
+  const penalty = await financeService.setPenaltyPolicy({
+    user: req.user,
+    invoiceId: req.params.id,
+    policy: req.validated.body,
+    req,
+  });
+
+  return sendSuccess(res, { message: "Penalty policy updated", data: { penalty } });
+});
+
+/**
+ * POST /api/v1/invoices/penalty-sweep
+ *
+ * Declared before `/:id` routes so the literal segment is never captured as an
+ * invoice id. Defaults to a dry run: a sweep that silently charges forty
+ * students 2% each should be opt-in, not the default.
+ */
+const sweepPenalties = asyncHandler(async (req, res) => {
+  const result = await financeService.sweepPenalties({
+    user: req.user,
+    invoiceIds: req.validated.body.invoiceIds,
+    dryRun: req.validated.body.dryRun,
+    req,
+  });
+
+  return sendSuccess(res, {
+    message: result.dryRun
+      ? `Would charge ${result.charged.length} invoice(s); nothing was written`
+      : `Charged ${result.charged.length} invoice(s)`,
+    data: result,
+  });
+});
+
 module.exports = {
   createInvoice,
   listInvoices,
@@ -435,4 +492,9 @@ module.exports = {
   getRefund,
   refundableForPayment,
   getReceipt,
+
+  scheduleInstalments,
+  getSchedule,
+  setPenaltyPolicy,
+  sweepPenalties,
 };

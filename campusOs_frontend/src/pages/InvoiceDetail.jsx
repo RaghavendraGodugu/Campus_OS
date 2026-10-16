@@ -7,6 +7,8 @@ import { apiGet, apiPost, fetchDocument } from "../api/client";
 import { formatDate, formatDateTime, formatMoney } from "../lib/format";
 import { Card } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
+import InstalmentPanel from "../components/InstalmentPanel";
+import { useAuth } from "../context/AuthContext";
 import Button from "../components/ui/Button";
 import Field, { inputClass } from "../components/ui/Field";
 import PayDialog from "../components/PayDialog";
@@ -35,6 +37,7 @@ import {
 export default function InvoiceDetail() {
   const { reference } = useParams();
   const queryClient = useQueryClient();
+  const { can } = useAuth();
 
   const [paying, setPaying] = useState(false);
   const [refundAmount, setRefundAmount] = useState("");
@@ -110,6 +113,12 @@ export default function InvoiceDetail() {
 
   const invoice = data.data;
   const payments = invoice.payments ?? [];
+  /*
+   * Hiding the controls is convenience, not authorisation — the API refuses a
+   * student regardless. But showing a finance officer a "split into
+   * instalments" button that always 403s would be worse than hiding it.
+   */
+  const canManage = can("invoice:manage:institution");
   const settled = payments.filter((p) => p.status === "PAID");
   const outstanding = invoice.balanceDue ?? 0;
 
@@ -161,6 +170,18 @@ export default function InvoiceDetail() {
           </p>
         )}
       </header>
+
+      <Card
+        title="Instalments and penalties"
+        description="How this can be paid, and what happens if it is late."
+      >
+        <InstalmentPanel
+          invoiceId={invoice.id ?? invoice._id}
+          total={invoice.total ?? outstanding}
+          paidAmount={invoice.paidAmount ?? 0}
+          canManage={canManage}
+        />
+      </Card>
 
       {/* ===== Line items, as the server calculated them ===== */}
       {Array.isArray(invoice.items) && invoice.items.length > 0 && (

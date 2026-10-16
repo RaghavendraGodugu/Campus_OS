@@ -133,6 +133,58 @@ const invoiceSchema = new mongoose.Schema(
     /** Who issued it. */
     issuedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
 
+    /*
+     * Payment schedule.
+     *
+     * ## Instalments split the total; they never restate it
+     *
+     * `total` stays the amount the student owes. The instalments are how it is
+     * paid. Recomputing the total from the schedule would mean a rounding
+     * difference on the last instalment becomes a different invoice total, and
+     * the student is charged for a rounding artefact.
+     *
+     * ## The last instalment absorbs the remainder, by design
+     *
+     * Splitting 1000 into three gives 333.33 × 3. The first two are floored and
+     * the last takes what is left, so the schedule always sums to exactly
+     * `total`. Floating-point thirds would not.
+     */
+    instalments: {
+      type: [
+        {
+          _id: false,
+          sequence: { type: Number, required: true, min: 1 },
+          /** Minor units. Sums with the rest to exactly the invoice total. */
+          amount: { type: Number, required: true, min: 0 },
+          dueAt: { type: Date, required: true },
+          paidAt: { type: Date, default: null },
+          paidAmount: { type: Number, default: 0, min: 0 },
+        },
+      ],
+      default: [],
+    },
+
+    /**
+     * Late-payment penalty policy, snapshotted onto the invoice.
+     *
+     * Snapshotted rather than looked up at payment time on purpose. If the
+     * college changes its penalty rate next month, invoices issued this month
+     * must still be governed by the terms that were on them when the student
+     * agreed — otherwise a student is charged a rate nobody told them about.
+     */
+    penalty: {
+      /** Basis points of the overdue amount per period. 100 bps = 1%. */
+      rateBps: { type: Number, default: 0, min: 0, max: 10000 },
+      /** Days between chargeable periods. 30 = monthly. */
+      periodDays: { type: Number, default: 30, min: 1, max: 365 },
+      graceDays: { type: Number, default: 0, min: 0, max: 90 },
+      /** Ceiling as a share of the invoice total, in basis points. 2000 = 20%. */
+      capBps: { type: Number, default: 0, min: 0, max: 10000 },
+      /** Charges already applied, so a recalculation never double-charges. */
+      chargedAmount: { type: Number, default: 0, min: 0 },
+      chargedAt: { type: Date, default: null },
+    },
+
     notes: {
       type: String,
       trim: true,

@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 /**
  * Finance service.
  *
@@ -22,6 +23,7 @@
  */
 
 const Invoice = require("../models/Invoice");
+const instalmentService = require("./instalment.service");
 const Payment = require("../models/Payment");
 const Student = require("../models/Student");
 const Counter = require("../models/Counter");
@@ -203,6 +205,204 @@ function canReadInvoice(invoice, user) {
 }
 
 /** List invoices visible to the caller. */
+
+/**
+ * Attach an instalment schedule to an invoice.
+ *
+ * ## Refused once anything is already paid
+ *
+ * Splitting an invoice that has taken a payment means the schedule no longer
+ * sums to what the student was told they owe, and the difference has to come
+ * from somewhere. It would come from their pocket, silently. An invoice with
+ * payments against it needs the payment reversed first, which is a decision
+ * somebody should be making deliberately.
+ */
+async function scheduleInstalments({ user, invoiceId, instalments, firstDueAt, periodDays, policy }) {
+  const invoice = await Invoice.findById(invoiceId);
+  if (!invoice) throw ApiError.notFound("Invoice not found");
+
+  if (invoice.status === INVOICE_STATUS.CANCELLED) {
+    throw ApiError.conflict("A cancelled invoice cannot be scheduled");
+  }
+
+  if ((invoice.paidAmount ?? 0) > 0) {
+    throw ApiError.conflict(
+      "This invoice already has a payment against it. Splitting it now would change what the student owes.",
+    );
+  }
+
+  if ((invoice.instalments ?? []).length > 0) {
+    throw ApiError.conflict("This invoice already has a schedule");
+  }
+
+  const first = new Date(firstDueAt);
+  if (Number.isNaN(first.getTime())) {
+    throw ApiError.badRequest("The first due date is not a valid date");
+  }
+
+  const schedule = instalmentService.buildSchedule(invoice.total, instalments, first, {
+    periodDays,
+  });
+
+  invoice.instalments = schedule.map((entry) => ({
+    sequence: entry.sequence,
+    amount: entry.amount,
+    dueAt: entry.dueAt,
+    paidAt: null,
+    paidAmount: 0,
+  }));
+
+  if (policy) {
+    invoice.penalty = { ...invoice.penalty.toObject?.(), ...policy, chargedAmount: 0 };
+  }
+
+  await invoice.save();
+
+  await auditService.record({
+    actor: user,
+    action: AUDIT_ACTION.INVOICE_SCHEDULED,
+    entity: "Invoice",
+    entityId: invoice._id,
+    entityRef: invoice.reference,
+    metadata: { instalments: schedule.length, periodDays, total: invoice.total },
+  });
+
+  return instalmentService.presentInstalments(invoice.instalments);
+}
+
+/** Read the schedule with paid-ness derived rather than stored. */
+async function getSchedule({ invoiceId }) {
+  // A malformed id is a 404, not a CastError surfacing as a 500. The route
+  // validates the shape, but the seeder and scripts call this directly too.
+  if (!mongoose.Types.ObjectId.isValid(invoiceId)) {
+    throw ApiError.notFound("Invoice not found");
+  }
+
+  const invoice = await Invoice.findById(invoiceId).select(
+    "reference total paidAmount balanceDue instalments penalty dueAt status",
+  );
+  if (!invoice) throw ApiError.notFound("Invoice not found");
+
+  return {
+    reference: invoice.reference,
+    total: invoice.total,
+    paidAmount: invoice.paidAmount ?? 0,
+    balanceDue: invoice.balanceDue,
+    dueAt: invoice.dueAt,
+    status: invoice.status,
+    instalments: instalmentService.presentInstalments(invoice.instalments),
+    penalty: {
+      rateBps: invoice.penalty?.rateBps ?? 0,
+      periodDays: invoice.penalty?.periodDays ?? 30,
+      graceDays: invoice.penalty?.graceDays ?? 0,
+      capBps: invoice.penalty?.capBps ?? 0,
+      chargedAmount: invoice.penalty?.chargedAmount ?? 0,
+    },
+  };
+}
+
+/**
+ * Apply the penalty policy to an invoice.
+ *
+ * The policy is written onto the invoice rather than looked up, so a later
+ * change to the college's rate does not retroactively alter terms a student
+ * already agreed to.
+ */
+async function setPenaltyPolicy({ user, invoiceId, policy, req }) {
+  const invoice = await Invoice.findById(invoiceId);
+  if (!invoice) throw ApiError.notFound("Invoice not found");
+
+  if (invoice.status === INVOICE_STATUS.CANCELLED) {
+    throw ApiError.conflict("A cancelled invoice carries no penalty");
+  }
+
+  invoice.penalty = { ...invoice.penalty.toObject?.(), ...policy };
+  await invoice.save();
+
+  await auditService.record({
+    actor: user,
+    action: AUDIT_ACTION.INVOICE_POLICY_SET,
+    entity: "Invoice",
+    entityId: invoice._id,
+    entityRef: invoice.reference,
+    metadata: policy,
+    req,
+  });
+
+  return invoice.penalty.toObject?.() ?? invoice.penalty;
+}
+
+/**
+ * Charge overdue penalties.
+ *
+ * ## A dry run is the default shape of this operation
+ *
+ * A sweep that silently charges forty students 2% each is not something to
+ * discover by looking at a bank statement. It reports what it would do before
+ * it does it, and writes nothing.
+ *
+ * ## Each invoice is charged its own delta
+ *
+ * Recomputed rather than incremented, so the sweep can run hourly, daily, or
+ * twice in a minute and one period of lateness costs one period's penalty.
+ */
+async function sweepPenalties({ user, invoiceIds, dryRun = false, req }) {
+  const filter = { status: { $in: [INVOICE_STATUS.ISSUED, INVOICE_STATUS.PARTIALLY_PAID, INVOICE_STATUS.OVERDUE] } };
+  if (invoiceIds?.length) filter._id = { $in: invoiceIds };
+
+  const invoices = await Invoice.find(filter);
+  const now = new Date();
+
+  const charged = [];
+  const skipped = [];
+
+  for (const invoice of invoices) {
+    const rate = invoice.penalty?.rateBps ?? 0;
+    if (rate <= 0) {
+      skipped.push({ reference: invoice.reference, reason: "No penalty policy on this invoice" });
+      continue;
+    }
+
+    const result = instalmentService.chargePenalty(invoice, invoice.penalty, now);
+
+    if (result.charged <= 0) {
+      skipped.push({
+        reference: invoice.reference,
+        reason: result.calculation.reason ?? "Nothing further to charge",
+      });
+      continue;
+    }
+
+    if (!dryRun) {
+      invoice.total = result.newTotal;
+      invoice.balanceDue = result.newBalance;
+      invoice.penalty.chargedAmount = (invoice.penalty.chargedAmount ?? 0) + result.charged;
+      invoice.penalty.chargedAt = now;
+      if (invoice.status === INVOICE_STATUS.ISSUED || invoice.status === INVOICE_STATUS.PARTIALLY_PAID) {
+        invoice.status = INVOICE_STATUS.OVERDUE;
+      }
+      await invoice.save();
+    }
+
+    charged.push({
+      reference: invoice.reference,
+      amount: result.charged,
+      periods: result.calculation.periods,
+      capped: result.calculation.capped,
+    });
+  }
+
+  await auditService.record({
+    actor: user,
+    action: AUDIT_ACTION.INVOICE_PENALTY_SWEEP,
+    entity: "Invoice",
+    metadata: { examined: invoices.length, charged: charged.length, dryRun },
+    req,
+  });
+
+  return { dryRun, examined: invoices.length, charged, skipped };
+}
+
 async function listInvoices({ user, filters = {}, page = 1, limit = 20 }) {
   const safePage = Math.max(1, Number(page) || 1);
   const safeLimit = Math.min(Math.max(1, Number(limit) || 20), 100);
@@ -1010,6 +1210,10 @@ module.exports = {
   createInvoice,
   getInvoice,
   listInvoices,
+  scheduleInstalments,
+  getSchedule,
+  setPenaltyPolicy,
+  sweepPenalties,
   canReadInvoice,
   createOrder,
   confirmPayment,

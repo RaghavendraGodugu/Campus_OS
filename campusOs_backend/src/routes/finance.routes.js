@@ -19,6 +19,12 @@ const {
   requireAnyPermission,
 } = require("../middleware/auth");
 const { csrfProtection } = require("../middleware/csrf");
+const { getInvoiceSchema: invoiceIdentifier } = require("../validators/finance.validator");
+const {
+  scheduleSchema,
+  penaltyPolicySchema,
+  penaltySweepSchema,
+} = require("../validators/instalment.validator");
 const { P } = require("../utils/permissions");
 const {
   createInvoiceSchema,
@@ -218,6 +224,48 @@ router.get(
   authenticate,
   requireAnyPermission(P.PAYMENT_MANAGE, P.INVOICE_MANAGE),
   financeController.reconcile
+);
+
+/**
+ * Instalments and penalties.
+ *
+ * All institution-scoped. A student can read their own invoice and see a
+ * schedule on it, but splitting an invoice into instalments or setting a
+ * penalty rate is the accounts department's call alone.
+ */
+router.post(
+  "/invoices/penalty-sweep",
+  authenticate,
+  csrfProtection,
+  requireAnyPermission(P.INVOICE_MANAGE_INSTITUTION),
+  validate({ body: penaltySweepSchema }),
+  financeController.sweepPenalties
+);
+
+router.post(
+  "/invoices/:id/schedule",
+  authenticate,
+  csrfProtection,
+  requireAnyPermission(P.INVOICE_MANAGE_INSTITUTION),
+  validate({ params: invoiceIdentifier, body: scheduleSchema }),
+  financeController.scheduleInstalments
+);
+
+router.get(
+  "/invoices/:id/schedule",
+  authenticate,
+  requireAnyPermission(P.INVOICE_READ_INSTITUTION, P.INVOICE_READ_OWN),
+  validate({ params: invoiceIdentifier }),
+  financeController.getSchedule
+);
+
+router.patch(
+  "/invoices/:id/penalty-policy",
+  authenticate,
+  csrfProtection,
+  requireAnyPermission(P.INVOICE_MANAGE_INSTITUTION),
+  validate({ params: invoiceIdentifier, body: penaltyPolicySchema }),
+  financeController.setPenaltyPolicy
 );
 
 module.exports = router;

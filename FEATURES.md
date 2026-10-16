@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 14 October 2026
-- **Verified:** 677 backend tests, 164 frontend tests, lint and build clean
+- **Verified:** 715 backend tests, 164 frontend tests, lint and build clean
 - **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
   screens, anonymous grievance, and bulk import all confirmed against it, plus a
   green browser sweep across all four roles
@@ -223,7 +223,28 @@ means the note that follows it)
       drill scripts cover the API calls, so this one rests on that manual pass
       rather than on a test.
 - [ ] Live webhook delivery (needs a public URL and `RAZORPAY_WEBHOOK_SECRET`)
-- [ ] Late-payment penalties and fee instalments
+- [x] **Fee instalments.** An invoice splits into a schedule that sums to its
+      total exactly: the earlier instalments are floored and the last absorbs
+      the remainder, because 1000 ÷ 3 is 333.33 and three of those is 999.99 —
+      a student short by a paisa through no fault of their own
+- [x] **Splitting is refused once any payment has landed.** The schedule would
+      no longer sum to what the student was told they owe, and the difference
+      would come out of their pocket silently
+- [x] **Late-payment penalties**, with rate, period, grace days and a cap. The
+      grace clock starts *after* the grace period rather than at the due date, so
+      charging from the due date would penalise the grace days twice
+- [x] **The penalty accrues on the original debt, never on a balance that
+      already includes earlier penalties.** Charging 1% of a growing balance
+      makes a student pay roughly 0.5% extra every month forever — and makes a
+      second sweep charge again
+- [x] **A sweep is idempotent.** Recomputed and charged as a delta, so a job
+      running hourly, daily or twice in a minute costs one period of lateness
+      once. A dry run is supported and writes nothing
+- [x] **The policy is snapshotted onto the invoice.** Changing the college's rate
+      next month must not retroactively alter terms a student already agreed to
+- [x] **Never charged on a settled invoice**, and never more than the outstanding
+      balance — checked before anything else, because it is the most damaging
+      bug this calculation could have
 - [ ] Tax/GST invoicing
 
 ## 10. Announcements and notifications
