@@ -108,7 +108,11 @@ describe("penalty calculation", () => {
    * it is the kind of error that reaches a real person before anybody notices.
    */
   it("never charges a settled invoice", () => {
-    const result = calculatePenalty({ ...invoice, balanceDue: 0 }, POLICY, at("2029-01-01"));
+    const result = calculatePenalty(
+      { ...invoice, balanceDue: 0 },
+      POLICY,
+      at("2029-01-01")
+    );
     expect(result.eligible).toBe(false);
     expect(result.reason).toMatch(/settled/i);
     expect(result.amount).toBe(0);
@@ -118,7 +122,7 @@ describe("penalty calculation", () => {
     const result = calculatePenalty(
       { ...invoice, balanceDue: 50, total: 10000 },
       { ...POLICY, capBps: 0 },
-      at("2030-01-01"),
+      at("2030-01-01")
     );
     expect(result.amount).toBeLessThanOrEqual(50);
   });
@@ -130,7 +134,11 @@ describe("penalty calculation", () => {
   });
 
   it("charges nothing on an invoice with no due date", () => {
-    const result = calculatePenalty({ ...invoice, dueAt: null }, POLICY, at("2030-01-01"));
+    const result = calculatePenalty(
+      { ...invoice, dueAt: null },
+      POLICY,
+      at("2030-01-01")
+    );
     expect(result.reason).toMatch(/no due date/i);
   });
 
@@ -154,7 +162,11 @@ describe("charging a penalty", () => {
     const first = chargePenalty(invoice, policy, at("2026-10-25"));
     expect(first.charged).toBe(201);
 
-    const second = chargePenalty(invoice, { ...policy, chargedAmount: 201 }, at("2026-10-25"));
+    const second = chargePenalty(
+      invoice,
+      { ...policy, chargedAmount: 201 },
+      at("2026-10-25")
+    );
     expect(second.charged).toBe(0);
   });
 
@@ -177,14 +189,18 @@ describe("charging a penalty", () => {
     const afterOne = calculatePenalty(
       invoice,
       { ...POLICY, chargedAmount: 100 },
-      at("2026-10-25"),
+      at("2026-10-25")
     );
     // The second calculation is against 9900, not 10100.
     expect(afterOne.amount).toBeLessThan(fresh.amount);
   });
 
   it("adds the penalty to both the balance and the total", () => {
-    const result = chargePenalty(invoice, { ...POLICY, chargedAmount: 0 }, at("2026-09-20"));
+    const result = chargePenalty(
+      invoice,
+      { ...POLICY, chargedAmount: 0 },
+      at("2026-09-20")
+    );
     expect(result.newBalance).toBe(10100);
     expect(result.newTotal).toBe(10100);
   });
@@ -198,7 +214,7 @@ describe("allocating a payment", () => {
     // leaves the student penalised on money they have effectively paid.
     const result = allocatePayment(
       { instalments: schedule.map((entry) => ({ ...entry, paidAmount: 0 })) },
-      5000,
+      5000
     );
 
     expect(result.allocations).toEqual([
@@ -209,8 +225,13 @@ describe("allocating a payment", () => {
 
   it("skips an instalment that is already settled", () => {
     const result = allocatePayment(
-      { instalments: schedule.map((entry, index) => ({ ...entry, paidAmount: index === 0 ? entry.amount : 0 })) },
-      1000,
+      {
+        instalments: schedule.map((entry, index) => ({
+          ...entry,
+          paidAmount: index === 0 ? entry.amount : 0,
+        })),
+      },
+      1000
     );
 
     expect(result.allocations[0]).toEqual({ sequence: 2, amount: 1000 });
@@ -219,7 +240,7 @@ describe("allocating a payment", () => {
   it("reports what could not be allocated to a schedule", () => {
     const result = allocatePayment(
       { instalments: schedule.map((entry) => ({ ...entry, paidAmount: entry.amount })) },
-      1000,
+      1000
     );
     // Everything is already paid, so this simply reduces the balance.
     expect(result.allocations).toHaveLength(0);

@@ -99,6 +99,12 @@ export const NAV_ITEMS = [
     permission: "announcement:manage:institution",
   },
   {
+    to: "/management/tax",
+    label: "Tax registration",
+    icon: "Receipt",
+    permission: "invoice:manage:institution",
+  },
+  {
     to: "/management/certificate-templates",
     label: "Certificate templates",
     icon: "FileText",

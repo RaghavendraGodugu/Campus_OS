@@ -24,7 +24,10 @@ const policyShape = {
 const scheduleSchema = z
   .object({
     instalments: z.number().int().min(1, "At least one instalment").max(24),
-    firstDueAt: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)),
+    firstDueAt: z
+      .string()
+      .datetime({ offset: true })
+      .or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)),
     periodDays: z.number().int().min(1).max(365).default(30),
     policy: z.object(policyShape).partial().optional(),
   })

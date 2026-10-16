@@ -32,13 +32,15 @@ const OFF = {
 
 describe("notification preferences — the badge decision", () => {
   it("badges everything by default", () => {
-    expect(preferences.shouldBadge({ preferences: {}, type: "INVOICE_ISSUED" })).toBe(true);
+    expect(preferences.shouldBadge({ preferences: {}, type: "INVOICE_ISSUED" })).toBe(
+      true
+    );
     expect(preferences.shouldBadge({ type: "REQUEST_ASSIGNED" })).toBe(true);
   });
 
   it("does not badge a muted category", () => {
     expect(
-      preferences.shouldBadge({ preferences: { finance: false }, type: "INVOICE_ISSUED" }),
+      preferences.shouldBadge({ preferences: { finance: false }, type: "INVOICE_ISSUED" })
     ).toBe(false);
   });
 
@@ -49,13 +51,16 @@ describe("notification preferences — the badge decision", () => {
       preferences.shouldBadge({
         preferences: { finance: false },
         type: "CERTIFICATE_READY",
-      }),
+      })
     ).toBe(true);
   });
 
   it("honours the blanket badge switch", () => {
     expect(
-      preferences.shouldBadge({ preferences: { unreadBadge: false }, type: "REQUEST_ASSIGNED" }),
+      preferences.shouldBadge({
+        preferences: { unreadBadge: false },
+        type: "REQUEST_ASSIGNED",
+      })
     ).toBe(false);
   });
 
@@ -68,7 +73,7 @@ describe("notification preferences — the badge decision", () => {
    */
   it("badges a type it has never heard of", () => {
     expect(
-      preferences.shouldBadge({ preferences: { requests: false }, type: "SOMETHING_NEW" }),
+      preferences.shouldBadge({ preferences: { requests: false }, type: "SOMETHING_NEW" })
     ).toBe(true);
   });
 
@@ -89,7 +94,10 @@ describe("notification preferences — delivery", () => {
   });
 
   it("delivers a muted notification but stores it already read", async () => {
-    await User.updateOne({ _id: user._id }, { $set: { "notificationPreferences.finance": false } });
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { "notificationPreferences.finance": false } }
+    );
 
     await notificationService.notify({
       userId: user._id,
@@ -120,7 +128,10 @@ describe("notification preferences — delivery", () => {
   });
 
   it("still lists a muted notification", async () => {
-    await User.updateOne({ _id: user._id }, { $set: { "notificationPreferences.finance": false } });
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { "notificationPreferences.finance": false } }
+    );
     await notificationService.notify({
       userId: user._id,
       type: "REFUND_STATUS_CHANGED",
@@ -146,7 +157,7 @@ describe("notification preferences — settings", () => {
   it("presents every category, even for an account that never set one", async () => {
     const shown = preferences.present(await User.findById(user._id));
     expect(Object.keys(shown).sort()).toEqual(
-      [...preferences.CATEGORIES, "unreadBadge"].sort(),
+      [...preferences.CATEGORIES, "unreadBadge"].sort()
     );
   });
 

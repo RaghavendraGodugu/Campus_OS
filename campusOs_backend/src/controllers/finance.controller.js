@@ -6,6 +6,7 @@
  */
 
 const financeService = require("../services/finance.service");
+const taxProfileService = require("../services/taxProfile.service");
 const refundService = require("../services/refund.service");
 const receiptService = require("../services/receipt.service");
 const { asyncHandler } = require("../utils/asyncHandler");
@@ -418,7 +419,6 @@ const getReceipt = asyncHandler(async (req, res) => {
   return res.send(buffer);
 });
 
-
 /** POST /api/v1/invoices/:id/schedule — split into instalments. */
 const scheduleInstalments = asyncHandler(async (req, res) => {
   const instalments = await financeService.scheduleInstalments({
@@ -475,6 +475,30 @@ const sweepPenalties = asyncHandler(async (req, res) => {
   });
 });
 
+/** GET /api/v1/tax-profile — null when none is set up. */
+const getTaxProfile = asyncHandler(async (req, res) => {
+  const profile = await taxProfileService.get();
+  return sendSuccess(res, {
+    message: profile ? "GST profile retrieved" : "No GST profile is set up",
+    data: { profile },
+  });
+});
+
+/** PUT /api/v1/tax-profile — create or replace. */
+const saveTaxProfile = asyncHandler(async (req, res) => {
+  const profile = await taxProfileService.save({
+    user: req.user,
+    payload: req.validated.body,
+  });
+  return sendSuccess(res, { message: "GST profile saved", data: { profile } });
+});
+
+/** DELETE /api/v1/tax-profile */
+const deleteTaxProfile = asyncHandler(async (req, res) => {
+  await taxProfileService.remove({ user: req.user });
+  return sendSuccess(res, { message: "GST profile removed", data: { removed: true } });
+});
+
 module.exports = {
   createInvoice,
   listInvoices,
@@ -497,4 +521,8 @@ module.exports = {
   getSchedule,
   setPenaltyPolicy,
   sweepPenalties,
+
+  getTaxProfile,
+  saveTaxProfile,
+  deleteTaxProfile,
 };

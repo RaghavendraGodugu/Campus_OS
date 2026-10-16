@@ -7,10 +7,7 @@
  * must not leave the record pointing at bytes that are gone.
  */
 
-const {
-  resetDatabase,
-  createUser,
-} = require("./helpers/factory");
+const { resetDatabase, createUser } = require("./helpers/factory");
 
 const avatarService = require("../src/services/avatar.service");
 const User = require("../src/models/User");
@@ -87,7 +84,11 @@ describe("avatar", () => {
     it("keeps the filename out of the key", async () => {
       const avatar = await avatarService.setAvatar({
         user,
-        file: { buffer: PNG, mimetype: "image/png", originalname: "../../etc/passwd.png" },
+        file: {
+          buffer: PNG,
+          mimetype: "image/png",
+          originalname: "../../etc/passwd.png",
+        },
       });
 
       expect(avatar.storageKey).not.toContain("..");
@@ -96,14 +97,17 @@ describe("avatar", () => {
 
     it("refuses an empty upload", async () => {
       await expect(
-        avatarService.setAvatar({ user, file: { buffer: Buffer.alloc(0), mimetype: "image/png" } }),
+        avatarService.setAvatar({
+          user,
+          file: { buffer: Buffer.alloc(0), mimetype: "image/png" },
+        })
       ).rejects.toThrow(/empty/);
     });
 
     it("refuses anything over 2 MB, well below the document limit", async () => {
       const huge = Buffer.concat([PNG.subarray(0, 8), Buffer.alloc(3 * 1024 * 1024)]);
       await expect(
-        avatarService.setAvatar({ user, file: { buffer: huge, mimetype: "image/png" } }),
+        avatarService.setAvatar({ user, file: { buffer: huge, mimetype: "image/png" } })
       ).rejects.toThrow(/too large/i);
     });
 
@@ -112,7 +116,7 @@ describe("avatar", () => {
         avatarService.setAvatar({
           user,
           file: { buffer: PDF, mimetype: "image/png", originalname: "x.png" },
-        }),
+        })
       ).rejects.toThrow(/JPEG, PNG or WebP/);
     });
   });

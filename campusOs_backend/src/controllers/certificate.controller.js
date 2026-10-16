@@ -202,7 +202,6 @@ const verify = asyncHandler(async (req, res) => {
   });
 });
 
-
 /** GET /api/v1/certificate-templates */
 const listTemplates = asyncHandler(async (req, res) => {
   const templates = await templateService.listTemplates({
@@ -266,9 +265,7 @@ const bulkIssue = asyncHandler(async (req, res) => {
       result.issued.length === 0
         ? "No certificates were issued"
         : `${result.issued.length} certificate(s) issued${
-            result.skipped.length
-              ? `, ${result.skipped.length} skipped`
-              : ""
+            result.skipped.length ? `, ${result.skipped.length} skipped` : ""
           }`,
     data: result,
   });

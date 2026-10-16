@@ -25,6 +25,7 @@ import AuditTrail from "./pages/AuditTrail";
 import ComposeAnnouncement from "./pages/ComposeAnnouncement";
 import Terms from "./pages/admin/Terms";
 import CertificateTemplates from "./pages/admin/CertificateTemplates";
+import GstProfile from "./pages/admin/GstProfile";
 import CertificateDetail from "./pages/CertificateDetail";
 import ComplaintDetail from "./pages/ComplaintDetail";
 import Requests from "./pages/Requests";
@@ -373,6 +374,14 @@ export default function App() {
           element={
             <RequirePermission permission="certificate:issue:institution">
               <CertificateTemplates />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="management/tax"
+          element={
+            <RequirePermission permission="invoice:manage:institution">
+              <GstProfile />
             </RequirePermission>
           }
         />

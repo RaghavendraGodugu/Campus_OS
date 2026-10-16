@@ -17,7 +17,11 @@
 
 const mongoose = require("mongoose");
 
-const { CERTIFICATE_TYPES, CERTIFICATE_STATUS, CERTIFICATE_STATUS_VALUES } = require("../config/constants");
+const {
+  CERTIFICATE_TYPES,
+  CERTIFICATE_STATUS,
+  CERTIFICATE_STATUS_VALUES,
+} = require("../config/constants");
 
 const certificateSchema = new mongoose.Schema(
   {

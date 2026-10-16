@@ -19,7 +19,10 @@ const {
   requireAnyPermission,
 } = require("../middleware/auth");
 const { csrfProtection } = require("../middleware/csrf");
-const { getInvoiceSchema: invoiceIdentifier } = require("../validators/finance.validator");
+const {
+  getInvoiceSchema: invoiceIdentifier,
+} = require("../validators/finance.validator");
+const { taxProfileSchema } = require("../validators/tax.validator");
 const {
   scheduleSchema,
   penaltyPolicySchema,
@@ -266,6 +269,38 @@ router.patch(
   requireAnyPermission(P.INVOICE_MANAGE_INSTITUTION),
   validate({ params: invoiceIdentifier, body: penaltyPolicySchema }),
   financeController.setPenaltyPolicy
+);
+
+/**
+ * The institution's GST profile.
+ *
+ * Institution-scoped and separate from the invoice routes: there is one
+ * supplier, and its registration is not a thing any single department can
+ * change. Reads are open to anyone who can issue an invoice, because creating
+ * one needs to know whether the institution is registered at all.
+ */
+router.get(
+  "/tax-profile",
+  authenticate,
+  requireAnyPermission(P.INVOICE_READ_INSTITUTION, P.INVOICE_READ_OWN),
+  financeController.getTaxProfile
+);
+
+router.put(
+  "/tax-profile",
+  authenticate,
+  csrfProtection,
+  requireAnyPermission(P.INVOICE_MANAGE),
+  validate({ body: taxProfileSchema }),
+  financeController.saveTaxProfile
+);
+
+router.delete(
+  "/tax-profile",
+  authenticate,
+  csrfProtection,
+  requireAnyPermission(P.INVOICE_MANAGE),
+  financeController.deleteTaxProfile
 );
 
 module.exports = router;

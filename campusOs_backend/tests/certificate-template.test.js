@@ -40,14 +40,16 @@ async function makeApprovedStudent({ status = CERTIFICATE_STATUS.APPROVED } = {}
 describe("certificate templates — rendering", () => {
   it("substitutes a known placeholder", () => {
     expect(
-      templateService.render("Hello {{studentName}}", { studentName: "Ananya" }),
+      templateService.render("Hello {{studentName}}", { studentName: "Ananya" })
     ).toBe("Hello Ananya");
   });
 
   it("matches a placeholder case-insensitively", () => {
     // Typing {{studentname}} in a template is the obvious mistake, and failing
     // the whole template for it would be unkind.
-    expect(templateService.render("{{studentName}}", { studentName: "Ananya" })).toBe("Ananya");
+    expect(templateService.render("{{studentName}}", { studentName: "Ananya" })).toBe(
+      "Ananya"
+    );
   });
 
   /**
@@ -58,7 +60,9 @@ describe("certificate templates — rendering", () => {
    * to whoever is holding the document.
    */
   it("leaves an unknown token as literal text", () => {
-    expect(templateService.render("Hi {{nope}}", { studentName: "A" })).toBe("Hi {{nope}}");
+    expect(templateService.render("Hi {{nope}}", { studentName: "A" })).toBe(
+      "Hi {{nope}}"
+    );
   });
 
   it("renders an empty value as blank, because that one is known to be absent", () => {
@@ -72,7 +76,10 @@ describe("certificate templates — rendering", () => {
   });
 
   it("finds the tokens a template refers to", () => {
-    expect(templateService.tokensIn("{{a}} and {{ b }} and {{a}}").sort()).toEqual(["a", "b"]);
+    expect(templateService.tokensIn("{{a}} and {{ b }} and {{a}}").sort()).toEqual([
+      "a",
+      "b",
+    ]);
   });
 });
 
@@ -119,10 +126,15 @@ describe("certificate templates — CRUD", () => {
 
     expect(second.isDefault).toBe(true);
 
-    const defaults = await CertificateTemplate.find({ type: "BONAFIDE", isDefault: true });
+    const defaults = await CertificateTemplate.find({
+      type: "BONAFIDE",
+      isDefault: true,
+    });
     expect(defaults).toHaveLength(1);
     expect(String(defaults[0]._id)).toBe(String(second._id));
-    expect(String((await CertificateTemplate.findById(first._id)).isDefault)).toBe("false");
+    expect(String((await CertificateTemplate.findById(first._id)).isDefault)).toBe(
+      "false"
+    );
   });
 
   it("keeps at most one default per type across different types", async () => {
@@ -145,14 +157,19 @@ describe("certificate templates — CRUD", () => {
     });
 
     await expect(
-      templateService.deleteTemplate({ user: admin, id: template._id }),
+      templateService.deleteTemplate({ user: admin, id: template._id })
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
   it("resolves a template for a type, defaulting to the marked one", async () => {
     await templateService.createTemplate({
       user: admin,
-      payload: { type: "STUDY", name: "Study default", isDefault: true, body: "Study for {{studentName}}" },
+      payload: {
+        type: "STUDY",
+        name: "Study default",
+        isDefault: true,
+        body: "Study for {{studentName}}",
+      },
     });
 
     const resolved = await templateService.resolveTemplate({ type: "STUDY" });
@@ -166,7 +183,7 @@ describe("certificate templates — CRUD", () => {
     });
 
     await expect(
-      templateService.resolveTemplate({ type: "BONAFIDE", templateId: template._id }),
+      templateService.resolveTemplate({ type: "BONAFIDE", templateId: template._id })
     ).rejects.toThrow(/is for Study, not Bonafide/i);
   });
 
@@ -175,10 +192,13 @@ describe("certificate templates — CRUD", () => {
       user: admin,
       payload: { type: "BONAFIDE", name: "Retired one" },
     });
-    await CertificateTemplate.updateOne({ _id: template._id }, { $set: { isActive: false } });
+    await CertificateTemplate.updateOne(
+      { _id: template._id },
+      { $set: { isActive: false } }
+    );
 
     await expect(
-      templateService.resolveTemplate({ type: "BONAFIDE", templateId: template._id }),
+      templateService.resolveTemplate({ type: "BONAFIDE", templateId: template._id })
     ).rejects.toThrow(/retired/);
   });
 
@@ -246,7 +266,9 @@ describe("bulk issuance", () => {
 
     const stored = await Certificate.find({ _id: { $in: [a._id, b._id] } });
     expect(stored).toHaveLength(2);
-    expect(stored.every((entry) => entry.status === CERTIFICATE_STATUS.GENERATED)).toBe(true);
+    expect(stored.every((entry) => entry.status === CERTIFICATE_STATUS.GENERATED)).toBe(
+      true
+    );
 
     // The trail has to say who did it, or a bulk run is unattributable.
     for (const entry of stored) {
@@ -327,21 +349,21 @@ describe("bulk issuance", () => {
 
   it("refuses an empty list rather than reporting success for nothing", async () => {
     await expect(
-      templateService.bulkIssue({ certificateIds: [], user: admin }),
+      templateService.bulkIssue({ certificateIds: [], user: admin })
     ).rejects.toThrow(/at least one/i);
   });
 
   it("caps the batch so one request cannot lock up the service", async () => {
     const ids = Array.from({ length: 201 }, () => String(new mongoose.Types.ObjectId()));
 
-    await expect(templateService.bulkIssue({ certificateIds: ids, user: admin })).rejects.toThrow(
-      /at most 200/i,
-    );
+    await expect(
+      templateService.bulkIssue({ certificateIds: ids, user: admin })
+    ).rejects.toThrow(/at most 200/i);
   });
 
   it("rejects a malformed identifier before touching the database", async () => {
     await expect(
-      templateService.bulkIssue({ certificateIds: ["not-an-id"], user: admin }),
+      templateService.bulkIssue({ certificateIds: ["not-an-id"], user: admin })
     ).rejects.toThrow(/not valid/i);
   });
 });

@@ -86,12 +86,7 @@ function elapsedPeriods(from, to, periodDays) {
  * @returns {{eligible: boolean, reason: string|null, periods: number, amount: number, capped: boolean}}
  */
 function calculatePenalty(invoice, policy, now = new Date()) {
-  const {
-    rateBps = 0,
-    periodDays = 30,
-    graceDays = 0,
-    capBps = 0,
-  } = policy ?? {};
+  const { rateBps = 0, periodDays = 30, graceDays = 0, capBps = 0 } = policy ?? {};
 
   const due = invoice.dueAt ?? null;
   const balance = invoice.balanceDue ?? 0;
@@ -110,17 +105,35 @@ function calculatePenalty(invoice, policy, now = new Date()) {
   const principal = Math.max(0, subtract(invoice.total ?? balance, alreadyCharged));
 
   if (rateBps <= 0) {
-    return { eligible: false, reason: "This invoice carries no penalty", periods: 0, amount: 0, capped: false };
+    return {
+      eligible: false,
+      reason: "This invoice carries no penalty",
+      periods: 0,
+      amount: 0,
+      capped: false,
+    };
   }
 
   if (!due) {
-    return { eligible: false, reason: "This invoice has no due date", periods: 0, amount: 0, capped: false };
+    return {
+      eligible: false,
+      reason: "This invoice has no due date",
+      periods: 0,
+      amount: 0,
+      capped: false,
+    };
   }
 
   if (balance <= 0) {
     // Charging a penalty on a paid invoice is the single most damaging bug this
     // function could have, so it is checked before anything else.
-    return { eligible: false, reason: "This invoice is already settled", periods: 0, amount: 0, capped: false };
+    return {
+      eligible: false,
+      reason: "This invoice is already settled",
+      periods: 0,
+      amount: 0,
+      capped: false,
+    };
   }
 
   const graceEnds = new Date(due.getTime() + graceDays * 86400000);
@@ -227,7 +240,7 @@ function allocatePayment(invoice, amount) {
   const allocations = [];
 
   const ordered = [...(invoice.instalments ?? [])].sort(
-    (a, b) => new Date(a.dueAt) - new Date(b.dueAt),
+    (a, b) => new Date(a.dueAt) - new Date(b.dueAt)
   );
 
   for (const instalment of ordered) {

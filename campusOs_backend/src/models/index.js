@@ -8,7 +8,8 @@
  */
 
 // ===== Phase A: foundation =====
-const User = require("./User")
+const User = require("./User");
+require("./InstitutionTaxProfile");
 require("./CertificateTemplate");
 require("./AcademicTerm");
 const Department = require("./Department");
@@ -64,6 +65,7 @@ module.exports = {
   models,
   AcademicTerm: require("./AcademicTerm"),
   CertificateTemplate: require("./CertificateTemplate"),
+  InstitutionTaxProfile: require("./InstitutionTaxProfile"),
   initIndexes,
   // Re-exported counter helpers so callers need a single import path.
   counterKey: Counter.counterKey,

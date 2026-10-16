@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 14 October 2026
-- **Verified:** 715 backend tests, 164 frontend tests, lint and build clean
+- **Verified:** 741 backend tests, 164 frontend tests, lint and build clean
 - **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
   screens, anonymous grievance, and bulk import all confirmed against it, plus a
   green browser sweep across all four roles
@@ -245,7 +245,28 @@ means the note that follows it)
 - [x] **Never charged on a settled invoice**, and never more than the outstanding
       balance — checked before anything else, because it is the most damaging
       bug this calculation could have
-- [ ] Tax/GST invoicing
+- [x] **GST invoicing.** One institution-wide registration with a validated GSTIN,
+      place of supply and signatory. The state is *derived* from the GSTIN's
+      first two digits rather than typed, because a profile claiming state 07
+      while carrying a GSTIN beginning 29 issues invoices stating the wrong place
+      of supply — wrong on the document, and invisible on it
+- [x] **The CGST/SGST split versus IGST is computed server-side, never by the
+      issuer.** A supply inside the state splits into CGST and SGST; one outside
+      it is charged IGST at the full rate. The total is identical either way, so
+      a wrong split cannot be spotted by looking at the invoice — it is caught by
+      an auditor. The split is stored on the line at issue time, because
+      recomputing it at print time would re-derive it from a student's *current*
+      address
+- [x] **The halves always reconcile.** CGST is floored and SGST takes the odd
+      paisa, so a tax of 101 splits 50/51 rather than both rounding to 51
+- [x] **Taxed lines are grouped by rate slab and HSN**, which is how a return is
+      filed and how the invoice is checked — not listed line by line
+- [x] **The registration is snapshotted onto the invoice**, so a corrected
+      profile does not silently change a document that has already been filed
+- [x] **An institution with no GST profile can still issue a taxable invoice**,
+      marked `isTaxInvoice: false`. Refusing would turn a missing setup step into
+      an outage, but the silent version — a tax total with no registration —
+      would only be noticed when the quarter failed to reconcile
 
 ## 10. Announcements and notifications
 

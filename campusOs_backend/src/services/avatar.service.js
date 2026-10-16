@@ -119,7 +119,7 @@ async function setAvatar({ user, file }) {
         },
       },
     },
-    { new: true },
+    { new: true }
   );
 
   await auditService.record({
@@ -129,7 +129,11 @@ async function setAvatar({ user, file }) {
     entityId: user._id,
     // The key is an unguessable path; recording the type and size is enough to
     // explain the record, and does not put a storage path in the audit trail.
-    metadata: { mimeType: verified, bytes: stored.bytes ?? file.buffer.length, replaced: Boolean(previousKey) },
+    metadata: {
+      mimeType: verified,
+      bytes: stored.bytes ?? file.buffer.length,
+      replaced: Boolean(previousKey),
+    },
   });
 
   // Only after the new avatar is committed. A failure here leaks one orphaned
@@ -138,7 +142,10 @@ async function setAvatar({ user, file }) {
     try {
       await storage.delete(previousKey, { mimeType: user.avatar?.mimeType });
     } catch (error) {
-      logger.warn({ err: error, key: previousKey }, "Could not delete the replaced avatar");
+      logger.warn(
+        { err: error, key: previousKey },
+        "Could not delete the replaced avatar"
+      );
     }
   }
 
@@ -165,7 +172,7 @@ async function clearAvatar({ user }) {
         avatar: { storageKey: null, mimeType: null, bytes: null, updatedAt: null },
       },
     },
-    { new: true },
+    { new: true }
   );
 
   if (!previousKey) return false;
@@ -182,7 +189,10 @@ async function clearAvatar({ user }) {
     await getStorage().delete(previousKey);
     return true;
   } catch (error) {
-    logger.warn({ err: error, key: previousKey }, "Avatar removed but file delete failed");
+    logger.warn(
+      { err: error, key: previousKey },
+      "Avatar removed but file delete failed"
+    );
     return false;
   }
 }

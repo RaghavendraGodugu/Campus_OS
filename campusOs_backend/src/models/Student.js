@@ -102,6 +102,27 @@ const studentSchema = new mongoose.Schema(
     },
 
     /**
+     * Two-digit state code, used only to decide the GST split.
+     *
+     * Deliberately optional. A student inside the institution's own state needs
+     * no state code to produce a correct invoice, and making it a required
+     * profile field would mean collecting an address from every student in the
+     * country to answer a question that is almost always "no".
+     *
+     * Absent is treated as "inside the institution's state", which charges
+     * CGST/SGST. That is the right default: a student who has not told us they
+     * moved out of state has not told us they moved.
+     */
+    stateCode: {
+      type: String,
+      default: null,
+      trim: true,
+      uppercase: true,
+      maxlength: 2,
+      match: [/^[0-9]{2}$/, "A state code is two digits"],
+    },
+
+    /**
      * Financial standing. Computed from invoices and updated by the finance
      * service — never set directly by a student request.
      */

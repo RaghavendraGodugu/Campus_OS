@@ -43,3 +43,17 @@ export const PROGRAM_LEVELS = Object.freeze([
   "CERTIFICATE",
   "DOCTORAL",
 ]);
+
+/**
+ * GST rate slabs, mirrored from the server.
+ *
+ * Declared here so the invoice form can offer them as options rather than a
+ * free-text box. The server validates independently and refuses anything else,
+ * so a stale copy here costs a confusing rejection, not a wrong invoice.
+ */
+export const GST_RATES = [0, 0.25, 3, 5, 12, 18, 28];
+
+/** "0.25%" not "0.25" — a rate without its sign is easy to misread. */
+export function formatRate(rate) {
+  return `${rate}%`;
+}

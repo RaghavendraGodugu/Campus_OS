@@ -6,21 +6,40 @@
  * somebody else owes.
  */
 
-const { resetDatabase, createUser, createStudent, loginAs } = require("./helpers/factory");
+const {
+  resetDatabase,
+  createUser,
+  createStudent,
+  loginAs,
+} = require("./helpers/factory");
 
 const financeService = require("../src/services/finance.service");
 const Invoice = require("../src/models/Invoice");
 const AuditLog = require("../src/models/AuditLog");
 const { INVOICE_STATUS } = require("../src/config/constants");
 
-async function makeInvoice({ total = 10000, balance = 10000, status = INVOICE_STATUS.ISSUED, dueAt = null } = {}) {
+async function makeInvoice({
+  total = 10000,
+  balance = 10000,
+  status = INVOICE_STATUS.ISSUED,
+  dueAt = null,
+} = {}) {
   const { student } = await createStudent();
   const admin = await createUser({ role: "SUPER_ADMIN" });
 
   return Invoice.create({
     reference: `INV-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
     student: student._id,
-    items: [{ description: "Tuition", quantity: 1, unitAmount: total, amount: total, taxAmount: 0, taxPercent: 0 }],
+    items: [
+      {
+        description: "Tuition",
+        quantity: 1,
+        unitAmount: total,
+        amount: total,
+        taxAmount: 0,
+        taxPercent: 0,
+      },
+    ],
     purpose: "Semester fee",
     subtotal: total,
     taxTotal: 0,
@@ -72,7 +91,7 @@ describe("instalment scheduling", () => {
         invoiceId: invoice._id,
         instalments: 3,
         firstDueAt: "2026-09-01",
-      }),
+      })
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
@@ -91,7 +110,7 @@ describe("instalment scheduling", () => {
         invoiceId: invoice._id,
         instalments: 4,
         firstDueAt: "2026-10-01",
-      }),
+      })
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
@@ -103,7 +122,7 @@ describe("instalment scheduling", () => {
         invoiceId: invoice._id,
         instalments: 2,
         firstDueAt: "2026-09-01",
-      }),
+      })
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
@@ -122,9 +141,9 @@ describe("instalment scheduling", () => {
   });
 
   it("reports a missing invoice as a 404", async () => {
-    await expect(
-      financeService.getSchedule({ invoiceId: "nope" }),
-    ).rejects.toMatchObject({ statusCode: 404 });
+    await expect(financeService.getSchedule({ invoiceId: "nope" })).rejects.toMatchObject(
+      { statusCode: 404 }
+    );
   });
 });
 
@@ -206,7 +225,11 @@ describe("penalty sweep", () => {
   });
 
   it("never charges a paid invoice", async () => {
-    const invoice = await makeInvoice({ total: 10000, balance: 0, status: INVOICE_STATUS.PAID });
+    const invoice = await makeInvoice({
+      total: 10000,
+      balance: 0,
+      status: INVOICE_STATUS.PAID,
+    });
     await financeService.setPenaltyPolicy({
       user: admin,
       invoiceId: invoice._id,
@@ -237,7 +260,9 @@ describe("permission boundary", () => {
     const student = await createUser({ role: "STUDENT" });
     const { agent } = await loginAs(student);
 
-    const response = await agent.post("/api/v1/invoices/penalty-sweep").send({ dryRun: true });
+    const response = await agent
+      .post("/api/v1/invoices/penalty-sweep")
+      .send({ dryRun: true });
     expect(response.status).toBe(403);
   });
 });

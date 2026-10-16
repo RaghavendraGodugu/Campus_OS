@@ -77,6 +77,29 @@ const invoiceSchema = new mongoose.Schema(
           amount: { type: Number, required: true, min: 0 },
           /** Tax percentage applied to this line, e.g. 18 for GST. */
           taxPercent: { type: Number, default: 0, min: 0, max: 100 },
+          /**
+           * Harmonised System of Nomenclature code.
+           *
+           * Required on a tax invoice and meaningless on a non-tax one, so it
+           * is optional here and required by the validator when tax is present.
+           */
+          hsnCode: { type: String, default: null, trim: true, maxlength: 8 },
+          /**
+           * The CGST/SGST/IGST split for this line, computed at issue time.
+           *
+           * Stored, not recomputed on read. The split depends on the state the
+           * student was in on the day of issue, and re-deriving it later — after
+           * the student's address has changed — produces a tax invoice that no
+           * longer matches the one that was issued.
+           */
+          taxComponents: {
+            igst: { type: Number, default: 0, min: 0 },
+            cgst: { type: Number, default: 0, min: 0 },
+            sgst: { type: Number, default: 0, min: 0 },
+            igstRate: { type: Number, default: 0 },
+            cgstRate: { type: Number, default: 0 },
+            sgstRate: { type: Number, default: 0 },
+          },
           /** Tax amount in minor units for this line. */
           taxAmount: { type: Number, default: 0, min: 0 },
         },
@@ -183,6 +206,29 @@ const invoiceSchema = new mongoose.Schema(
       /** Charges already applied, so a recalculation never double-charges. */
       chargedAmount: { type: Number, default: 0, min: 0 },
       chargedAt: { type: Date, default: null },
+    },
+
+    /**
+     * The supplier's GST details, snapshotted onto the invoice.
+     *
+     * The same reasoning as the penalty policy: a tax invoice must carry the
+     * GSTIN and legal name that were valid when it was issued. Reading them from
+     * the live profile at print time means a corrected profile silently changes
+     * a document that has already been filed.
+     */
+    taxProfile: {
+      legalName: { type: String, default: null },
+      gstin: { type: String, default: null },
+      stateCode: { type: String, default: null },
+      placeOfSupply: { type: String, default: null },
+      addressLine1: { type: String, default: null },
+      addressLine2: { type: String, default: null },
+      pincode: { type: String, default: null },
+      /** Whether this invoice was taxed as an inter-state supply. */
+      interState: { type: Boolean, default: false },
+      reverseCharge: { type: Boolean, default: false },
+      /** The rate-slab breakup, as printed on a tax invoice. */
+      breakup: { type: [mongoose.Schema.Types.Mixed], default: [] },
     },
 
     notes: {

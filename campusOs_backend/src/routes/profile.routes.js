@@ -77,7 +77,12 @@ router.post(
   profileController.uploadAvatar
 );
 
-router.delete("/profile/avatar", authenticate, csrfProtection, profileController.removeAvatar);
+router.delete(
+  "/profile/avatar",
+  authenticate,
+  csrfProtection,
+  profileController.removeAvatar
+);
 
 /** GET /profile/avatar/:userId — the bytes, for an <img> tag. */
 router.get(
@@ -94,7 +99,6 @@ router.post(
   validate({ body: changePasswordSchema }),
   authController.changePassword
 );
-
 
 router.post(
   "/profile/sign-out-everywhere",

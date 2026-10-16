@@ -154,11 +154,7 @@ async function updateNotificationPreferences({ user, changes }) {
   }
   update["notificationPreferences.unreadBadge"] = Boolean(changes.unreadBadge);
 
-  const updated = await User.findByIdAndUpdate(
-    user._id,
-    { $set: update },
-    { new: true },
-  );
+  const updated = await User.findByIdAndUpdate(user._id, { $set: update }, { new: true });
 
   return preferenceService.present(updated);
 }

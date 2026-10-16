@@ -24,6 +24,8 @@ const mongoose = require("mongoose");
 
 const Invoice = require("../models/Invoice");
 const instalmentService = require("./instalment.service");
+const InstitutionTaxProfile = require("../models/InstitutionTaxProfile");
+const taxService = require("./tax.service");
 const Payment = require("../models/Payment");
 const Student = require("../models/Student");
 const Counter = require("../models/Counter");
@@ -63,9 +65,43 @@ async function nextReference(namespace, prefix, year = new Date().getFullYear())
  * @param {Array<object>} items
  * @returns {{items: object[], subtotal: number, taxTotal: number, total: number}}
  */
-function calculateTotals(items) {
+function calculateTotals(items, { interState = false, requireGst = false } = {}) {
   if (!Array.isArray(items) || items.length === 0) {
     throw ApiError.badRequest("An invoice requires at least one line item");
+  }
+
+  /*
+   * GST validation, but only when the institution is actually registered.
+   *
+   * An HSN code and a slab rate are what make a document a *tax* invoice. An
+   * institution with no GST profile is issuing ordinary invoices with a tax
+   * component, and refusing those for want of an HSN code would break every
+   * invoice that worked before the profile existed — for no compliance gain,
+   * because there is nothing to file.
+   *
+   * Once a profile is set, the rules apply in full: a line with tax and no HSN
+   * code cannot be filed against, and a rate outside the slabs is rejected on
+   * submission. Both are cheaper to refuse at issue than to discover when the
+   * accountant reconciles the quarter.
+   */
+  if (requireGst) {
+    for (const item of items) {
+      const hsn = taxService.checkHsn(item.hsnCode);
+      if (!hsn.valid) {
+        throw ApiError.badRequest(`For "${item.description}": ${hsn.reason}`);
+      }
+
+      const rate = taxService.checkRate(item.taxPercent ?? 0);
+      if (!rate.valid) {
+        throw ApiError.badRequest(`For "${item.description}": ${rate.reason}`);
+      }
+
+      if ((item.taxPercent ?? 0) > 0 && !item.hsnCode) {
+        throw ApiError.badRequest(
+          `For "${item.description}": a line with tax needs an HSN code, or it is not a tax invoice`
+        );
+      }
+    }
   }
 
   const pricedLines = items.map((item) => {
@@ -84,7 +120,14 @@ function calculateTotals(items) {
     }
 
     const taxPercent = item.taxPercent ?? 0;
-    const taxAmount = money.percentageOf(amount, taxPercent);
+    // The split is computed here, once, from the bytes and the place of
+    // supply — and stored on the line. Recomputing it at print time would
+    // re-derive it from a student's *current* address, producing a tax invoice
+    // that no longer matches the one that was issued.
+    const { taxAmount, components } = taxService.computeLineTax(
+      { amount, taxPercent },
+      interState
+    );
 
     return {
       description: String(item.description).trim(),
@@ -93,6 +136,8 @@ function calculateTotals(items) {
       amount,
       taxPercent,
       taxAmount,
+      taxComponents: components,
+      hsnCode: item.hsnCode ?? null,
     };
   });
 
@@ -100,7 +145,14 @@ function calculateTotals(items) {
   const taxTotal = pricedLines.reduce((sum, line) => money.add(sum, line.taxAmount), 0);
   const total = money.add(subtotal, taxTotal);
 
-  return { items: pricedLines, subtotal, taxTotal, total };
+  return {
+    items: pricedLines,
+    subtotal,
+    taxTotal,
+    total,
+    breakup: taxService.buildBreakup(pricedLines),
+    interState,
+  };
 }
 
 /**
@@ -128,11 +180,44 @@ async function createInvoice({
     throw ApiError.notFound("Student not found");
   }
 
-  const totals = calculateTotals(items);
+  /*
+   * Read the institution's GST profile, and the student's state.
+   *
+   * The split — CGST and SGST inside the state, IGST outside it — depends on
+   * both, so neither can be chosen by the issuer. An account issuing an
+   * inter-state invoice and marking it intra-state produces a document that
+   * reconciles to the wrong total and is caught by an auditor, not a student.
+   */
+  const profile = await InstitutionTaxProfile.findOne({ singleton: "primary" }).lean();
+  const studentStateCode = student.stateCode ?? null;
+  const interState = Boolean(
+    profile &&
+    studentStateCode &&
+    String(studentStateCode).toUpperCase() !== profile.stateCode
+  );
+
+  const totals = calculateTotals(items, { interState, requireGst: Boolean(profile) });
 
   if (totals.total <= 0) {
     throw ApiError.badRequest("An invoice must total more than zero");
   }
+
+  /*
+   * Tax without a registered GSTIN is not chargeable, and an institution
+   * collecting GST it is not registered for is a real problem.
+   *
+   * But refusing here would reject every taxable invoice in an institution that
+   * has not set up a profile — which is most of them, today — and turn a missing
+   * setup step into an outage. So the invoice is issued and marked: it carries
+   * tax, it carries no GSTIN, and the presenter reports `isTaxInvoice: false`
+   * so the accounts department can see on the document that it is not one.
+   *
+   * What is never acceptable is the silent version, where a tax total appears
+   * with no registration and nobody notices until the quarter does not
+   * reconcile.
+   */
+  const hasTax = totals.items.some((line) => (line.taxPercent ?? 0) > 0);
+  const isTaxInvoice = Boolean(hasTax && profile);
 
   const now = new Date();
   const reference = await nextReference("invoice", "INV", now.getFullYear());
@@ -153,6 +238,23 @@ async function createInvoice({
     dueAt: dueAt ?? new Date(now.getTime() + 14 * 86_400_000),
     issuedBy: user._id,
     notes,
+    // Snapshotted, like the penalty policy: a tax invoice must carry the GSTIN
+    // and legal name that were valid when it was issued, not whatever the
+    // profile says when it is reprinted.
+    taxProfile: isTaxInvoice
+      ? {
+          legalName: profile.legalName,
+          gstin: profile.gstin,
+          stateCode: profile.stateCode,
+          placeOfSupply: profile.placeOfSupply,
+          addressLine1: profile.addressLine1,
+          addressLine2: profile.addressLine2 ?? null,
+          pincode: profile.pincode ?? null,
+          interState,
+          reverseCharge: false,
+          breakup: totals.breakup,
+        }
+      : undefined,
   });
 
   await auditService.record({
@@ -217,7 +319,14 @@ function canReadInvoice(invoice, user) {
  * payments against it needs the payment reversed first, which is a decision
  * somebody should be making deliberately.
  */
-async function scheduleInstalments({ user, invoiceId, instalments, firstDueAt, periodDays, policy }) {
+async function scheduleInstalments({
+  user,
+  invoiceId,
+  instalments,
+  firstDueAt,
+  periodDays,
+  policy,
+}) {
   const invoice = await Invoice.findById(invoiceId);
   if (!invoice) throw ApiError.notFound("Invoice not found");
 
@@ -227,7 +336,7 @@ async function scheduleInstalments({ user, invoiceId, instalments, firstDueAt, p
 
   if ((invoice.paidAmount ?? 0) > 0) {
     throw ApiError.conflict(
-      "This invoice already has a payment against it. Splitting it now would change what the student owes.",
+      "This invoice already has a payment against it. Splitting it now would change what the student owes."
     );
   }
 
@@ -279,7 +388,7 @@ async function getSchedule({ invoiceId }) {
   }
 
   const invoice = await Invoice.findById(invoiceId).select(
-    "reference total paidAmount balanceDue instalments penalty dueAt status",
+    "reference total paidAmount balanceDue instalments penalty dueAt status"
   );
   if (!invoice) throw ApiError.notFound("Invoice not found");
 
@@ -347,7 +456,11 @@ async function setPenaltyPolicy({ user, invoiceId, policy, req }) {
  * twice in a minute and one period of lateness costs one period's penalty.
  */
 async function sweepPenalties({ user, invoiceIds, dryRun = false, req }) {
-  const filter = { status: { $in: [INVOICE_STATUS.ISSUED, INVOICE_STATUS.PARTIALLY_PAID, INVOICE_STATUS.OVERDUE] } };
+  const filter = {
+    status: {
+      $in: [INVOICE_STATUS.ISSUED, INVOICE_STATUS.PARTIALLY_PAID, INVOICE_STATUS.OVERDUE],
+    },
+  };
   if (invoiceIds?.length) filter._id = { $in: invoiceIds };
 
   const invoices = await Invoice.find(filter);
@@ -359,7 +472,10 @@ async function sweepPenalties({ user, invoiceIds, dryRun = false, req }) {
   for (const invoice of invoices) {
     const rate = invoice.penalty?.rateBps ?? 0;
     if (rate <= 0) {
-      skipped.push({ reference: invoice.reference, reason: "No penalty policy on this invoice" });
+      skipped.push({
+        reference: invoice.reference,
+        reason: "No penalty policy on this invoice",
+      });
       continue;
     }
 
@@ -376,9 +492,13 @@ async function sweepPenalties({ user, invoiceIds, dryRun = false, req }) {
     if (!dryRun) {
       invoice.total = result.newTotal;
       invoice.balanceDue = result.newBalance;
-      invoice.penalty.chargedAmount = (invoice.penalty.chargedAmount ?? 0) + result.charged;
+      invoice.penalty.chargedAmount =
+        (invoice.penalty.chargedAmount ?? 0) + result.charged;
       invoice.penalty.chargedAt = now;
-      if (invoice.status === INVOICE_STATUS.ISSUED || invoice.status === INVOICE_STATUS.PARTIALLY_PAID) {
+      if (
+        invoice.status === INVOICE_STATUS.ISSUED ||
+        invoice.status === INVOICE_STATUS.PARTIALLY_PAID
+      ) {
         invoice.status = INVOICE_STATUS.OVERDUE;
       }
       await invoice.save();

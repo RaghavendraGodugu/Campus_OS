@@ -83,15 +83,15 @@ const notificationPreferencesSchema = z
 /** GET /profile/avatar/:userId */
 const avatarIdentifier = z
   .object({
-    userId: z
-      .string()
-      .refine((value) => mongoose.Types.ObjectId.isValid(value), {
-        message: "That is not a valid id",
-      }),
+    userId: z.string().refine((value) => mongoose.Types.ObjectId.isValid(value), {
+      message: "That is not a valid id",
+    }),
   })
   .strict();
 
 module.exports = {
   avatarIdentifier,
   notificationPreferencesSchema,
-  updateProfileSchema, changePasswordSchema };
+  updateProfileSchema,
+  changePasswordSchema,
+};

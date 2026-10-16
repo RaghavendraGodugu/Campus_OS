@@ -52,7 +52,7 @@ function render(text, context) {
   if (!text) return null;
   return String(text).replace(TOKEN_PATTERN, (match, token) => {
     const key = Object.keys(context).find(
-      (candidate) => candidate.toLowerCase() === token.toLowerCase(),
+      (candidate) => candidate.toLowerCase() === token.toLowerCase()
     );
     if (!key) return match;
     const value = context[key];
@@ -124,7 +124,7 @@ async function resolveTemplate({ type, templateId }) {
     const template = await getTemplate(templateId);
     if (template.type !== type) {
       throw ApiError.badRequest(
-        `That template is for ${humanType(template.type)}, not ${humanType(type)}`,
+        `That template is for ${humanType(template.type)}, not ${humanType(type)}`
       );
     }
     if (!template.isActive) {
@@ -148,14 +148,14 @@ async function createTemplate({ user, payload }) {
   if (payload.isDefault) {
     await CertificateTemplate.updateMany(
       { type: payload.type, isDefault: true },
-      { $set: { isDefault: false } },
+      { $set: { isDefault: false } }
     );
   }
 
   const template = await CertificateTemplate.create({
     ...payload,
     declaredTokens: tokensIn(
-      [payload.heading, payload.body, payload.footer].filter(Boolean).join(" "),
+      [payload.heading, payload.body, payload.footer].filter(Boolean).join(" ")
     ),
     createdBy: user._id,
     updatedBy: user._id,
@@ -182,13 +182,13 @@ async function updateTemplate({ user, id, payload }) {
   if (payload.isDefault === true) {
     await CertificateTemplate.updateMany(
       { type: template.type, isDefault: true, _id: { $ne: template._id } },
-      { $set: { isDefault: false } },
+      { $set: { isDefault: false } }
     );
   }
 
   Object.assign(template, payload);
   template.declaredTokens = tokensIn(
-    [template.heading, template.body, template.footer].filter(Boolean).join(" "),
+    [template.heading, template.body, template.footer].filter(Boolean).join(" ")
   );
   template.updatedBy = user._id;
   await template.save();
@@ -210,7 +210,7 @@ async function deleteTemplate({ user, id }) {
   if (!template) throw ApiError.notFound("Template not found");
   if (template.isDefault) {
     throw ApiError.conflict(
-      "This is the default template for its type. Make another one the default first.",
+      "This is the default template for its type. Make another one the default first."
     );
   }
 
@@ -255,7 +255,8 @@ async function preview({ type, templateId }) {
     body: render(template.body, context),
     footer: render(template.footer, context),
     unknownTokens: [...new Set(tokensIn(template.body))].filter(
-      (token) => !Object.keys(context).some((key) => key.toLowerCase() === token.toLowerCase()),
+      (token) =>
+        !Object.keys(context).some((key) => key.toLowerCase() === token.toLowerCase())
     ),
   };
 }
@@ -301,7 +302,7 @@ async function bulkIssue({ certificateIds, user, req }) {
   // so a mid-run failure cannot leave half a cohort issued.
   const eligible = certificates.filter(
     (certificate) =>
-      certificate.status === CERTIFICATE_STATUS.APPROVED && certificate.approvedBy,
+      certificate.status === CERTIFICATE_STATUS.APPROVED && certificate.approvedBy
   );
 
   for (const certificate of certificates) {
@@ -342,7 +343,7 @@ async function bulkIssue({ certificateIds, user, req }) {
             note: "Issued in bulk",
           },
         },
-      },
+      }
     );
   }
 
