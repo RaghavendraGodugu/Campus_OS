@@ -380,3 +380,70 @@ describe("tax on a real invoice", () => {
     expect(invoice.taxProfile?.gstin ?? null).toBeNull();
   });
 });
+
+describe("the tax-invoice flag reaches the client", () => {
+  const { resetDatabase, createUser, createStudent } = require("./helpers/factory");
+  const { ROLES } = require("../src/config/constants");
+  const financeService = require("../src/services/finance.service");
+  const InstitutionTaxProfile = require("../src/models/InstitutionTaxProfile");
+
+  let accounts;
+
+  beforeEach(async () => {
+    await resetDatabase();
+    accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+  });
+
+  /**
+   * This flag had already been lost once.
+   *
+   * It was assigned onto the document by the service, and `toJSON` builds its
+   * output from schema paths only — so it was silently dropped on every route.
+   * The invoice looked fine; the accounts department just could not tell a tax
+   * invoice from an ordinary one.
+   */
+  it("survives serialisation, because the transform derives it", async () => {
+    await InstitutionTaxProfile.create({
+      legalName: "Demo College",
+      gstin: "29ABCDE1234F1Z5",
+      stateCode: "29",
+      placeOfSupply: "Karnataka",
+      addressLine1: "1 College Road",
+    });
+    const { student } = await createStudent();
+
+    const invoice = await financeService.createInvoice({
+      user: accounts,
+      studentId: student._id,
+      purpose: "Semester fee",
+      items: [
+        {
+          description: "Tuition",
+          quantity: 1,
+          unitAmount: "100000.00",
+          taxPercent: 18,
+          hsnCode: "996311",
+        },
+      ],
+    });
+
+    const serialised = invoice.toJSON();
+    expect(serialised.isTaxInvoice).toBe(true);
+  });
+
+  it("reports false for a taxable invoice with no registration", async () => {
+    const { student } = await createStudent();
+
+    const invoice = await financeService.createInvoice({
+      user: accounts,
+      studentId: student._id,
+      purpose: "Semester fee",
+      items: [
+        { description: "Tuition", quantity: 1, unitAmount: "1000.00", taxPercent: 18 },
+      ],
+    });
+
+    // Still a valid bill. Just not a tax invoice — and it has to say so.
+    expect(invoice.toJSON().isTaxInvoice).toBe(false);
+  });
+});

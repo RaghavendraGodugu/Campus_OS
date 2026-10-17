@@ -246,6 +246,21 @@ const invoiceSchema = new mongoose.Schema(
         ret.id = ret._id;
         delete ret._id;
         delete ret.__v;
+
+        /*
+         * Whether this can be filed as a tax invoice.
+         *
+         * Computed here rather than assigned by a service, because `toJSON`
+         * builds its output from schema paths only: anything a service tacked
+         * onto the document is silently dropped, and this flag had already been
+         * lost that way once. Deriving it in the transform makes it impossible
+         * for it to go missing on any route that serialises an invoice.
+         *
+         * An invoice with tax and no GSTIN is a real document and a perfectly
+         * legitimate bill — it is just not a *tax* invoice.
+         */
+        ret.isTaxInvoice = Boolean(ret.taxProfile?.gstin);
+
         return ret;
       },
     },

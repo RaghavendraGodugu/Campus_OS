@@ -11,7 +11,6 @@ import {
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../api/client";
 import { formatDate, humanise } from "../../lib/format";
 import Button from "../../components/ui/Button";
-import Badge from "../../components/ui/Badge";
 import Field, { inputClass } from "../../components/ui/Field";
 import Modal from "../../components/ui/Modal";
 import { EmptyState, ErrorState } from "../../components/ui/States";
@@ -183,7 +182,17 @@ export default function Terms() {
                     <span className="text-xs text-ink-500 dark:text-ink-400">
                       {term.code}
                     </span>
-                    {term.isCurrent && <Badge status="GENERATED" />}
+                    {term.isCurrent && (
+                      /*
+                        Not a status badge. "Generated" is the certificate
+                        vocabulary, borrowed by accident, and on a term it reads
+                        as though the term had been issued by something.
+                      */
+                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-100 px-2 py-0.5 text-[0.6875rem] font-medium text-brand-800 ring-1 ring-brand-600/20 ring-inset dark:bg-brand-500/15 dark:text-brand-200 dark:ring-brand-400/25">
+                        <CheckCircle2 className="size-3" aria-hidden="true" />
+                        Current
+                      </span>
+                    )}
                   </div>
 
                   <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">

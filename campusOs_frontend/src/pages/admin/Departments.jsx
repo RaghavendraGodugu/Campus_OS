@@ -9,6 +9,7 @@ import Modal from "../../components/ui/Modal";
 import { EmptyState, ErrorState } from "../../components/ui/States";
 import { SkeletonList, SkeletonRegion } from "../../components/ui/Skeleton";
 import AdminLayout from "./AdminLayout";
+import { useAuth } from "../../context/AuthContext";
 
 /**
  * Departments.
@@ -29,6 +30,15 @@ export default function Departments() {
   const [editing, setEditing] = useState(null);
   const [retiring, setRetiring] = useState(null);
   const [assigning, setAssigning] = useState(null);
+  /*
+   * Appointing somebody to run a department is a different act from tidying
+   * one, and carries its own permission. Today only the super administrator
+   * holds either, so the button would never lie — but the day somebody gains
+   * `department:manage` without `department:assign-hod`, an ungated button here
+   * would offer a control that always 403s.
+   */
+  const { can } = useAuth();
+  const canAssignHod = can("department:assign-hod");
 
   const list = useQuery({
     queryKey: ["admin", "departments", applied],
@@ -135,14 +145,16 @@ export default function Departments() {
                 </div>
 
                 <div className="flex shrink-0 gap-1.5">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setAssigning(department)}
-                  >
-                    <UserRound className="size-3.5" aria-hidden="true" />
-                    {department.hod ? "Change HOD" : "Assign HOD"}
-                  </Button>
+                  {canAssignHod && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setAssigning(department)}
+                    >
+                      <UserRound className="size-3.5" aria-hidden="true" />
+                      {department.hod ? "Change HOD" : "Assign HOD"}
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     variant="secondary"

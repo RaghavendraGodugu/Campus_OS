@@ -7,11 +7,12 @@ human step or a missing screen is left empty and says why.
 **Legend** — `[x]` working · `[ ]` not working · `[~]` partly working (the tick
 means the note that follows it)
 
-- **Last reviewed:** 14 October 2026
-- **Verified:** 741 backend tests, 164 frontend tests, lint and build clean
-- **Databases:** Atlas `campusos` re-seeded and exercised end to end — admin
-  screens, anonymous grievance, and bulk import all confirmed against it, plus a
-  green browser sweep across all four roles
+- **Last reviewed:** 17 October 2026
+- **Verified:** 743 backend tests, 164 frontend tests, live sweep against Atlas, lint and build clean
+- **Databases:** Atlas `campusos` exercised end to end — a real GST invoice
+  (₹1,00,000 + 18% CGST/SGST = ₹1,18,000, halves reconciling exactly), an
+  opened academic term, a saved tax registration, and a green browser sweep
+  across all four roles at 375px, 320px and full width
 
 ---
 

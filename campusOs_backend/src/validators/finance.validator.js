@@ -62,6 +62,20 @@ const createInvoiceSchema = z
             quantity: quantity.default(1),
             unitAmount: priceString,
             taxPercent: z.coerce.number().min(0).max(100).default(0),
+            /*
+             * HSN/SAC code.
+             *
+             * Optional here and *required* by the service once the institution
+             * is GST-registered, so this stays permissive: a college that has no
+             * registration is not filing a return and needs no code, and
+             * refusing one would break every invoice that worked before the
+             * profile existed.
+             */
+            hsnCode: z
+              .string()
+              .trim()
+              .regex(/^[0-9]{2,8}$/, "An HSN code is 2 to 8 digits, all numeric")
+              .nullish(),
           })
           .strict()
       )

@@ -37,18 +37,13 @@ export default function GstProfile() {
   const profile = useQuery({
     queryKey: ["tax-profile"],
     queryFn: () => apiGet("/tax-profile"),
-    // Seeded from the server value once it arrives, so the read-only state code
-    // can be derived from the GSTIN the college actually registered with.
-    onSuccess: (response) => {
-      const existing = response.data.profile;
-      if (existing && !form) setForm(existing);
-    },
   });
 
   const save = useMutation({
     mutationFn: (payload) => apiPut("/tax-profile", payload),
-    onSuccess: (response) => {
-      setForm(response.data.profile);
+    onSuccess: () => {
+      // Drop the draft so the form goes back to showing the server's copy.
+      setForm(null);
       setError(null);
       queryClient.invalidateQueries({ queryKey: ["tax-profile"] });
     },
@@ -79,7 +74,16 @@ export default function GstProfile() {
     );
   }
 
-  const current = form ?? {
+  /*
+   * The server's copy, unless there is a draft in progress.
+   *
+   * Derived rather than copied into state when the query resolves. Copying it
+   * needs a sync effect or an `onSuccess` callback, and both are ways to end
+   * up showing an empty form next to data that has loaded — which is exactly
+   * what happened here: the API returned a saved GSTIN and the screen showed
+   * blank fields, with nothing to indicate which of the two was wrong.
+   */
+  const EMPTY_PROFILE = {
     legalName: "",
     gstin: "",
     placeOfSupply: "",
@@ -89,6 +93,9 @@ export default function GstProfile() {
     email: "",
     authorisedSignatory: "",
   };
+
+  const saved = profile.data?.data?.profile ?? null;
+  const current = form ?? saved ?? EMPTY_PROFILE;
 
   // Derived, never typed. See the note at the top of this file.
   const derivedState = /^[0-9]{2}/.test(current.gstin)

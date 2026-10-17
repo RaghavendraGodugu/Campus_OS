@@ -281,7 +281,17 @@ export default function App() {
         <Route
           path="finance/invoices"
           element={
-            <RequirePermission permission="invoice:read:own">
+            /*
+             * Either the student's own invoices or the institution's, because
+             * the accounts department lives on the same screen — a separate
+             * "management" copy would be the same page twice.
+             *
+             * Hiding links is convenience, not control: the API still decides
+             * per invoice whether this reader may see it.
+             */
+            <RequirePermission
+              permissions={["invoice:read:own", "invoice:read:institution"]}
+            >
               <Invoices />
             </RequirePermission>
           }
@@ -289,7 +299,15 @@ export default function App() {
         <Route
           path="finance/invoices/:reference"
           element={
-            <RequirePermission permission="invoice:read:own">
+            /*
+             * The accounts department could not open an invoice at all before
+             * this: the route was gated on `invoice:read:own`, which they do
+             * not hold, so the one screen that shows what a student owes was
+             * unreachable for the people who collect it.
+             */
+            <RequirePermission
+              permissions={["invoice:read:own", "invoice:read:institution"]}
+            >
               <InvoiceDetail />
             </RequirePermission>
           }
