@@ -111,7 +111,33 @@ const completeTwoFactorSchema = z
 
 const codeOnlySchema = z.object({ code: twoFactorCodeSchema }).strict();
 
+/**
+ * "Prove you own this inbox".
+ *
+ * The token is the whole secret, so its shape is all that is checked. Its
+ * entropy is not a validator's business.
+ */
+const emailTokenSchema = z
+  .string()
+  .trim()
+  .min(16, "That link is not complete")
+  .max(200, "That link is not valid");
+
+const forgotPasswordSchema = z.object({ email: email.clone() }).strict();
+
+const resetPasswordSchema = z
+  .object({
+    token: emailTokenSchema,
+    // The same rules as everywhere else. A reset is not a way to set a weaker
+    // password than signing in would accept.
+    password,
+  })
+  .strict();
+
 module.exports = {
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  emailTokenSchema,
   completeTwoFactorSchema,
   codeOnlySchema,
   loginSchema,

@@ -295,6 +295,15 @@ export default function Login() {
               </>
             )}
 
+            <div className="mt-5 text-center">
+              <Link
+                to="/forgot-password"
+                className="text-sm font-medium text-brand-700 transition-colors hover:text-brand-900 dark:text-brand-300 dark:hover:text-brand-100"
+              >
+                Forgotten your password?
+              </Link>
+            </div>
+
             {/* Someone holding a paper certificate is the other kind of visitor
               to this page, and they have no account. */}
             <div className="mt-6 rounded-2xl border border-dashed border-brand-200 dark:border-brand-400/25 bg-brand-50/60 dark:bg-brand-500/12 p-4">

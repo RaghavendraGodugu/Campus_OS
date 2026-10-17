@@ -8,6 +8,7 @@
 
 const authService = require("../services/auth.service");
 const twoFactorService = require("../services/twoFactor.service");
+const emailAuthService = require("../services/emailAuth.service");
 const auditService = require("../services/audit.service");
 const Student = require("../models/Student");
 const User = require("../models/User");
@@ -261,6 +262,71 @@ const disableTwoFactor = asyncHandler(async (req, res) => {
   return sendSuccess(res, { message: "Two-factor is off", data: { enabled: false } });
 });
 
+/**
+ * POST /api/v1/auth/forgot-password
+ *
+ * Always the same answer. See the note in emailAuth.service.js — an endpoint
+ * that says "no such account" is an endpoint that lists the college.
+ */
+const forgotPassword = asyncHandler(async (req, res) => {
+  await emailAuthService.requestReset({
+    email: req.validated.body.email,
+    req,
+  });
+
+  return sendSuccess(res, {
+    message:
+      "If that address has an account, a reset link is on its way. It expires in one hour.",
+    status: 200,
+  });
+});
+
+/** POST /api/v1/auth/reset-password/check — is this link still usable? */
+const checkResetLink = asyncHandler(async (req, res) => {
+  const result = await emailAuthService.inspect({
+    token: req.validated.query.token,
+    purpose: emailAuthService.PURPOSE.RESET,
+  });
+
+  // The page needs to say "expired" rather than "wrong", but nothing about
+  // which account it was.
+  return sendSuccess(res, {
+    data: { valid: result.valid, reason: result.reason },
+    status: 200,
+  });
+});
+
+/** POST /api/v1/auth/reset-password */
+const resetPassword = asyncHandler(async (req, res) => {
+  await emailAuthService.resetPassword({
+    token: req.validated.body.token,
+    password: req.validated.body.password,
+    req,
+  });
+
+  return sendSuccess(res, {
+    message: "Password changed. You can sign in with it now.",
+    status: 200,
+  });
+});
+
+/** POST /api/v1/auth/verify-email */
+const verifyEmail = asyncHandler(async (req, res) => {
+  await emailAuthService.verifyEmail({ token: req.validated.body.token, req });
+
+  return sendSuccess(res, { message: "Email address confirmed", status: 200 });
+});
+
+/** POST /api/v1/auth/resend-verification — needs a session: it is for an account in use. */
+const resendVerification = asyncHandler(async (req, res) => {
+  await emailAuthService.sendVerification({ user: req.user, req });
+
+  return sendSuccess(res, {
+    message: "Confirmation link sent. Check your inbox.",
+    status: 200,
+  });
+});
+
 module.exports = {
   login,
   refresh,
@@ -272,4 +338,9 @@ module.exports = {
   beginTwoFactor,
   confirmTwoFactor,
   disableTwoFactor,
+  forgotPassword,
+  checkResetLink,
+  resetPassword,
+  verifyEmail,
+  resendVerification,
 };

@@ -47,3 +47,6 @@ storage/
 
 # Backup output. Contains every grievance and certificate in clear.
 backups/
+
+# Development mailbox: holds single-use password-reset links.
+dev-mailbox.jsonl

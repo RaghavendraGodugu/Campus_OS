@@ -141,6 +141,15 @@ const schema = z
     SMTP_USER: z.string().optional(),
     SMTP_PASSWORD: z.string().optional(),
     SMTP_FROM: z.string().optional(),
+
+    /**
+     * The origin the links in outgoing email point at.
+     *
+     * Separate from any CORS or callback setting on purpose: this is a full URL
+     * handed to a person in an inbox, so it has to be exactly where the frontend
+     * is reachable from.
+     */
+    WEB_URL: z.string().url().optional(),
   })
   // Refine on the whole object so cross-field rules can be expressed.
   .superRefine((value, ctx) => {

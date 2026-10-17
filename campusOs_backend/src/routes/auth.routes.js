@@ -21,6 +21,7 @@
  */
 
 const express = require("express");
+const { z } = require("zod");
 
 const authController = require("../controllers/auth.controller");
 const { validate } = require("../middleware/validate");
@@ -39,6 +40,9 @@ const {
   changePasswordSchema,
   completeTwoFactorSchema,
   codeOnlySchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  emailTokenSchema,
 } = require("../validators/auth.validator");
 
 const router = express.Router();
@@ -102,11 +106,53 @@ router.post(
 router.post(
   "/2fa/complete",
   loginLimiter,
+  loginPerAccountLimiter,
   validate({ body: completeTwoFactorSchema }),
   authController.completeTwoFactor
 );
 
+/**
+ * Proving you own an inbox.
+ *
+ * No session: these are the routes a locked-out person uses, which is exactly
+ * when there is nobody to be signed in as.
+ */
+router.post(
+  "/forgot-password",
+  loginPerAccountLimiter,
+  validate({ body: forgotPasswordSchema }),
+  authController.forgotPassword
+);
+
+router.post(
+  "/reset-password/check",
+  loginLimiter,
+  validate({ query: z.object({ token: emailTokenSchema }) }),
+  authController.checkResetLink
+);
+
+router.post(
+  "/reset-password",
+  loginLimiter,
+  validate({ body: resetPasswordSchema }),
+  authController.resetPassword
+);
+
+router.post(
+  "/verify-email",
+  loginLimiter,
+  validate({ body: z.object({ token: emailTokenSchema }) }),
+  authController.verifyEmail
+);
+
 /** From here on a session exists. */
+router.post(
+  "/resend-verification",
+  authenticate,
+  csrfProtection,
+  authController.resendVerification
+);
+
 router.post("/2fa/enrol", authenticate, csrfProtection, authController.beginTwoFactor);
 
 router.post(

@@ -414,6 +414,26 @@ async function checkPublicVerification(port) {
     `/password/i.test(document.body.innerText)`,
   );
 
+  // The way back in when you cannot sign in. Same risk as the two above and for
+  // the same reason: a route that guards a page meant for a locked-out person
+  // locks out exactly the person it exists for. A dead token is used here, so
+  // this checks reachability and the honest "expired" answer, not a real reset.
+  await go("/forgot-password");
+  const forgotReachable = await evaluate(
+    `/reset your password/i.test(document.body.innerText)`,
+  );
+  const stayedOnForgot = await evaluate(
+    `location.pathname === "/forgot-password"`,
+  );
+
+  await go("/reset-password?token=" + "a".repeat(64));
+  const resetReachable = await evaluate(
+    `/not valid|expired/i.test(document.body.innerText)`,
+  );
+  const stayedOnReset = await evaluate(
+    `location.pathname === "/reset-password"`,
+  );
+
   await close();
 
   const good =
@@ -421,11 +441,17 @@ async function checkPublicVerification(port) {
     stayedOnVerify &&
     !signInShown &&
     grievanceReachable &&
-    stayedOnGrievance;
+    stayedOnGrievance &&
+    forgotReachable &&
+    stayedOnForgot &&
+    resetReachable &&
+    stayedOnReset;
 
   console.log(
     `\nPUBLIC — no session\n   ${reachable && stayedOnVerify && !signInShown ? "PASS" : "FAIL"}  verify (public) [ok] reachable without signing in` +
-      `\n   ${grievanceReachable && stayedOnGrievance ? "PASS" : "FAIL"}  grievance (public) [ok] reachable without signing in`,
+      `\n   ${grievanceReachable && stayedOnGrievance ? "PASS" : "FAIL"}  grievance (public) [ok] reachable without signing in` +
+      `\n   ${forgotReachable && stayedOnForgot ? "PASS" : "FAIL"}  forgot password [ok] reachable without signing in` +
+      `\n   ${resetReachable && stayedOnReset ? "PASS" : "FAIL"}  reset password [ok] reachable, and a dead link says so`,
   );
 
   if (!good) console.log(`        saw: ${text.slice(0, 120)}`);

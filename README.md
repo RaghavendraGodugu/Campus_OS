@@ -126,6 +126,22 @@ npm run create-admin
 - `/verify` — check a certificate someone handed you
 - `/grievance` — file something anonymously
 
+### Resetting a password
+
+Go to `/forgot-password` and type the address. The link arrives by email, works
+once, and expires in an hour.
+
+With no `SMTP_HOST` set — which is the default — nothing goes over the network.
+The message is appended to `dev-mailbox.jsonl` in the backend directory, so the
+link is a `tail` away:
+
+```bash
+tail -f campusOs_backend/dev-mailbox.jsonl
+```
+
+That file holds working single-use links, so it is gitignored. Set `SMTP_HOST`
+(and `npm install nodemailer`) to send real mail instead; nothing else changes.
+
 ---
 
 ## Commands
@@ -195,7 +211,7 @@ certificate is indefensible.
 to the total exactly. Penalties compound on the original debt, never on a
 balance that already includes earlier penalties, and a sweep is idempotent.
 
-**Correctness that is checked rather than assumed.** 775 backend tests and 170
+**Correctness that is checked rather than assumed.** 801 backend tests and 181
 frontend tests. Contrast ratios computed, not eyeballed. Spreadsheet exports
 neutralise formula injection. CSV exports reuse the same service the screen
 uses, so the two cannot disagree about who may see what.
@@ -207,10 +223,10 @@ uses, so the two cannot disagree about who may see what.
 Being explicit, because a system that claims to be finished when it is not is
 worse than one that is not finished.
 
-**Needs a provider or a host** — the code is not written:
+**Needs a provider or a host**:
 
-- Email verification and password reset by email
-- Email delivery of announcements
+- Email delivery of announcements (the mailer exists; announcements do not use it
+  yet)
 - Live Razorpay webhook delivery (needs a public URL and a signing secret)
 - Uptime monitoring and error tracking
 - Malware scanning of uploads
@@ -260,8 +276,8 @@ campusOs_frontend/    React and Vite
 ## Testing
 
 ```bash
-npm test                    # 775 backend
-npm run test:frontend       # 170 frontend
+npm test                    # 801 backend
+npm run test:frontend       # 181 frontend
 npm run lint                # both, clean
 npm run build               # production bundle
 ```

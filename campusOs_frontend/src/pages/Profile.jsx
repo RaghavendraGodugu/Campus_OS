@@ -19,6 +19,7 @@ import Button from "../components/ui/Button";
 import AvatarPicker from "../components/AvatarPicker";
 import NotificationPreferences from "../components/NotificationPreferences";
 import TwoFactorSettings from "../components/TwoFactorSettings";
+import EmailVerification from "../components/EmailVerification";
 import Field, { inputClass } from "../components/ui/Field";
 import { ErrorState } from "../components/ui/States";
 import {
@@ -168,6 +169,17 @@ export default function Profile() {
           enabled={Boolean(account.twoFactorEnabled)}
           onChange={refresh}
         />
+      </Card>
+
+      <Card
+        title="Email address"
+        description={
+          account.emailVerified
+            ? "Confirmed. Password resets arrive here."
+            : "Not confirmed yet. Confirm it so a locked-out password can be recovered."
+        }
+      >
+        <EmailVerification verified={Boolean(account.emailVerified)} />
       </Card>
 
       <Card title="Profile picture">

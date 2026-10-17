@@ -86,6 +86,39 @@ const userSchema = new mongoose.Schema(
      * wants silence about money but not about a certificate they are waiting on
      * should be able to say so.
      */
+    /**
+     * Single-use tokens for "prove you own this inbox".
+     *
+     * One field, not a collection: at most one verification and one reset may be
+     * outstanding at a time, and asking for a new one retires the old. Storing
+     * the SHA-256 hash rather than the token means a database dump yields no
+     * usable links — the same reasoning as the refresh-token family.
+     *
+     * `purpose` keeps the two apart. A verification link must not be usable to
+     * set a password, or a link that gets pasted into a chat would hand over the
+     * account.
+     */
+    emailTokens: {
+      verification: {
+        hash: { type: String, default: null, select: false },
+        expiresAt: { type: Date, default: null },
+      },
+      reset: {
+        hash: { type: String, default: null, select: false },
+        expiresAt: { type: Date, default: null },
+      },
+    },
+
+    /**
+     * Whether the address has been proven.
+     *
+     * Set when the verification link is used. Admin-created accounts start
+     * unverified: the institute chose the address, and nobody has yet shown
+     * that they can read mail there.
+     */
+    emailVerified: { type: Boolean, default: false },
+    emailVerifiedAt: { type: Date, default: null },
+
     notificationPreferences: {
       requests: { type: Boolean, default: true },
       complaints: { type: Boolean, default: true },
@@ -359,6 +392,11 @@ userSchema.methods.toPublicJSON = function toPublicJSON() {
      * being returned, never anyone else's.
      */
     mustChangePassword: this.mustChangePassword ?? false,
+    /**
+     * Whether the address is proven, and when. Enough for the account holder to
+     * see; the tokens themselves are `select: false` and never leave the server.
+     */
+    emailVerified: this.emailVerified ?? false,
     /**
      * Whether a second factor is active — the person reading their own profile
      * needs this to show the settings. It says nothing an account holder does

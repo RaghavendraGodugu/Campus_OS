@@ -9,6 +9,9 @@ import Profile from "./pages/Profile";
 import ApplyCertificate from "./pages/ApplyCertificate";
 import VerifyCertificate from "./pages/VerifyCertificate";
 import SetPassword from "./pages/SetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 import Grievance from "./pages/Grievance";
 import People from "./pages/admin/People";
 import Departments from "./pages/admin/Departments";
@@ -55,6 +58,14 @@ export default function App() {
       <Route path="/grievance" element={<Grievance />} />
 
       <Route path="/login" element={<Login />} />
+
+      {/*
+        Locked out, or arriving from a link in an email. All three are outside
+        the shell: by definition there is no session to put them in.
+      */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
 
       {/*
         Reachable while signed in, but deliberately outside the shell: a person
