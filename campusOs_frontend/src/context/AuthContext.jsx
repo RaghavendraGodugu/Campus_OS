@@ -125,13 +125,38 @@ export function AuthProvider({ children }) {
     return () => controller.abort();
   }, [refresh]);
 
+  /**
+   * Sign in.
+   *
+   * Two possible outcomes, and the caller has to be ready for both: a session,
+   * or a two-factor challenge. Returning the challenge instead of applying a
+   * session keeps the decision in one place, so no screen can accidentally treat
+   * "password accepted" as "signed in".
+   */
   const login = useCallback(
     async (email, password) => {
       const response = await apiPost("/auth/login", { email, password });
 
+      if (response.data.twoFactorRequired) {
+        return response.data;
+      }
+
       applySession(response.data);
 
       // Cached data belongs to the previous session.
+      queryClient.clear();
+
+      return response.data.user;
+    },
+    [applySession, queryClient],
+  );
+
+  /** The second step of a two-factor sign-in. */
+  const completeTwoFactor = useCallback(
+    async (challenge, code) => {
+      const response = await apiPost("/auth/2fa/complete", { challenge, code });
+
+      applySession(response.data);
       queryClient.clear();
 
       return response.data.user;
@@ -185,6 +210,7 @@ export function AuthProvider({ children }) {
       can,
       canAny,
       login,
+      completeTwoFactor,
       logout,
       refresh,
     }),
@@ -197,6 +223,7 @@ export function AuthProvider({ children }) {
       can,
       canAny,
       login,
+      completeTwoFactor,
       logout,
       refresh,
     ],

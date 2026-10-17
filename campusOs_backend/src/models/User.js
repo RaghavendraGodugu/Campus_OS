@@ -98,6 +98,45 @@ const userSchema = new mongoose.Schema(
     },
 
     /**
+     * Two-factor authentication.
+     *
+     * ## The secret is encrypted at rest, not stored plainly
+     *
+     * A TOTP secret is a *password* — whoever holds it can mint valid codes
+     * forever. A plaintext secret in a database dump means one leaked backup
+     * hands over permanent impersonation of that account, with no second factor
+     * left to stop it. It is sealed with AES-256-GCM under a key derived from
+     * `CSRF_SECRET`, so the ciphertext is useless without an application secret
+     * the backup does not contain.
+     *
+     * shortcut: the sealing key is derived from CSRF_SECRET rather than a
+     * dedicated `TOTP_ENCRYPTION_KEY`. Upgrade path: add the dedicated key — a
+     * one-line change — if the two ever need to rotate separately.
+     *
+     * ## `pendingSecret` until the code is confirmed
+     *
+     * Enrolment enables nothing. The secret sits in `pendingSecret` until a
+     * code from the authenticator app comes back, so a user who abandons
+     * enrolment half-way is not locked out of an app they never added.
+     */
+    twoFactor: {
+      enabled: { type: Boolean, default: false },
+      /** AES-256-GCM ciphertext of the base32 secret. Null until confirmed. */
+      encryptedSecret: { type: String, default: null },
+      /** Sealed, awaiting the first code. Never used to authenticate. */
+      pendingSecret: { type: String, default: null },
+      confirmedAt: { type: Date, default: null },
+      /**
+       * Recovery codes, as SHA-256 hashes.
+       *
+       * Hashed for the same reason a password is: they are single-use bearer
+       * credentials, so a stolen list is a list of working one-time passwords.
+       */
+      recoveryCodes: { type: [String], default: [] },
+      lastUsedAt: { type: Date, default: null },
+    },
+
+    /**
      * Profile picture.
      *
      * Held as a storage key, never as a URL or a data blob. The key is an
@@ -320,6 +359,12 @@ userSchema.methods.toPublicJSON = function toPublicJSON() {
      * being returned, never anyone else's.
      */
     mustChangePassword: this.mustChangePassword ?? false,
+    /**
+     * Whether a second factor is active — the person reading their own profile
+     * needs this to show the settings. It says nothing an account holder does
+     * not already know, and the secret and recovery codes stay server-side.
+     */
+    twoFactorEnabled: Boolean(this.twoFactor?.enabled),
     lastLoginAt: this.lastLoginAt ?? null,
     createdAt: this.createdAt,
   };

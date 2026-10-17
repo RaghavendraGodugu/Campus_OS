@@ -31,6 +31,8 @@ const bcrypt = require("bcryptjs");
 const { ApiError } = require("../utils/ApiError");
 const {
   signAccessToken,
+  signTwoFactorChallenge,
+  verifyTwoFactorChallenge,
   signRefreshToken,
   verifyRefreshToken,
   hashToken,
@@ -43,6 +45,7 @@ const { describePermissions } = require("../utils/permissions");
 const { AUDIT_ACTION } = require("../config/constants");
 const { logger } = require("../config/logger");
 const auditService = require("./audit.service");
+const twoFactor = require("./twoFactor.service");
 
 /**
  * Maximum stored refresh-token entries per account.
@@ -120,6 +123,29 @@ async function login({ email, password, req }) {
     throw ApiError.invalidCredentials();
   }
 
+  /*
+   * A password is not enough when the account has a second factor.
+   *
+   * No session is issued here. The caller gets a short-lived challenge token
+   * instead, and `completeTwoFactor` mints the session once the code comes
+   * back. Issuing the session here and asking for the code afterwards would
+   * mean the account was already open for the length of that conversation.
+   */
+  if (twoFactor.isEnabled(user)) {
+    const challenge = await issueTwoFactorChallenge(user);
+
+    await auditService.record({
+      action: AUDIT_ACTION.TWO_FACTOR_CHALLENGED,
+      entity: "User",
+      entityId: user._id,
+      metadata: { role: user.role },
+      actor: user,
+      req,
+    });
+
+    return { twoFactorRequired: true, challenge };
+  }
+
   // Clear any earlier forced invalidation: signing in is the user's explicit
   // decision to start a new session.
   if (user.sessionsInvalidatedAt) {
@@ -143,6 +169,77 @@ async function login({ email, password, req }) {
   });
 
   return { user, ...tokens };
+}
+
+/**
+ * Mint the short-lived token that the second step of a 2FA login carries.
+ *
+ * Scoped to this one login attempt: it authorises nothing but "prove you hold
+ * the second factor", and it expires in minutes.
+ */
+async function issueTwoFactorChallenge(user) {
+  return {
+    token: signTwoFactorChallenge({ userId: user._id, sessionId: randomId(8) }),
+    expiresInSeconds: 300,
+    // Shown so the person knows which account they are finishing, without
+    // confirming that it exists beyond what they just typed.
+    maskedAccount: maskEmail(user.email),
+  };
+}
+
+/** Second step of a two-factor login: verify the code, then issue the session. */
+async function completeTwoFactor({ challenge, code, req }) {
+  let claims;
+  try {
+    claims = verifyTwoFactorChallenge(challenge);
+  } catch {
+    throw ApiError.invalidCredentials();
+  }
+
+  const user = await User.findById(claims.sub);
+  if (!user || !user.isActive) {
+    throw ApiError.invalidCredentials();
+  }
+
+  const ok = await twoFactor.checkCode({ user, code });
+  if (!ok) {
+    await auditService.record({
+      action: AUDIT_ACTION.LOGIN_FAILED,
+      entity: "User",
+      entityId: user._id,
+      metadata: { reason: "bad_two_factor_code" },
+      actor: user,
+      req,
+    });
+    throw ApiError.invalidCredentials();
+  }
+
+  if (user.sessionsInvalidatedAt) user.sessionsInvalidatedAt = null;
+
+  const tokens = await issueSession(user, req);
+
+  user.lastLoginAt = new Date();
+  await user.save().catch((error) => {
+    logger.warn({ err: error, userId: user.id }, "Failed to record lastLoginAt");
+  });
+
+  await auditService.record({
+    action: AUDIT_ACTION.LOGIN,
+    entity: "User",
+    entityId: user._id,
+    metadata: { role: user.role, twoFactor: true },
+    actor: user,
+    req,
+  });
+
+  return { user, ...tokens };
+}
+
+/** a@b.co -> a***@b.co. Enough to recognise your own account, not to enumerate. */
+function maskEmail(email) {
+  const [local, domain] = String(email ?? "").split("@");
+  if (!domain) return "your account";
+  return `${local.slice(0, 1)}***@${domain}`;
 }
 
 /**
@@ -502,6 +599,7 @@ const tokensMatch = (presented, expected) => safeCompare(presented, expected);
 
 module.exports = {
   login,
+  completeTwoFactor,
   refreshSession,
   logout: revokeSession,
   revokeAllSessions,

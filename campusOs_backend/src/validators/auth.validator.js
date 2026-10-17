@@ -88,7 +88,32 @@ const changePasswordSchema = z
 /** POST /auth/logout-all */
 const logoutAllSchema = z.object({}).strict().partial();
 
+/**
+ * Two-factor.
+ *
+ * `code` accepts six digits *or* a recovery code, in one field. The user does
+ * not think in terms of "which kind did I type", they type what is in their app
+ * or what is on their paper.
+ */
+const twoFactorCodeSchema = z
+  .string()
+  .trim()
+  .min(6, "Enter the six-digit code from your app")
+  .max(32, "That is too long to be a code or a recovery code")
+  .regex(/^[0-9A-Za-z]+$/, "Codes contain only letters and digits");
+
+const completeTwoFactorSchema = z
+  .object({
+    challenge: z.string().trim().min(10, "Sign-in expired. Start again."),
+    code: twoFactorCodeSchema,
+  })
+  .strict();
+
+const codeOnlySchema = z.object({ code: twoFactorCodeSchema }).strict();
+
 module.exports = {
+  completeTwoFactorSchema,
+  codeOnlySchema,
   loginSchema,
   refreshSchema,
   logoutSchema,

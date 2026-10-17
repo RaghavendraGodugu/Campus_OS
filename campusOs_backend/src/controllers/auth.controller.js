@@ -7,6 +7,7 @@
  */
 
 const authService = require("../services/auth.service");
+const twoFactorService = require("../services/twoFactor.service");
 const auditService = require("../services/audit.service");
 const Student = require("../models/Student");
 const User = require("../models/User");
@@ -27,8 +28,24 @@ const { AUDIT_ACTION } = require("../config/constants");
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.validated.body;
 
-  const { user, accessToken, refreshToken, csrfToken, expiresAt } =
-    await authService.login({ email, password, req });
+  const result = await authService.login({ email, password, req });
+
+  /*
+   * The password was right and that is not yet a session.
+   *
+   * No cookies are set and no user is returned — the caller gets a challenge
+   * and comes back with a code. Returning the account here would mean the whole
+   * second factor was advisory.
+   */
+  if (result.twoFactorRequired) {
+    return sendSuccess(res, {
+      message: "Enter the code from your authenticator app",
+      data: { twoFactorRequired: true, challenge: result.challenge },
+      status: 200,
+    });
+  }
+
+  const { user, accessToken, refreshToken, csrfToken, expiresAt } = result;
 
   setAuthCookies(res, { accessToken, refreshToken, csrfToken });
 
@@ -190,4 +207,69 @@ const changePassword = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { login, refresh, me, logout, logoutAll, changePassword };
+/** POST /api/v1/auth/2fa/complete — the second step of a two-factor sign-in. */
+const completeTwoFactor = asyncHandler(async (req, res) => {
+  const result = await authService.completeTwoFactor({
+    challenge: req.validated.body.challenge,
+    code: req.validated.body.code,
+    req,
+  });
+
+  setAuthCookies(res, {
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
+    csrfToken: result.csrfToken,
+  });
+
+  return sendSuccess(res, {
+    message: "Signed in",
+    data: {
+      user: result.user.toPublicJSON(),
+      expiresAt: result.expiresAt.toISOString(),
+    },
+    status: 200,
+  });
+});
+
+/** POST /api/v1/auth/2fa/enrol — start, and get a secret to put in an app. */
+const beginTwoFactor = asyncHandler(async (req, res) => {
+  const enrolment = await twoFactorService.beginEnrolment({ user: req.user });
+
+  return sendSuccess(res, {
+    message: "Scan or type this secret into your authenticator app",
+    data: enrolment,
+  });
+});
+
+/** POST /api/v1/auth/2fa/confirm — enable it with a working code. */
+const confirmTwoFactor = asyncHandler(async (req, res) => {
+  const result = await twoFactorService.confirmEnrolment({
+    user: req.user,
+    code: req.validated.body.code,
+  });
+
+  return sendSuccess(res, {
+    message: "Two-factor is on. Save your recovery codes now.",
+    data: result,
+  });
+});
+
+/** POST /api/v1/auth/2fa/disable — needs a working code, not just a session. */
+const disableTwoFactor = asyncHandler(async (req, res) => {
+  await twoFactorService.disable({ user: req.user, code: req.validated.body.code });
+
+  return sendSuccess(res, { message: "Two-factor is off", data: { enabled: false } });
+});
+
+module.exports = {
+  login,
+  refresh,
+  me,
+  logout,
+  logoutAll,
+  changePassword,
+  completeTwoFactor,
+  beginTwoFactor,
+  confirmTwoFactor,
+  disableTwoFactor,
+};

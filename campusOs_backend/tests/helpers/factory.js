@@ -145,6 +145,14 @@ async function createStudent({ department, program, ...userOptions } = {}) {
  * @param {string} password
  * @returns {Promise<{agent: object, csrfToken: string, cookieHeader: string}>}
  */
+/**
+ * Log in with a password.
+ *
+ * With a second factor enabled there is no session to return, so this returns
+ * `twoFactorRequired` plus a bare `agent` that is deliberately not signed in,
+ * and the caller finishes with `/auth/2fa/complete`. Tests should read
+ * `twoFactorRequired` rather than assume a session always comes back.
+ */
 async function loginAs(user, password = "TestPass123!") {
   const agent = request.agent(getApp());
   const res = await agent
@@ -155,6 +163,19 @@ async function loginAs(user, password = "TestPass123!") {
     throw new Error(
       `loginAs failed for ${user.email}: expected 200, received ${res.status} ${JSON.stringify(res.body)}`
     );
+  }
+
+  if (res.body.data?.twoFactorRequired) {
+    return {
+      agent,
+      twoFactorRequired: true,
+      // The whole challenge object: callers need `maskedAccount` too, not just
+      // the token.
+      challenge: res.body.data.challenge,
+      csrfToken: undefined,
+      userId: undefined,
+      user: await User.findById(user._id).select("-passwordHash"),
+    };
   }
 
   return {

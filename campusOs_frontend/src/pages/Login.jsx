@@ -25,13 +25,16 @@ import Field, { inputClass } from "../components/ui/Field";
  * nothing about anyone else.
  */
 export default function Login() {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, completeTwoFactor, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  // Non-null once the password is accepted but the second factor is not.
+  const [challenge, setChallenge] = useState(null);
+  const [code, setCode] = useState("");
 
   if (isLoading) {
     return null;
@@ -49,11 +52,40 @@ export default function Login() {
     setSubmitting(true);
 
     try {
-      await login(email.trim(), password);
+      const result = await login(email.trim(), password);
+
+      if (result?.twoFactorRequired) {
+        // The password was right; this is not yet a session.
+        setChallenge(result.challenge);
+        setSubmitting(false);
+        return;
+      }
     } catch (failure) {
       setError(failure.message);
       setSubmitting(false);
     }
+  };
+
+  const submitCode = async (event) => {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+
+    try {
+      await completeTwoFactor(challenge.token, code.trim());
+      // On success the context flips to authenticated and this page unmounts.
+    } catch (failure) {
+      setError(failure.message);
+      setCode("");
+      setSubmitting(false);
+    }
+  };
+
+  // Back to the password step: the challenge is deliberately not reused.
+  const backToPassword = () => {
+    setChallenge(null);
+    setCode("");
+    setError(null);
   };
 
   // Not named `useDemo`: a `use` prefix marks this as a hook to the linter and
@@ -147,60 +179,121 @@ export default function Login() {
           </div>
 
           <div className="surface-raised p-6 sm:p-7">
-            <h2 className="text-xl font-semibold tracking-tight text-ink-900">
-              Sign in
-            </h2>
-            <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
-              Use your college account.
-            </p>
-
-            <form onSubmit={submit} className="mt-8 space-y-5" noValidate>
-              <Field label="Email" htmlFor="email" required>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="username"
-                  required
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  className={inputClass}
-                  placeholder="you@college.edu"
-                />
-              </Field>
-
-              <Field label="Password" htmlFor="password" required>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className={inputClass}
-                  placeholder="••••••••"
-                />
-              </Field>
-
-              {error && (
-                <p
-                  role="alert"
-                  className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
-                >
-                  {error}
+            {challenge ? (
+              <form onSubmit={submitCode} className="space-y-5" noValidate>
+                <h2 className="text-xl font-semibold tracking-tight text-ink-900">
+                  Enter your code
+                </h2>
+                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+                  Six digits from your authenticator app for{" "}
+                  <span className="font-medium text-ink-700 dark:text-ink-200">
+                    {challenge.maskedAccount}
+                  </span>
+                  . A recovery code works too.
                 </p>
-              )}
 
-              <Button
-                type="submit"
-                size="lg"
-                loading={submitting}
-                className="w-full"
-              >
-                Sign in
-              </Button>
-            </form>
+                <Field label="Code" htmlFor="code" required>
+                  <input
+                    id="code"
+                    name="code"
+                    type="text"
+                    inputMode="text"
+                    // Six digits normally, but recovery codes are letters, so no
+                    // numeric-only autocomplete here.
+                    autoComplete="one-time-code"
+                    autoFocus
+                    required
+                    value={code}
+                    onChange={(event) => setCode(event.target.value)}
+                    className={inputClass}
+                    placeholder="123456"
+                  />
+                </Field>
+
+                {error && (
+                  <p
+                    role="alert"
+                    className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
+                  >
+                    {error}
+                  </p>
+                )}
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  loading={submitting}
+                  className="w-full"
+                >
+                  Verify
+                </Button>
+
+                <button
+                  type="button"
+                  onClick={backToPassword}
+                  className="w-full text-center text-sm font-medium text-brand-700 dark:text-brand-300 transition-colors hover:text-brand-900 dark:hover:text-brand-100"
+                >
+                  Use a different account
+                </button>
+              </form>
+            ) : (
+              <>
+                <h2 className="text-xl font-semibold tracking-tight text-ink-900">
+                  Sign in
+                </h2>
+                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+                  Use your college account.
+                </p>
+
+                <form onSubmit={submit} className="mt-8 space-y-5" noValidate>
+                  <Field label="Email" htmlFor="email" required>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="username"
+                      required
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      className={inputClass}
+                      placeholder="you@college.edu"
+                    />
+                  </Field>
+
+                  <Field label="Password" htmlFor="password" required>
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autoComplete="current-password"
+                      required
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      className={inputClass}
+                      placeholder="••••••••"
+                    />
+                  </Field>
+
+                  {error && (
+                    <p
+                      role="alert"
+                      className="rounded-xl bg-red-50 dark:bg-red-500/12 px-3.5 py-2.5 text-sm text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset"
+                    >
+                      {error}
+                    </p>
+                  )}
+
+                  <Button
+                    type="submit"
+                    size="lg"
+                    loading={submitting}
+                    className="w-full"
+                  >
+                    Sign in
+                  </Button>
+                </form>
+              </>
+            )}
 
             {/* Someone holding a paper certificate is the other kind of visitor
               to this page, and they have no account. */}

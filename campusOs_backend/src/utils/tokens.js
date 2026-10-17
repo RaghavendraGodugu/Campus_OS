@@ -37,7 +37,19 @@ const { getEnv } = require("../config/env");
 const TOKEN_TYPE = {
   ACCESS: "access",
   REFRESH: "refresh",
+  /**
+   * The half-finished state of a two-factor login.
+   *
+   * A distinct type, not a flag on an access token. If the challenge were an
+   * access token then every place that verifies "is this a valid session?" would
+   * accept it — and the challenge exists precisely during the window where the
+   * password is known but the second factor is not.
+   */
+  CHALLENGE: "2fa-challenge",
 };
+
+/** How long a two-factor challenge stays usable. */
+const CHALLENGE_EXPIRY = "5m";
 
 /** Token lifetime defaults, overridable via the environment. */
 const DEFAULT_ACCESS_EXPIRY = "15m";
@@ -122,6 +134,25 @@ function verifyToken(token, expectedType, secret) {
 /** Verify an access token using the access secret. */
 function verifyAccessToken(token) {
   return verifyToken(token, TOKEN_TYPE.ACCESS, getEnv().JWT_SECRET);
+}
+
+/**
+ * Sign the token for the second step of a two-factor login.
+ *
+ * Authorises exactly one thing: "prove you hold the second factor for this
+ * account". It is not a session, carries no role, and no middleware accepts it.
+ */
+function signTwoFactorChallenge({ userId, sessionId }) {
+  const env = getEnv();
+  return jwt.sign({ sid: sessionId, typ: TOKEN_TYPE.CHALLENGE }, env.JWT_SECRET, {
+    subject: userId.toString(),
+    expiresIn: CHALLENGE_EXPIRY,
+  });
+}
+
+/** Verify a two-factor challenge. */
+function verifyTwoFactorChallenge(token) {
+  return verifyToken(token, TOKEN_TYPE.CHALLENGE, getEnv().JWT_SECRET);
 }
 
 /** Verify a refresh token using the refresh secret. */
@@ -222,6 +253,8 @@ function randomId(bytes = 16) {
 module.exports = {
   TOKEN_TYPE,
   signAccessToken,
+  signTwoFactorChallenge,
+  verifyTwoFactorChallenge,
   signRefreshToken,
   verifyToken,
   verifyAccessToken,

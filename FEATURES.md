@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 17 October 2026
-- **Verified:** 743 backend tests, 164 frontend tests, live sweep against Atlas, lint and build clean
+- **Verified:** 775 backend tests, 170 frontend tests, live sweep against Atlas, lint and build clean
 - **Databases:** Atlas `campusos` exercised end to end — a real GST invoice
   (₹1,00,000 + 18% CGST/SGST = ₹1,18,000, halves reconciling exactly), an
   opened academic term, a saved tax registration, and a green browser sweep
@@ -42,7 +42,11 @@ means the note that follows it)
 - [x] Login throttling, and lockout after repeated failures
 - [ ] Email verification of new accounts
 - [ ] Password reset by email
-- [ ] Two-factor authentication
+- [x] Two-factor authentication — TOTP, enforced at the login step with no
+      session until the code arrives; the challenge is a distinct token type, so
+      it can never be used as an access token. Turned on and off from the profile
+      with a working code required to turn it off, ten single-use recovery codes
+      shown once, secret sealed with AES-256-GCM, RFC 6238 vectors covered
 
 ## 3. Profile (every role)
 
@@ -417,8 +421,8 @@ means the note that follows it)
 
 ## 15. Quality gates
 
-- [x] Backend: 577 tests passing
-- [x] Frontend: 164 tests passing
+- [x] Backend: 775 tests passing
+- [x] Frontend: 170 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds
 - [x] `npm run verify:login` — real-browser sign-in sweep

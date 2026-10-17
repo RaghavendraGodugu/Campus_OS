@@ -18,6 +18,7 @@ import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
 import AvatarPicker from "../components/AvatarPicker";
 import NotificationPreferences from "../components/NotificationPreferences";
+import TwoFactorSettings from "../components/TwoFactorSettings";
 import Field, { inputClass } from "../components/ui/Field";
 import { ErrorState } from "../components/ui/States";
 import {
@@ -156,6 +157,16 @@ export default function Profile() {
       >
         <NotificationPreferences
           preferences={account.notificationPreferences}
+        />
+      </Card>
+
+      <Card
+        title="Two-factor sign-in"
+        description="A six-digit code from an authenticator app, in addition to your password."
+      >
+        <TwoFactorSettings
+          enabled={Boolean(account.twoFactorEnabled)}
+          onChange={refresh}
         />
       </Card>
 

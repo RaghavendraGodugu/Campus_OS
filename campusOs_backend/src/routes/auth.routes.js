@@ -37,6 +37,8 @@ const {
   logoutSchema,
   logoutAllSchema,
   changePasswordSchema,
+  completeTwoFactorSchema,
+  codeOnlySchema,
 } = require("../validators/auth.validator");
 
 const router = express.Router();
@@ -88,6 +90,39 @@ router.post(
   csrfProtection,
   validate({ body: changePasswordSchema }),
   authController.changePassword
+);
+
+/**
+ * Two-factor sign-in.
+ *
+ * Declared before `/:something` paths matter, and unauthenticated: this is the
+ * step *between* the password and the session, so by definition there is no
+ * session yet.
+ */
+router.post(
+  "/2fa/complete",
+  loginLimiter,
+  validate({ body: completeTwoFactorSchema }),
+  authController.completeTwoFactor
+);
+
+/** From here on a session exists. */
+router.post("/2fa/enrol", authenticate, csrfProtection, authController.beginTwoFactor);
+
+router.post(
+  "/2fa/confirm",
+  authenticate,
+  csrfProtection,
+  validate({ body: codeOnlySchema }),
+  authController.confirmTwoFactor
+);
+
+router.post(
+  "/2fa/disable",
+  authenticate,
+  csrfProtection,
+  validate({ body: codeOnlySchema }),
+  authController.disableTwoFactor
 );
 
 module.exports = router;
