@@ -75,3 +75,44 @@ describe("databaseNameFrom", () => {
     expect(databaseNameFrom("mongodb://127.0.0.1:27017/campus%2Fdev")).toBe("campus/dev");
   });
 });
+
+/**
+ * The `EBADRESP` this project actually hit.
+ *
+ * A `mongodb+srv://` URI is resolved through c-ares. The Node build on this
+ * machine shipped without it, so every SRV lookup failed — while `dig` answered
+ * correctly and Atlas was, and still is, perfectly reachable. The connection
+ * refused, the error named a hostname nobody could act on, and it read like a
+ * MongoDB outage.
+ */
+describe("explaining a DNS failure", () => {
+  const { explainDnsFailure } = require("../src/config/db");
+  const SRV_URI = "mongodb+srv://user:pass@campusos.xwdvotu.mongodb.net";
+
+  it("names the local cause when this Node cannot resolve SRV", () => {
+    const message = explainDnsFailure(
+      { code: "EBADRESP", message: "querySrv EBADRESP host" },
+      SRV_URI
+    );
+
+    expect(message).toBeTruthy();
+    // It must be actionable, not merely different.
+    expect(message).toMatch(/nvm use/i);
+    expect(message).toMatch(/local/i);
+  });
+
+  it("still recognises the failure when the code is missing but the message says querySrv", () => {
+    expect(
+      explainDnsFailure({ message: "querySrv EBADRESP somewhere" }, SRV_URI)
+    ).toBeTruthy();
+  });
+
+  it("says nothing about SRV when the URI is not an SRV one", () => {
+    // A plain seed list never does an SRV lookup, so this is a different problem.
+    expect(explainDnsFailure({ code: "EBADRESP" }, "mongodb://a,b,c/db")).toBeNull();
+  });
+
+  it("says nothing about an authentication failure", () => {
+    expect(explainDnsFailure({ code: "AUTHENTICATION_FAILED" }, SRV_URI)).toBeNull();
+  });
+});

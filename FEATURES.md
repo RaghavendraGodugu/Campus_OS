@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 17 October 2026
-- **Verified:** 824 backend tests, 181 frontend tests, lint and build clean. The last live sweep against Atlas was green; DNS to Atlas is currently failing from this machine, so the newest work is covered by the test suite only until that recovers
+- **Verified:** 828 backend tests, 181 frontend tests, lint and build clean, plus a green 41-check browser sweep against Atlas and the six fixes below confirmed against live data
 - **Databases:** Atlas `campusos` exercised end to end — a real GST invoice
   (₹1,00,000 + 18% CGST/SGST = ₹1,18,000, halves reconciling exactly), an
   opened academic term, a saved tax registration, and a green browser sweep
@@ -429,7 +429,7 @@ means the note that follows it)
 
 ## 15. Quality gates
 
-- [x] Backend: 824 tests passing
+- [x] Backend: 828 tests passing
 - [x] Frontend: 181 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds

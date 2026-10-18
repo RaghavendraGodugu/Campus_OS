@@ -80,12 +80,62 @@ async function connectDB(uri) {
       })
       .catch((error) => {
         connectPromise = null;
-        logger.error({ err: error, message: error.message }, "MongoDB connection failed");
+
+        const explained = explainDnsFailure(error, connectionString);
+        if (explained) {
+          logger.fatal({ message: explained }, "MongoDB connection failed");
+        } else {
+          logger.error(
+            { err: error, message: error.message },
+            "MongoDB connection failed"
+          );
+        }
+
         throw error;
       });
   }
 
   return connectPromise;
+}
+
+/**
+ * Explain a DNS failure that is about this machine, not about MongoDB.
+ *
+ * A `mongodb+srv://` URI is resolved by `dns.resolveSrv`, which is backed by
+ * c-ares. Some Node builds ship without it, and then *every* SRV lookup fails
+ * with `EBADRESP` — including ones `dig` answers correctly. The connection
+ * refused, Atlas is fine, and the error names a hostname nobody can do anything
+ * about, so it reads like an outage at MongoDB.
+ *
+ * Saying so, and naming the fix, is the whole value here. Returns null for a
+ * failure that is not this one.
+ */
+function explainDnsFailure(error, connectionString) {
+  if (!String(connectionString).startsWith("mongodb+srv://")) return null;
+
+  const code = error?.code ?? "";
+  const message = String(error?.message ?? "");
+
+  const srvLookupFailed =
+    code === "EBADRESP" || code === "ESERVFAIL" || /querySrv|ENOTFOUND/i.test(message);
+
+  // Only worth claiming when SRV really is the broken part here; a missing
+  // atlas host is a different problem with a different fix.
+  if (!srvLookupFailed) return null;
+  if (process.versions.cares === undefined || process.versions.cares === null) {
+    return (
+      "This Node build cannot resolve DNS SRV records (it ships without c-ares), " +
+      "so a mongodb+srv:// connection cannot work. MongoDB and Atlas are both " +
+      "fine — this is local. Run `nvm use` from the repository root to switch to " +
+      "the pinned version, then start again."
+    );
+  }
+
+  return (
+    "The SRV record for this MongoDB host could not be resolved from this " +
+    "machine. Atlas may be unreachable from your network, or a DNS filter may be " +
+    "rewriting the answer. `dig SRV <host>` will show what your resolver returns."
+  );
 }
 
 /**
@@ -260,6 +310,9 @@ function registerConnectionListeners() {
 
 module.exports = {
   syncIndexes,
+  // Exported for its own test: the whole value of this function is the wording,
+  // and wording is the thing that goes stale unnoticed.
+  explainDnsFailure,
   connectDB,
   disconnectDB,
   isDbConnected,

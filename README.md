@@ -47,10 +47,19 @@ Permissions are computed on the server and re-checked on every request.
 
 ```bash
 git clone <this repo> && cd CampusOS
+nvm use                          # reads .nvmrc and picks a Node that works
 npm install                      # installs both workspaces
 
 cp campusOs_backend/.env.example campusOs_backend/.env
 ```
+
+> **Use `nvm use` before `npm install`.** A `MONGO_URI` beginning
+> `mongodb+srv://` is resolved through DNS SRV records, which need the c-ares
+> library inside Node. Some builds ship without it, and then the connection
+> fails with `querySrv EBADRESP` even though Atlas is perfectly reachable and
+> `dig` answers correctly. The error names a hostname you cannot act on and reads
+> like a MongoDB outage. `.nvmrc` pins a version known to work; the API says so
+> outright if your Node is the problem.
 
 Edit `campusOs_backend/.env`. Four values are required:
 
@@ -211,7 +220,7 @@ certificate is indefensible.
 to the total exactly. Penalties compound on the original debt, never on a
 balance that already includes earlier penalties, and a sweep is idempotent.
 
-**Correctness that is checked rather than assumed.** 824 backend tests and 181
+**Correctness that is checked rather than assumed.** 828 backend tests and 181
 frontend tests. Contrast ratios computed, not eyeballed. Spreadsheet exports
 neutralise formula injection. CSV exports reuse the same service the screen
 uses, so the two cannot disagree about who may see what.
@@ -274,7 +283,7 @@ campusOs_frontend/    React and Vite
 ## Testing
 
 ```bash
-npm test                    # 824 backend
+npm test                    # 828 backend
 npm run test:frontend       # 181 frontend
 npm run lint                # both, clean
 npm run build               # production bundle
