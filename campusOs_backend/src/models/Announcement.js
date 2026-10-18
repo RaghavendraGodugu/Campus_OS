@@ -165,6 +165,15 @@ const announcementSchema = new mongoose.Schema(
      * even when the notification inbox is only partially populated.
      */
     notifiedCount: { type: Number, default: 0 },
+    /**
+     * How many messages actually left for email.
+     *
+     * Recorded rather than assumed, because the honest number is usually lower
+     * than the audience: unconfirmed addresses and muted categories are skipped,
+     * and a mail server that is down sends nothing at all. An admin reading this
+     * needs the truth, not the fan-out size.
+     */
+    emailedCount: { type: Number, default: 0 },
     fanOutTruncated: { type: Boolean, default: false },
 
     archivedAt: { type: Date, default: null },

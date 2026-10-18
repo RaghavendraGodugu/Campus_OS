@@ -10,7 +10,7 @@ const VARIANTS = {
   // single most dated thing a button can be. The gradient is barely perceptible
   // but stops the control reading as a rectangle of paint.
   primary:
-    "aurora bg-[length:100%_100%] text-white shadow-brand ring-1 ring-white/15 hover:shadow-pop hover:brightness-[1.08] focus-visible:outline-brand-700 active:brightness-95 disabled:bg-none disabled:bg-ink-200 disabled:text-ink-400 disabled:shadow-none disabled:ring-ink-300",
+    "aurora liquid-sheen text-white shadow-brand ring-1 ring-white/15 hover:shadow-pop hover:brightness-[1.08] focus-visible:outline-brand-700 active:brightness-95 disabled:bg-none disabled:bg-ink-200 disabled:text-ink-400 disabled:shadow-none disabled:ring-ink-300",
   secondary:
     "bg-surface/90 text-ink-700 shadow-card ring-1 ring-ink-200/90 dark:ring-ink-600 backdrop-blur-sm hover:bg-white hover:ring-brand-200 hover:shadow-raised focus-visible:outline-ink-400 active:bg-ink-50 disabled:text-ink-400 disabled:shadow-none disabled:ring-ink-200",
   danger:
@@ -22,7 +22,7 @@ const VARIANTS = {
     "bg-ink-100 dark:bg-ink-200/40 text-ink-600 hover:bg-brand-50 dark:hover:bg-brand-500/20 hover:text-brand-800 focus-visible:outline-ink-400 disabled:text-ink-400",
   /** The one loud control on a page. Never more than one per screen. */
   accent:
-    "aurora-warm text-white shadow-accent ring-1 ring-white/20 hover:brightness-[1.07] hover:shadow-pop focus-visible:outline-accent-600 active:brightness-95 disabled:bg-ink-200 disabled:text-ink-400 disabled:shadow-none",
+    "aurora-vanilla liquid-sheen text-brand-950 shadow-accent ring-1 ring-brand-900/10 hover:brightness-[1.03] hover:shadow-pop focus-visible:outline-accent-700 active:brightness-95 disabled:bg-none disabled:bg-ink-200 disabled:text-ink-400 disabled:shadow-none",
 };
 
 const SIZES = {

@@ -31,7 +31,6 @@ const mailer = require("./mailer.service");
 const auditService = require("./audit.service");
 const { ApiError } = require("../utils/ApiError");
 const { hashToken, safeCompare } = require("../utils/tokens");
-const { getEnv } = require("../config/env");
 const { AUDIT_ACTION } = require("../config/constants");
 const { logger } = require("../config/logger");
 
@@ -42,11 +41,6 @@ const TTL = {
   [PURPOSE.VERIFICATION]: 24 * 60 * 60 * 1000,
   [PURPOSE.RESET]: 60 * 60 * 1000,
 };
-
-function webUrl(path) {
-  const base = getEnv().WEB_URL || "http://localhost:5173";
-  return `${base.replace(/\/$/, "")}${path}`;
-}
 
 /**
  * Mint a token, store its hash, and mail the link.
@@ -66,8 +60,8 @@ async function issue({ user, purpose, req }) {
 
   const link =
     purpose === PURPOSE.VERIFICATION
-      ? webUrl(`/verify-email?token=${token}`)
-      : webUrl(`/reset-password?token=${token}`);
+      ? mailer.webUrl(`/verify-email?token=${token}`)
+      : mailer.webUrl(`/reset-password?token=${token}`);
 
   const message =
     purpose === PURPOSE.VERIFICATION

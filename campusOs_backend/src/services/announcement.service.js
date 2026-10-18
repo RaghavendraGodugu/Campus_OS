@@ -46,6 +46,7 @@ const { getStorage } = require("../config/storage");
 const { nextReference } = require("./finance.service");
 const auditService = require("./audit.service");
 const notificationService = require("./notification.service");
+const mailer = require("./mailer.service");
 
 /**
  * Recipients notified in one call to publish. Beyond this the fan-out stops and
@@ -363,9 +364,32 @@ async function fanOut({ announcement, limit = FAN_OUT_LIMIT }) {
   const audienceSize = await countAudience(announcement);
   const truncated = audienceSize > delivered.length;
 
+  // Email is a separate decision from the bell, and it is a deliberate one:
+  //
+  //  - Muting announcements DOES stop the email. The existing rule is that
+  //    muting stops the badge and never the delivery, because the in-app list is
+  //    a record you can read whenever you like. An inbox is not: a message that
+  //    arrives cannot be un-read. Honouring the preference here is the only
+  //    honest reading of "do not interrupt me about this".
+  //
+  //  - Only addresses that have been proven. An announcement can carry
+  //    institutional news; posting it to an address nobody has confirmed belongs
+  //    to them would put it in a stranger's inbox.
+  //
+  //  - And it must never hold up the announcement itself. A mail server that is
+  //    down must not stop a notice reaching the campus, so this runs after the
+  //    notifications are written and its own failures are swallowed.
+  const emailed = await emailAnnouncement({ announcement });
+
   await Announcement.updateOne(
     { _id: announcement._id },
-    { $set: { notifiedCount: delivered.length, fanOutTruncated: truncated } }
+    {
+      $set: {
+        notifiedCount: delivered.length,
+        fanOutTruncated: truncated,
+        emailedCount: emailed,
+      },
+    }
   );
 
   if (truncated) {
@@ -440,6 +464,57 @@ function studentIdsForProgram(programId) {
  * `studentIdsForProgram` returns a promise, which cannot be used inside a query
  * filter, so programme audiences are counted separately.
  */
+
+/**
+ * Email an announcement to the people who asked to hear about it.
+ *
+ * Returns how many messages were handed to the mailer. Never throws — see the
+ * note at the call site: a notice that reaches the campus in-app but not by
+ * email is still a notice that reached them.
+ */
+async function emailAnnouncement({ announcement, limit = FAN_OUT_LIMIT }) {
+  // `resolveAudienceUserIds`, not `audienceUserQuery`: it is the one that
+  // handles every scope, including the programme case that has to go through
+  // the Student collection. Reusing it means "who is this notice for" has one
+  // definition, so the bell and the inbox cannot drift apart.
+  const userIds = await resolveAudienceUserIds(announcement, { limit });
+
+  const recipients = await User.find({
+    _id: { $in: userIds },
+    isActive: true,
+    emailVerified: true,
+  })
+    .select("email fullName notificationPreferences")
+    .lean();
+
+  let sent = 0;
+  for (const recipient of recipients) {
+    // The same switch the bell already reads. Muted is muted, here and there.
+    if (recipient.notificationPreferences?.announcements === false) continue;
+
+    const result = await mailer.send({
+      to: recipient.email,
+      subject:
+        announcement.priority === ANNOUNCEMENT_PRIORITY.URGENT
+          ? `Urgent: ${announcement.title}`
+          : announcement.title,
+      text:
+        `${announcement.body}\n\n` +
+        `— ${announcement.publishedByName ?? "CampusOS"}\n\n` +
+        `${mailer.webUrl(`/announcements/${announcement.reference}`)}\n`,
+    });
+
+    if (result.delivered) sent += 1;
+  }
+
+  logger.info(
+    { announcement: announcement.reference, sent, audience: recipients.length },
+    "Announcement email delivered"
+  );
+
+  return sent;
+}
+
 async function countAudience(announcement) {
   const audience = announcement.audience ?? { scope: AUDIENCE_SCOPE.ALL };
 

@@ -119,7 +119,7 @@ export default function Departments() {
                 <div className="flex min-w-0 items-start gap-3.5">
                   <span
                     aria-hidden="true"
-                    className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-accent-100 to-accent-50 text-[0.6875rem] font-bold text-accent-700 dark:text-accent-300 ring-1 ring-accent-200 dark:ring-accent-400/25 ring-inset"
+                    className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-accent-100 to-accent-50 text-[0.6875rem] font-bold text-accent-800 ring-1 ring-accent-200 dark:ring-accent-400/25 ring-inset"
                   >
                     {department.code?.slice(0, 3)}
                   </span>

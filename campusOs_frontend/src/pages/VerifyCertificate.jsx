@@ -65,9 +65,9 @@ export default function VerifyCertificate() {
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-canvas" />
         <div className="grid-texture absolute inset-0 opacity-70" />
-        <div className="absolute -top-40 -left-32 size-[34rem] rounded-full bg-brand-400/25 blur-3xl" />
-        <div className="absolute -top-24 right-0 size-[28rem] rounded-full bg-accent-300/25 blur-3xl" />
-        <div className="absolute -bottom-48 left-1/3 size-[32rem] rounded-full bg-brand-600/20 blur-3xl" />
+        <div className="liquid-blob absolute -top-40 -left-32 size-[34rem] bg-accent-500/25 blur-3xl" />
+        <div className="liquid-blob absolute -top-24 right-0 size-[28rem] bg-white/50 blur-3xl" />
+        <div className="liquid-blob absolute -bottom-48 left-1/3 size-[32rem] bg-brand-500/6 blur-3xl" />
       </div>
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-5 py-8 sm:px-8">

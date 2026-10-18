@@ -211,7 +211,7 @@ certificate is indefensible.
 to the total exactly. Penalties compound on the original debt, never on a
 balance that already includes earlier penalties, and a sweep is idempotent.
 
-**Correctness that is checked rather than assumed.** 801 backend tests and 181
+**Correctness that is checked rather than assumed.** 811 backend tests and 181
 frontend tests. Contrast ratios computed, not eyeballed. Spreadsheet exports
 neutralise formula injection. CSV exports reuse the same service the screen
 uses, so the two cannot disagree about who may see what.
@@ -225,8 +225,6 @@ worse than one that is not finished.
 
 **Needs a provider or a host**:
 
-- Email delivery of announcements (the mailer exists; announcements do not use it
-  yet)
 - Live Razorpay webhook delivery (needs a public URL and a signing secret)
 - Uptime monitoring and error tracking
 - Malware scanning of uploads
@@ -276,7 +274,7 @@ campusOs_frontend/    React and Vite
 ## Testing
 
 ```bash
-npm test                    # 801 backend
+npm test                    # 811 backend
 npm run test:frontend       # 181 frontend
 npm run lint                # both, clean
 npm run build               # production bundle

@@ -65,7 +65,18 @@ export default function AppShell() {
   const items = visibleNavItems(canAny);
 
   return (
-    <div className="min-h-screen lg:flex">
+    <div className="relative isolate min-h-screen lg:flex">
+      {/* Ambient liquid: one slow pool of light under the page. Fixed rather
+          than absolute, so it stays put while the content scrolls past. The
+          root is `isolate` so `-z-10` sits above the body canvas instead of
+          disappearing behind it. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      >
+        <span className="liquid-blob absolute bottom-[-18rem] left-1/4 size-[34rem] bg-brand-500/8 blur-3xl" />
+      </div>
+
       <a href="#main" className="skip-link">
         Skip to content
       </a>
@@ -77,15 +88,14 @@ export default function AppShell() {
         }`}
       >
         <div className="relative flex h-full flex-col overflow-hidden bg-brand-ink">
-          {/* Two colour fields so the rail has depth rather than being a
-              silhouette. */}
+          {/* The rail is a liquid wash rather than a flat silhouette. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-linear-to-b from-brand-700/45 via-brand-800/10 to-accent-600/20"
+            className="liquid-mesh pointer-events-none absolute inset-0"
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -top-24 -right-20 size-72 rounded-full bg-accent-500/25 blur-3xl"
+            className="liquid-blob pointer-events-none absolute -top-24 -right-20 size-72 bg-accent-400/20 blur-2xl"
           />
 
           <div className="relative flex h-full flex-col">
@@ -167,7 +177,7 @@ export default function AppShell() {
                   <img> that has not decoded should never leave a blank hole
                   where a face should be.
                 */}
-                <span className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-linear-to-br from-accent-400 to-accent-600 text-xs font-semibold text-white ring-2 ring-white/20">
+                <span className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-linear-to-br from-accent-300 to-accent-500 text-xs font-semibold text-brand-900 ring-2 ring-white/20">
                   <span aria-hidden="true">{initials(user?.fullName)}</span>
                   {user?.hasAvatar && (
                     <img

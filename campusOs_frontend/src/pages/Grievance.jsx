@@ -72,8 +72,8 @@ export default function Grievance() {
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-canvas" />
         <div className="grid-texture absolute inset-0 opacity-60" />
-        <div className="absolute -top-40 -right-24 size-[32rem] rounded-full bg-brand-400/25 blur-3xl" />
-        <div className="absolute -top-32 -left-28 size-[30rem] rounded-full bg-accent-300/20 blur-3xl" />
+        <div className="liquid-blob absolute -top-40 -right-24 size-[32rem] bg-accent-500/25 blur-3xl" />
+        <div className="liquid-blob absolute -top-32 -left-28 size-[30rem] bg-white/45 blur-3xl" />
       </div>
 
       <div className="relative mx-auto w-full max-w-3xl px-5 py-8 sm:px-8">

@@ -12,99 +12,128 @@
 
 /*
  * CampusOS theme.
-
+ *
  * Colour is defined once as CSS variables and referenced by Tailwind utilities,
  * so a component never hard-codes a hex value. That is what makes the dark
  * theme a variable swap rather than a second stylesheet.
  */
 @theme {
   /*
-   * The palette: deep emerald on warm sand, with coral for emphasis.
+   * The palette: midnight indigo on vanilla.
    *
-   * ## Why the canvas is warm
+   * Two colours carry the identity — midnight indigo (#282B4A) and vanilla
+   * (#EEEBDA). Everything else is a tint, a shade or a neutral derived from
+   * that pair, so the interface reads as one material rather than a set of
+   * unrelated accents.
    *
-   * Every neutral here carries a trace of warm hue rather than the cold
-   * blue-grey a framework ships by default. A pure grey next to white has no
-   * temperature, and the result reads as a spreadsheet. A warm sand canvas
-   * gives white cards an edge you can actually see, and it is what lets a
-   * single green read as calm instead of cold.
+   * ## Why the canvas is vanilla, not white
+   *
+   * A white page with indigo type is a document. Vanilla gives the indigo
+   * something warm to sit on, and it is what lets the pale chips and glass
+   * panels belong to the same palette instead of looking like a different
+   * theme bolted on.
    */
-  --color-brand-50: oklch(0.972 0.015 160);
-  --color-brand-100: oklch(0.93 0.04 160);
-  --color-brand-200: oklch(0.865 0.078 160);
-  --color-brand-300: oklch(0.775 0.108 160);
-  --color-brand-400: oklch(0.66 0.115 160);
-  --color-brand-500: oklch(0.55 0.112 160);
-  --color-brand-600: oklch(0.3 0.095 161);
-  --color-brand-700: oklch(0.305 0.092 162);
-  --color-brand-800: oklch(0.245 0.075 163);
-  --color-brand-900: oklch(0.19 0.058 164);
-  --color-brand-950: oklch(0.135 0.044 165);
-
-  /* Deep green-black for the sidebar and anything that wants to feel solid. */
-  --color-brand-ink: oklch(0.235 0.033 165);
+  --color-midnight: #282b4a;
+  --color-vanilla: #eeebda;
 
   /*
-   * The accent. Coral, used only for emphasis.
+   * Indigo, light to dark. 600 is the reference colour exactly; 100 is the
+   * reference vanilla, so every cream chip and pale panel is literally the
+   * other half of the palette rather than an approximation of it.
    *
-   * ## The status colours own four hues, and this has to dodge all of them
-   *
-   * emerald = success, amber = pending, red = danger, sky = info. The accent
-   * is the one colour that must not collide with a status, or an alert starts
-   * to look like decoration. Coral is close enough to red to notice and far
-   * enough to read differently at a glance — but it is never used for a badge,
-   * and never to signal a state.
-   *
-   * Note that the brand green and the success green are the same hue. They
-   * coexist because they never appear in the same role: the brand is a filled
-   * button or a link, success is a pale tinted chip with a word in it. A solid
-   * dark green block and a mint chip with text are not confusable.
+   * The ramp crosses from warm paper (50-400) into cold ink (500-950). That is
+   * deliberate: it means one ramp can describe both the page and the type on
+   * it, and the seam is hidden at 400-500 where the two are closest in
+   * lightness and used least often.
    */
-  --color-accent-50: oklch(0.972 0.018 32);
-  --color-accent-100: oklch(0.935 0.047 32);
-  --color-accent-200: oklch(0.88 0.085 33);
-  --color-accent-300: oklch(0.8 0.128 34);
-  --color-accent-400: oklch(0.72 0.164 35);
-  --color-accent-500: oklch(0.645 0.184 36);
-  --color-accent-600: oklch(0.575 0.174 37);
+  --color-brand-50: oklch(0.975 0.012 96);
+  --color-brand-100: oklch(0.9378 0.0228 98.6); /* #EEEBDA — vanilla */
+  --color-brand-200: oklch(0.885 0.02 96);
+  --color-brand-300: oklch(0.79 0.03 95);
+  --color-brand-400: oklch(0.66 0.045 92);
+  --color-brand-500: oklch(0.52 0.055 278);
+  --color-brand-600: oklch(0.302 0.0559 278.3); /* #282B4A — midnight indigo */
+  --color-brand-700: oklch(0.255 0.052 279);
+  --color-brand-800: oklch(0.205 0.045 280);
+  --color-brand-900: oklch(0.16 0.038 281);
+  --color-brand-950: oklch(0.105 0.028 282);
 
-  /* Warm neutrals: low chroma, hue 70-75, so they sit with the sand canvas. */
-  --color-ink-50: oklch(0.987 0.003 72);
-  --color-ink-100: oklch(0.968 0.005 72);
-  --color-ink-200: oklch(0.932 0.007 72);
-  --color-ink-300: oklch(0.882 0.009 72);
-  --color-ink-400: oklch(0.47 0.012 72);
-  --color-ink-500: oklch(0.29 0.013 72);
-  --color-ink-600: oklch(0.27 0.014 72);
-  --color-ink-700: oklch(0.21 0.015 72);
-  --color-ink-800: oklch(0.16 0.015 72);
-  --color-ink-900: oklch(0.11 0.014 72);
-
-  /* Porcelain and sand. Not #fff — the hair of warmth gives a white card an
-     edge against the canvas rather than dissolving into it. */
-  --color-surface: oklch(0.996 0.004 85);
-  --color-canvas: oklch(0.972 0.013 85);
+  /* Deep indigo for the sidebar and anything that wants to feel solid. */
+  --color-brand-ink: oklch(0.225 0.045 279);
 
   /*
-   * Elevation as coloured, layered light. One flat shadow reads as a border; a
-   * tight contact shadow under a wide diffuse one reads as a card floating
-   * above the page.
+   * Vanilla, pale to deep. 200 is the reference colour exactly.
+   *
+   * ## Emphasis, not status
+   *
+   * The status colours keep their four own hues — emerald = success, amber =
+   * pending, red = danger, sky = info — and vanilla is never used for a badge
+   * or to signal a state. It appears as a glow, a gradient partner, a pale
+   * fill, and as text on indigo.
+   *
+   * ## Why the deep end goes taupe
+   *
+   * Vanilla at full lightness cannot carry small text on paper. The darker
+   * steps keep the yellow but lose the light, which is what lets `accent-700`
+   * be legible on the canvas while `accent-300` stays legible on indigo.
+   */
+  --color-accent-50: oklch(0.985 0.012 96);
+  --color-accent-100: oklch(0.968 0.018 96);
+  --color-accent-200: oklch(0.9378 0.0228 98.6); /* #EEEBDA — vanilla */
+  --color-accent-300: oklch(0.905 0.028 96);
+  --color-accent-400: oklch(0.86 0.035 94);
+  --color-accent-500: oklch(0.79 0.045 92);
+  --color-accent-600: oklch(0.68 0.05 90);
+  --color-accent-700: oklch(0.5 0.045 88);
+  --color-accent-800: oklch(0.42 0.04 86);
+
+  /*
+   * Warm neutrals give way to indigo-black in the text range (500-900).
+   *
+   * The light steps are paper: borders and inert fills. The dark steps are
+   * ink, and they carry a trace of the brand hue so body copy belongs to the
+   * palette rather than sitting on top of it as generic grey.
+   */
+  --color-ink-50: oklch(0.987 0.004 96);
+  --color-ink-100: oklch(0.968 0.006 96);
+  --color-ink-200: oklch(0.932 0.008 96);
+  --color-ink-300: oklch(0.882 0.01 96);
+  --color-ink-400: oklch(0.47 0.012 96);
+  --color-ink-500: oklch(0.3 0.02 280);
+  --color-ink-600: oklch(0.27 0.022 280);
+  --color-ink-700: oklch(0.215 0.024 280);
+  --color-ink-800: oklch(0.16 0.026 280);
+  --color-ink-900: oklch(0.11 0.028 280);
+
+  /* Glass and paper. */
+  --color-surface: oklch(0.985 0.008 96);
+  --color-canvas: oklch(0.9378 0.0228 98.6);
+
+  /*
+   * Elevation as coloured, layered light, with a specular top edge.
+   *
+   * The inset highlight is the liquid-morphism signature: a glass panel catches
+   * light along the edge nearest the viewer, which is what separates it from a
+   * flat rectangle with a shadow behind it.
    */
   --shadow-card:
-    0 1px 2px -1px oklch(0.2 0.015 72 / 0.05),
-    0 4px 14px -4px oklch(0.26 0.035 80 / 0.09);
+    inset 0 1px 0 oklch(1 0 0 / 0.7), 0 1px 2px -1px oklch(0.2 0.03 280 / 0.08),
+    0 12px 32px -12px oklch(0.25 0.06 280 / 0.22);
   --shadow-raised:
-    0 2px 4px -2px oklch(0.2 0.015 72 / 0.06),
-    0 14px 32px -10px oklch(0.26 0.04 80 / 0.16);
+    inset 0 1px 0 oklch(1 0 0 / 0.75), 0 2px 6px -2px oklch(0.2 0.03 280 / 0.1),
+    0 24px 48px -16px oklch(0.22 0.07 280 / 0.28);
   --shadow-pop:
-    0 8px 16px -6px oklch(0.2 0.015 72 / 0.09),
-    0 28px 56px -14px oklch(0.26 0.05 80 / 0.2);
+    inset 0 1px 0 oklch(1 0 0 / 0.8),
+    0 8px 20px -6px oklch(0.2 0.04 280 / 0.12),
+    0 36px 64px -18px oklch(0.2 0.08 280 / 0.34);
   --shadow-brand:
-    0 1px 2px -1px oklch(0.245 0.075 163 / 0.34),
-    0 8px 24px -6px oklch(0.4 0.1 161 / 0.42);
+    0 1px 2px -1px oklch(0.2 0.05 279 / 0.4),
+    0 10px 28px -8px oklch(0.3 0.07 279 / 0.5);
+  /* A vanilla button needs a dark shadow to sit above the page. A vanilla-tinted
+     one reads as a glow, which would make the brightest control look lit. */
   --shadow-accent:
-    0 1px 2px -1px oklch(0.575 0.174 37 / 0.28),
-    0 8px 24px -6px oklch(0.645 0.184 36 / 0.36);
+    0 1px 2px -1px oklch(0.3 0.04 88 / 0.18),
+    0 10px 26px -8px oklch(0.4 0.05 88 / 0.3);
 
   /* One radius scale. Mixed 8px and 12px corners are half the reason a UI
      looks assembled rather than designed. */
@@ -135,6 +164,62 @@
       opacity: 1;
     }
   }
+
+  /*
+   * Liquid morphism, in three parts.
+   *
+   *  - `liquid-morph` changes the eight-value corner radii, so a shape flows
+   *    between blobs instead of rotating a fixed one.
+   *  - `liquid-drift` moves it slowly, so two blobs sharing a keyframe never
+   *    pulse in unison.
+   *  - `liquid-flow` walks a gradient across a surface, which is what makes a
+   *    large panel feel wet rather than painted.
+   *
+   * All three are slow on purpose. Fast morphing reads as a loading state;
+   * twelve seconds and up reads as a surface that happens to be alive.
+   */
+  @keyframes liquid-morph {
+    0%,
+    100% {
+      border-radius: 44% 56% 60% 40% / 42% 44% 56% 58%;
+    }
+    33% {
+      border-radius: 60% 40% 36% 64% / 56% 62% 38% 44%;
+    }
+    66% {
+      border-radius: 38% 62% 56% 44% / 64% 36% 60% 40%;
+    }
+  }
+
+  @keyframes liquid-drift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(2.2rem, -1.6rem, 0) scale(1.07);
+    }
+  }
+
+  @keyframes liquid-flow {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes sheen-sweep {
+    0% {
+      transform: translateX(-160%) skewX(-18deg);
+    }
+    55%,
+    100% {
+      transform: translateX(320%) skewX(-18deg);
+    }
+  }
 }
 
 @layer base {
@@ -144,26 +229,34 @@
 
   body {
     /*
-     * One soft field of colour, not a backdrop.
+     * A liquid mesh, not a flat fill.
      *
-     * The earlier version painted four overlapping colour fields behind the
-     * content. It looked like a light show, and it competed with the thing the
-     * reader was actually looking at: every card sat on a different colour, so
-     * no card read as the same kind of object as any other.
-     *
-     * A single blurred blob in one corner gives the page a light source without
-     * decorating it. Everywhere else the content column runs over flat sand, so
-     * the cards are the only thing carrying depth.
+     * Three soft fields — warm light top-left, an indigo blush on the right,
+     * and a cooler pool at the bottom — give the page a light source and a
+     * depth order without drawing anything. The glass cards pick these colours
+     * up through their own translucency, which is what ties the surface to the
+     * canvas instead of pasting it on.
      *
      * Fixed attachment so the light stays put while the page scrolls.
      */
     @apply text-ink-800 antialiased;
     background-color: var(--color-canvas);
-    background-image: radial-gradient(
-      ellipse 52rem 30rem at 6% -12rem,
-      oklch(0.72 0.13 160 / 0.3),
-      transparent 62%
-    );
+    background-image:
+      radial-gradient(
+        ellipse 46rem 30rem at 6% -12rem,
+        oklch(0.99 0.01 96 / 0.5),
+        transparent 62%
+      ),
+      radial-gradient(
+        ellipse 52rem 34rem at 102% 6%,
+        oklch(0.84 0.055 278 / 0.05),
+        transparent 64%
+      ),
+      radial-gradient(
+        ellipse 44rem 30rem at 48% 116%,
+        oklch(0.78 0.06 280 / 0.06),
+        transparent 66%
+      );
     background-attachment: fixed;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
@@ -200,50 +293,160 @@
   /*
    * The glass panel: the default surface for anything floating over the canvas.
    *
-   * Translucent white plus a backdrop blur, so the colour fields behind show
-   * through faintly and the card belongs to the page instead of sitting on top
-   * of it. The ring is what actually draws the edge — a white card on a near
-   * white canvas has almost no luminance difference to describe.
+   * Translucent paper plus a backdrop blur, a hairline of white along the top
+   * edge, and a faint diagonal sheen. The border and the inset highlight are
+   * what actually draw the edge — a near-white card on a vanilla canvas has
+   * almost no luminance difference to describe.
    */
   .surface {
-    @apply rounded-card border border-white/70 bg-surface/92 shadow-card backdrop-blur-xl;
-    /* The border is what draws the edge of a card on a light canvas; on a dark
-       one, white at 70% is a bright outline, so it becomes a faint light line
-       against the panel instead. */
-    @apply dark:border-white/10 dark:bg-surface/85;
+    position: relative;
+    border-radius: var(--radius-card);
+    border: 1px solid oklch(1 0 0 / 0.6);
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) 74%,
+      transparent
+    );
+    background-image: linear-gradient(
+      142deg,
+      oklch(1 0 0 / 0.5),
+      transparent 44%
+    );
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(22px) saturate(135%);
+    -webkit-backdrop-filter: blur(22px) saturate(135%);
   }
 
   /** The heavier version, for menus and panels that must sit clearly above. */
   .surface-raised {
-    @apply rounded-card border border-white/70 bg-surface/92 shadow-pop backdrop-blur-2xl;
-    @apply dark:border-white/12 dark:bg-surface/95;
+    position: relative;
+    border-radius: var(--radius-card);
+    border: 1px solid oklch(1 0 0 / 0.7);
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) 82%,
+      transparent
+    );
+    background-image: linear-gradient(
+      142deg,
+      oklch(1 0 0 / 0.55),
+      transparent 46%
+    );
+    box-shadow: var(--shadow-raised);
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+  }
+
+  /*
+   * A morphing shape for ambient light.
+   *
+   * The border radius is animated rather than rotated: a rotated circle reads
+   * as a spinning disc, while shifting the eight radii reads as something
+   * viscous. Paired with a heavy blur it becomes a slow pool of colour.
+   *
+   * `will-change` is declared because these elements only ever do this one
+   * thing; promoting them once is cheaper than re-rasterising each frame.
+   */
+  .liquid-blob {
+    border-radius: 44% 56% 60% 40% / 42% 44% 56% 58%;
+    animation:
+      liquid-morph 22s cubic-bezier(0.45, 0, 0.55, 1) infinite,
+      liquid-drift 28s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    will-change: border-radius, transform;
+  }
+
+  /*
+   * The moving light on glass and on the one bright button.
+   *
+   * A narrow highlight band crosses the surface on a long cycle. It is a
+   * pseudo-element rather than an animated gradient so the sweep has an edge;
+   * a gradient fade reads as a colour change, a band reads as a reflection
+   * passing over something solid.
+   */
+  .liquid-sheen {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .liquid-sheen::after {
+    content: "";
+    position: absolute;
+    top: -60%;
+    bottom: -60%;
+    left: -30%;
+    width: 45%;
+    background: linear-gradient(
+      100deg,
+      transparent 24%,
+      oklch(1 0 0 / 0.32) 50%,
+      transparent 76%
+    );
+    transform: translateX(-160%) skewX(-18deg);
+    animation: sheen-sweep 7.5s var(--ease-out-soft) infinite;
+    pointer-events: none;
+  }
+
+  /*
+   * A liquid wash for large, dark panels.
+   *
+   * Three radial fields with a background larger than the element, walked
+   * across by `liquid-flow`. Used on the public heroes and the sidebar, never
+   * behind body text at full strength.
+   */
+  .liquid-mesh {
+    background-image:
+      radial-gradient(
+        60% 70% at 15% 8%,
+        oklch(0.46 0.09 279 / 0.65),
+        transparent 62%
+      ),
+      radial-gradient(
+        48% 58% at 88% 18%,
+        oklch(0.9 0.04 96 / 0.22),
+        transparent 60%
+      ),
+      radial-gradient(
+        72% 84% at 52% 104%,
+        oklch(0.3 0.07 282 / 0.8),
+        transparent 66%
+      );
+    background-size: 190% 190%;
+    animation: liquid-flow 24s ease-in-out infinite;
   }
 
   /**
-   * A gradient that follows the brand: emerald deepening to pine, angled so it
-   * has a light side and a dark side. Used for headers, empty states and the
-   * public verification seal, never behind body text.
+   * A gradient that follows the brand: indigo deepening into its own shadow,
+   * angled so it has a light side and a dark side. Used for headers, empty
+   * states and the public verification seal, never behind body text.
    *
-   * It starts at 700 rather than 500 on purpose. Saturated green carries a lot
-   * of luminance, so white text on a mid-green sits around 2:1 — legible in a
-   * screenshot on a good screen, and unreadable in sunlight. The ramp is dark
-   * from 700 down precisely so buttons can carry white labels.
+   * It starts at 600 — the reference indigo itself — rather than 400 or 500.
+   * White text on a mid-indigo sits around 4:1; legible in a screenshot on a
+   * good screen, and marginal in sunlight. The ramp runs dark from 600 down
+   * precisely so buttons can carry white labels.
    */
   .aurora {
     background-image: linear-gradient(
       135deg,
-      var(--color-brand-700) 0%,
-      var(--color-brand-800) 48%,
+      var(--color-brand-600) 0%,
+      var(--color-brand-800) 52%,
       var(--color-brand-900) 100%
     );
   }
 
-  .aurora-warm {
+  /**
+   * The one bright control: vanilla, with indigo type.
+   *
+   * Every stop is light enough to carry `brand-950` text — a vanilla gradient
+   * with white labels would fail the same contrast test the indigo ramp was
+   * built to pass. That is why the accent variant is text-brand-950.
+   */
+  .aurora-vanilla {
     background-image: linear-gradient(
       135deg,
-      var(--color-accent-400) 0%,
-      var(--color-accent-600) 55%,
-      var(--color-brand-700) 130%
+      var(--color-accent-100) 0%,
+      var(--color-accent-300) 52%,
+      var(--color-accent-400) 100%
     );
   }
 
@@ -273,12 +476,12 @@
   }
 
   /* The dark equivalent of the same sweep: a dark bar cannot be swept with a
-     white highlight without glowing, so it gets a lighter brand tint instead. */
+     white highlight without glowing, so it gets a vanilla tint instead. */
   .dark .shimmer::after {
     background-image: linear-gradient(
       90deg,
       transparent,
-      oklch(0.55 0.12 165 / 0.24),
+      oklch(0.9 0.03 96 / 0.16),
       transparent
     );
   }
@@ -294,12 +497,12 @@
     background-image:
       linear-gradient(
         to right,
-        oklch(0.44 0.09 162 / 0.055) 1px,
+        oklch(0.45 0.05 279 / 0.06) 1px,
         transparent 1px
       ),
       linear-gradient(
         to bottom,
-        oklch(0.44 0.09 162 / 0.055) 1px,
+        oklch(0.45 0.05 279 / 0.06) 1px,
         transparent 1px
       );
     background-size: 56px 56px;
@@ -311,53 +514,102 @@
  *
  * The whole palette is tokens, so this is a re-declaration rather than a second
  * stylesheet — which is the reason the theme was built this way in the first
- * place. Two things are deliberately *not* mirrored:
+ * place. Three things happen here:
  *
- *  - **the brand ramp stays put.** Emerald reads the same on both surfaces;
- *    darkening it further would make it indistinguishable from the background.
  *  - **the neutrals invert.** The light ramp is near-white at 50 and near-black
  *    at 900; the dark ramp runs the other way, which is why `--color-ink-800`
  *    becomes a light text colour and `--color-ink-50` a dark one. Swapping the
  *    meaning rather than the values is what lets one set of `text-ink-800`
  *    classes work in both themes.
+ *  - **the brand lightens.** Indigo #282B4A on a #0B0C1A canvas is a shape with
+ *    no edge. Primary buttons use 600, so 600-950 are lifted until a filled
+ *    control is visible while still carrying white text.
+ *  - **the mesh becomes indigo.** The vanilla light source would be wrong in a
+ *    dark room; the warm field is replaced by a cool one.
  */
 @layer base {
   .dark {
-    --color-ink-50: oklch(0.19 0.008 72);
-    --color-ink-100: oklch(0.23 0.009 72);
-    --color-ink-200: oklch(0.28 0.01 72);
-    --color-ink-300: oklch(0.35 0.011 72);
-    --color-ink-400: oklch(0.52 0.011 72);
-    --color-ink-500: oklch(0.62 0.011 72);
-    --color-ink-600: oklch(0.71 0.01 72);
-    --color-ink-700: oklch(0.79 0.009 72);
-    --color-ink-800: oklch(0.87 0.008 72);
-    --color-ink-900: oklch(0.95 0.007 72);
+    --color-ink-50: oklch(0.19 0.025 280);
+    --color-ink-100: oklch(0.23 0.028 280);
+    --color-ink-200: oklch(0.28 0.03 280);
+    --color-ink-300: oklch(0.35 0.032 280);
+    --color-ink-400: oklch(0.65 0.018 96);
+    --color-ink-500: oklch(0.69 0.017 96);
+    --color-ink-600: oklch(0.77 0.015 96);
+    --color-ink-700: oklch(0.84 0.014 96);
+    --color-ink-800: oklch(0.9 0.014 96);
+    --color-ink-900: oklch(0.96 0.012 96);
+
+    /* The brand, lifted so a filled button still reads on a dark canvas. */
+    --color-brand-500: oklch(0.55 0.06 278);
+    --color-brand-600: oklch(0.48 0.065 278);
+    --color-brand-700: oklch(0.4 0.06 279);
+    --color-brand-800: oklch(0.33 0.055 280);
+    --color-brand-900: oklch(0.26 0.05 281);
+    --color-brand-950: oklch(0.18 0.04 282);
 
     /* Surfaces: not black. Pure #000 on a large field is harsh, and it is what
        makes cheap "dark mode" implementations look broken. */
-    --color-surface: oklch(0.225 0.009 78);
-    --color-canvas: oklch(0.165 0.008 78);
+    --color-surface: oklch(0.215 0.032 280);
+    --color-canvas: oklch(0.16 0.03 280);
 
-    /* Shadows do almost nothing on a dark surface, so they are replaced by
-       borders doing the work instead. */
+    /* Shadows do almost nothing on a dark surface, so the inset edge takes
+       over: a faint light line along the top of every panel. */
     --shadow-card:
-      0 1px 2px -1px oklch(0 0 0 / 0.4), 0 4px 16px -4px oklch(0 0 0 / 0.5);
+      inset 0 1px 0 oklch(1 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.4),
+      0 12px 32px -12px oklch(0 0 0 / 0.5);
     --shadow-raised:
-      0 2px 4px -2px oklch(0 0 0 / 0.45), 0 14px 32px -10px oklch(0 0 0 / 0.6);
+      inset 0 1px 0 oklch(1 0 0 / 0.08), 0 2px 6px -2px oklch(0 0 0 / 0.45),
+      0 24px 48px -16px oklch(0 0 0 / 0.6);
     --shadow-pop:
-      0 8px 16px -6px oklch(0 0 0 / 0.5), 0 28px 56px -14px oklch(0 0 0 / 0.7);
-
-    /* The same single blob, dimmer. One light source in both themes, so
-       switching between them does not rearrange the page. */
-    background-image: radial-gradient(
-      ellipse 52rem 30rem at 6% -12rem,
-      oklch(0.45 0.1 165 / 0.26),
-      transparent 64%
-    );
-    background-attachment: fixed;
+      inset 0 1px 0 oklch(1 0 0 / 0.1), 0 8px 20px -6px oklch(0 0 0 / 0.5),
+      0 36px 64px -18px oklch(0 0 0 / 0.7);
 
     color-scheme: dark;
+  }
+
+  /* The dark mesh lives on the body, because the body paints over the html
+     canvas and a background set on `.dark` would never be seen. */
+  .dark body {
+    background-image:
+      radial-gradient(
+        ellipse 48rem 32rem at 8% -10rem,
+        oklch(0.42 0.09 280 / 0.35),
+        transparent 62%
+      ),
+      radial-gradient(
+        ellipse 44rem 30rem at 100% 112%,
+        oklch(0.55 0.05 96 / 0.1),
+        transparent 64%
+      );
+  }
+
+  .dark .surface {
+    border-color: oklch(1 0 0 / 0.1);
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) 82%,
+      transparent
+    );
+    background-image: linear-gradient(
+      142deg,
+      oklch(1 0 0 / 0.045),
+      transparent 46%
+    );
+  }
+
+  .dark .surface-raised {
+    border-color: oklch(1 0 0 / 0.12);
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) 88%,
+      transparent
+    );
+    background-image: linear-gradient(
+      142deg,
+      oklch(1 0 0 / 0.06),
+      transparent 48%
+    );
   }
 
   /* The light equivalents, spelled out so the theme resets cleanly when the

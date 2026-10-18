@@ -71,8 +71,8 @@ export default function SetPassword() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-12">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div className="grid-texture absolute inset-0 opacity-60" />
-        <div className="absolute -top-32 -left-24 size-[32rem] rounded-full bg-brand-400/25 blur-3xl" />
-        <div className="absolute -right-24 -bottom-32 size-[30rem] rounded-full bg-accent-300/25 blur-3xl" />
+        <div className="liquid-blob absolute -top-32 -left-24 size-[32rem] bg-accent-500/25 blur-3xl" />
+        <div className="liquid-blob absolute -right-24 -bottom-32 size-[30rem] bg-white/45 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md">

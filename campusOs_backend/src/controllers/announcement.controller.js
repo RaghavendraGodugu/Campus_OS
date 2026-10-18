@@ -40,6 +40,13 @@ function present(announcement) {
      */
     attachmentMimeType: announcement.attachment?.mimeType ?? null,
     notifiedCount: announcement.notifiedCount,
+    /**
+     * Shown next to `notifiedCount` so the two are not mistaken for each other.
+     * The gap between them is the interesting part: every recipient whose address
+     * is unconfirmed, or who has muted announcements, is in the first number and
+     * not the second.
+     */
+    emailedCount: announcement.emailedCount ?? 0,
     fanOutTruncated: announcement.fanOutTruncated,
     createdAt: announcement.createdAt,
   };

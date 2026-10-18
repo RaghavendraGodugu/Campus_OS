@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 17 October 2026
-- **Verified:** 801 backend tests, 181 frontend tests, live sweep against Atlas, lint and build clean
+- **Verified:** 811 backend tests, 181 frontend tests, lint and build clean. The last live sweep against Atlas was green; DNS to Atlas is currently failing from this machine, so the newest email work is covered by tests only until that recovers
 - **Databases:** Atlas `campusos` exercised end to end — a real GST invoice
   (₹1,00,000 + 18% CGST/SGST = ₹1,18,000, halves reconciling exactly), an
   opened academic term, a saved tax registration, and a green browser sweep
@@ -285,7 +285,10 @@ means the note that follows it)
 - [x] Draft, publish, expire
 - [x] In-app notification list, unread count, mark read
 - [x] Announcement list and detail screens
-- [ ] Email or push delivery of announcements
+- [x] **Announcement email**, to confirmed addresses only. Muting announcements
+      stops the email as well as the badge — an inbox is not a record you read
+      when you like, so honouring the preference here is the only honest reading
+      of "do not interrupt me". The in-app notice is still delivered either way
 - [x] **Notification preferences**, on the profile page. Five categories rather
       than fourteen types — somebody can express "don't interrupt me about
       money" in one tap, which fourteen switches never achieves
@@ -426,7 +429,7 @@ means the note that follows it)
 
 ## 15. Quality gates
 
-- [x] Backend: 801 tests passing
+- [x] Backend: 811 tests passing
 - [x] Frontend: 181 tests passing
 - [x] ESLint clean on both projects
 - [x] Production build succeeds

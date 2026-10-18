@@ -241,7 +241,7 @@ export default function ApplyCertificate() {
         />
         <div
           aria-hidden="true"
-          className="absolute -bottom-28 -left-10 size-64 rounded-full bg-brand-400/20 blur-3xl"
+          className="liquid-blob absolute -bottom-28 -left-10 size-64 bg-accent-300/25 blur-3xl"
         />
 
         <div className="relative flex flex-wrap items-start justify-between gap-6">

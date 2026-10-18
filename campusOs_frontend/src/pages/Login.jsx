@@ -102,11 +102,11 @@ export default function Login() {
       <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-brand-ink p-12 text-white lg:flex">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-linear-to-br from-brand-700/55 via-brand-800/25 to-accent-600/30"
+          className="liquid-mesh pointer-events-none absolute inset-0"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-28 -right-24 size-96 rounded-full bg-accent-400/25 blur-3xl"
+          className="liquid-blob pointer-events-none absolute -top-28 -right-24 size-96 bg-accent-400/25 blur-3xl"
         />
         <div
           aria-hidden="true"

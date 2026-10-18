@@ -135,7 +135,7 @@ export default function Programmes() {
                 <div className="flex min-w-0 items-start gap-3.5">
                   <span
                     aria-hidden="true"
-                    className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-brand-100 to-brand-50 dark:to-brand-500/12 dark:to-brand-500/15 text-brand-700 dark:text-brand-300 ring-1 ring-brand-200 dark:ring-brand-400/25 ring-inset"
+                    className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-brand-100 to-brand-50 text-brand-800 ring-1 ring-brand-200 dark:ring-brand-400/25 ring-inset"
                   >
                     <GraduationCap className="size-5" />
                   </span>

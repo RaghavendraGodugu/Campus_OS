@@ -118,4 +118,16 @@ function clearMailbox() {
   if (fs.existsSync(MAILBOX_FILE)) fs.rmSync(MAILBOX_FILE);
 }
 
-module.exports = { send, readMailbox, clearMailbox, MAILBOX_FILE };
+/**
+ * Build the link a person clicks in an email.
+ *
+ * Lives here rather than in each caller because getting it wrong is silent: a
+ * link pointing at the wrong host still looks like a link, and the failure only
+ * shows up as somebody stranded in front of a page that does not exist.
+ */
+function webUrl(path) {
+  const base = getEnv().WEB_URL || "http://localhost:5173";
+  return `${base.replace(/\/$/, "")}${path}`;
+}
+
+module.exports = { send, webUrl, readMailbox, clearMailbox, MAILBOX_FILE };
