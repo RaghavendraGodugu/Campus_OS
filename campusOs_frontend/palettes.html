@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusOS — palette studies</title>
+    <style>
+      :root {
+        --paper: #efece4;
+        --ink: #1a1a18;
+        --muted: #6b6a62;
+        --line: rgba(26, 26, 24, 0.1);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 48px;
+        background: var(--paper);
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+      }
+      header.page {
+        max-width: 1320px;
+        margin: 0 auto 28px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 30px;
+        letter-spacing: -0.03em;
+        font-weight: 650;
+      }
+      header.page p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        max-width: 52ch;
+        line-height: 1.5;
+      }
+      .stamp {
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 7px 13px;
+        white-space: nowrap;
+      }
+      .grid {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+      }
+      .tile {
+        border-radius: 20px;
+        overflow: hidden;
+        background: var(--surface);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.6),
+          0 18px 40px -26px rgba(20, 20, 30, 0.45);
+      }
+      .meta {
+        padding: 15px 18px 17px;
+      }
+      .meta h2 {
+        margin: 0;
+        font-size: 15px;
+        letter-spacing: -0.015em;
+        font-weight: 650;
+        color: var(--ink);
+      }
+      .meta .why {
+        margin: 4px 0 0;
+        font-size: 12px;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+      .swatches {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .sw {
+        flex: 1;
+        min-width: 0;
+      }
+      .sw i {
+        display: block;
+        height: 26px;
+        border-radius: 7px;
+        border: 1px solid rgba(0, 0, 0, 0.09);
+      }
+      .sw b,
+      .sw span {
+        display: block;
+        font-size: 8.5px;
+        font-style: normal;
+        line-height: 1.5;
+        letter-spacing: 0.02em;
+      }
+      .sw b {
+        font-weight: 600;
+        color: var(--ink);
+        margin-top: 4px;
+      }
+      .sw span {
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      /* ---------- mini app ---------- */
+      .app {
+        display: grid;
+        grid-template-columns: 106px 1fr;
+        height: 208px;
+        background: var(--canvas);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+      }
+      .rail {
+        background: var(--brand);
+        padding: 12px 9px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .mark {
+        width: 24px;
+        height: 24px;
+        border-radius: 7px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.16);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .nav {
+        font-size: 9px;
+        color: rgba(255, 255, 255, 0.62);
+        padding: 5px 7px;
+        border-radius: 6px;
+      }
+      .nav.on {
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+        font-weight: 600;
+      }
+      .pane {
+        padding: 11px 12px;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 9px;
+      }
+      .top .t {
+        font-size: 15px;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+      }
+      .pill {
+        font-size: 8px;
+        font-weight: 600;
+        padding: 4px 7px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: var(--brand);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+      }
+      .card {
+        background: var(--surface);
+        border-radius: 11px;
+        padding: 10px 11px;
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.75),
+          0 8px 18px -12px rgba(0, 0, 0, 0.4);
+      }
+      .card .h {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .card .sub {
+        font-size: 8.5px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 10px;
+      }
+      .btn {
+        font-size: 8.5px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--brand);
+        padding: 6px 9px;
+        border-radius: 7px;
+        box-shadow: 0 4px 10px -5px rgba(0, 0, 0, 0.5);
+      }
+      .chip {
+        font-size: 8px;
+        font-weight: 600;
+        color: var(--brand);
+        background: var(--accent);
+        padding: 4px 7px;
+        border-radius: 999px;
+      }
+      .pop {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--pop);
+        margin-left: auto;
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--pop) 22%, transparent);
+      }
+      .rows {
+        margin-top: 9px;
+        border-top: 1px solid rgba(0, 0, 0, 0.07);
+        padding-top: 7px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 8.5px;
+        color: var(--muted);
+      }
+      .rows i {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--pop);
+      }
+
+      /* ---------- palette definitions ---------- */
+      .p1 {
+        --canvas: #eeebda;
+        --surface: #fcfaf4;
+        --ink: #171824;
+        --muted: #5d5b53;
+        --brand: #282b4a;
+        --accent: #e6e1cf;
+        --pop: #6e74a8;
+      }
+      .p2 {
+        --canvas: #f1e7d6;
+        --surface: #faf4e8;
+        --ink: #2b1a1c;
+        --muted: #6d5a55;
+        --brand: #4a1f24;
+        --accent: #ecd9ba;
+        --pop: #b08d57;
+      }
+      .p3 {
+        --canvas: #e9e7de;
+        --surface: #f7f6f1;
+        --ink: #14211f;
+        --muted: #56645f;
+        --brand: #0c3b3a;
+        --accent: #dbe7df;
+        --pop: #c97b63;
+      }
+      .p4 {
+        --canvas: #edece6;
+        --surface: #f8f7f2;
+        --ink: #141518;
+        --muted: #5c5d60;
+        --brand: #1c1d21;
+        --accent: #e5e4da;
+        --pop: #b6e33f;
+      }
+      .p5 {
+        --canvas: #f2e9dc;
+        --surface: #fbf5ec;
+        --ink: #17222f;
+        --muted: #615a54;
+        --brand: #14243a;
+        --accent: #f1dfc9;
+        --pop: #e8a87c;
+      }
+      .p6 {
+        --canvas: #f0e9ee;
+        --surface: #faf6f8;
+        --ink: #241a26;
+        --muted: #6a5866;
+        --brand: #3a2340;
+        --accent: #eadfe6;
+        --pop: #c98b9b;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div>
+        <h1>CampusOS — six palette studies</h1>
+        <p>
+          Each study uses the same components and the same four roles: brand
+          (rail, primary action), canvas, surface, and one accent that is never
+          a status colour. Hex values are the exact tokens to drop into
+          <code>@theme</code>.
+        </p>
+      </div>
+      <span class="stamp">Liquid morphism · light theme</span>
+    </header>
+
+    <div class="grid">
+      <article class="tile p1">
+        <div class="app">
+          <aside class="rail">
+            <div class="mark">C</div>
+            <div class="nav on">Dashboard</div>
+            <div class="nav">Requests</div>
+            <div class="nav">Finance</div>
+            <div class="nav">Reports</div>
+          </aside>
+          <div class="pane">
+            <div class="top"><span class="t">People</span><span class="pill">super admin</span></div>
+            <div class="card">
+              <div class="h">Semester fee with GST</div>
+              <div class="sub">INV-2026-000003 · due 31 Oct 2026</div>
+              <div class="actions"><span class="btn">Pay ₹1,18,000</span><span class="chip">Issued</span><span class="pop"></span></div>
+              <div class="rows"><i></i> Payment recorded · receipt ready</div>
+            </div>
+          </div>
+        </div>
+        <div class="meta">
+          <h2>1 · Midnight Indigo / Vanilla <em style="font-style:normal;color:var(--muted);font-weight:400">— current</em></h2>
+          <p class="why">Calm, institutional, slightly premium. Vanilla keeps the indigo from feeling like a bank.</p>
+          <div class="swatches">
+            <div class="sw"><i style="background:#282b4a"></i><b>Brand</b><span>#282B4A</span></div>
+            <div class="sw"><i style="background:#eeebda"></i><b>Canvas</b><span>#EEEBDA</span></div>
+            <div class="sw"><i style="background:#fcfaf4"></i><b>Surface</b><span>#FCFAF4</span></div>
+            <div class="sw"><i style="background:#e6e1cf"></i><b>Accent</b><span>#E6E1CF</span></div>
+            <div class="sw"><i style="background:#6e74a8"></i><b>Pop</b><span>#6E74A8</span></div>
+            <div class="sw"><i style="background:#171824"></i><b>Ink</b><span>#171824</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="tile p2">
+        <div class="app">
+          <aside class="rail">
+            <div class="mark">C</div>
+            <div class="nav on">Dashboard</div>
+            <div class="nav">Requests</div>
+            <div class="nav">Finance</div>
+            <div class="nav">Reports</div>
+          </aside>
+          <div class="pane">
+            <div class="top"><span class="t">People</span><span class="pill">super admin</span></div>
+            <div class="card">
+              <div class="h">Semester fee with GST</div>
+              <div class="sub">INV-2026-000003 · due 31 Oct 2026</div>
+              <div class="actions"><span class="btn">Pay ₹1,18,000</span><span class="chip">Issued</span><span class="pop"></span></div>
+              <div class="rows"><i></i> Payment recorded · receipt ready</div>
+            </div>
+          </div>
+        </div>
+        <div class="meta">
+          <h2>2 · Oxblood / Parchment</h2>
+          <p class="why">The most “old university” of the set. Brass accent reads as a seal, not a button.</p>
+          <div class="swatches">
+            <div class="sw"><i style="background:#4a1f24"></i><b>Brand</b><span>#4A1F24</span></div>
+            <div class="sw"><i style="background:#f1e7d6"></i><b>Canvas</b><span>#F1E7D6</span></div>
+            <div class="sw"><i style="background:#faf4e8"></i><b>Surface</b><span>#FAF4E8</span></div>
+            <div class="sw"><i style="background:#ecd9ba"></i><b>Accent</b><span>#ECD9BA</span></div>
+            <div class="sw"><i style="background:#b08d57"></i><b>Pop</b><span>#B08D57</span></div>
+            <div class="sw"><i style="background:#2b1a1c"></i><b>Ink</b><span>#2B1A1C</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="tile p3">
+        <div class="app">
+          <aside class="rail">
+            <div class="mark">C</div>
+            <div class="nav on">Dashboard</div>
+            <div class="nav">Requests</div>
+            <div class="nav">Finance</div>
+            <div class="nav">Reports</div>
+          </aside>
+          <div class="pane">
+            <div class="top"><span class="t">People</span><span class="pill">super admin</span></div>
+            <div class="card">
+              <div class="h">Semester fee with GST</div>
+              <div class="sub">INV-2026-000003 · due 31 Oct 2026</div>
+              <div class="actions"><span class="btn">Pay ₹1,18,000</span><span class="chip">Issued</span><span class="pop"></span></div>
+              <div class="rows"><i></i> Payment recorded · receipt ready</div>
+            </div>
+          </div>
+        </div>
+        <div class="meta">
+          <h2>3 · Deep Teal / Chalk</h2>
+          <p class="why">Reads as trustworthy and clinical. Terracotta keeps it from going cold or corporate.</p>
+          <div class="swatches">
+            <div class="sw"><i style="background:#0c3b3a"></i><b>Brand</b><span>#0C3B3A</span></div>
+            <div class="sw"><i style="background:#e9e7de"></i><b>Canvas</b><span>#E9E7DE</span></div>
+            <div class="sw"><i style="background:#f7f6f1"></i><b>Surface</b><span>#F7F6F1</span></div>
+            <div class="sw"><i style="background:#dbe7df"></i><b>Accent</b><span>#DBE7DF</span></div>
+            <div class="sw"><i style="background:#c97b63"></i><b>Pop</b><span>#C97B63</span></div>
+            <div class="sw"><i style="background:#14211f"></i><b>Ink</b><span>#14211F</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="tile p4">
+        <div class="app">
+          <aside class="rail">
+            <div class="mark">C</div>
+            <div class="nav on">Dashboard</div>
+            <div class="nav">Requests</div>
+            <div class="nav">Finance</div>
+            <div class="nav">Reports</div>
+          </aside>
+          <div class="pane">
+            <div class="top"><span class="t">People</span><span class="pill">super admin</span></div>
+            <div class="card">
+              <div class="h">Semester fee with GST</div>
+              <div class="sub">INV-2026-000003 · due 31 Oct 2026</div>
+              <div class="actions"><span class="btn">Pay ₹1,18,000</span><span class="chip">Issued</span><span class="pop"></span></div>
+              <div class="rows"><i></i> Payment recorded · receipt ready</div>
+            </div>
+          </div>
+        </div>
+        <div class="meta">
+          <h2>4 · Graphite / Acid</h2>
+          <p class="why">The most modern. Near-black rail and a single lime signal — very liquid-morphism, very tech.</p>
+          <div class="swatches">
+            <div class="sw"><i style="background:#1c1d21"></i><b>Brand</b><span>#1C1D21</span></div>
+            <div class="sw"><i style="background:#edece6"></i><b>Canvas</b><span>#EDECE6</span></div>
+            <div class="sw"><i style="background:#f8f7f2"></i><b>Surface</b><span>#F8F7F2</span></div>
+            <div class="sw"><i style="background:#e5e4da"></i><b>Accent</b><span>#E5E4DA</span></div>
+            <div class="sw"><i style="background:#b6e33f"></i><b>Pop</b><span>#B6E33F</span></div>
+            <div class="sw"><i style="background:#141518"></i><b>Ink</b><span>#141518</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="tile p5">
+        <div class="app">
+          <aside class="rail">
+            <div class="mark">C</div>
+            <div class="nav on">Dashboard</div>
+            <div class="nav">Requests</div>
+            <div class="nav">Finance</div>
+            <div class="nav">Reports</div>
+          </aside>
+          <div class="pane">
+            <div class="top"><span class="t">People</span><span class="pill">super admin</span></div>
+            <div class="card">
+              <div class="h">Semester fee with GST</div>
+              <div class="sub">INV-2026-000003 · due 31 Oct 2026</div>
+              <div class="actions"><span class="btn">Pay ₹1,18,000</span><span class="chip">Issued</span><span class="pop"></span></div>
+              <div class="rows"><i></i> Payment recorded · receipt ready</div>
+            </div>
+          </div>
+        </div>
+        <div class="meta">
+          <h2>5 · Ink Blue / Apricot</h2>
+          <p class="why">Warmer and friendlier — the best fit if students are the primary audience, not staff.</p>
+          <div class="swatches">
+            <div class="sw"><i style="background:#14243a"></i><b>Brand</b><span>#14243A</span></div>
+            <div class="sw"><i style="background:#f2e9dc"></i><b>Canvas</b><span>#F2E9DC</span></div>
+            <div class="sw"><i style="background:#fbf5ec"></i><b>Surface</b><span>#FBF5EC</span></div>
+            <div class="sw"><i style="background:#f1dfc9"></i><b>Accent</b><span>#F1DFC9</span></div>
+            <div class="sw"><i style="background:#e8a87c"></i><b>Pop</b><span>#E8A87C</span></div>
+            <div class="sw"><i style="background:#17222f"></i><b>Ink</b><span>#17222F</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="tile p6">
+        <div class="app">
+          <aside class="rail">
+            <div class="mark">C</div>
+            <div class="nav on">Dashboard</div>
+            <div class="nav">Requests</div>
+            <div class="nav">Finance</div>
+            <div class="nav">Reports</div>
+          </aside>
+          <div class="pane">
+            <div class="top"><span class="t">People</span><span class="pill">super admin</span></div>
+            <div class="card">
+              <div class="h">Semester fee with GST</div>
+              <div class="sub">INV-2026-000003 · due 31 Oct 2026</div>
+              <div class="actions"><span class="btn">Pay ₹1,18,000</span><span class="chip">Issued</span><span class="pop"></span></div>
+              <div class="rows"><i></i> Payment recorded · receipt ready</div>
+            </div>
+          </div>
+        </div>
+        <div class="meta">
+          <h2>6 · Plum / Powder</h2>
+          <p class="why">The most distinctive; good for a brand that wants to be remembered rather than trusted-at-a-glance.</p>
+          <div class="swatches">
+            <div class="sw"><i style="background:#3a2340"></i><b>Brand</b><span>#3A2340</span></div>
+            <div class="sw"><i style="background:#f0e9ee"></i><b>Canvas</b><span>#F0E9EE</span></div>
+            <div class="sw"><i style="background:#faf6f8"></i><b>Surface</b><span>#FAF6F8</span></div>
+            <div class="sw"><i style="background:#eadfe6"></i><b>Accent</b><span>#EADFE6</span></div>
+            <div class="sw"><i style="background:#c98b9b"></i><b>Pop</b><span>#C98B9B</span></div>
+            <div class="sw"><i style="background:#241a26"></i><b>Ink</b><span>#241A26</span></div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </body>
+</html>
