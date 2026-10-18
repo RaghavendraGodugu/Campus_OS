@@ -331,6 +331,15 @@ function normaliseAudience(audience) {
  * Safe to re-run: `notifyMany` dedupes per recipient, so a second pass adds
  * only the notifications the first pass did not reach.
  */
+/**
+ * Announcement ids whose email send has not finished.
+ *
+ * The send is deliberately detached from the request, which leaves a test with
+ * nothing to await. Polling this keeps the tests deterministic without making
+ * the production path wait for mail.
+ */
+const inFlight = new Set();
+
 async function fanOut({ announcement, limit = FAN_OUT_LIMIT }) {
   const userIds = await resolveAudienceUserIds(announcement, { limit });
 
@@ -377,9 +386,35 @@ async function fanOut({ announcement, limit = FAN_OUT_LIMIT }) {
   //    to them would put it in a stranger's inbox.
   //
   //  - And it must never hold up the announcement itself. A mail server that is
-  //    down must not stop a notice reaching the campus, so this runs after the
-  //    notifications are written and its own failures are swallowed.
-  const emailed = await emailAnnouncement({ announcement });
+  //    down must not stop a notice reaching the campus, and a cohort of two
+  //    thousand is two thousand SMTP round-trips — minutes inside a POST. So
+  //    this is deliberately not awaited: the caller gets its response as soon as
+  //    the in-app fan-out is written, and the mail follows.
+  //
+  //    `emailedCount` is therefore 0 until the deferred work finishes and writes
+  //    it back. That is honest — it is a count of messages actually sent, not a
+  //    prediction — and it is why the admin screen must not treat 0 as "nobody
+  //    was emailed" while a send is still running.
+  //
+  //    The catch is required, not defensive: `server.js` treats an unhandled
+  //    rejection as fatal and shuts the process down.
+  inFlight.add(announcement._id.toString());
+  void emailAnnouncement({ announcement })
+    .then((emailed) =>
+      Announcement.updateOne(
+        { _id: announcement._id },
+        { $set: { emailedCount: emailed } }
+      )
+    )
+    .catch((error) => {
+      logger.error(
+        { err: error, announcement: announcement.reference },
+        "Announcement email failed"
+      );
+    })
+    .finally(() => {
+      inFlight.delete(announcement._id.toString());
+    });
 
   await Announcement.updateOne(
     { _id: announcement._id },
@@ -387,7 +422,6 @@ async function fanOut({ announcement, limit = FAN_OUT_LIMIT }) {
       $set: {
         notifiedCount: delivered.length,
         fanOutTruncated: truncated,
-        emailedCount: emailed,
       },
     }
   );
@@ -652,7 +686,17 @@ async function readAttachmentBytes({ storageKey }) {
   return { buffer: await storage.read(storageKey) };
 }
 
+/** Wait for any detached announcement email to settle. Tests only. */
+async function settleEmail() {
+  for (let attempt = 0; attempt < 100 && inFlight.size > 0; attempt += 1) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 20);
+    });
+  }
+}
+
 module.exports = {
+  settleEmail,
   createAnnouncement,
   FAN_OUT_CHUNK,
   listAnnouncements,

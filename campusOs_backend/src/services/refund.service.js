@@ -360,12 +360,32 @@ async function rejectRefund({ user, refundId, reason, req }) {
  * was credited — a partial refund leaves the invoice settled.
  */
 async function applyRefundToLedger({ payment, refund, amount, req }) {
-  const newRefunded = money.add(payment.refundedAmount ?? 0, amount);
+  /*
+   * `$inc` against the value that was read, not `$set` against a computed one.
+   *
+   * Two approvals on the same payment at the same moment both read
+   * `refundedAmount: 0`, both computed their own total, and both wrote it. The
+   * second overwrote the first, so `fullyRefunded` was derived from a number
+   * that was never stored and the ledger under-reported the money returned.
+   *
+   * The extra `refundedAmount` clause makes the filter a compare-and-set: the
+   * loser matches nothing and is reported rather than silently overwriting.
+   */
+  const previous = payment.refundedAmount ?? 0;
 
-  await Payment.updateOne(
-    { _id: payment._id },
-    { $set: { refundedAmount: newRefunded } }
+  const written = await Payment.updateOne(
+    { _id: payment._id, refundedAmount: previous },
+    { $inc: { refundedAmount: amount } }
   );
+
+  if (written.matchedCount === 0) {
+    logger.error(
+      { paymentId: payment._id, expected: previous },
+      "Payment changed during refund — refundedAmount not updated"
+    );
+  }
+
+  const newRefunded = money.add(previous, amount);
 
   const credited = payment.capturedAmount ?? payment.amount;
   const fullyRefunded = newRefunded >= credited;
@@ -373,17 +393,30 @@ async function applyRefundToLedger({ payment, refund, amount, req }) {
   const invoice = await Invoice.findById(payment.invoice);
   if (!invoice) return;
 
+  /*
+   * Reduce the invoice by what actually went back, never reset it.
+   *
+   * An invoice can carry several payments — a retry creates a new one — so
+   * refunding one of them in full does not return the others. Zeroing
+   * `paidAmount` here re-billed a student for money still captured, and the
+   * ledger stopped matching the payments underneath it.
+   */
   if (fullyRefunded) {
-    // The money is back with the student; the invoice is no longer settled.
+    // Only the amount that came off this payment, and never below zero.
+    const deduction = Math.min(credited, invoice.paidAmount);
+    const newPaid = Math.max(0, invoice.paidAmount - deduction);
+    const newBalance = money.subtract(invoice.total, newPaid);
+    const settled = newBalance <= 0;
+
     await Invoice.updateOne(
       { _id: invoice._id },
       {
         $set: {
-          paidAmount: 0,
-          balanceDue: invoice.total,
-          status: INVOICE_STATUS.ISSUED,
-          isFullyPaid: false,
-          paidAt: null,
+          paidAmount: newPaid,
+          balanceDue: Math.max(0, newBalance),
+          status: settled ? INVOICE_STATUS.PAID : INVOICE_STATUS.ISSUED,
+          isFullyPaid: settled,
+          paidAt: settled ? invoice.paidAt : null,
         },
       }
     );

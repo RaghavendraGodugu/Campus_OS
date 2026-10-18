@@ -15,6 +15,7 @@ const {
 
 const financeService = require("../src/services/finance.service");
 const Invoice = require("../src/models/Invoice");
+const Payment = require("../src/models/Payment");
 const AuditLog = require("../src/models/AuditLog");
 const { INVOICE_STATUS } = require("../src/config/constants");
 
@@ -264,5 +265,138 @@ describe("permission boundary", () => {
       .post("/api/v1/invoices/penalty-sweep")
       .send({ dryRun: true });
     expect(response.status).toBe(403);
+  });
+
+  /*
+   * The permission check above passed for the wrong reason.
+   *
+   * The route named a permission that does not exist, so `userHasPermission`
+   * was asked about `undefined` and answered false for every role including
+   * SUPER_ADMIN. This endpoint was unreachable for everybody, and "refuses a
+   * student" was still green. So the other half has to be asserted too.
+   */
+  it("lets the accounts department sweep", async () => {
+    const accounts = await createUser({ role: "ACCOUNTS_ADMIN" });
+    const { agent, csrfToken } = await loginAs(accounts);
+
+    const response = await agent
+      .post("/api/v1/invoices/penalty-sweep")
+      .set("X-CSRF-Token", csrfToken)
+      .send({ dryRun: true });
+
+    expect(response.status).toBe(200);
+  });
+
+  it("lets the accounts department set a penalty policy", async () => {
+    const admin = await createUser({ role: "ACCOUNTS_ADMIN" });
+    const { agent, csrfToken } = await loginAs(admin);
+    const invoice = await makeInvoice({
+      status: "OVERDUE",
+      dueAt: new Date(Date.now() - 86_400_000),
+    });
+
+    const response = await agent
+      .patch(`/api/v1/invoices/${invoice.id}/penalty-policy`)
+      .set("X-CSRF-Token", csrfToken)
+      .send({ ratePercent: 2, graceDays: 7 });
+
+    // Reachable at all is the point: it used to be 403 for everyone.
+    expect(response.status).not.toBe(403);
+  });
+
+  /**
+   * The schedule has to agree with the invoice beside it.
+   *
+   * `paidAmount` and `paidAt` existed on each instalment and nothing ever wrote
+   * them, so a student who had paid in full was shown owing every instalment
+   * while the invoice said PAID. This goes through `creditInvoice`, which is what
+   * a captured payment calls, rather than testing the allocator on its own.
+   */
+  it("marks instalments paid when a payment settles them", async () => {
+    const invoice = await makeInvoice({ total: 90000, balance: 90000 });
+
+    await Invoice.updateOne(
+      { _id: invoice._id },
+      {
+        $set: {
+          instalments: [
+            { sequence: 1, amount: 30000, dueAt: new Date("2026-01-01") },
+            { sequence: 2, amount: 30000, dueAt: new Date("2026-02-01") },
+            { sequence: 3, amount: 30000, dueAt: new Date("2026-03-01") },
+          ],
+        },
+      }
+    );
+
+    const payment = await Payment.create({
+      reference: "PAY-INSTAL-TEST",
+      invoice: invoice._id,
+      student: invoice.student,
+      amount: 90000,
+      capturedAmount: 90000,
+      status: "PAID",
+      gateway: "razorpay",
+      razorpayOrderId: "order_instal_test",
+      razorpayPaymentId: "pay_instal_test",
+    });
+
+    await financeService.creditInvoice(payment);
+
+    const stored = await Invoice.findById(invoice._id).lean();
+    expect(stored.status).toBe(INVOICE_STATUS.PAID);
+    for (const instalment of stored.instalments) {
+      expect(instalment.paidAmount).toBe(instalment.amount);
+      expect(instalment.paidAt).toBeTruthy();
+    }
+  });
+
+  it("allocates to the oldest instalment first", async () => {
+    const invoice = await makeInvoice({ total: 90000, balance: 90000 });
+
+    await Invoice.updateOne(
+      { _id: invoice._id },
+      {
+        $set: {
+          instalments: [
+            { sequence: 1, amount: 30000, dueAt: new Date("2026-01-01") },
+            { sequence: 2, amount: 30000, dueAt: new Date("2026-02-01") },
+            { sequence: 3, amount: 30000, dueAt: new Date("2026-03-01") },
+          ],
+        },
+      }
+    );
+
+    // Enough for the first and part of the second.
+    const payment = await Payment.create({
+      reference: "PAY-PART-TEST",
+      invoice: invoice._id,
+      student: invoice.student,
+      amount: 40000,
+      capturedAmount: 40000,
+      status: "PAID",
+      gateway: "razorpay",
+      razorpayOrderId: "order_instal_test",
+      razorpayPaymentId: "pay_part_test",
+    });
+
+    await financeService.creditInvoice(payment);
+
+    const stored = await Invoice.findById(invoice._id).lean();
+
+    expect(stored.instalments[0].paidAmount).toBe(30000);
+    expect(stored.instalments[1].paidAmount).toBe(10000);
+    expect(stored.instalments[2].paidAmount ?? 0).toBe(0);
+  });
+
+  it("lets the accounts department read a schedule", async () => {
+    const accounts = await createUser({ role: "ACCOUNTS_ADMIN" });
+    const { agent } = await loginAs(accounts);
+    const invoice = await makeInvoice({
+      status: "OVERDUE",
+      dueAt: new Date(Date.now() - 86_400_000),
+    });
+
+    const response = await agent.get(`/api/v1/invoices/${invoice.id}/schedule`);
+    expect(response.status).toBe(200);
   });
 });

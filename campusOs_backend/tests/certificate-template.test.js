@@ -270,6 +270,20 @@ describe("bulk issuance", () => {
       true
     );
 
+    /*
+     * The old implementation flipped the status with one `updateMany` and never
+     * rendered a PDF. Every certificate in the batch was left `GENERATED` with no
+     * file: downloading it threw on a null path, and verification by code could
+     * never match. Issuance is the render, not the flag.
+     */
+    for (const entry of stored) {
+      expect(entry.document?.storageKey, `${entry.reference} has no PDF`).toBeTruthy();
+      expect(
+        entry.verificationCode,
+        `${entry.reference} cannot be verified`
+      ).toBeTruthy();
+    }
+
     // The trail has to say who did it, or a bulk run is unattributable.
     for (const entry of stored) {
       const last = entry.statusHistory[entry.statusHistory.length - 1];

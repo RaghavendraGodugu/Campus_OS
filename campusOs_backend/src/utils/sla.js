@@ -256,6 +256,16 @@ function businessMinutesBetween(from, to, options = {}) {
     businessHours = DEFAULT_BUSINESS_HOURS,
   } = options;
 
+  /*
+   * No deadline means no measurement, and "0 minutes remaining" would read as
+   * "fine" — the one answer that must never be reported by accident.
+   *
+   * Anonymous grievances have no `dueAt`: there is no clock on a complaint with
+   * nobody named to answer it. They return null, and every caller treats null as
+   * "not applicable" rather than as zero.
+   */
+  if (!from || !to) return null;
+
   if (to <= from) return -businessMinutesBetween(to, from, options);
 
   let cursor = new Date(from.getTime());

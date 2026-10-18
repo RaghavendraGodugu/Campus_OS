@@ -240,7 +240,7 @@ router.post(
   "/invoices/penalty-sweep",
   authenticate,
   csrfProtection,
-  requireAnyPermission(P.INVOICE_MANAGE_INSTITUTION),
+  requireAnyPermission(P.INVOICE_MANAGE),
   validate({ body: penaltySweepSchema }),
   financeController.sweepPenalties
 );
@@ -249,7 +249,7 @@ router.post(
   "/invoices/:id/schedule",
   authenticate,
   csrfProtection,
-  requireAnyPermission(P.INVOICE_MANAGE_INSTITUTION),
+  requireAnyPermission(P.INVOICE_MANAGE),
   validate({ params: invoiceIdentifier, body: scheduleSchema }),
   financeController.scheduleInstalments
 );
@@ -266,7 +266,7 @@ router.patch(
   "/invoices/:id/penalty-policy",
   authenticate,
   csrfProtection,
-  requireAnyPermission(P.INVOICE_MANAGE_INSTITUTION),
+  requireAnyPermission(P.INVOICE_MANAGE),
   validate({ params: invoiceIdentifier, body: penaltyPolicySchema }),
   financeController.setPenaltyPolicy
 );

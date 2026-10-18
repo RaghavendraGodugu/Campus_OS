@@ -433,3 +433,38 @@ describe("the contract with the file", () => {
     expect(user.fullName).toBe("Kumar, Raghav");
   });
 });
+
+/**
+ * Rollback.
+ *
+ * `insertMany({ ordered: true })` writes rows one at a time and throws on the
+ * first failure. With the rollback list filled in only after a successful
+ * insert, a duplicate email that raced in after the preview check left every row
+ * before it already written — accounts with working passwords that were returned
+ * to nobody and no linked Student record.
+ */
+describe("when an import fails part way", () => {
+  it("leaves no account behind", async () => {
+    await makeFixture();
+    const { agent, csrfToken } = await asAdmin();
+
+    // Somebody takes one address between the dry run and the commit.
+    const taken = await createUser({ role: ROLES.STUDENT, email: "second@campus.edu" });
+    expect(taken).toBeTruthy();
+
+    const csv = csvFor([
+      { ...goodRow, rollNumber: "R1", email: "first@campus.edu" },
+      { ...goodRow, rollNumber: "R2", email: "second@campus.edu" },
+    ]);
+
+    const res = await commit(agent, csrfToken, csv);
+
+    // The commit reports the rollback rather than importing half a cohort.
+    expect(res.status).toBeGreaterThanOrEqual(400);
+
+    const User = require("../src/models/User");
+    // The row written before the collision is rolled back with it.
+    expect(await User.countDocuments({ email: "first@campus.edu" })).toBe(0);
+    expect(await User.countDocuments({ email: "second@campus.edu" })).toBe(1);
+  });
+});

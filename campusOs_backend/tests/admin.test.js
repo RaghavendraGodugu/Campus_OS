@@ -91,6 +91,29 @@ describe("creating an account", () => {
   });
 
   /**
+   * `.lean()` bypasses `toJSON`, so the schema's redaction of `refreshTokens`
+   * never ran on this query and the page carried the SHA-256 of every session
+   * token, plus device, user-agent and IP, for every account listed.
+   */
+  it("never puts session material in the people list", async () => {
+    const { agent } = await loginAs(await createUser({ role: ROLES.SUPER_ADMIN }));
+
+    const res = await agent.get("/api/v1/admin/users");
+
+    expect(res.status).toBe(200);
+    const raw = JSON.stringify(res.body);
+
+    expect(raw).not.toContain("refreshTokens");
+    expect(raw).not.toContain("sessionsInvalidatedAt");
+    expect(raw).not.toContain("tokenHash");
+    const listed = res.body.data.users ?? res.body.data;
+    for (const user of listed) {
+      expect(user.refreshTokens).toBeUndefined();
+      expect(user.passwordHash).toBeUndefined();
+    }
+  });
+
+  /**
    * A provisioned account that works indefinitely on a password the institute
    * knows is a standing risk, so this one is flagged and the client gates on it.
    */

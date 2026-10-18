@@ -544,6 +544,15 @@ async function complaintsReport({ user, from, to }) {
     Complaint.countDocuments({
       ...filter,
       resolvedAt: { $ne: null },
+      /*
+       * `dueAt: { $ne: null }` is load-bearing, not a tidy-up.
+       *
+       * BSON orders Null below Date, so `$resolvedAt > null` is true for every
+       * resolved anonymous grievance — and those have no deadline at all. Left
+       * unguarded they were counted as breaches for ever, quietly depressing the
+       * on-time rate in a report an administrator trusts.
+       */
+      dueAt: { $ne: null },
       $expr: { $gt: ["$resolvedAt", "$dueAt"] },
     }),
   ]);

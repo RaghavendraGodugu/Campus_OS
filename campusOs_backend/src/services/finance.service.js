@@ -490,18 +490,43 @@ async function sweepPenalties({ user, invoiceIds, dryRun = false, req }) {
     }
 
     if (!dryRun) {
-      invoice.total = result.newTotal;
-      invoice.balanceDue = result.newBalance;
-      invoice.penalty.chargedAmount =
-        (invoice.penalty.chargedAmount ?? 0) + result.charged;
-      invoice.penalty.chargedAt = now;
-      if (
-        invoice.status === INVOICE_STATUS.ISSUED ||
-        invoice.status === INVOICE_STATUS.PARTIALLY_PAID
-      ) {
-        invoice.status = INVOICE_STATUS.OVERDUE;
+      /*
+       * Written with the value read at the top of the loop in the filter, not
+       * just in the body.
+       *
+       * `save()` rewrites every modified path from a document fetched before the
+       * loop reached this invoice, so a sweep running twice — the nightly job
+       * alongside a manual run — charged the same period twice and lost one of
+       * the two writes. Making the filter carry the value we read turns this
+       * into a compare-and-set: the second sweep's write matches nothing.
+       */
+      const chargedBefore = invoice.penalty.chargedAmount ?? 0;
+
+      const applied = await Invoice.updateOne(
+        { _id: invoice._id, "penalty.chargedAmount": chargedBefore },
+        {
+          $set: {
+            total: result.newTotal,
+            balanceDue: result.newBalance,
+            "penalty.chargedAmount": money.add(chargedBefore, result.charged),
+            "penalty.chargedAt": now,
+            status: INVOICE_STATUS.OVERDUE,
+          },
+        }
+      );
+
+      if (applied.matchedCount === 0) {
+        logger.warn(
+          { invoice: invoice.reference },
+          "Invoice changed during the penalty sweep — skipped to avoid double-charging"
+        );
+        skipped.push({
+          reference: invoice.reference,
+          reason: "Changed by another sweep while this one was running",
+        });
+        // Not charged, so it must not be reported as though it were.
+        continue;
       }
-      await invoice.save();
     }
 
     charged.push({
@@ -1175,6 +1200,51 @@ async function creditInvoice(payment) {
     return;
   }
 
+  /*
+   * Mark the instalments this payment actually settled.
+   *
+   * Without this the schedule on an invoice always reads as wholly unpaid: the
+   * `paidAmount` and `paidAt` fields exist on each instalment and nothing ever
+   * wrote them, so a student who had paid in full was shown as owing every
+   * instalment while the invoice beside it said PAID.
+   */
+  if (Array.isArray(invoice.instalments) && invoice.instalments.length > 0) {
+    const { allocations } = instalmentService.allocatePayment(invoice, amountToCredit);
+
+    if (allocations.length > 0) {
+      await Invoice.updateOne(
+        { _id: invoice._id },
+        {
+          $set: {
+            instalments: invoice.instalments.map((instalment) => {
+              const applied = allocations.find(
+                (entry) => entry.sequence === instalment.sequence
+              );
+              if (!applied) return instalment;
+
+              const paid = Math.min(
+                instalment.amount,
+                (instalment.paidAmount ?? 0) + applied.amount
+              );
+
+              return {
+                // `toObject()`, not a spread: spreading a Mongoose subdocument
+                // yields its internals (`$__parent`, `__parentArray`) and none
+                // of the real fields, so the write silently stored nothing.
+                ...instalment.toObject(),
+                paidAmount: paid,
+                paidAt:
+                  paid >= instalment.amount
+                    ? (instalment.paidAt ?? new Date())
+                    : instalment.paidAt,
+              };
+            }),
+          },
+        }
+      );
+    }
+  }
+
   // Issue the receipt here — the single point at which a payment becomes
   // settled. Issuing it on request instead would mean the document a student
   // downloads today is not the one they were given at the time.
@@ -1272,20 +1342,61 @@ async function listPayments({ user, filters = {}, page = 1, limit = 20 }) {
  * silently correcting them.
  */
 async function reconcile({ req } = {}) {
-  const invoices = await Invoice.find({ status: { $ne: INVOICE_STATUS.DRAFT } }).lean();
+  /*
+   * One aggregation instead of a query per invoice.
+   *
+   * This was `1 + N` against a live database with no bound on N, run from an
+   * HTTP endpoint. All this needs is the totals per invoice, and Mongo can
+   * produce them in a single pass.
+   */
+  const totals = await Payment.aggregate([
+    {
+      $match: {
+        status: PAYMENT_STATUS.PAID,
+      },
+    },
+    {
+      $group: {
+        _id: "$invoice",
+        // `capturedAmount ?? amount`, matching the rule the ledger used: a row
+        // written before `capturedAmount` existed still counts what it moved.
+        captured: { $sum: { $ifNull: ["$capturedAmount", "$amount"] } },
+        refunded: { $sum: { $ifNull: ["$refundedAmount", 0] } },
+      },
+    },
+  ]);
+
+  const byInvoice = new Map(
+    totals.map((row) => [
+      String(row._id),
+      { captured: row.captured ?? 0, refunded: row.refunded ?? 0 },
+    ])
+  );
+
+  const invoices = await Invoice.find({ status: { $ne: INVOICE_STATUS.DRAFT } })
+    .select("reference total paidAmount balanceDue status")
+    .lean();
   const discrepancies = [];
 
   for (const invoice of invoices) {
-    const payments = await Payment.find({ invoice: invoice._id }).lean();
+    const row = byInvoice.get(String(invoice._id)) ?? { captured: 0, refunded: 0 };
 
     // Only PAID payments count toward the ledger; an attempted-but-unconfirmed
     // payment has not moved money.
-    const captured = payments
-      .filter((p) => p.status === PAYMENT_STATUS.PAID)
-      .reduce((sum, p) => sum + (p.capturedAmount ?? p.amount), 0);
+    const captured = row.captured;
 
-    const refunded = payments.reduce((sum, p) => sum + (p.refundedAmount ?? 0), 0);
-    const expectedPaid = Math.min(captured, invoice.total);
+    /*
+     * Refunded money is not paid money.
+     *
+     * This line computed the refunded total and then discarded it, so a
+     * reconciled invoice was compared against the full captured amount while the
+     * ledger had been reduced by the refund. Every fully refunded invoice
+     * therefore reported a permanent discrepancy and `clean` was never true
+     * again once anyone had been refunded.
+     */
+    const refunded = row.refunded;
+    const netPaid = Math.max(0, captured - refunded);
+    const expectedPaid = Math.min(netPaid, invoice.total);
     const expectedBalance = Math.max(0, invoice.total - expectedPaid);
     const expectedStatus =
       expectedBalance === 0

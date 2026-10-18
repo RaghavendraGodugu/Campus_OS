@@ -54,6 +54,7 @@ describe("announcement email", () => {
     await createStudent();
 
     await notice();
+    await announcementService.settleEmail();
 
     // Admin-created accounts start unconfirmed, and institutional news posted to
     // an address nobody has proven belongs to them would land in a stranger's
@@ -66,6 +67,7 @@ describe("announcement email", () => {
     await User.updateOne({ _id: student._id }, { $set: { emailVerified: true } });
 
     await notice();
+    await announcementService.settleEmail();
 
     expect(mailedTo()).toContain(student.email);
   });
@@ -84,6 +86,7 @@ describe("announcement email", () => {
     );
 
     await notice();
+    await announcementService.settleEmail();
 
     expect(mailedTo()).not.toContain(student.email);
   });
@@ -95,7 +98,9 @@ describe("announcement email", () => {
       { $set: { emailVerified: true, "notificationPreferences.announcements": false } }
     );
 
-    const announcement = await notice();
+    await notice();
+    await announcementService.settleEmail();
+    const announcement = await Announcement.findOne({ title: /Examination schedule/ });
 
     // The app still has it. That is the whole point of the distinction.
     const stored = await Announcement.findById(announcement._id);
@@ -131,6 +136,7 @@ describe("announcement email", () => {
     await User.updateOne({ _id: student._id }, { $set: { emailVerified: true } });
 
     const announcement = await notice();
+    await announcementService.settleEmail();
 
     const message = mailer.readMailbox().find((entry) => entry.to === student.email);
     expect(message.text).toContain(`/announcements/${announcement.reference}`);
@@ -153,8 +159,9 @@ describe("announcement email", () => {
     });
 
     try {
-      const announcement = await notice();
-
+      await notice();
+      await announcementService.settleEmail();
+      const announcement = await Announcement.findOne({ title: /Examination schedule/ });
       const stored = await Announcement.findById(announcement._id);
       expect(stored.notifiedCount).toBeGreaterThan(0);
     } finally {
@@ -189,6 +196,7 @@ describe("announcement email", () => {
     await createStudent(); // left unconfirmed
 
     const announcement = await notice();
+    await announcementService.settleEmail();
 
     // Three accounts are in the audience — the two students and the dean who
     // posted — but only one address has been confirmed. An admin reading this

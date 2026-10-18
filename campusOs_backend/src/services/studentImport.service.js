@@ -277,6 +277,34 @@ async function validateImport({ csv }) {
  * Refuses if anything at all is wrong, so a file is either fully imported or
  * not imported at all.
  */
+/**
+ * Hash every temporary password, yielding to the event loop between batches.
+ *
+ * `bcryptjs` is pure JavaScript and does not release the thread mid-hash, so
+ * `Promise.all` gives no parallelism at all — it just queues every hash onto one
+ * event loop. At `MAX_ROWS` that starved the loop for minutes, so health checks,
+ * the payment webhook and every other request in the process stalled behind one
+ * import.
+ *
+ * The pause is what fixes it: each batch is genuinely sequential work, and
+ * between batches the loop is handed back so other requests can run.
+ */
+async function hashPasswords(prepared) {
+  const BATCH = 10;
+
+  for (let offset = 0; offset < prepared.length; offset += BATCH) {
+    for (const entry of prepared.slice(offset, offset + BATCH)) {
+      entry.passwordHash = await bcrypt.hash(entry.temporaryPassword, 12);
+      // The plaintext must not survive into the insert document.
+      delete entry.temporaryPassword;
+    }
+
+    await new Promise((resolve) => {
+      setImmediate(resolve);
+    });
+  }
+}
+
 async function commitImport({ csv, user: actor, req }) {
   const { candidates } = await readRows(csv);
 
@@ -336,16 +364,21 @@ async function commitImport({ csv, user: actor, req }) {
      * a batched account and a singly-created one are equally expensive to
      * crack offline.
      */
-    await Promise.all(
-      prepared.map(async (entry) => {
-        entry.passwordHash = await bcrypt.hash(entry.temporaryPassword, 12);
-        // The plaintext must not survive into the insert document.
-        delete entry.temporaryPassword;
-      })
-    );
+    await hashPasswords(prepared);
+
+    /*
+     * Recorded before the write, not after.
+     *
+     * `ordered: true` writes rows one at a time and throws on the first
+     * failure, so a duplicate email that raced in after the preview was checked
+     * leaves every row before it already inserted. With the list filled in
+     * afterwards, the rollback guard saw nothing to undo and those accounts
+     * survived: working passwords that were returned to nobody, and no linked
+     * Student record, so the person could sign in and find an empty account.
+     */
+    createdUsers.push(...prepared.map((u) => u.email));
 
     await User.insertMany(prepared, { ordered: true });
-    createdUsers.push(...prepared.map((u) => u.email));
 
     const usersByEmail = await User.find({ email: { $in: prepared.map((u) => u.email) } })
       .select("email _id")

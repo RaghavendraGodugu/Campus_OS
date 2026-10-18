@@ -211,7 +211,7 @@ certificate is indefensible.
 to the total exactly. Penalties compound on the original debt, never on a
 balance that already includes earlier penalties, and a sweep is idempotent.
 
-**Correctness that is checked rather than assumed.** 811 backend tests and 181
+**Correctness that is checked rather than assumed.** 822 backend tests and 181
 frontend tests. Contrast ratios computed, not eyeballed. Spreadsheet exports
 neutralise formula injection. CSV exports reuse the same service the screen
 uses, so the two cannot disagree about who may see what.
@@ -274,7 +274,7 @@ campusOs_frontend/    React and Vite
 ## Testing
 
 ```bash
-npm test                    # 811 backend
+npm test                    # 822 backend
 npm run test:frontend       # 181 frontend
 npm run lint                # both, clean
 npm run build               # production bundle

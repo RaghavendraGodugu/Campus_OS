@@ -14,6 +14,7 @@ const {
   getApp,
   resetDatabase,
   createStudent,
+  createUser,
   createDepartment,
   loginAs,
 } = require("./helpers/factory");
@@ -104,6 +105,43 @@ describe("what the record does not keep", () => {
     expect(serialised).not.toMatch(/\d{1,3}(\.\d{1,3}){3}/); // no IP address
     expect(complaint.get("ipAddress")).toBeUndefined();
     expect(complaint.get("reporterEmail")).toBeUndefined();
+  });
+
+  /**
+   * An anonymous grievance has no deadline, because there is nobody to hold to
+   * one. Reading its SLA used to throw, which returned a 500 — and on the
+   * transition endpoint that happened *after* the status change had already been
+   * committed, so the caller was told it had failed when it had not.
+   */
+  it("has no SLA clock, and reports that rather than crashing", async () => {
+    const filed = await fileAnonymous();
+    const dean = await createUser({ role: "DEAN" });
+    const { agent } = await loginAs(dean);
+
+    const detail = await agent.get(`/api/v1/complaints/${filed.body.data.reference}`);
+
+    expect(detail.status).toBe(200);
+    expect(detail.body.data.sla.dueAt).toBeNull();
+    expect(detail.body.data.sla.remaining).toBeNull();
+    // Not breached either: there is no deadline to miss.
+    expect(detail.body.data.sla.breached).toBe(false);
+  });
+
+  it("still transitions an anonymous grievance without a 500", async () => {
+    const filed = await fileAnonymous();
+    const dean = await createUser({ role: "DEAN" });
+    const { agent, csrfToken } = await loginAs(dean);
+
+    const response = await agent
+      .post(`/api/v1/complaints/${filed.body.data.reference}/transition`)
+      .set("X-CSRF-Token", csrfToken)
+      .send({
+        to: "ACKNOWLEDGED",
+        expectedFrom: "OPEN",
+        note: "Received and being looked into.",
+      });
+
+    expect(response.status).toBe(200);
   });
 
   /**

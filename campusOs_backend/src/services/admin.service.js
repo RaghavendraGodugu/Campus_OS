@@ -167,9 +167,20 @@ async function listUsers({ query, user: actor }) {
     users: users.map((entry) => ({
       ...entry,
       id: entry._id,
-      // Never the hash, whatever a lean query was asked for.
-      passwordHash: undefined,
       _id: undefined,
+      /*
+       * Redacted here rather than trusted to the schema.
+       *
+       * `toJSON` already deletes these, but `.lean()` skips transforms
+       * altogether — so a lean query returned the SHA-256 of every refresh
+       * token, plus the session ids, devices and IPs behind them, for every
+       * account on the page. Naming them once in the map that builds the
+       * response is the only place that does not depend on a caller
+       * remembering.
+       */
+      passwordHash: undefined,
+      refreshTokens: undefined,
+      sessionsInvalidatedAt: undefined,
     })),
     pagination: {
       page: query.page,

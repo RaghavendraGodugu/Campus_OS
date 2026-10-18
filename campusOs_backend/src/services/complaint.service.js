@@ -641,13 +641,16 @@ function slaStatusFor(complaint) {
   const reference = clockRunning
     ? now
     : (complaint.respondedAt ?? complaint.resolvedAt ?? now);
+  // null for an anonymous grievance: there is nobody to hold to a deadline.
   const remaining = slaUtils.businessMinutesBetween(now, complaint.dueAt, calendar);
 
   return {
     dueAt: complaint.dueAt,
-    breached: remaining < 0,
+    // `remaining < 0` alone would be true for null — 0 - 1 is 1 — and would
+    // report every anonymous complaint as breached.
+    breached: remaining !== null && remaining < 0,
     /** Human-readable, e.g. "-2h 15m" when breached. */
-    remaining: slaUtils.formatDuration(remaining),
+    remaining: remaining === null ? null : slaUtils.formatDuration(remaining),
     elapsed: slaUtils.businessMinutesBetween(
       complaint.submittedAt ?? now,
       reference,

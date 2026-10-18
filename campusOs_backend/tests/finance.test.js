@@ -603,6 +603,48 @@ describe("reconciliation", () => {
     expect(res.body.data.clean).toBe(true);
   });
 
+  /*
+   * The bug: the refunded total was computed and then thrown away, so a
+   * reconciled invoice was compared against the full captured amount while the
+   * ledger had already been reduced by the refund. Every fully refunded invoice
+   * reported a permanent discrepancy and `clean` was never true again.
+   */
+  it("agrees with the ledger after a refund", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const payment = await settlePayment(student, invoice);
+
+    const refund = await (async () => {
+      const { agent, csrfToken } = await loginAs(student.user);
+      const res = await postAs(agent, csrfToken, "/api/v1/finance/refunds", {
+        payment: payment._id,
+        reason: "Fee charged after the student had withdrawn from the programme",
+      });
+      expect(res.status).toBe(201);
+      const Refund = require("../src/models/Refund");
+      return Refund.findById(res.body.data.refund.id).lean();
+    })();
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+    await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/approve`,
+      {
+        note: "Confirmed with the billing office",
+      }
+    );
+
+    const res = await agent.get("/api/v1/finance/reconcile");
+
+    expect(res.status).toBe(200);
+    // The money went back, so the ledger says unpaid and reconciliation has to
+    // agree rather than flag it forever.
+    expect(res.body.data.discrepancies).toHaveLength(0);
+    expect(res.body.data.clean).toBe(true);
+  });
+
   it("detects a drifted balance", async () => {
     const student = await createStudent();
     const invoice = await makeInvoice(student);
@@ -1036,6 +1078,51 @@ describe("refund decisions", () => {
     expect(ledger.status).toBe(INVOICE_STATUS.ISSUED);
     expect(ledger.paidAmount).toBe(0);
     expect(ledger.balanceDue).toBe(invoice.total);
+    expect(ledger.isFullyPaid).toBe(false);
+  });
+
+  /**
+   * The bug this guards: an invoice can carry several payments, because a retry
+   * creates a new one. Fully refunding one of them used to zero `paidAmount` for
+   * the whole invoice, so the student was re-billed for money still captured and
+   * the ledger stopped matching the payments underneath it.
+   */
+  it("only reverses the refunded payment when an invoice has two of them", async () => {
+    const student = await createStudent();
+    const invoice = await makeInvoice(student);
+    const half = Math.floor(invoice.total / 2);
+
+    const first = await settlePayment(student, invoice, {
+      amount: half,
+      id: "pay_first",
+    });
+    await settlePayment(student, invoice, { amount: half, id: "pay_second" });
+
+    const settled = await Invoice.findById(invoice._id).lean();
+    expect(settled.paidAmount).toBe(invoice.total);
+    expect(settled.status).toBe(INVOICE_STATUS.PAID);
+
+    const refund = await requestOne(student, first, {
+      amount: (half / 100).toFixed(2),
+    });
+
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+    const approved = await postAs(
+      agent,
+      csrfToken,
+      `/api/v1/finance/refunds/${refund.reference}/approve`,
+      { note: "Duplicate charge" }
+    );
+    expect(approved.status).toBe(200);
+
+    const ledger = await Invoice.findById(invoice._id).lean();
+
+    // The first payment came back; the second is still captured. So the invoice
+    // is half paid again — not unpaid in full.
+    expect(ledger.paidAmount).toBe(half);
+    expect(ledger.balanceDue).toBe(invoice.total - half);
+    expect(ledger.status).toBe(INVOICE_STATUS.ISSUED);
     expect(ledger.isFullyPaid).toBe(false);
   });
 

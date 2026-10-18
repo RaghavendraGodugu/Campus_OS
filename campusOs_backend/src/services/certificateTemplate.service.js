@@ -33,6 +33,7 @@ const {
   CERTIFICATE_STATUS,
 } = require("../config/constants");
 const { ApiError } = require("../utils/ApiError");
+const certificateService = require("./certificate.service");
 const auditService = require("./audit.service");
 const { AUDIT_ACTION } = require("../config/constants");
 const { logger } = require("../config/logger");
@@ -298,8 +299,18 @@ async function bulkIssue({ certificateIds, user, req }) {
     }
   }
 
-  // The database write is atomic. Everything either issues or none of it does,
-  // so a mid-run failure cannot leave half a cohort issued.
+  /*
+   * Issued one at a time through the single-certificate path.
+   *
+   * The previous version flipped the status with one `updateMany` and never
+   * produced a PDF. Every certificate in the batch ended up `GENERATED` with no
+   * file, so downloading it 500'd on a null path, and verification by code could
+   * never match. It also skipped the visibility check the single path enforces,
+   * letting an HOD issue certificates outside their department.
+   *
+   * Delegating costs a render per certificate, which is the actual work — a
+   * "bulk" issue that produces nothing downloadable is not bulk, it is a flag.
+   */
   const eligible = certificates.filter(
     (certificate) =>
       certificate.status === CERTIFICATE_STATUS.APPROVED && certificate.approvedBy
@@ -314,44 +325,35 @@ async function bulkIssue({ certificateIds, user, req }) {
             ? `Status is ${certificate.status}, not APPROVED`
             : "No approver was recorded on this certificate",
       });
+      continue;
     }
-  }
 
-  const issuedAt = new Date();
+    // Re-read as a document: `generate()` needs methods and runs its own
+    // visibility check against the caller.
+    const fresh = await Certificate.findById(certificate._id);
 
-  if (eligible.length > 0) {
-    await Certificate.updateMany(
-      { _id: { $in: eligible.map((entry) => entry._id) } },
-      {
-        $set: {
-          status: CERTIFICATE_STATUS.GENERATED,
-          issuedAt,
-          issuedBy: user._id,
-        },
-        /*
-         * The real field is `statusHistory`, with `from`/`to`/`actor`/
-         * `actorRole`. Writing `$push: { history: ... }` is silently dropped by
-         * Mongoose's strict mode — the certificates issue correctly and the
-         * trail that explains who did it simply does not exist.
-         */
-        $push: {
-          statusHistory: {
-            from: CERTIFICATE_STATUS.APPROVED,
-            to: CERTIFICATE_STATUS.GENERATED,
-            actor: user._id,
-            actorRole: user.role,
-            note: "Issued in bulk",
-          },
-        },
-      }
-    );
-  }
+    if (!fresh || !certificateService.canRead(fresh, user)) {
+      skipped.push({
+        reference: certificate.reference,
+        reason: "Not visible to you",
+      });
+      continue;
+    }
 
-  for (const certificate of eligible) {
-    issued.push({
-      reference: certificate.reference,
-      studentId: String(certificate.student?._id ?? certificate.student),
-    });
+    try {
+      await certificateService.generate({
+        certificateId: fresh._id.toString(),
+        user,
+        req,
+      });
+      issued.push({
+        reference: certificate.reference,
+        status: CERTIFICATE_STATUS.GENERATED,
+      });
+    } catch (error) {
+      // One bad certificate must not abandon the rest of the cohort.
+      skipped.push({ reference: certificate.reference, reason: error.message });
+    }
   }
 
   await auditService.record({
@@ -371,7 +373,7 @@ async function bulkIssue({ certificateIds, user, req }) {
     "Bulk certificate issuance"
   );
 
-  return { issued, skipped, issuedAt };
+  return { issued, skipped, issuedAt: new Date() };
 }
 
 module.exports = {

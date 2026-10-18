@@ -462,7 +462,17 @@ async function generate({ certificateId, user, req }) {
     throw ApiError.notFound("Certificate not found");
   }
 
-  if (!userHasPermission(user, P.CERTIFICATE_APPROVE)) {
+  /*
+   * `CERTIFICATE_ISSUE`, not `CERTIFICATE_APPROVE`.
+   *
+   * Every route that reaches here gates on ISSUE, so checking APPROVE made the
+   * service stricter than its own routes and quietly blocked the roles granted
+   * ISSUE without APPROVE. Approval is enforced separately, below, by the
+   * certificate's status and recorded approver — which is the check that
+   * actually matters, because it is about *this* certificate rather than about
+   * the person clicking.
+   */
+  if (!userHasPermission(user, P.CERTIFICATE_ISSUE)) {
     throw ApiError.forbidden("You do not have permission to issue certificates");
   }
 
