@@ -748,6 +748,34 @@ async function settlePayment(
   return Payment.findById(orderRes.body.data.paymentId).lean();
 }
 
+/**
+ * Every `:id` route in this file validates its parameter except three payment
+ * routes, which handed the value straight to `findById`. A malformed id then
+ * surfaced as a Mongoose `CastError` instead of the same clean 400 every
+ * sibling returned — the kind of difference that only shows up as a confusing
+ * message in a bug report.
+ */
+describe("malformed payment identifiers", () => {
+  const notAnId = "definitely-not-an-object-id";
+
+  it("rejects them on every payment route", async () => {
+    const accounts = await createUser({ role: ROLES.ACCOUNTS_ADMIN });
+    const { agent, csrfToken } = await loginAs(accounts);
+
+    const receipt = await agent.get(`/api/v1/finance/payments/${notAnId}/receipt`);
+    const refundable = await agent.get(`/api/v1/finance/payments/${notAnId}/refundable`);
+    const verify = await agent
+      .post(`/api/v1/finance/payments/${notAnId}/verify`)
+      .set("X-CSRF-Token", csrfToken);
+
+    for (const response of [receipt, refundable, verify]) {
+      expect(response.status).toBe(400);
+      // The shared validation message, not a driver error.
+      expect(response.body.code).toBe("VALIDATION_ERROR");
+    }
+  });
+});
+
 describe("receipts", () => {
   it("issues a receipt when the payment settles", async () => {
     const student = await createStudent();

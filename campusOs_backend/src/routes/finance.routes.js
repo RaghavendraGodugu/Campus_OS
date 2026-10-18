@@ -33,6 +33,7 @@ const {
   createInvoiceSchema,
   listInvoicesSchema,
   getInvoiceSchema,
+  paymentParamsSchema,
   createOrderSchema,
   confirmPaymentSchema,
   listPaymentsSchema,
@@ -138,6 +139,9 @@ router.post(
   "/finance/payments/:id/verify",
   authenticate,
   csrfProtection,
+  // Validation, like every other `:id` route here: the controller should never
+  // be the first thing to see a malformed identifier.
+  validate({ params: paymentParamsSchema }),
   financeController.verifyPayment
 );
 
@@ -151,12 +155,18 @@ router.post(
  * student receives their own receipts, accounts staff receive all of them, and
  * everyone else gets 404.
  */
-router.get("/finance/payments/:id/receipt", authenticate, financeController.getReceipt);
+router.get(
+  "/finance/payments/:id/receipt",
+  authenticate,
+  validate({ params: paymentParamsSchema }),
+  financeController.getReceipt
+);
 
 /** GET /api/v1/finance/payments/:id/refundable — drives the student's UI. */
 router.get(
   "/finance/payments/:id/refundable",
   authenticate,
+  validate({ params: paymentParamsSchema }),
   financeController.refundableForPayment
 );
 

@@ -110,6 +110,16 @@ const listInvoicesSchema = z
 const getInvoiceSchema = z.object({ id: invoiceIdentifier }).strict();
 
 /**
+ * Payment routes take an id, never a reference.
+ *
+ * A payment has no human-readable reference in this system, so `objectId` is
+ * the whole check — but it is still the check, and having it means a malformed
+ * id is refused at the edge with the same message as every sibling route rather
+ * than reaching `findById` and surfacing a Mongoose `CastError`.
+ */
+const paymentParamsSchema = z.object({ id: objectId }).strict();
+
+/**
  * POST /finance/payments/order
  *
  * An invoice id only. There is deliberately no `amount` field: the amount is
@@ -191,6 +201,7 @@ module.exports = {
   createInvoiceSchema,
   listInvoicesSchema,
   getInvoiceSchema,
+  paymentParamsSchema,
   createOrderSchema,
   confirmPaymentSchema,
   listPaymentsSchema,

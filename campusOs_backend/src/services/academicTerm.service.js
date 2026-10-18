@@ -204,9 +204,15 @@ async function open({ user, id, req }) {
       term.status = ACADEMIC_TERM_STATUS.OPEN;
       term.openedAt = new Date();
       term.openedBy = user._id;
-      await term.save({ session });
 
+      // Counted *before* the save, not after. Setting `term.counts` on a
+      // document that has already been written changes nothing in the database:
+      // `open()` was persisting a term with no counts while `close()` — which
+      // recounts first — stored them. The audit entry showed the real numbers
+      // and the record disagreed with itself.
       await recountCounts(term);
+
+      await term.save({ session });
       opened = term.toJSON();
     });
   } finally {

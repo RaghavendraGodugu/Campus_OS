@@ -1,13 +1,18 @@
 /**
  * MongoDB connection management.
  *
- * Design constraint that shaped this module: **no multi-document
- * transactions anywhere in slices 0-3**. Transactions require a replica set;
- * a local `mongod` is a standalone and rejects them outright. Atomicity is
- * therefore achieved with single-document operations (`findOneAndUpdate`,
- * `findOneAndDelete`) plus unique indexes, both of which are atomic on every
- * deployment topology. This keeps development, the in-memory test database and
- * production Atlas on identical code paths.
+ * Design constraint that shaped this module: **multi-document transactions are
+ * avoided wherever a single-document operation will do**. Transactions require
+ * a replica set; a local `mongod` is a standalone and rejects them outright.
+ * Atomicity is therefore normally achieved with single-document operations
+ * (`findOneAndUpdate`, `findOneAndDelete`) plus unique indexes, both of which
+ * are atomic on every deployment topology. This keeps development, the in-memory
+ * test database and production Atlas on identical code paths.
+ *
+ * There is exactly one transaction in the codebase — `academicTerm.open()`,
+ * where closing the old term and opening the new one must not be observable
+ * half-done. Every other invariant in this system is carried by a unique index
+ * rather than by a transaction, which is the more portable of the two.
  */
 
 const mongoose = require("mongoose");

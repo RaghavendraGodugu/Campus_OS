@@ -12,7 +12,7 @@ const mongoose = require("mongoose");
 const { resetDatabase, createUser } = require("./helpers/factory");
 const termService = require("../src/services/academicTerm.service");
 const AcademicTerm = require("../src/models/AcademicTerm");
-const { ACADEMIC_TERM_STATUS } = require("../src/config/constants");
+const { ACADEMIC_TERM_STATUS, ROLES } = require("../src/config/constants");
 
 const DAY = 86400000;
 
@@ -253,5 +253,30 @@ describe("academic terms", () => {
 
     expect(actions).toContain("ACADEMIC_TERM_CREATED");
     expect(actions).toContain("ACADEMIC_TERM_OPENED");
+  });
+});
+
+/**
+ * `open()` recounted *after* saving, so `term.counts` was set on a document the
+ * database had already been told about. The term was stored with no counts while
+ * the response and audit entry showed real ones — the record disagreed with
+ * itself, and `close()` — which recounts first — had been storing them.
+ */
+describe("counts on an opened term", () => {
+  it("persists the counts it reports", async () => {
+    const admin = await createUser({ role: ROLES.SUPER_ADMIN });
+    const term = await termService.create({
+      user: admin,
+      payload: payload({ code: "A26-COUNTS", name: "Counts check" }),
+    });
+
+    const opened = await termService.open({ user: admin, id: term._id });
+
+    const stored = await AcademicTerm.findById(term._id).lean();
+
+    expect(stored.counts).toBeTruthy();
+    expect(typeof stored.counts.students).toBe("number");
+    // The whole point: what the caller was told is what was written.
+    expect(stored.counts).toEqual(opened.counts);
   });
 });
