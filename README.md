@@ -53,13 +53,15 @@ npm install                      # installs both workspaces
 cp campusOs_backend/.env.example campusOs_backend/.env
 ```
 
-> **Use `nvm use` before `npm install`.** A `MONGO_URI` beginning
-> `mongodb+srv://` is resolved through DNS SRV records, which need the c-ares
-> library inside Node. Some builds ship without it, and then the connection
-> fails with `querySrv EBADRESP` even though Atlas is perfectly reachable and
-> `dig` answers correctly. The error names a hostname you cannot act on and reads
-> like a MongoDB outage. `.nvmrc` pins a version known to work; the API says so
-> outright if your Node is the problem.
+> **`npm run dev` can use the Node on your PATH, whatever it is.** A
+> `MONGO_URI` beginning `mongodb+srv://` is resolved through DNS SRV records,
+> which need the c-ares library inside Node, and some builds ship without it.
+> On that broken build the connection fails with `querySrv EBADRESP` even
+> though Atlas is perfectly reachable and `dig` answers correctly — it reads
+> like a MongoDB outage and is not one. The dev launcher checks for the missing
+> library and, when your Node lacks it, hands the server to the version pinned
+> in `.nvmrc` before you see anything wrong. `nvm use` before `npm install`
+> is still the tidiest setup, but it is no longer a requirement.
 
 Edit `campusOs_backend/.env`. Four values are required:
 
