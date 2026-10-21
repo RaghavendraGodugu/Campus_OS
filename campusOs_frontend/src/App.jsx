@@ -6,6 +6,14 @@ import AppShell from "./components/layout/AppShell";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import Timetable from "./pages/Timetable";
+import Attendance from "./pages/Attendance";
+import Results from "./pages/Results";
+import Hostel from "./pages/Hostel";
+import Library from "./pages/Library";
+import Placements from "./pages/Placements";
+import CampusOverview from "./pages/CampusOverview";
+import Academics from "./pages/Academics";
 import ApplyCertificate from "./pages/ApplyCertificate";
 import VerifyCertificate from "./pages/VerifyCertificate";
 import SetPassword from "./pages/SetPassword";
@@ -91,6 +99,119 @@ export default function App() {
         <Route index element={<Dashboard />} />
         {/* Available to every signed-in role; the content varies by role. */}
         <Route path="profile" element={<Profile />} />
+
+        {/*
+          The timetable is one page with four scopes: the server returns a
+          student's programme, a faculty member's own classes, a HOD's
+          department or the institution, depending on who is asking.
+        */}
+        <Route
+          path="timetable"
+          element={
+            <RequirePermission
+              permissions={[
+                "timetable:read:own",
+                "timetable:read:department",
+                "timetable:read:institution",
+              ]}
+            >
+              <Timetable />
+            </RequirePermission>
+          }
+        />
+
+        <Route
+          path="attendance"
+          element={
+            <RequirePermission
+              permissions={[
+                "attendance:read:own",
+                "attendance:read:department",
+                "attendance:read:institution",
+              ]}
+            >
+              <Attendance />
+            </RequirePermission>
+          }
+        />
+
+        <Route
+          path="results"
+          element={
+            <RequirePermission
+              permissions={[
+                "result:read:own",
+                "result:read:department",
+                "result:read:institution",
+              ]}
+            >
+              <Results />
+            </RequirePermission>
+          }
+        />
+
+        <Route
+          path="hostel"
+          element={
+            <RequirePermission
+              permissions={["hostel:read:own", "hostel:read:institution"]}
+            >
+              <Hostel />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="library"
+          element={
+            <RequirePermission
+              permissions={["library:read:own", "library:read:institution"]}
+            >
+              <Library />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="placements"
+          element={
+            <RequirePermission
+              permissions={["placement:read:own", "placement:read:institution"]}
+            >
+              <Placements />
+            </RequirePermission>
+          }
+        />
+
+        <Route
+          path="analytics"
+          element={
+            <RequirePermission
+              permissions={[
+                "hostel:read:institution",
+                "library:read:institution",
+                "placement:read:institution",
+                "attendance:read:institution",
+                "result:read:institution",
+              ]}
+            >
+              <CampusOverview />
+            </RequirePermission>
+          }
+        />
+
+        <Route
+          path="management/academics"
+          element={
+            <RequirePermission
+              permissions={[
+                "subject:manage:institution",
+                "subject:manage:department",
+                "room:manage:institution",
+              ]}
+            >
+              <Academics />
+            </RequirePermission>
+          }
+        />
 
         {/* Administration. Gated on permissions the server re-checks on every
             request — the guard here is for the reader, not a control. */}

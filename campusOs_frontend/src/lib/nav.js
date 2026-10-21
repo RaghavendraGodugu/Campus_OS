@@ -25,6 +25,61 @@ export const NAV_ITEMS = [
   },
 
   {
+    to: "/timetable",
+    label: "Timetable",
+    icon: "CalendarDays",
+    // Any of the three read scopes qualifies: institution readers do not hold
+    // the `own` variant, and gating on that alone would hide the page from the
+    // people who see the most.
+    permissions: [
+      "timetable:read:own",
+      "timetable:read:department",
+      "timetable:read:institution",
+    ],
+  },
+
+  {
+    to: "/attendance",
+    label: "Attendance",
+    icon: "ClipboardCheck",
+    permissions: [
+      "attendance:read:own",
+      "attendance:read:department",
+      "attendance:read:institution",
+    ],
+  },
+
+  {
+    to: "/results",
+    label: "Results",
+    icon: "GraduationCap",
+    permissions: [
+      "result:read:own",
+      "result:read:department",
+      "result:read:institution",
+    ],
+  },
+
+  {
+    to: "/hostel",
+    label: "Hostel",
+    icon: "BedDouble",
+    permissions: ["hostel:read:own", "hostel:read:institution"],
+  },
+  {
+    to: "/library",
+    label: "Library",
+    icon: "Library",
+    permissions: ["library:read:own", "library:read:institution"],
+  },
+  {
+    to: "/placements",
+    label: "Placements",
+    icon: "Briefcase",
+    permissions: ["placement:read:own", "placement:read:institution"],
+  },
+
+  {
     to: "/requests",
     label: "Requests",
     icon: "FileText",
@@ -111,6 +166,16 @@ export const NAV_ITEMS = [
     permission: "certificate:issue:institution",
   },
   {
+    to: "/management/academics",
+    label: "Academics",
+    icon: "BookOpen",
+    permissions: [
+      "subject:manage:institution",
+      "subject:manage:department",
+      "room:manage:institution",
+    ],
+  },
+  {
     to: "/management/terms",
     label: "Academic terms",
     icon: "CalendarRange",
@@ -154,6 +219,18 @@ export const NAV_ITEMS = [
     permission: "program:manage:institution",
   },
 
+  {
+    to: "/analytics",
+    label: "Campus overview",
+    icon: "BarChart3",
+    permissions: [
+      "hostel:read:institution",
+      "library:read:institution",
+      "placement:read:institution",
+      "attendance:read:institution",
+      "result:read:institution",
+    ],
+  },
   {
     to: "/reports",
     label: "Reports",

@@ -57,6 +57,13 @@ const ROLES = [
       ["invoices", "/finance/invoices", "ok"],
       ["refunds", "/finance/refunds", "ok"],
       ["announcements", "/announcements", "ok"],
+      // The academic core and the service desks; a student owns these.
+      ["my timetable", "/timetable", "ok"],
+      ["my attendance", "/attendance", "ok"],
+      ["my results", "/results", "ok"],
+      ["hostel", "/hostel", "ok"],
+      ["library", "/library", "ok"],
+      ["placements", "/placements", "ok"],
       // Correctly refused: certificate issuance is not a student page.
       ["audit (staff)", "/audit", "refused"],
     ],
@@ -71,6 +78,9 @@ const ROLES = [
       ["reports", "/reports", "ok"],
       ["audit", "/audit", "ok"],
       ["announcements", "/announcements", "ok"],
+      ["timetable", "/timetable", "ok"],
+      ["attendance", "/attendance", "ok"],
+      ["results", "/results", "ok"],
       // Correctly refused: own-requests is the student's view.
       ["student requests", "/requests", "refused"],
     ],
@@ -92,8 +102,51 @@ const ROLES = [
       ["programmes", "/admin/programmes", "ok"],
       ["services", "/admin/services", "ok"],
       ["import students", "/admin/students", "ok"],
+      ["timetable", "/timetable", "ok"],
+      ["attendance", "/attendance", "ok"],
+      ["results", "/results", "ok"],
+      ["hostel", "/hostel", "ok"],
+      ["library", "/library", "ok"],
+      ["placements", "/placements", "ok"],
+      ["campus overview", "/analytics", "ok"],
       ["reports", "/reports", "ok"],
       ["audit", "/audit", "ok"],
+    ],
+  },
+  {
+    // The three domain desks. Each sees its own desk and nothing of the others'.
+    role: "hostel",
+    email: "demo.hostel@campusos.local",
+    pages: [
+      ["dashboard", "/", "ok"],
+      ["profile", "/profile", "ok"],
+      ["hostel", "/hostel", "ok"],
+      // Correctly refused: the library desk is not theirs.
+      ["library", "/library", "refused"],
+    ],
+  },
+  {
+    role: "library",
+    email: "demo.library@campusos.local",
+    pages: [
+      ["dashboard", "/", "ok"],
+      ["profile", "/profile", "ok"],
+      ["library", "/library", "ok"],
+      ["library issues", "/library?tab=issues", "ok"],
+      // Correctly refused.
+      ["placements", "/placements", "refused"],
+    ],
+  },
+  {
+    role: "placements",
+    email: "demo.placement@campusos.local",
+    pages: [
+      ["dashboard", "/", "ok"],
+      ["profile", "/profile", "ok"],
+      ["placements", "/placements", "ok"],
+      ["companies", "/placements?tab=companies", "ok"],
+      // Correctly refused: the hostel desk is not theirs.
+      ["hostel", "/hostel", "refused"],
     ],
   },
   {
@@ -107,6 +160,13 @@ const ROLES = [
       ["complaints", "/management/complaints", "ok"],
       ["certificates", "/management/certificates", "ok"],
       ["post notice", "/management/announcements", "ok"],
+      ["timetable", "/timetable", "ok"],
+      ["attendance", "/attendance", "ok"],
+      ["results", "/results", "ok"],
+      ["hostel", "/hostel", "ok"],
+      ["library", "/library", "ok"],
+      ["placements", "/placements", "ok"],
+      ["campus overview", "/analytics", "ok"],
     ],
   },
 ];

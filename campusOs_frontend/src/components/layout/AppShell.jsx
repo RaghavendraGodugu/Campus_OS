@@ -3,7 +3,13 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import {
   BarChart3,
   BadgeCheck,
+  BedDouble,
+  BookOpen,
+  Briefcase,
   Building2,
+  CalendarDays,
+  ClipboardCheck,
+  Library,
   FileText,
   GraduationCap,
   Inbox,
@@ -49,6 +55,12 @@ const ICONS = {
   Building2,
   GraduationCap,
   User,
+  CalendarDays,
+  BookOpen,
+  ClipboardCheck,
+  BedDouble,
+  Briefcase,
+  Library,
 };
 
 /**

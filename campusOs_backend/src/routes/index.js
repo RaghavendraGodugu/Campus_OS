@@ -23,6 +23,13 @@ const documentRoutes = require("./document.routes");
 const profileRoutes = require("./profile.routes");
 const adminRoutes = require("./admin.routes");
 const auditRoutes = require("./audit.routes");
+const academicRoutes = require("./academic.routes");
+const attendanceRoutes = require("./attendance.routes");
+const resultRoutes = require("./result.routes");
+const hostelRoutes = require("./hostel.routes");
+const libraryRoutes = require("./library.routes");
+const placementRoutes = require("./placement.routes");
+const analyticsRoutes = require("./analytics.routes");
 
 const router = express.Router();
 
@@ -50,5 +57,12 @@ router.use("/api/v1", documentRoutes);
 router.use("/api/v1", profileRoutes);
 router.use("/api/v1", adminRoutes);
 router.use("/api/v1", auditRoutes);
+router.use("/api/v1", academicRoutes);
+router.use("/api/v1", attendanceRoutes);
+router.use("/api/v1", resultRoutes);
+router.use("/api/v1", hostelRoutes);
+router.use("/api/v1", libraryRoutes);
+router.use("/api/v1", placementRoutes);
+router.use("/api/v1", analyticsRoutes);
 
 module.exports = router;

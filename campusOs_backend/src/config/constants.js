@@ -53,6 +53,119 @@ const ACADEMIC_TERM_KINDS = Object.freeze({
   ACADEMIC_YEAR: "ACADEMIC_YEAR",
 });
 
+/**
+ * The kind of teaching a subject is.
+ *
+ * Theory and lab are separate timetable objects even when they share a paper
+ * code: a lab needs a lab room and its own weekly block, and most colleges
+ * count the two differently in a student's load. Folding them into one record
+ * is what forces a timetable to lie about where the class actually meets.
+ */
+const SUBJECT_KINDS = Object.freeze({
+  THEORY: "THEORY",
+  LAB: "LAB",
+  PROJECT: "PROJECT",
+  SEMINAR: "SEMINAR",
+});
+const SUBJECT_KIND_VALUES = Object.freeze(Object.values(SUBJECT_KINDS));
+
+/** Physical space kinds. A lab double-booked into a classroom is a real clash. */
+const ROOM_KINDS = Object.freeze({
+  CLASSROOM: "CLASSROOM",
+  LAB: "LAB",
+  SEMINAR: "SEMINAR",
+  AUDITORIUM: "AUDITORIUM",
+});
+const ROOM_KIND_VALUES = Object.freeze(Object.values(ROOM_KINDS));
+
+/**
+ * How a student was recorded for one class meeting.
+ *
+ * `LATE` counts as attended in the derived percentage — the student was in the
+ * room. `EXCUSED` does not: an approved absence is still an absence for the
+ * 75% rule, and pretending otherwise would let a student clear the threshold on
+ * approved leaves alone. The policy lives here so the arithmetic and the label
+ * cannot drift.
+ */
+const ATTENDANCE_STATUS = Object.freeze({
+  PRESENT: "PRESENT",
+  ABSENT: "ABSENT",
+  LATE: "LATE",
+  EXCUSED: "EXCUSED",
+});
+const ATTENDANCE_STATUS_VALUES = Object.freeze(Object.values(ATTENDANCE_STATUS));
+
+/** Statuses that count toward "attended". */
+const ATTENDED_STATUSES = Object.freeze([
+  ATTENDANCE_STATUS.PRESENT,
+  ATTENDANCE_STATUS.LATE,
+]);
+
+/**
+ * The institutional threshold, as policy rather than a magic number.
+ *
+ * It is used to flag students in a roll-up; it is not enforced as a hard block
+ * anywhere, because eligibility for an exam is a decision the college makes,
+ * not a rule this code should silently apply.
+ */
+const ATTENDANCE_THRESHOLD_PERCENT = 75;
+
+/** The kinds of assessment component a subject can carry. */
+const ASSESSMENT_KINDS = Object.freeze({
+  INTERNAL: "INTERNAL",
+  EXTERNAL: "EXTERNAL",
+  PRACTICAL: "PRACTICAL",
+  PROJECT: "PROJECT",
+  VIVA: "VIVA",
+});
+const ASSESSMENT_KIND_VALUES = Object.freeze(Object.values(ASSESSMENT_KINDS));
+
+/**
+ * The grade scale.
+ *
+ * Ordered from highest to lowest; the first entry whose `min` the percentage
+ * reaches is the grade. `points` is the conventional 10-point value used for a
+ * GPA, and `passing` is explicit rather than inferred from the letter, so
+ * changing the scale cannot silently turn a pass into an arrears subject.
+ */
+/** Hostel kinds. A co-ed hostel is a real category, not a missing value. */
+const HOSTEL_KINDS = Object.freeze({ BOYS: "BOYS", GIRLS: "GIRLS", COED: "COED" });
+const HOSTEL_KIND_VALUES = Object.freeze(Object.values(HOSTEL_KINDS));
+
+const HOSTEL_ALLOCATION_STATUS = Object.freeze({ ACTIVE: "ACTIVE", VACATED: "VACATED" });
+const HOSTEL_LEAVE_STATUS = Object.freeze({
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+  CANCELLED: "CANCELLED",
+});
+
+const BOOK_ISSUE_STATUS = Object.freeze({ ISSUED: "ISSUED", RETURNED: "RETURNED" });
+
+const PLACEMENT_DRIVE_STATUS = Object.freeze({
+  DRAFT: "DRAFT",
+  OPEN: "OPEN",
+  CLOSED: "CLOSED",
+});
+
+const PLACEMENT_APPLICATION_STATUS = Object.freeze({
+  APPLIED: "APPLIED",
+  SHORTLISTED: "SHORTLISTED",
+  SELECTED: "SELECTED",
+  REJECTED: "REJECTED",
+  WITHDRAWN: "WITHDRAWN",
+});
+
+const GRADE_SCALE = Object.freeze([
+  { grade: "O", min: 90, points: 10, passing: true },
+  { grade: "A+", min: 80, points: 9, passing: true },
+  { grade: "A", min: 70, points: 8, passing: true },
+  { grade: "B+", min: 60, points: 7, passing: true },
+  { grade: "B", min: 50, points: 6, passing: true },
+  { grade: "C", min: 40, points: 5, passing: true },
+  { grade: "F", min: 0, points: 0, passing: false },
+]);
+
 const REQUEST_STATUS = {
   DRAFT: "DRAFT",
   SUBMITTED: "SUBMITTED",
@@ -304,6 +417,57 @@ const AUDIT_ACTION = {
   ACADEMIC_TERM_OPENED: "ACADEMIC_TERM_OPENED",
   ACADEMIC_TERM_CLOSED: "ACADEMIC_TERM_CLOSED",
   ACADEMIC_TERM_DELETED: "ACADEMIC_TERM_DELETED",
+
+  /*
+   * Academic structure and timetable.
+   *
+   * Separate from a generic UPDATE because a clash and a retirement are both
+   * things a person will later need to attribute: "who scheduled this over the
+   * lab?" is not answerable from an edit entry that records only a document id.
+   */
+  SUBJECT_CREATED: "SUBJECT_CREATED",
+  SUBJECT_UPDATED: "SUBJECT_UPDATED",
+  SUBJECT_RETIRED: "SUBJECT_RETIRED",
+  ROOM_CREATED: "ROOM_CREATED",
+  ROOM_UPDATED: "ROOM_UPDATED",
+  ROOM_RETIRED: "ROOM_RETIRED",
+  TIMETABLE_ENTRY_CREATED: "TIMETABLE_ENTRY_CREATED",
+  TIMETABLE_ENTRY_UPDATED: "TIMETABLE_ENTRY_UPDATED",
+  TIMETABLE_ENTRY_REMOVED: "TIMETABLE_ENTRY_REMOVED",
+
+  /*
+   * Attendance.
+   *
+   * Marking and correcting are separate actions: the first is the teacher
+   * recording what happened, the second is somebody changing that record after
+   * the fact, and the second must always name a reason.
+   */
+  ATTENDANCE_MARKED: "ATTENDANCE_MARKED",
+  ATTENDANCE_CORRECTED: "ATTENDANCE_CORRECTED",
+
+  /*
+   * Marks and results.
+   *
+   * Publishing is its own action: it is the moment a student can see a result,
+   * and "who released this programme's results, and when" has to be answerable
+   * on its own.
+   */
+  ASSESSMENT_CREATED: "ASSESSMENT_CREATED",
+  ASSESSMENT_DELETED: "ASSESSMENT_DELETED",
+  MARKS_ENTERED: "MARKS_ENTERED",
+  RESULTS_PUBLISHED: "RESULTS_PUBLISHED",
+
+  /* Campus services. */
+  HOSTEL_ALLOCATED: "HOSTEL_ALLOCATED",
+  HOSTEL_VACATED: "HOSTEL_VACATED",
+  HOSTEL_LEAVE_REQUESTED: "HOSTEL_LEAVE_REQUESTED",
+  HOSTEL_LEAVE_DECIDED: "HOSTEL_LEAVE_DECIDED",
+  BOOK_ISSUED: "BOOK_ISSUED",
+  BOOK_RETURNED: "BOOK_RETURNED",
+  PLACEMENT_DRIVE_CREATED: "PLACEMENT_DRIVE_CREATED",
+  PLACEMENT_DRIVE_STATUS: "PLACEMENT_DRIVE_STATUS",
+  PLACEMENT_APPLIED: "PLACEMENT_APPLIED",
+  PLACEMENT_APPLICATION_STATUS: "PLACEMENT_APPLICATION_STATUS",
 };
 
 module.exports = {
@@ -315,6 +479,24 @@ module.exports = {
   TERMINAL_STATUSES,
   ACADEMIC_TERM_STATUS,
   ACADEMIC_TERM_KINDS,
+  SUBJECT_KINDS,
+  SUBJECT_KIND_VALUES,
+  ROOM_KINDS,
+  ROOM_KIND_VALUES,
+  ATTENDANCE_STATUS,
+  ATTENDANCE_STATUS_VALUES,
+  ATTENDED_STATUSES,
+  ATTENDANCE_THRESHOLD_PERCENT,
+  ASSESSMENT_KINDS,
+  ASSESSMENT_KIND_VALUES,
+  GRADE_SCALE,
+  HOSTEL_KINDS,
+  HOSTEL_KIND_VALUES,
+  HOSTEL_ALLOCATION_STATUS,
+  HOSTEL_LEAVE_STATUS,
+  BOOK_ISSUE_STATUS,
+  PLACEMENT_DRIVE_STATUS,
+  PLACEMENT_APPLICATION_STATUS,
   STUDENT_ACTIONABLE_STATUSES,
   COMPLAINT_STATUS,
   COMPLAINT_STATUS_VALUES,

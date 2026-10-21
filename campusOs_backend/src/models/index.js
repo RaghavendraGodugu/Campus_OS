@@ -47,6 +47,22 @@ const models = {
   Invoice,
   Payment,
   Refund,
+  Subject: require("./Subject"),
+  Room: require("./Room"),
+  TimetableEntry: require("./TimetableEntry"),
+  AttendanceSession: require("./AttendanceSession"),
+  Assessment: require("./Assessment"),
+  AssessmentMark: require("./AssessmentMark"),
+  ResultRelease: require("./ResultRelease"),
+  Hostel: require("./Hostel"),
+  HostelRoom: require("./HostelRoom"),
+  HostelAllocation: require("./HostelAllocation"),
+  HostelLeave: require("./HostelLeave"),
+  Book: require("./Book"),
+  BookIssue: require("./BookIssue"),
+  Company: require("./Company"),
+  PlacementDrive: require("./PlacementDrive"),
+  PlacementApplication: require("./PlacementApplication"),
 };
 
 /**

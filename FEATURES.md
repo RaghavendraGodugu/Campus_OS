@@ -7,8 +7,8 @@ human step or a missing screen is left empty and says why.
 **Legend** — `[x]` working · `[ ]` not working · `[~]` partly working (the tick
 means the note that follows it)
 
-- **Last reviewed:** 17 October 2026
-- **Verified:** 828 backend tests, 181 frontend tests, lint and build clean, plus a green 41-check browser sweep against Atlas and the six fixes below confirmed against live data
+- **Last reviewed:** 21 October 2026
+- **Verified:** 886 backend tests, 181 frontend tests, lint and build clean, plus a green 78-check browser sweep against Atlas across nine roles and four public pages
 - **Databases:** Atlas `campusos` exercised end to end — a real GST invoice
   (₹1,00,000 + 18% CGST/SGST = ₹1,18,000, halves reconciling exactly), an
   opened academic term, a saved tax registration, and a green browser sweep
@@ -465,6 +465,47 @@ means the note that follows it)
 
 ---
 
+## 17. Academic core
+
+- [x] Academic terms with exactly one open term at a time; a register, a result
+      and an instalment can only be written into an open term
+- [x] Subjects and rooms as live catalogue entries; a retired subject cannot
+      appear on a new timetable
+- [x] Timetable with generated clash rules: an overlapping room, a teacher
+      double-booked across rooms, a cohort booked for two subjects at once —
+      each refused with a reason; back-to-back classes are allowed
+- [x] A student sees only their programme and semester; faculty see only the
+      classes they teach; a HOD schedules and reads inside their department
+- [x] Attendance registers that must be complete before they are saved — no
+      register that quietly defaults a student to absent; invalid students, a
+      day the class does not meet, a closed term and a second marking are all
+      refused
+- [x] Corrections bump a revision number and write an audit entry; a teacher
+      who does not teach the class cannot correct it, even with the permission
+- [x] Percentages are derived, never stored or typed
+- [x] Marks and components with their own maxima; an unfilled component blocks
+      release; the grade derives from the marks and recomputes on correction
+- [x] Release is a decision, not a side effect: a student sees nothing before
+      their programme is released; a HOD releases their programme, the
+      examination office releases institution-wide
+
+## 18. Campus services
+
+- [x] Hostel: rooms with capacity; a refusal that names the reason rather than
+      "conflict"; one active allocation per student, room freed on vacate;
+      leave requires an active allocation and only the warden decides
+- [x] Library: catalogue with copies; the last copy is issued atomically and
+      the next borrower is refused; a double borrow rolls the count back; a
+      copy is returned exactly once
+- [x] Placements: companies and drives; draft drives invisible to students
+      until opened; one application per drive, duplicate refused, withdrawal
+      allowed; eligibility and deadline both enforced; the company directory
+      ("who is recruiting") is readable by the same roles that can list drives
+- [x] The three operational roles read and manage their own domain and hold no
+      generic request/complaint grants
+
+---
+
 ## Known blockers
 
 1. **Live webhooks** need a public URL and a signing secret. Direct server-side
@@ -479,22 +520,26 @@ Razorpay was verified by hand and is no longer on this list.
 
 ## What is genuinely finished
 
-Authentication and sessions, the permission model, requests, complaints,
-certificate issuance and PDFs, invoices, refunds and reconciliation, document
-upload and private delivery, announcements and notifications, scoped reports and
-audit, and the profile section for every role.
+Authentication, sessions, two-factor sign-in, email verification and password
+reset, the permission model, the request engine, the grievance engine,
+certificate issuance, PDFs and templates, the finance stack (invoicing with GST,
+instalments, penalties, refunds, a Razorpay gateway), documents, announcements
+with email delivery and image upload, notifications and their preferences,
+scoped reports, exports and audit, the profile for every role, and the academic
+core (terms, subjects, timetable, attendance, marks and result release) together
+with hostel, library and placements, and the campus overview that aggregates
+them for the dean and principal.
 
 ## What is not
 
-The items still marked above with no box: email verification, password reset by
-email, two-factor authentication, avatar upload, academic term setup, HOD
-assignment from the interface, certificate templates, bulk certificate issuance,
-late-payment penalties and instalments, GST invoicing, email delivery of
-announcements, notification preferences, report export and scheduling, malware
-scanning, document thumbnails, account-lockout notification, a security headers
-report, a dependency-audit gate, coverage thresholds, a motion audit on the
-finance tables, uptime monitoring and error tracking. Some need a host or a
-third-party account; the rest are simply not built.
+The items still marked above with no box: a live Razorpay webhook beyond the
+signature check, scheduled report delivery and scheduled penalty runs, event
+management, a searchable staff directory, term rollover automation, per-college
+certificate branding, malware scanning of uploads, document thumbnails, an
+account-lockout notification, a security headers report, a dependency-audit
+gate, coverage thresholds, a motion audit on the finance tables, and uptime
+monitoring or error tracking. Most need a host, a third party or a product
+decision; the rest are simply not started.
 
 Three more are marked done but rest on a human step rather than a test: the
 Razorpay capture-to-refund drill, the Docker image build, and Cloudinary delivery

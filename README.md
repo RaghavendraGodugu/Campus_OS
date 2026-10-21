@@ -220,7 +220,19 @@ certificate is indefensible.
 to the total exactly. Penalties compound on the original debt, never on a
 balance that already includes earlier penalties, and a sweep is idempotent.
 
-**Correctness that is checked rather than assumed.** 828 backend tests and 181
+**Academic core.** Terms with exactly one open at a time. A timetable that
+computes its own clashes — room, teacher, cohort — rather than hoping nobody
+collides. Attendance registers that must be complete before they save, with
+corrections that bump a revision and write an audit line. Marks per component
+with maxima, a grade derived and recomputed on correction, and a release gate:
+nothing is visible to a student before their programme is released.
+
+**Campus services.** Hostel rooms with capacity and one active allocation per
+student. A library whose last copy is issued atomically and whose copies are
+returned exactly once. Placement drives invisible to students until they are
+opened, with eligibility, deadline and one-application rules.
+
+**Correctness that is checked rather than assumed.** 886 backend tests and 181
 frontend tests. Contrast ratios computed, not eyeballed. Spreadsheet exports
 neutralise formula injection. CSV exports reuse the same service the screen
 uses, so the two cannot disagree about who may see what.
@@ -246,7 +258,7 @@ worse than one that is not finished.
 - **Certificate templates** are built; **bulk issuance** is built; **per-college
   branding** is not
 - **Penalty sweeps** are built; **scheduled runs** are not
-- Attendance, timetable, exams, hostel, library, placements, events
+- Event management; a searchable staff directory beyond the built one
 
 `FEATURES.md` has every single item, ticked or not, with the reason for each
 unticked one.
@@ -283,7 +295,7 @@ campusOs_frontend/    React and Vite
 ## Testing
 
 ```bash
-npm test                    # 828 backend
+npm test                    # 886 backend
 npm run test:frontend       # 181 frontend
 npm run lint                # both, clean
 npm run build               # production bundle
@@ -330,6 +342,9 @@ Docker was not installed on the machine this was written on. See `FEATURES.md`.
 | File | For |
 | --- | --- |
 | **[FEATURES.md](FEATURES.md)** | Every feature, ticked or not, with reasons. The honest inventory. |
+| **[ACADEMICS.md](ACADEMICS.md)** | The academic core: terms, subjects, timetable, attendance, marks and release. |
+| **[CAMPUS_SERVICES.md](CAMPUS_SERVICES.md)** | Hostel, library and placements: the desks and their invariants. |
+| **[ANALYTICS.md](ANALYTICS.md)** | The campus overview figures and how each is derived. |
 | **[DEPLOY.md](DEPLOY.md)** | Deployment, backups, restore, the environment contract. |
 | `.env.example` | Every variable, with what it is for. |
 

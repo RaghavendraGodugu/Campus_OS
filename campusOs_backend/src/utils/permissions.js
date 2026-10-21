@@ -77,6 +77,96 @@ const P = {
   PROGRAM_READ: "program:read:institution",
   PROGRAM_MANAGE: "program:manage:institution",
 
+  // ===== Academic structure and timetable =====
+  /**
+   * Academic reference data is readable by everyone who has a schedule.
+   *
+   * A student needs the subject list to understand their own timetable; a
+   * faculty member needs it to know what they are teaching. Neither needs the
+   * full catalogue's write side.
+   */
+  SUBJECT_READ: "subject:read:institution",
+  SUBJECT_MANAGE: "subject:manage:institution",
+  /**
+   * A HOD may only change subjects their own department owns.
+   *
+   * The scope is part of the permission string rather than a check in the
+   * service alone, so widening it is a visible edit to one grant.
+   */
+  SUBJECT_MANAGE_DEPARTMENT: "subject:manage:department",
+  ROOM_READ: "room:read:institution",
+  ROOM_MANAGE: "room:manage:institution",
+
+  /**
+   * A timetable is read by scope, not by role.
+   *
+   * `own` means "the entries for my programme and semester" for a student and
+   * "the classes I teach" for faculty; `department` and `institution` widen
+   * that. Writing is separate from reading, and the department variant is what
+   * lets a HOD schedule without gaining institution-wide control.
+   */
+  TIMETABLE_READ_OWN: "timetable:read:own",
+  TIMETABLE_READ_DEPARTMENT: "timetable:read:department",
+  TIMETABLE_READ_INSTITUTION: "timetable:read:institution",
+  TIMETABLE_MANAGE: "timetable:manage:institution",
+  TIMETABLE_MANAGE_DEPARTMENT: "timetable:manage:department",
+
+  /**
+   * Attendance is read by scope and written by the person who taught.
+   *
+   * `MARK_OWN` is deliberately narrow: it authorises marking a class the
+   * caller teaches, not attendance in general. Corrections are a separate
+   * capability because changing a record after the fact is a different act
+   * from recording it, and it is the one an audit reader cares about.
+   */
+  ATTENDANCE_READ_OWN: "attendance:read:own",
+  ATTENDANCE_READ_DEPARTMENT: "attendance:read:department",
+  ATTENDANCE_READ_INSTITUTION: "attendance:read:institution",
+  ATTENDANCE_MARK_OWN: "attendance:mark:own",
+  ATTENDANCE_CORRECT_DEPARTMENT: "attendance:correct:department",
+  ATTENDANCE_CORRECT_INSTITUTION: "attendance:correct:institution",
+
+  /**
+   * Marks and results.
+   *
+   * `RESULT_READ_OWN` means "my own results" for a student and "the subjects I
+   * teach" for faculty; the service decides which. `PUBLISH` is separate from
+   * `MANAGE` because releasing a result is the moment it becomes a claim the
+   * institution has made to a student, and it happens per programme.
+   */
+  RESULT_READ_OWN: "result:read:own",
+  RESULT_READ_DEPARTMENT: "result:read:department",
+  RESULT_READ_INSTITUTION: "result:read:institution",
+  RESULT_ENTER_OWN: "result:enter:own",
+  RESULT_MANAGE_DEPARTMENT: "result:manage:department",
+  RESULT_MANAGE_INSTITUTION: "result:manage:institution",
+  RESULT_PUBLISH_DEPARTMENT: "result:publish:department",
+  RESULT_PUBLISH_INSTITUTION: "result:publish:institution",
+
+  // ===== Campus services =====
+  /**
+   * The three operational domains that used to exist only as roles.
+   *
+   * Each has its own read scope, its own manage grant and one student-facing
+   * action (hostel leave, library borrowing, placement application). None of
+   * them inherits request or complaint powers: a library administrator has no
+   * business approving a bonafide certificate, and the least-privilege rule is
+   * what makes that visible.
+   */
+  HOSTEL_READ_OWN: "hostel:read:own",
+  HOSTEL_READ_INSTITUTION: "hostel:read:institution",
+  HOSTEL_MANAGE: "hostel:manage:institution",
+  HOSTEL_APPROVE: "hostel:approve:institution",
+  HOSTEL_LEAVE_OWN: "hostel:leave:own",
+  LIBRARY_READ_OWN: "library:read:own",
+  LIBRARY_READ_INSTITUTION: "library:read:institution",
+  LIBRARY_MANAGE: "library:manage:institution",
+  LIBRARY_ISSUE: "library:issue:institution",
+  PLACEMENT_READ_OWN: "placement:read:own",
+  PLACEMENT_READ_INSTITUTION: "placement:read:institution",
+  PLACEMENT_MANAGE: "placement:manage:institution",
+  PLACEMENT_APPLY_OWN: "placement:apply:own",
+
   // ===== Requests =====
   REQUEST_CREATE: "request:create:own",
   REQUEST_READ_OWN: "request:read:own",
@@ -241,6 +331,15 @@ const ROLE_PERMISSIONS = {
     P.PAYMENT_CREATE_OWN,
     P.PAYMENT_READ_OWN,
     P.REFUND_REQUEST,
+    P.SUBJECT_READ,
+    P.TIMETABLE_READ_OWN,
+    P.ATTENDANCE_READ_OWN,
+    P.RESULT_READ_OWN,
+    P.HOSTEL_READ_OWN,
+    P.HOSTEL_LEAVE_OWN,
+    P.LIBRARY_READ_OWN,
+    P.PLACEMENT_READ_OWN,
+    P.PLACEMENT_APPLY_OWN,
     P.ANNOUNCEMENT_READ,
   ],
 
@@ -279,6 +378,13 @@ const ROLE_PERMISSIONS = {
     P.DOCUMENT_READ_DEPARTMENT,
     P.ANNOUNCEMENT_READ,
     P.REPORT_READ_DEPARTMENT,
+    P.SUBJECT_READ,
+    P.ROOM_READ,
+    P.TIMETABLE_READ_OWN,
+    P.ATTENDANCE_READ_OWN,
+    P.ATTENDANCE_MARK_OWN,
+    P.RESULT_READ_OWN,
+    P.RESULT_ENTER_OWN,
   ],
 
   [ROLES.HOD]: [
@@ -310,6 +416,18 @@ const ROLE_PERMISSIONS = {
     P.ANNOUNCEMENT_READ,
     P.REPORT_READ_DEPARTMENT,
     P.AUDIT_READ_DEPARTMENT,
+    P.SUBJECT_READ,
+    P.SUBJECT_MANAGE_DEPARTMENT,
+    P.ROOM_READ,
+    P.TIMETABLE_READ_DEPARTMENT,
+    P.TIMETABLE_MANAGE_DEPARTMENT,
+    P.ATTENDANCE_MARK_OWN,
+    P.ATTENDANCE_READ_DEPARTMENT,
+    P.ATTENDANCE_CORRECT_DEPARTMENT,
+    P.RESULT_READ_DEPARTMENT,
+    P.RESULT_ENTER_OWN,
+    P.RESULT_MANAGE_DEPARTMENT,
+    P.RESULT_PUBLISH_DEPARTMENT,
   ],
 
   [ROLES.EXAM_ADMIN]: [
@@ -327,6 +445,17 @@ const ROLE_PERMISSIONS = {
     P.DOCUMENT_READ_INSTITUTION,
     P.ANNOUNCEMENT_READ,
     P.REPORT_READ_DEPARTMENT,
+    P.SUBJECT_READ,
+    P.SUBJECT_MANAGE,
+    P.ROOM_READ,
+    P.ROOM_MANAGE,
+    P.TIMETABLE_READ_INSTITUTION,
+    P.TIMETABLE_MANAGE,
+    P.ATTENDANCE_READ_INSTITUTION,
+    P.ATTENDANCE_CORRECT_INSTITUTION,
+    P.RESULT_READ_INSTITUTION,
+    P.RESULT_MANAGE_INSTITUTION,
+    P.RESULT_PUBLISH_INSTITUTION,
   ],
 
   [ROLES.ACCOUNTS_ADMIN]: [
@@ -346,20 +475,22 @@ const ROLE_PERMISSIONS = {
     P.AUDIT_READ_INSTITUTION,
   ],
 
+  /**
+   * The three operational roles now own a domain instead of borrowing the
+   * request and complaint engine.
+   *
+   * Request and complaint grants were removed deliberately: a library fine
+   * dispute is not a library administrator's request queue, and a hostel warden
+   * should not be able to resolve a ragging complaint merely because the role
+   * existed before its module did.
+   */
   [ROLES.HOSTEL_ADMIN]: [
     ...BASE_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
-    P.REQUEST_READ_INSTITUTION,
-    P.REQUEST_READ_ASSIGNED,
-    P.REQUEST_UPDATE_ASSIGNED,
-    P.COMPLAINT_READ_DEPARTMENT,
-    P.COMPLAINT_READ_ASSIGNED,
-    P.COMPLAINT_UPDATE_ASSIGNED,
-    P.COMPLAINT_TRIAGE,
-    P.COMPLAINT_ACKNOWLEDGE,
-    P.COMPLAINT_INVESTIGATE,
-    P.COMPLAINT_RESOLVE,
+    P.HOSTEL_READ_INSTITUTION,
+    P.HOSTEL_MANAGE,
+    P.HOSTEL_APPROVE,
     P.ANNOUNCEMENT_READ,
     P.REPORT_READ_DEPARTMENT,
   ],
@@ -368,16 +499,9 @@ const ROLE_PERMISSIONS = {
     ...BASE_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
-    P.REQUEST_READ_INSTITUTION,
-    P.REQUEST_READ_ASSIGNED,
-    P.REQUEST_UPDATE_ASSIGNED,
-    P.COMPLAINT_READ_DEPARTMENT,
-    P.COMPLAINT_READ_ASSIGNED,
-    P.COMPLAINT_UPDATE_ASSIGNED,
-    P.COMPLAINT_TRIAGE,
-    P.COMPLAINT_ACKNOWLEDGE,
-    P.COMPLAINT_INVESTIGATE,
-    P.COMPLAINT_RESOLVE,
+    P.LIBRARY_READ_INSTITUTION,
+    P.LIBRARY_MANAGE,
+    P.LIBRARY_ISSUE,
     P.ANNOUNCEMENT_READ,
     P.REPORT_READ_DEPARTMENT,
   ],
@@ -386,18 +510,8 @@ const ROLE_PERMISSIONS = {
     ...BASE_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
-    P.REQUEST_READ_INSTITUTION,
-    P.REQUEST_READ_ASSIGNED,
-    P.REQUEST_UPDATE_ASSIGNED,
-    P.COMPLAINT_READ_DEPARTMENT,
-    P.COMPLAINT_READ_ASSIGNED,
-    P.COMPLAINT_UPDATE_ASSIGNED,
-    P.COMPLAINT_TRIAGE,
-    P.COMPLAINT_ACKNOWLEDGE,
-    P.COMPLAINT_INVESTIGATE,
-    P.COMPLAINT_RESOLVE,
-    P.CERTIFICATE_READ_INSTITUTION,
-    P.DOCUMENT_READ_INSTITUTION,
+    P.PLACEMENT_READ_INSTITUTION,
+    P.PLACEMENT_MANAGE,
     P.ANNOUNCEMENT_READ,
     P.REPORT_READ_DEPARTMENT,
   ],
@@ -437,6 +551,14 @@ const ROLE_PERMISSIONS = {
     P.ANNOUNCEMENT_MANAGE,
     P.REPORT_READ_INSTITUTION,
     P.AUDIT_READ_INSTITUTION,
+    P.SUBJECT_READ,
+    P.ROOM_READ,
+    P.TIMETABLE_READ_INSTITUTION,
+    P.ATTENDANCE_READ_INSTITUTION,
+    P.RESULT_READ_INSTITUTION,
+    P.HOSTEL_READ_INSTITUTION,
+    P.LIBRARY_READ_INSTITUTION,
+    P.PLACEMENT_READ_INSTITUTION,
   ],
 
   [ROLES.PRINCIPAL]: [
@@ -468,6 +590,14 @@ const ROLE_PERMISSIONS = {
     P.ANNOUNCEMENT_MANAGE,
     P.REPORT_READ_INSTITUTION,
     P.AUDIT_READ_INSTITUTION,
+    P.SUBJECT_READ,
+    P.ROOM_READ,
+    P.TIMETABLE_READ_INSTITUTION,
+    P.ATTENDANCE_READ_INSTITUTION,
+    P.RESULT_READ_INSTITUTION,
+    P.HOSTEL_READ_INSTITUTION,
+    P.LIBRARY_READ_INSTITUTION,
+    P.PLACEMENT_READ_INSTITUTION,
   ],
 
   /**
@@ -513,6 +643,20 @@ const ROLE_PERMISSIONS = {
     P.ANNOUNCEMENT_MANAGE,
     P.REPORT_READ_INSTITUTION,
     P.AUDIT_READ_INSTITUTION,
+    // Academic *configuration*, not academic records: rooms, subjects and the
+    // timetable are setup, and setup has to belong to somebody. Student grades
+    // and attendance are deliberately not granted here.
+    P.SUBJECT_READ,
+    P.SUBJECT_MANAGE,
+    P.ROOM_READ,
+    P.ROOM_MANAGE,
+    P.TIMETABLE_READ_INSTITUTION,
+    P.TIMETABLE_MANAGE,
+    P.ATTENDANCE_READ_INSTITUTION,
+    P.RESULT_READ_INSTITUTION,
+    P.HOSTEL_READ_INSTITUTION,
+    P.LIBRARY_READ_INSTITUTION,
+    P.PLACEMENT_READ_INSTITUTION,
   ],
 };
 

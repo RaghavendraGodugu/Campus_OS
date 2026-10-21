@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   BadgeCheck,
   BellRing,
+  CalendarCheck,
   FileText,
   IndianRupee,
   Megaphone,
@@ -66,6 +67,12 @@ export default function Dashboard() {
     enabled: can("invoice:read:own"),
   });
 
+  const myAttendance = useQuery({
+    queryKey: ["dashboard", "attendance"],
+    queryFn: () => apiGet("/attendance/me"),
+    enabled: isStudent,
+  });
+
   const announcements = useQuery({
     queryKey: ["dashboard", "announcements"],
     queryFn: () => apiGet("/announcements?limit=4"),
@@ -92,6 +99,8 @@ export default function Dashboard() {
       )}
 
       {isStudent && student && <StudentStrip student={student} />}
+
+      {isStudent && <StudentAttendance query={myAttendance} />}
 
       {canAny("report:read:department", "report:read:institution") && (
         <section aria-label="Key figures">
@@ -434,3 +443,187 @@ function QuickLinks() {
     </Card>
   );
 }
+
+/**
+ * Attendance on the student dashboard.
+ *
+ * ## Why the colour thresholds are literal
+ *
+ * Below 60 is red, 60 up to (not including) 75 is amber, and 75 or above is
+ * green. The middle band is deliberately *not* green: 75 is the institutional
+ * threshold, so a student at 70 is below it and needs to see that before the
+ * end of term, not a reassuring colour.
+ *
+ * The percentage comes from the server. This card colours it; it never
+ * calculates it.
+ */
+function StudentAttendance({ query }) {
+  if (query.isLoading) {
+    return (
+      <SkeletonRegion label="Loading your attendance">
+        <div className="h-32 rounded-card bg-ink-100/60 dark:bg-ink-200/20" />
+      </SkeletonRegion>
+    );
+  }
+
+  if (query.isError) {
+    return (
+      <ErrorState
+        title="Could not load your attendance"
+        message={query.error?.message}
+        onRetry={() => query.refetch()}
+      />
+    );
+  }
+
+  const data = query.data?.data;
+
+  if (!data?.term) {
+    return (
+      <Card
+        title="Attendance"
+        description="No academic term is open, so there is nothing to report yet."
+      />
+    );
+  }
+
+  if (!data.overall) {
+    return (
+      <Card
+        title="Attendance"
+        actions={
+          <Link
+            to="/attendance"
+            className="text-xs font-medium text-brand-700 dark:text-brand-300 hover:underline"
+          >
+            View details
+          </Link>
+        }
+      >
+        <EmptyState
+          icon={CalendarCheck}
+          title="No classes marked yet"
+          description="Your attendance appears here once a teacher marks a register."
+        />
+      </Card>
+    );
+  }
+
+  const percentage = data.overall.percentage;
+  const tone = attendanceTone(percentage);
+  const palette = ATTENDANCE_PALETTE[tone];
+
+  return (
+    <Card
+      title="Attendance"
+      actions={
+        <Link
+          to="/attendance"
+          className="text-xs font-medium text-brand-700 dark:text-brand-300 hover:underline"
+        >
+          View details
+        </Link>
+      }
+    >
+      <div className="grid gap-6 sm:grid-cols-[auto_1fr] sm:items-start">
+        <div>
+          <p
+            className={`text-5xl font-semibold tracking-tight ${palette.text}`}
+          >
+            {percentage}
+            <span className="text-2xl">%</span>
+          </p>
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+            {data.overall.attended} of {data.overall.held} classes attended
+          </p>
+          <span
+            className={`mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${palette.chip}`}
+          >
+            <span
+              className={`size-1.5 rounded-full ${palette.dot}`}
+              aria-hidden="true"
+            />
+            {palette.label}
+          </span>
+        </div>
+
+        <div className="min-w-0">
+          <div className="h-2 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-200/40">
+            <div
+              className={`h-full rounded-full ${palette.bar}`}
+              style={{ width: `${Math.min(100, percentage)}%` }}
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-ink-500 dark:text-ink-400">
+            Institutional threshold {data.threshold}%.
+          </p>
+
+          <ul className="mt-4 space-y-2">
+            {data.subjects.map((row) => {
+              const rowTone = attendanceTone(row.percentage);
+              return (
+                <li
+                  key={row.subject.id}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span
+                      className={`size-1.5 shrink-0 rounded-full ${ATTENDANCE_PALETTE[rowTone].dot}`}
+                      aria-hidden="true"
+                    />
+                    <span className="truncate text-ink-700 dark:text-ink-300">
+                      {row.subject.code} · {row.subject.name}
+                    </span>
+                  </span>
+                  <span
+                    className={`shrink-0 tabular-nums font-medium ${ATTENDANCE_PALETTE[rowTone].text}`}
+                  >
+                    {row.percentage}%
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function attendanceTone(percentage) {
+  if (percentage === null || percentage === undefined) return "muted";
+  if (percentage < 60) return "bad";
+  if (percentage < 75) return "warn";
+  return "good";
+}
+
+const ATTENDANCE_PALETTE = {
+  good: {
+    text: "text-emerald-600 dark:text-emerald-400",
+    bar: "bg-emerald-500",
+    dot: "bg-emerald-500",
+    label: "On track",
+    chip: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/70 dark:bg-emerald-500/12 dark:text-emerald-300 dark:ring-emerald-400/25",
+  },
+  warn: {
+    text: "text-amber-600 dark:text-amber-400",
+    bar: "bg-amber-500",
+    dot: "bg-amber-500",
+    label: "Needs attention",
+    chip: "bg-amber-50 text-amber-800 ring-1 ring-amber-200/80 dark:bg-amber-500/12 dark:text-amber-300 dark:ring-amber-400/25",
+  },
+  bad: {
+    text: "text-red-600 dark:text-red-400",
+    bar: "bg-red-500",
+    dot: "bg-red-500",
+    label: "Critical",
+    chip: "bg-red-50 text-red-700 ring-1 ring-red-200/70 dark:bg-red-500/12 dark:text-red-300 dark:ring-red-400/25",
+  },
+  muted: {
+    text: "text-ink-500",
+    bar: "bg-ink-300",
+    dot: "bg-ink-300",
+    label: "No data",
+    chip: "bg-ink-100 text-ink-600",
+  },
+};
