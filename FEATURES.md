@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 21 October 2026
-- **Verified:** 886 backend tests, 181 frontend tests, lint and build clean, plus a green 78-check browser sweep against Atlas across nine roles and four public pages
+- **Verified:** 906 backend tests, 186 frontend tests, lint and build clean, plus a green 85-check browser sweep against Atlas across nine roles and four public pages
 - **Databases:** Atlas `campusos` exercised end to end — a real GST invoice
   (₹1,00,000 + 18% CGST/SGST = ₹1,18,000, halves reconciling exactly), an
   opened academic term, a saved tax registration, and a green browser sweep
@@ -504,6 +504,30 @@ means the note that follows it)
 - [x] The three operational roles read and manage their own domain and hold no
       generic request/complaint grants
 
+## 19. Events
+
+- [x] The campus calendar for workshops, fests, seminars, sport and culture;
+      every signed-in role reads the published programme, and the offices that
+      answer for the poster (dean and super administrator) compose, publish and
+      cancel
+- [x] Publishing is a decision with an audit line, not a save state: a draft is
+      invisible to students until it is announced, and a published event is
+      refused un-publication — people act on the notice, and pulling it back
+      silently would be lying
+- [x] A cancelled event comes off the published calendar and refuses new
+      registers; transitions are database-validated, so an event cannot return
+      from cancelled or move through states nobody declared
+- [x] Registration is a ledger with a database constraint, not a counter: one
+      seat per person, the loser of a simultaneous click gets the conflict
+      instead of the seat
+- [x] Capacity compares against a live count; a full event says so; a
+      withdrawal frees the seat for the next person and is itself audited
+- [x] Registration closes when the event starts, because a headcount was
+      promised to the organisers before the door
+- [x] An event cannot end before it begins, in the validator and the service
+
+---
+
 ---
 
 ## Known blockers
@@ -533,8 +557,7 @@ them for the dean and principal.
 ## What is not
 
 The items still marked above with no box: a live Razorpay webhook beyond the
-signature check, scheduled report delivery and scheduled penalty runs, event
-management, a searchable staff directory, term rollover automation, per-college
+signature check, scheduled report delivery and scheduled penalty runs, a searchable staff directory page by name, department or skill, term rollover automation, per-college
 certificate branding, malware scanning of uploads, document thumbnails, an
 account-lockout notification, a security headers report, a dependency-audit
 gate, coverage thresholds, a motion audit on the finance tables, and uptime

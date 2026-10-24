@@ -229,12 +229,17 @@ corrections that bump a revision and write an audit line. Marks per component
 with maxima, a grade derived and recomputed on correction, and a release gate:
 nothing is visible to a student before their programme is released.
 
+**Events.** The campus calendar: drafts invisible until published, a publish
+decision rather than a save state, seats held once per person by a database
+constraint, capacity checked against a live count, registration closed when the
+event starts, and every transition audited.
+
 **Campus services.** Hostel rooms with capacity and one active allocation per
 student. A library whose last copy is issued atomically and whose copies are
 returned exactly once. Placement drives invisible to students until they are
 opened, with eligibility, deadline and one-application rules.
 
-**Correctness that is checked rather than assumed.** 886 backend tests and 181
+**Correctness that is checked rather than assumed.** 906 backend tests and 186
 frontend tests. Contrast ratios computed, not eyeballed. Spreadsheet exports
 neutralise formula injection. CSV exports reuse the same service the screen
 uses, so the two cannot disagree about who may see what.
@@ -260,7 +265,7 @@ worse than one that is not finished.
 - **Certificate templates** are built; **bulk issuance** is built; **per-college
   branding** is not
 - **Penalty sweeps** are built; **scheduled runs** are not
-- Event management; a searchable staff directory beyond the built one
+- A searchable staff directory beyond the built one
 
 `FEATURES.md` has every single item, ticked or not, with the reason for each
 unticked one.
@@ -297,7 +302,7 @@ campusOs_frontend/    React and Vite
 ## Testing
 
 ```bash
-npm test                    # 886 backend
+npm test                    # 906 backend
 npm run test:frontend       # 181 frontend
 npm run lint                # both, clean
 npm run build               # production bundle

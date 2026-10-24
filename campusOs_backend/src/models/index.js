@@ -63,6 +63,8 @@ const models = {
   Company: require("./Company"),
   PlacementDrive: require("./PlacementDrive"),
   PlacementApplication: require("./PlacementApplication"),
+  Event: require("./Event"),
+  EventRsvp: require("./EventRsvp"),
 };
 
 /**

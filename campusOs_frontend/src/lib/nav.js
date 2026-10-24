@@ -73,6 +73,13 @@ export const NAV_ITEMS = [
     permissions: ["library:read:own", "library:read:institution"],
   },
   {
+    to: "/events",
+    label: "Events",
+    icon: "CalendarRange",
+    permission: "event:read",
+  },
+
+  {
     to: "/placements",
     label: "Placements",
     icon: "Briefcase",

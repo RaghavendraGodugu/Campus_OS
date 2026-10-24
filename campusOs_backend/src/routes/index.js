@@ -29,6 +29,7 @@ const resultRoutes = require("./result.routes");
 const hostelRoutes = require("./hostel.routes");
 const libraryRoutes = require("./library.routes");
 const placementRoutes = require("./placement.routes");
+const eventRoutes = require("./event.routes");
 const analyticsRoutes = require("./analytics.routes");
 
 const router = express.Router();
@@ -63,6 +64,7 @@ router.use("/api/v1", resultRoutes);
 router.use("/api/v1", hostelRoutes);
 router.use("/api/v1", libraryRoutes);
 router.use("/api/v1", placementRoutes);
+router.use("/api/v1", eventRoutes);
 router.use("/api/v1", analyticsRoutes);
 
 module.exports = router;

@@ -64,6 +64,7 @@ const ROLES = [
       ["hostel", "/hostel", "ok"],
       ["library", "/library", "ok"],
       ["placements", "/placements", "ok"],
+      ["events calendar", "/events", "ok"],
       // Correctly refused: certificate issuance is not a student page.
       ["audit (staff)", "/audit", "refused"],
     ],
@@ -81,6 +82,7 @@ const ROLES = [
       ["timetable", "/timetable", "ok"],
       ["attendance", "/attendance", "ok"],
       ["results", "/results", "ok"],
+      ["events calendar", "/events", "ok"],
       // Correctly refused: own-requests is the student's view.
       ["student requests", "/requests", "refused"],
     ],
@@ -109,6 +111,7 @@ const ROLES = [
       ["library", "/library", "ok"],
       ["placements", "/placements", "ok"],
       ["campus overview", "/analytics", "ok"],
+      ["events calendar", "/events", "ok"],
       ["reports", "/reports", "ok"],
       ["audit", "/audit", "ok"],
     ],
@@ -120,6 +123,7 @@ const ROLES = [
     pages: [
       ["dashboard", "/", "ok"],
       ["profile", "/profile", "ok"],
+      ["events calendar", "/events", "ok"],
       ["hostel", "/hostel", "ok"],
       // Correctly refused: the library desk is not theirs.
       ["library", "/library", "refused"],
@@ -131,6 +135,7 @@ const ROLES = [
     pages: [
       ["dashboard", "/", "ok"],
       ["profile", "/profile", "ok"],
+      ["events calendar", "/events", "ok"],
       ["library", "/library", "ok"],
       ["library issues", "/library?tab=issues", "ok"],
       // Correctly refused.
@@ -143,6 +148,7 @@ const ROLES = [
     pages: [
       ["dashboard", "/", "ok"],
       ["profile", "/profile", "ok"],
+      ["events calendar", "/events", "ok"],
       ["placements", "/placements", "ok"],
       ["companies", "/placements?tab=companies", "ok"],
       // Correctly refused: the hostel desk is not theirs.
@@ -166,6 +172,7 @@ const ROLES = [
       ["hostel", "/hostel", "ok"],
       ["library", "/library", "ok"],
       ["placements", "/placements", "ok"],
+      ["events calendar", "/events", "ok"],
       ["campus overview", "/analytics", "ok"],
     ],
   },

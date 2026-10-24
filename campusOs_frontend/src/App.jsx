@@ -13,6 +13,7 @@ import Hostel from "./pages/Hostel";
 import Library from "./pages/Library";
 import Placements from "./pages/Placements";
 import CampusOverview from "./pages/CampusOverview";
+import Events from "./pages/Events";
 import Academics from "./pages/Academics";
 import ApplyCertificate from "./pages/ApplyCertificate";
 import VerifyCertificate from "./pages/VerifyCertificate";
@@ -150,6 +151,14 @@ export default function App() {
           }
         />
 
+        <Route
+          path="events"
+          element={
+            <RequirePermission permissions={["event:read"]}>
+              <Events />
+            </RequirePermission>
+          }
+        />
         <Route
           path="hostel"
           element={

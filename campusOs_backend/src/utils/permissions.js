@@ -164,6 +164,14 @@ const P = {
   LIBRARY_ISSUE: "library:issue:institution",
   PLACEMENT_READ_OWN: "placement:read:own",
   PLACEMENT_READ_INSTITUTION: "placement:read:institution",
+  /**
+   * Events belong to the whole campus, so reading the published calendar is a
+   * base grant. Managing one — booking the hall, publishing, cancelling — is
+   * an institution-scoped decision that stays with the offices that answer for
+   * the poster, and does not follow seniority anywhere else.
+   */
+  EVENT_READ: "event:read",
+  EVENT_MANAGE: "event:manage:institution",
   PLACEMENT_MANAGE: "placement:manage:institution",
   PLACEMENT_APPLY_OWN: "placement:apply:own",
 
@@ -302,6 +310,7 @@ const BASE_PERMISSIONS = [
   P.DEPARTMENT_READ,
   P.PROGRAM_READ,
   P.ACADEMIC_TERM_READ,
+  P.EVENT_READ,
 ];
 
 /**
@@ -549,6 +558,7 @@ const ROLE_PERMISSIONS = {
     P.CERTIFICATE_APPROVE_INSTITUTION,
     P.ANNOUNCEMENT_READ,
     P.ANNOUNCEMENT_MANAGE,
+    P.EVENT_MANAGE,
     P.REPORT_READ_INSTITUTION,
     P.AUDIT_READ_INSTITUTION,
     P.SUBJECT_READ,
@@ -612,6 +622,7 @@ const ROLE_PERMISSIONS = {
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
     P.DEPARTMENT_MANAGE,
+    P.EVENT_MANAGE,
     P.ACADEMIC_TERM_MANAGE,
     P.HOD_ASSIGN,
     P.ACADEMIC_TERM_READ,
