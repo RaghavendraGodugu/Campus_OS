@@ -65,6 +65,7 @@ const models = {
   PlacementApplication: require("./PlacementApplication"),
   Event: require("./Event"),
   EventRsvp: require("./EventRsvp"),
+  Branding: require("./Branding"),
 };
 
 /**

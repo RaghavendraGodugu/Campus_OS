@@ -173,6 +173,12 @@ export const NAV_ITEMS = [
     permission: "invoice:manage:institution",
   },
   {
+    to: "/admin/branding",
+    label: "Branding",
+    icon: "Palette",
+    permission: "super-admin:all",
+  },
+  {
     to: "/management/certificate-templates",
     label: "Certificate templates",
     icon: "FileText",

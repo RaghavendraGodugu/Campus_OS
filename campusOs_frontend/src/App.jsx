@@ -39,6 +39,7 @@ import ComposeAnnouncement from "./pages/ComposeAnnouncement";
 import Terms from "./pages/admin/Terms";
 import CertificateTemplates from "./pages/admin/CertificateTemplates";
 import GstProfile from "./pages/admin/GstProfile";
+import Branding from "./pages/admin/Branding";
 import CertificateDetail from "./pages/CertificateDetail";
 import ComplaintDetail from "./pages/ComplaintDetail";
 import Requests from "./pages/Requests";
@@ -550,6 +551,14 @@ export default function App() {
           element={
             <RequirePermission permission="invoice:manage:institution">
               <GstProfile />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="admin/branding"
+          element={
+            <RequirePermission permission="super-admin:all">
+              <Branding />
             </RequirePermission>
           }
         />

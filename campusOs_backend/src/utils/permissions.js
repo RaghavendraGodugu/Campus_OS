@@ -69,6 +69,11 @@ const P = {
    * a directory says who somebody is, not how to reach them privately.
    */
   STAFF_DIRECTORY_READ: "staff-directory:read",
+  /**
+   * SUPER_ADMIN authority — unrestricted system access.
+   * Used sparingly for actions that transcend normal role boundaries.
+   */
+  SUPER_ADMIN: "super-admin:all",
 
   // ===== Institutional structure =====
   DEPARTMENT_READ: "department:read:institution",

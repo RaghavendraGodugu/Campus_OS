@@ -28,6 +28,7 @@ import {
   Upload,
   User,
   Users,
+  Palette,
   X,
 } from "lucide-react";
 
@@ -41,6 +42,7 @@ const ICONS = {
   LayoutDashboard,
   FileText,
   Users,
+  Palette,
   ShieldAlert,
   BadgeCheck,
   Receipt,
