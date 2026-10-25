@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { CheckCircle2, KeyRound } from "lucide-react";
+import { CheckCircle2, KeyRound, Eye, EyeOff } from "lucide-react";
 
 import { apiPost } from "../api/client";
 import Button from "../components/ui/Button";
@@ -29,6 +29,8 @@ export default function ResetPassword() {
   const token = params.get("token") ?? "";
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState(null);
   const [done, setDone] = useState(false);
 
@@ -150,15 +152,25 @@ export default function ResetPassword() {
           noValidate
         >
           <Field label="New password" htmlFor="new-password" required>
-            <input
-              id="new-password"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className={inputClass}
-            />
+            <div className="relative">
+              <input
+                id="new-password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className={inputClass}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+              </button>
+            </div>
           </Field>
 
           <Field
@@ -167,15 +179,25 @@ export default function ResetPassword() {
             required
             error={mismatch ? "These do not match" : null}
           >
-            <input
-              id="confirm-password"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={confirm}
-              onChange={(event) => setConfirm(event.target.value)}
-              className={inputClass}
-            />
+            <div className="relative">
+              <input
+                id="confirm-password"
+                type={showConfirm ? "text" : "password"}
+                autoComplete="new-password"
+                required
+                value={confirm}
+                onChange={(event) => setConfirm(event.target.value)}
+                className={inputClass}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                aria-label={showConfirm ? "Hide password" : "Show password"}
+              >
+                {showConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+              </button>
+            </div>
           </Field>
 
           {tooShort && (

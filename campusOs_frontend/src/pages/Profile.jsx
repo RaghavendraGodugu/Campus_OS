@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   Check,
+  Eye,
+  EyeOff,
   KeyRound,
   LogOut,
   Pencil,
@@ -425,6 +427,9 @@ function PasswordSection() {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNext, setShowNext] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [notice, setNotice] = useState(null);
   const [error, setError] = useState(null);
 
@@ -484,14 +489,24 @@ function PasswordSection() {
           className="space-y-4"
         >
           <Field label="Current password" htmlFor="current-password" required>
-            <input
-              id="current-password"
-              type="password"
-              autoComplete="current-password"
-              value={current}
-              onChange={(event) => setCurrent(event.target.value)}
-              className={inputClass}
-            />
+            <div className="relative">
+              <input
+                id="current-password"
+                type={showCurrent ? "text" : "password"}
+                autoComplete="current-password"
+                value={current}
+                onChange={(event) => setCurrent(event.target.value)}
+                className={inputClass}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrent(!showCurrent)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                aria-label={showCurrent ? "Hide password" : "Show password"}
+              >
+                {showCurrent ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+              </button>
+            </div>
           </Field>
 
           <Field
@@ -501,15 +516,25 @@ function PasswordSection() {
             hint="At least 12 characters, with an upper-case letter, a lower-case letter and a number."
             error={tooShort ? "Too short — at least 12 characters" : null}
           >
-            <input
-              id="new-password"
-              type="password"
-              autoComplete="new-password"
-              value={next}
-              onChange={(event) => setNext(event.target.value)}
-              className={inputClass}
-              aria-invalid={tooShort || undefined}
-            />
+            <div className="relative">
+              <input
+                id="new-password"
+                type={showNext ? "text" : "password"}
+                autoComplete="new-password"
+                value={next}
+                onChange={(event) => setNext(event.target.value)}
+                className={inputClass}
+                aria-invalid={tooShort || undefined}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNext(!showNext)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                aria-label={showNext ? "Hide password" : "Show password"}
+              >
+                {showNext ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+              </button>
+            </div>
           </Field>
 
           <Field
@@ -518,15 +543,25 @@ function PasswordSection() {
             required
             error={mismatch ? "The two passwords do not match" : null}
           >
-            <input
-              id="confirm-password"
-              type="password"
-              autoComplete="new-password"
-              value={confirm}
-              onChange={(event) => setConfirm(event.target.value)}
-              className={inputClass}
-              aria-invalid={mismatch || undefined}
-            />
+            <div className="relative">
+              <input
+                id="confirm-password"
+                type={showConfirm ? "text" : "password"}
+                autoComplete="new-password"
+                value={confirm}
+                onChange={(event) => setConfirm(event.target.value)}
+                className={inputClass}
+                aria-invalid={mismatch || undefined}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                aria-label={showConfirm ? "Hide password" : "Show password"}
+              >
+                {showConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+              </button>
+            </div>
           </Field>
 
           {error && (

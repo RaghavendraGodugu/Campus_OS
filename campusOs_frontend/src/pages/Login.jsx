@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
-import { BadgeCheck, ShieldCheck, Sparkles } from "lucide-react";
+import { BadgeCheck, ShieldCheck, Sparkles, Eye, EyeOff } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
 import { DEMO_ACCOUNTS } from "../lib/nav";
@@ -30,6 +30,7 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   // Non-null once the password is accepted but the second factor is not.
@@ -261,17 +262,28 @@ export default function Login() {
                   </Field>
 
                   <Field label="Password" htmlFor="password" required>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      autoComplete="current-password"
-                      required
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                      className={inputClass}
-                      placeholder="••••••••"
-                    />
+                    <div className="relative">
+                      <input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
+                        required
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        className={inputClass}
+                        placeholder="••••••••"
+                        data-testid="password-input"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                      </button>
+                    </div>
                   </Field>
 
                   {error && (

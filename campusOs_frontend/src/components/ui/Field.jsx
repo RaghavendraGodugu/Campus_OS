@@ -81,4 +81,4 @@ export default function Field({
  * needing a brightness jump.
  */
 export const inputClass =
-  "block w-full rounded-xl border-0 bg-surface px-3.5 py-2.5 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200/90 dark:ring-ink-600 transition-all duration-150 placeholder:text-ink-400 hover:ring-ink-300 hover:shadow-card focus:bg-white focus:ring-2 focus:ring-brand-500 focus:shadow-raised aria-[invalid=true]:ring-red-400 aria-[invalid=true]:focus:ring-red-500 disabled:bg-ink-100/70 disabled:text-ink-400";
+  "block w-full rounded-xl border-0 bg-surface px-3.5 py-2.5 text-sm text-ink-900 dark:text-ink-100 shadow-sm ring-1 ring-ink-200/90 dark:ring-ink-600 transition-all duration-150 placeholder:text-ink-400 dark:placeholder:text-ink-500 hover:ring-ink-300 hover:shadow-card focus:bg-surface focus:ring-2 focus:ring-brand-500 focus:shadow-raised aria-[invalid=true]:ring-red-400 aria-[invalid=true]:focus:ring-red-500 disabled:bg-ink-100/70 dark:disabled:bg-ink-800/70 disabled:text-ink-400 dark:disabled:text-ink-500";

@@ -256,7 +256,7 @@ describe("sign in", () => {
     await waitFor(() => screen.getByRole("heading", { name: /sign in/i }));
 
     await user.type(screen.getByLabelText(/email/i), "demo.hod@campusos.local");
-    await user.type(screen.getByLabelText(/password/i), "Demo@Campus123");
+    await user.type(screen.getByTestId("password-input"), "Demo@Campus123");
     await user.click(screen.getByRole("button", { name: /^sign in$/i }));
 
     await waitFor(() => screen.getByRole("heading", { name: /hello/i }));
@@ -286,7 +286,7 @@ describe("sign in", () => {
     await waitFor(() => screen.getByRole("heading", { name: /sign in/i }));
 
     await user.type(screen.getByLabelText(/email/i), "wrong@campusos.local");
-    await user.type(screen.getByLabelText(/password/i), "wrong");
+    await user.type(screen.getByTestId("password-input"), "wrong");
     await user.click(screen.getByRole("button", { name: /^sign in$/i }));
 
     // The refusal is shown, and the form is still there to correct.
