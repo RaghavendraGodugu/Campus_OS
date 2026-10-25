@@ -69,8 +69,23 @@ const updateAcademicTermSchema = z
 
 const academicTermIdSchema = z.object({ id: objectId }).strict();
 
+const prepareRolloverSchema = z
+  .object({
+    currentYear: z
+      .string()
+      .trim()
+      .regex(/^\d{4}(-\d{2,4})?$/, "An academic year looks like 2026 or 2026-27"),
+    nextYearStart: z
+      .string()
+      .datetime({ offset: true })
+      .or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD"))
+      .transform((value) => new Date(value)),
+  })
+  .strict();
+
 module.exports = {
   createAcademicTermSchema,
   updateAcademicTermSchema,
   academicTermIdSchema,
+  prepareRolloverSchema,
 };

@@ -295,6 +295,185 @@ async function remove({ user, id, req }) {
   return true;
 }
 
+/**
+ * Prepare the next academic year by cloning the current year's term structure.
+ *
+ * Given an academic year like "2026-27", this finds all terms in that year and
+ * creates corresponding terms for the next year (e.g., "2027-28") with the same
+ * kinds, names (year suffix adjusted), codes (year suffix adjusted), and
+ * relative date offsets. The new terms are created in PLANNED status, not open.
+ *
+ * The caller chooses the start date for the first term of the next year; the
+ * rest follow the same duration and gap pattern as the source year.
+ */
+async function prepareNextYear({ user, currentYear, nextYearStart, req }) {
+  if (!/^\d{4}(-\d{2,4})?$/.test(currentYear)) {
+    throw ApiError.badRequest("currentYear must look like 2026-27");
+  }
+  if (!(nextYearStart instanceof Date) && isNaN(Date.parse(nextYearStart))) {
+    throw ApiError.badRequest("nextYearStart must be a valid date");
+  }
+
+  const terms = await AcademicTerm.find({ academicYear: currentYear })
+    .sort({ startsOn: 1 })
+    .lean();
+
+  if (terms.length === 0) {
+    throw ApiError.notFound(`No terms found for academic year ${currentYear}`);
+  }
+
+  // Determine the next academic year string
+  const nextYear = (() => {
+    if (currentYear.includes("-")) {
+      const [start, end] = currentYear.split("-").map(Number);
+      return `${start + 1}-${String(end + 1).slice(-2)}`;
+    }
+    const year = Number(currentYear);
+    return `${year + 1}-${String(year + 2).slice(-2)}`;
+  })();
+
+  // Check if next year already has terms
+  const existing = await AcademicTerm.find({ academicYear: nextYear }).countDocuments();
+  if (existing > 0) {
+    throw ApiError.conflict(`Academic year ${nextYear} already has ${existing} term(s)`);
+  }
+
+  // Calculate the offset from the first term's start to the chosen next year start
+  const firstStart = new Date(terms[0].startsOn);
+  const offsetMs = new Date(nextYearStart).getTime() - firstStart.getTime();
+
+  const created = [];
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      for (const term of terms) {
+        const newStartsOn = new Date(new Date(term.startsOn).getTime() + offsetMs);
+        const newEndsOn = new Date(new Date(term.endsOn).getTime() + offsetMs);
+
+        // Adjust name and code by replacing the year portion.
+        // The academic year "2026-27" means terms span 2026 and 2027.
+        // Term names typically contain one of those years (e.g., "Autumn 2026",
+        // "Spring 2027"). Codes often have a 2-digit suffix (e.g., "A26", "S27").
+        // We increment any 4-digit year in the name, and any 2-digit year suffix in the code.
+        const [currStart, currEnd] = currentYear.split("-").map((y) => (y.length === 4 ? Number(y) : Number("20" + y)));
+        const nextStart = currStart + 1;
+        const nextEnd = currEnd + 1;
+
+        const newName = term.name.replace(/\b\d{4}\b/g, (match) => {
+          const year = Number(match);
+          if (year === currStart) return String(nextStart);
+          if (year === currEnd) return String(nextEnd);
+          // If the year doesn't match either, increment anyway (fallback)
+          return String(year + 1);
+        });
+        const newCode = term.code.replace(/\d{2}$/, (match) => {
+
+          const year2 = Number(match);
+          if (year2 === currStart % 100) return String(nextStart % 100).padStart(2, "0");
+          if (year2 === currEnd % 100) return String(nextEnd % 100).padStart(2, "0");
+          return String((year2 + 1) % 100).padStart(2, "0");
+        });
+
+        const newTerm = await AcademicTerm.create(
+          [
+            {
+              name: newName,
+              code: newCode,
+              kind: term.kind,
+              academicYear: nextYear,
+              startsOn: newStartsOn,
+              endsOn: newEndsOn,
+              status: ACADEMIC_TERM_STATUS.PLANNED,
+              isCurrent: false,
+              notes: term.notes,
+            },
+          ],
+          { session }
+        );
+
+        created.push(newTerm[0].toJSON());
+      }
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  await auditService.record({
+    actor: user,
+    action: AUDIT_ACTION.ACADEMIC_TERM_ROLLOVER_PREPARED,
+    entity: "AcademicTerm",
+    entityRef: nextYear,
+    metadata: { fromYear: currentYear, toYear: nextYear, termsCreated: created.length },
+    req,
+  });
+
+  logger.info({ userId: user._id, fromYear: currentYear, toYear: nextYear }, "Next academic year prepared");
+  return created;
+}
+
+/**
+ * Automatic rollover check.
+ *
+ * Runs daily (from cron or an external scheduler). If the current term has
+ * ended and there is a PLANNED term for the next period (same academic year
+ * or next), it closes the current and opens the next. This is the "set and
+ * forget" automation for colleges that want terms to roll over on their dates.
+ */
+async function autoRolloverCheck({ req }) {
+  const current = await AcademicTerm.findOne({ isCurrent: true });
+  if (!current) {
+    return { action: "none", reason: "no current term" };
+  }
+
+  const now = new Date();
+  if (new Date(current.endsOn) > now) {
+    return { action: "none", reason: "current term has not ended yet" };
+  }
+
+  // Find a candidate next term: PLANNED, same or next academic year, starts after current ends
+  const nextYear = (() => {
+    if (current.academicYear.includes("-")) {
+      const [start, end] = current.academicYear.split("-").map(Number);
+      return `${start + 1}-${String(end + 1).slice(-2)}`;
+    }
+    const year = Number(current.academicYear);
+    return `${year + 1}-${String(year + 2).slice(-2)}`;
+  })();
+
+  const candidate = await AcademicTerm.findOne({
+    status: ACADEMIC_TERM_STATUS.PLANNED,
+    academicYear: { $in: [current.academicYear, nextYear] },
+    startsOn: { $gte: new Date(current.endsOn) },
+  }).sort({ startsOn: 1 });
+
+  if (!candidate) {
+    return { action: "none", reason: "no planned next term found" };
+  }
+
+  // Use the existing open() which closes current and opens candidate in one transaction
+  // We need a system user for this - but the audit expects an actor. We'll use the
+  // first SUPER_ADMIN we find, or throw if none.
+  const User = mongoose.model("User");
+  const systemUser = await User.findOne({ role: "SUPER_ADMIN" }).select("_id");
+  if (!systemUser) {
+    throw ApiError.conflict("No SUPER_ADMIN exists to perform automatic rollover");
+  }
+
+  const opened = await open({ user: systemUser, id: candidate._id, req });
+
+  await auditService.record({
+    actor: systemUser,
+    action: AUDIT_ACTION.ACADEMIC_TERM_AUTO_ROLLOVER,
+    entity: "AcademicTerm",
+    entityId: opened._id,
+    entityRef: opened.code,
+    metadata: { previousTerm: current.code, rolledOverAt: now.toISOString() },
+    req,
+  });
+
+  return { action: "rolled_over", previous: current.code, opened: opened.code };
+}
+
 module.exports = {
   list,
   current,
@@ -306,4 +485,6 @@ module.exports = {
   close,
   remove,
   recountCounts,
+  prepareNextYear,
+  autoRolloverCheck,
 };

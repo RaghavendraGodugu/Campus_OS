@@ -74,4 +74,28 @@ const remove = asyncHandler(async (req, res) => {
   return sendSuccess(res, { message: "Term deleted", data: { removed: true } });
 });
 
-module.exports = { list, current, getOne, create, update, open, close, remove };
+/** POST /api/v1/academic-terms/rollover/prepare-next-year */
+const prepareNextYear = asyncHandler(async (req, res) => {
+  const { currentYear, nextYearStart } = req.validated.body;
+  const terms = await termService.prepareNextYear({
+    user: req.user,
+    currentYear,
+    nextYearStart: new Date(nextYearStart),
+    req,
+  });
+  return sendCreated(res, {
+    message: `${terms.length} term(s) prepared for the next academic year`,
+    data: { terms },
+  });
+});
+
+/** POST /api/v1/academic-terms/rollover/check — callable by external cron */
+const autoRolloverCheck = asyncHandler(async (req, res) => {
+  const result = await termService.autoRolloverCheck({ req });
+  return sendSuccess(res, {
+    message: "Automatic rollover check completed",
+    data: result,
+  });
+});
+
+module.exports = { list, current, getOne, create, update, open, close, remove, prepareNextYear, autoRolloverCheck };

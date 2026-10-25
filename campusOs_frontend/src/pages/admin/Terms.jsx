@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarRange,
+  CalendarDays,
   CheckCircle2,
   Plus,
   Trash2,
@@ -52,6 +53,9 @@ export default function Terms() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState(null);
   const [confirming, setConfirming] = useState(null);
+  const [rollingOver, setRollingOver] = useState(false);
+  const [rolloverYear, setRolloverYear] = useState("");
+  const [rolloverStart, setRolloverStart] = useState(todayIso());
   const [errors, setErrors] = useState({});
 
   const list = useQuery({
@@ -95,6 +99,17 @@ export default function Terms() {
       invalidate();
       setConfirming(null);
     },
+  });
+
+  const rollover = useMutation({
+    mutationFn: (payload) => apiPost("/academic-terms/rollover/prepare-next-year", payload),
+    onSuccess: () => {
+      invalidate();
+      setRollingOver(false);
+      setRolloverYear("");
+      setErrors({});
+    },
+    onError: (error) => setErrors(error.fieldErrors ?? {}),
   });
 
   const terms = list.data?.data?.terms ?? [];
@@ -146,6 +161,18 @@ export default function Terms() {
               Close this term
             </Button>
           )}
+          <Button
+            variant="outline"
+            onClick={() => {
+              setRolloverYear(open.academicYear);
+              setRolloverStart(todayIso());
+              setRollingOver(true);
+            }}
+            disabled={rollover.isPending}
+          >
+            <CalendarDays className="size-4" aria-hidden="true" />
+            Prepare next year
+          </Button>
         </section>
 
         {list.isLoading ? (
@@ -319,6 +346,23 @@ export default function Terms() {
           </p>
         </Modal>
       )}
+
+      {rollingOver && (
+        <RolloverDialog
+          title="Prepare next academic year"
+          submitLabel="Prepare terms"
+          pending={rollover.isPending}
+          errors={errors}
+          year={rolloverYear}
+          startDate={rolloverStart}
+          onClose={() => {
+            setRollingOver(false);
+            setRolloverYear("");
+            setErrors({});
+          }}
+          onSubmit={(payload) => rollover.mutate(payload)}
+        />
+      )}
     </AdminLayout>
   );
 }
@@ -469,3 +513,84 @@ function TermDialog({
     </Modal>
   );
 }
+
+/** Dialog to prepare the next academic year. */
+function RolloverDialog({
+  title,
+  submitLabel,
+  pending,
+  errors,
+  year,
+  startDate,
+  onClose,
+  onSubmit,
+}) {
+  const [form, setForm] = useState({ year, startDate });
+  const set = (key) => (event) =>
+    setForm((prev) => ({ ...prev, [key]: event.target.value }));
+
+  return (
+    <Modal
+      open
+      title={title}
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={() => onSubmit(form)} disabled={pending}>
+            {submitLabel}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <p className="text-sm text-ink-600 dark:text-ink-400">
+          This creates a complete copy of the <strong>{year}</strong> term
+          structure for the next academic year, with all dates shifted so the
+          first term starts on the date you choose. The new terms are created in
+          <strong>Planned</strong> status — they do not open automatically.
+        </p>
+
+        <Field
+          label="Next academic year"
+          htmlFor="rollover-year"
+          required
+          error={errors.currentYear}
+        >
+          <input
+            id="rollover-year"
+            value={form.year}
+            onChange={set("year")}
+            placeholder="2027-28"
+            maxLength={16}
+            className={inputClass}
+          />
+        </Field>
+
+        <Field
+          label="First term starts on"
+          htmlFor="rollover-start"
+          required
+          error={errors.nextYearStart}
+        >
+          <input
+            id="rollover-start"
+            type="date"
+            value={form.startDate}
+            onChange={set("startDate")}
+            className={inputClass}
+          />
+        </Field>
+
+        <p className="text-xs text-ink-500 dark:text-ink-400">
+          The rest of the terms keep their relative durations and gaps. Names
+          and codes are updated by replacing the year suffix (e.g. 2026-27 →
+          2027-28).
+        </p>
+      </div>
+    </Modal>
+  );
+}
+

@@ -256,6 +256,118 @@ describe("academic terms", () => {
   });
 });
 
+describe("term rollover automation", () => {
+  let admin;
+
+  beforeEach(async () => {
+    await resetDatabase();
+    admin = await createUser({ role: ROLES.SUPER_ADMIN });
+  });
+
+  it("prepares the next academic year by cloning the current year's terms", async () => {
+    // Debug: check what's in the database
+
+    // Seed two terms in 2026-27
+    await termService.create({
+      user: admin,
+      payload: payload({
+        name: "Autumn 2026",
+        code: "A26",
+        academicYear: "2026-27",
+        startsOn: new Date("2026-08-01T00:00:00.000Z"),
+        endsOn: new Date("2026-12-20T00:00:00.000Z"),
+      }),
+    });
+    await termService.create({
+      user: admin,
+      payload: payload({
+        name: "Spring 2027",
+        code: "S27",
+        academicYear: "2026-27",
+        startsOn: new Date("2027-01-05T00:00:00.000Z"),
+        endsOn: new Date("2027-05-30T00:00:00.000Z"),
+      }),
+    });
+
+    const created = await termService.prepareNextYear({
+      user: admin,
+      currentYear: "2026-27",
+      nextYearStart: new Date("2027-08-01T00:00:00.000Z"),
+    });
+
+    expect(created).toHaveLength(2);
+    expect(created[0].academicYear).toBe("2027-28");
+    expect(created[0].name).toBe("Autumn 2027");
+    expect(created[0].code).toBe("A27");
+    expect(created[1].name).toBe("Spring 2028");
+    expect(created[1].code).toBe("S28");
+    // New terms are planned, not current
+    expect(created.every((t) => t.status === ACADEMIC_TERM_STATUS.PLANNED)).toBe(true);
+    expect(created.every((t) => t.isCurrent === false)).toBe(true);
+  });
+
+  it("refuses to prepare if next year already has terms", async () => {
+    await termService.create({
+      user: admin,
+      payload: payload({ academicYear: "2026-27" }),
+    });
+    await termService.create({
+      user: admin,
+      payload: payload({ academicYear: "2027-28", code: "A27", name: "Autumn 2027" }),
+    });
+
+    await expect(
+      termService.prepareNextYear({
+        user: admin,
+        currentYear: "2026-27",
+        nextYearStart: new Date("2027-08-01T00:00:00.000Z"),
+      })
+    ).rejects.toMatchObject({ statusCode: 409 });
+  });
+
+  it("writes an audit entry for the rollover preparation", async () => {
+    await termService.create({
+      user: admin,
+      payload: payload({ academicYear: "2026-27" }),
+    });
+
+    await termService.prepareNextYear({
+      user: admin,
+      currentYear: "2026-27",
+      nextYearStart: new Date("2027-08-01T00:00:00.000Z"),
+    });
+
+    const AuditLog = require("../src/models/AuditLog");
+    const entries = await AuditLog.find({
+      action: "ACADEMIC_TERM_ROLLOVER_PREPARED",
+    }).lean();
+    expect(entries).toHaveLength(1);
+    expect(entries[0].metadata.fromYear).toBe("2026-27");
+    expect(entries[0].metadata.toYear).toBe("2027-28");
+  });
+
+  it("autoRolloverCheck returns 'none' when no current term", async () => {
+    const result = await termService.autoRolloverCheck({});
+    expect(result.action).toBe("none");
+    expect(result.reason).toBe("no current term");
+  });
+
+  it("autoRolloverCheck returns 'none' when current term has not ended", async () => {
+    const term = await termService.create({
+      user: admin,
+      payload: payload({
+        startsOn: new Date(Date.now() + 10 * DAY),
+        endsOn: new Date(Date.now() + 100 * DAY),
+      }),
+    });
+    await termService.open({ user: admin, id: term._id });
+
+    const result = await termService.autoRolloverCheck({});
+    expect(result.action).toBe("none");
+    expect(result.reason).toBe("current term has not ended yet");
+  });
+});
+
 /**
  * `open()` recounted *after* saving, so `term.counts` was set on a document the
  * database had already been told about. The term was stored with no counts while

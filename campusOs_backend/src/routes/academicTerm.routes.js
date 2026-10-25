@@ -9,6 +9,7 @@ const {
   createAcademicTermSchema,
   updateAcademicTermSchema,
   academicTermIdSchema,
+  prepareRolloverSchema,
 } = require("../validators/academicTerm.validator");
 
 const router = express.Router();
@@ -79,6 +80,35 @@ router.delete(
   requirePermission(P.ACADEMIC_TERM_MANAGE),
   validate({ params: academicTermIdSchema }),
   controller.remove
+);
+
+/**
+ * Term rollover automation.
+ *
+ * Prepare next year creates the next academic year's term structure from the
+ * current year, shifted to a new start date. This is a deliberate admin action,
+ * not automatic — the college decides when the next year begins.
+ */
+router.post(
+  "/academic-terms/rollover/prepare-next-year",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.ACADEMIC_TERM_MANAGE),
+  validate({ body: prepareRolloverSchema }),
+  controller.prepareNextYear
+);
+
+/**
+ * Automatic rollover check — called by an external scheduler (cron, Render Cron
+ * Job, systemd timer). If the current term has ended and a planned next term
+ * exists, it closes the current and opens the next. Returns what it did.
+ */
+router.post(
+  "/academic-terms/rollover/check",
+  authenticate,
+  csrfProtection,
+  requirePermission(P.ACADEMIC_TERM_MANAGE),
+  controller.autoRolloverCheck
 );
 
 module.exports = router;
