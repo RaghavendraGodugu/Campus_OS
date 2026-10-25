@@ -28,7 +28,7 @@ const Program = require("../models/Program");
 const AuditLog = require("../models/AuditLog");
 
 const { ApiError } = require("../utils/ApiError");
-const { AUDIT_ACTION } = require("../config/constants");
+const { AUDIT_ACTION, ROLES } = require("../config/constants");
 const { describePermissions } = require("../utils/permissions");
 const auditService = require("./audit.service");
 
@@ -84,6 +84,8 @@ async function getProfile({ user }) {
       isActive: fresh.isActive,
       createdAt: fresh.createdAt,
       lastLoginAt: fresh.lastLoginAt ?? null,
+      designation: fresh.designation || undefined,
+      expertise: Array.isArray(fresh.expertise) && fresh.expertise.length > 0 ? fresh.expertise : undefined,
     },
 
     /** Academic record. Read-only, and absent for staff. */
@@ -124,7 +126,7 @@ async function getProfile({ user }) {
      * Sent rather than assumed, so the interface can say what is editable
      * instead of guessing and offering a save that the server refuses.
      */
-    editableFields: ["fullName", "phone"],
+    editableFields: editableFields(fresh),
   };
 }
 
@@ -159,8 +161,24 @@ async function updateNotificationPreferences({ user, changes }) {
   return preferenceService.present(updated);
 }
 
+/**
+ * What this person may change on themselves.
+ *
+ * A staff member describes themselves publicly — title and declared expertise —
+ * because that is how the directory finds them. A student holds no such
+ * identity, so a student's editable set stays the original two fields, and a
+ * student sending `description`-like fields is refused by name rather than
+ * silently dropped.
+ */
+const SELF_FIELDS_INS = ["fullName", "phone"];
+const SELF_FIELDS_STAFF = ["fullName", "phone", "designation", "expertise"];
+
+function editableFields(user) {
+  return user?.role === ROLES.STUDENT ? SELF_FIELDS_INS : SELF_FIELDS_STAFF;
+}
+
 async function updateProfile({ user, changes, req }) {
-  const allowed = ["fullName", "phone"];
+  const allowed = editableFields(user);
   const refused = Object.keys(changes).filter((key) => !allowed.includes(key));
 
   if (refused.length > 0) {
@@ -174,6 +192,12 @@ async function updateProfile({ user, changes, req }) {
   const update = {};
   if (changes.fullName !== undefined) update.fullName = changes.fullName;
   if (changes.phone !== undefined) update.phone = changes.phone || null;
+  if (changes.designation !== undefined && allowed.includes("designation")) {
+    update.designation = changes.designation || "";
+  }
+  if (changes.expertise !== undefined && allowed.includes("expertise")) {
+    update.expertise = Array.isArray(changes.expertise) ? changes.expertise : [];
+  }
 
   if (Object.keys(update).length === 0) {
     throw ApiError.badRequest("Nothing to update.");
@@ -217,9 +241,9 @@ async function signOutEverywhere({ user, req }) {
   return { message: "Signed out on every other device." };
 }
 module.exports = {
+  editableFields,
   getProfile,
   updateProfile,
   updateNotificationPreferences,
   signOutEverywhere,
-  editableFields: ["fullName", "phone"],
 };

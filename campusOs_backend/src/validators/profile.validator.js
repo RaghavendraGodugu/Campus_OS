@@ -39,6 +39,12 @@ const updateProfileSchema = z
       .max(150, "Name cannot exceed 150 characters")
       .optional(),
     phone,
+    /**
+     * Staff-only self-description. Students get the fields back from the
+     * service with the refusal they deserve, so the schema stays shared.
+     */
+    designation: z.string().trim().max(120).optional(),
+    expertise: z.array(z.string().trim().min(1).max(40)).max(12).optional(),
   })
   // `.passthrough()`, not the default strip: unknown fields have to survive
   // validation to reach the service, which is where they are refused by name.

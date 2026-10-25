@@ -528,6 +528,28 @@ means the note that follows it)
 
 ---
 
+## 20. Staff directory
+
+- [x] A finding-people page for every role: search the staff of the
+      institution by a fragment of a name, a designation or one of the skills a
+      person has declared, narrower by office when the office is named —
+      deliberately dumb about contact details, which stay behind the request
+      engine they are for
+- [x] What it shows is what the person wrote: each staff member maintains a
+      designation and up to twelve areas of expertise on their own profile, and
+      the directory never invents one — a blank stays blank
+- [x] The student does not see it. Contact flows through the requests they
+      already can file; a directory that lists everybody's whereabouts to every
+      stranger on campus is a different product with a different threat model
+- [x] The match is the server's job, not the browser's — and regex
+      metacharacters typed into the search box are treated as text, not as a
+      pattern
+- [x] FullName, designation and expertise are searched case-insensitively; a
+      skill can be found at a fragment ("iot" finds "IoT"), because a person who
+      half-remembers a name is precisely the one this page exists for
+
+---
+
 ---
 
 ## Known blockers
@@ -549,16 +571,17 @@ reset, the permission model, the request engine, the grievance engine,
 certificate issuance, PDFs and templates, the finance stack (invoicing with GST,
 instalments, penalties, refunds, a Razorpay gateway), documents, announcements
 with email delivery and image upload, notifications and their preferences,
-scoped reports, exports and audit, the profile for every role, and the academic
-core (terms, subjects, timetable, attendance, marks and result release) together
-with hostel, library and placements, and the campus overview that aggregates
-them for the dean and principal.
+scoped reports, exports and audit, the profile for every role, the events
+calendar with its seat ledger, and the academic core (terms, subjects,
+timetable, attendance, marks and result release) together with hostel, library
+and placements, and the campus overview that aggregates them for the dean and
+principal.
 
 ## What is not
 
 The items still marked above with no box: a live Razorpay webhook beyond the
-signature check, scheduled report delivery and scheduled penalty runs, a searchable staff directory page by name, department or skill, term rollover automation, per-college
-certificate branding, malware scanning of uploads, document thumbnails, an
+signature check, scheduled report delivery and scheduled penalty runs, term rollover
+automation, per-college certificate branding, malware scanning of uploads, document thumbnails, an
 account-lockout notification, a security headers report, a dependency-audit
 gate, coverage thresholds, a motion audit on the finance tables, and uptime
 monitoring or error tracking. Most need a host, a third party or a product

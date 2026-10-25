@@ -49,9 +49,12 @@ export default function Profile() {
   const { user, refresh } = useAuth();
   const queryClient = useQueryClient();
 
+  const isStaff = user?.role !== "STUDENT";
   const [editing, setEditing] = useState(false);
   const [fullName, setFullName] = useState(user?.fullName ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
+  const [designation, setDesignation] = useState(user?.designation ?? "");
+  const [expertise, setExpertise] = useState(user?.expertise ?? []);
   const [notice, setNotice] = useState(null);
   const [error, setError] = useState(null);
 
@@ -67,7 +70,18 @@ export default function Profile() {
   });
 
   const save = useMutation({
-    mutationFn: () => apiPatch("/profile", { fullName, phone }),
+    // Only the fields the server declared editable go out, so a trailing
+    // state never becomes a refusal the person would have to decipher.
+    mutationFn: () =>
+      apiPatch("/profile", {
+        fullName,
+        phone,
+        // The fields in a submission match what the server said this person
+        // may change — the staff self-description only goes out when an
+        // editableFields list grants it.
+        ...(data.data.editableFields.includes("designation") ? { designation } : {}),
+        ...(data.data.editableFields.includes("expertise") ? { expertise } : {}),
+      }),
     onSuccess: async (response) => {
       setEditing(false);
       setNotice("Your profile has been updated.");
@@ -200,6 +214,8 @@ export default function Profile() {
               onClick={() => {
                 setFullName(account.fullName);
                 setPhone(account.phone ?? "");
+                setDesignation(account.designation ?? "");
+                setExpertise(account.expertise ?? []);
                 setEditing(true);
               }}
             >
@@ -242,6 +258,37 @@ export default function Profile() {
               />
             </Field>
 
+            {isStaff &&
+              data.data.editableFields.includes("designation") && (
+                <Field
+                  label="Designation"
+                  htmlFor="designation"
+                  hint="Optional. What the directory shows beside your name."
+                >
+                  <input
+                    id="designation"
+                    value={designation}
+                    onChange={(event) => setDesignation(event.target.value)}
+                    maxLength={120}
+                    placeholder="Associate Professor"
+                    className={inputClass}
+                  />
+                </Field>
+              )}
+
+            {isStaff &&
+              data.data.editableFields.includes("expertise") && (
+                <Field
+                  label="Expertise"
+                  hint="Optional. Up to twelve areas colleagues can search you by."
+                >
+                  <ExpertiseEditor
+                    expertise={expertise}
+                    onChange={setExpertise}
+                  />
+                </Field>
+              )}
+
             <div className="flex justify-end gap-2">
               <Button
                 type="button"
@@ -256,12 +303,29 @@ export default function Profile() {
             </div>
           </form>
         ) : (
-          <dl className="grid gap-4 sm:grid-cols-2">
+          <>
+            <dl className="grid gap-4 sm:grid-cols-2">
             <Detail label="Name" value={account.fullName} />
             <Detail label="Email" value={account.email} />
             <Detail label="Phone" value={account.phone} />
             <Detail label="Role" value={humanise(account.role)} />
-          </dl>
+            {account.designation && (
+              <Detail label="Designation" value={account.designation} />
+            )}
+            </dl>
+            {Array.isArray(account.expertise) && account.expertise.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {account.expertise.map((skill) => (
+                  <span
+                    key={skill}
+                    className="rounded-full bg-ink-100 px-2.5 py-0.5 text-xs font-medium text-ink-700 dark:bg-ink-800 dark:text-ink-300"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </Card>
 
@@ -518,6 +582,72 @@ function Detail({ label, value }) {
         {label}
       </dt>
       <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
+    </div>
+  );
+}
+
+/**
+ * A comma-separated input for a chip list in disguise.
+ *
+ * Expertise is a set of short labels. Twelve separate form fields would make a
+ * test of patience; typing "distributed systems, iot" is one gesture. The
+ * editor splits on commas and drops empty fragments, so grammar the user
+ * leaves behind does not become data.
+ */
+function ExpertiseEditor({ expertise, onChange }) {
+  const [draft, setDraft] = useState("");
+
+  const commit = () => {
+    const fromDraft = draft
+      .split(",")
+      .map((skill) => skill.trim())
+      .filter(Boolean);
+    if (fromDraft.length > 0) {
+      onChange([...expertise, ...fromDraft]);
+    }
+    setDraft("");
+  };
+
+  return (
+    <div className="space-y-2">
+      <input
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={commit}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            commit();
+          }
+        }}
+        maxLength={200}
+        placeholder="Machine Learning, Distributed Systems, …"
+        className={inputClass}
+      />
+      {expertise.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {expertise.map((skill) => (
+            <span
+              key={skill}
+              className="flex items-center gap-1 rounded-full bg-ink-100 px-2.5 py-0.5 text-xs font-medium text-ink-700 dark:bg-ink-800 dark:text-ink-300"
+            >
+              {skill}
+              <button
+                type="button"
+                aria-label={`Remove ${skill}`}
+                onClick={() => onChange(expertise.filter((s) => s !== skill))}
+                className="text-ink-500 transition hover:text-red-600"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <p className="text-xs text-ink-500 dark:text-ink-400">
+        Comma-separated. They are seen by everyone who can search the staff
+        directory.
+      </p>
     </div>
   );
 }

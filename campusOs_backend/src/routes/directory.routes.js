@@ -11,7 +11,10 @@ const directoryController = require("../controllers/directory.controller");
 const { validate } = require("../middleware/validate");
 const { authenticate, requireAnyPermission } = require("../middleware/auth");
 const { P } = require("../utils/permissions");
-const { listStaffSchema } = require("../validators/directory.validator");
+const {
+  listStaffSchema,
+  searchStaffSchema,
+} = require("../validators/directory.validator");
 
 const router = express.Router();
 
@@ -28,6 +31,21 @@ router.get(
   requireAnyPermission(P.REQUEST_ASSIGN_INSTITUTION, P.REQUEST_ASSIGN_DEPARTMENT),
   validate({ query: listStaffSchema }),
   directoryController.listStaff
+);
+
+/**
+ * GET /api/v1/directory/staff
+ *
+ * The searchable staff directory for staff roles: name, role, designation,
+ * department and declared expertise. A student is refused, and contact
+ * details are not in the payload.
+ */
+router.get(
+  "/directory/staff",
+  authenticate,
+  requireAnyPermission(P.STAFF_DIRECTORY_READ),
+  validate({ query: searchStaffSchema }),
+  directoryController.searchStaff
 );
 
 module.exports = router;

@@ -202,6 +202,53 @@ const userSchema = new mongoose.Schema(
     },
 
     /**
+     * A staff member's title — "Associate Professor", not a job description.
+     *
+     * Staff-owned (changed on the profile page) because a title is what a
+     * person is introduced as, not institutional truth like a role. Students
+     * hold none, and the directory displays it beside their name.
+     */
+    designation: {
+      type: String,
+      trim: true,
+      maxlength: [120, "Designation cannot exceed 120 characters"],
+      default: "",
+    },
+
+    /**
+     * The areas a staff member can speak for, self-declared.
+     *
+     * Normalised by the setter: trimmed, case-folded only for the duplicate
+     * check, deduplicated, [] for nothing. The directory's skill search reads
+     * this array directly, so a profile that says "Machine Learning" is findable
+     * by a student searching "machine learning" without an index to maintain.
+     */
+    expertise: {
+      type: [String],
+      set(values) {
+        if (!Array.isArray(values)) return [];
+        const seen = new Set();
+        return values
+          .map((value) => String(value).trim())
+          .filter((value) => value.length > 0)
+          .filter((value) => {
+            const key = value.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          })
+          .slice(0, 12);
+      },
+      default: [],
+      validate: {
+        validator(values) {
+          return values.every((value) => value.length <= 40);
+        },
+        message: "Each skill must be at most 40 characters",
+      },
+    },
+
+    /**
      * Set for users whose profile is owned by a Student document. Enforced so
      * a staff account can never be linked to a student record (privilege
      * confusion).
@@ -374,6 +421,10 @@ userSchema.methods.toPublicJSON = function toPublicJSON() {
     fullName: this.fullName,
     role: this.role,
     phone: this.phone ?? null,
+    // Staff-only self-descriptive fields; undefined for students so the
+    // payload does not change shape for them.
+    designation: this.designation || undefined,
+    expertise: Array.isArray(this.expertise) && this.expertise.length > 0 ? this.expertise : undefined,
     department: this.department ?? null,
     student: this.student ?? null,
     isActive: this.isActive,

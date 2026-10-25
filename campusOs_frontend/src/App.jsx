@@ -14,6 +14,7 @@ import Library from "./pages/Library";
 import Placements from "./pages/Placements";
 import CampusOverview from "./pages/CampusOverview";
 import Events from "./pages/Events";
+import StaffDirectory from "./pages/StaffDirectory";
 import Academics from "./pages/Academics";
 import ApplyCertificate from "./pages/ApplyCertificate";
 import VerifyCertificate from "./pages/VerifyCertificate";
@@ -156,6 +157,14 @@ export default function App() {
           element={
             <RequirePermission permissions={["event:read"]}>
               <Events />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="directory"
+          element={
+            <RequirePermission permissions={["staff-directory:read"]}>
+              <StaffDirectory />
             </RequirePermission>
           }
         />

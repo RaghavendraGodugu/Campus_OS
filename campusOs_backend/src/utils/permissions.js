@@ -61,6 +61,15 @@ const P = {
   STUDENT_READ_DEPARTMENT: "student:read:department",
   STUDENT_READ_INSTITUTION: "student:read:institution",
 
+  // ===== Staff directory =====
+  /**
+   * Reading the staff directory: names, designations, departments and the
+   * expertise a person has declared. Granted to every staff role, no student,
+   * and deliberately narrower than the assignment parties (no email, no phone):
+   * a directory says who somebody is, not how to reach them privately.
+   */
+  STAFF_DIRECTORY_READ: "staff-directory:read",
+
   // ===== Institutional structure =====
   DEPARTMENT_READ: "department:read:institution",
   DEPARTMENT_MANAGE: "department:manage:institution",
@@ -305,6 +314,15 @@ const P = {
  * Per-student data (profiles, requests, complaints, invoices, certificates)
  * never appears in this list and is always scope-checked.
  */
+/**
+ * Held by every *staff* role, never by a student.
+ *
+ * The staff directory is a finding-people tool for the people who work with
+ * each other; putting it in the staff base means a new operational role gains
+ * the ability without an explicit edit, while a student never does.
+ */
+const STAFF_PERMISSIONS = [P.STAFF_DIRECTORY_READ];
+
 const BASE_PERMISSIONS = [
   P.NOTIFICATION_READ_OWN,
   P.DEPARTMENT_READ,
@@ -321,6 +339,9 @@ const BASE_PERMISSIONS = [
  */
 const ROLE_PERMISSIONS = {
   [ROLES.STUDENT]: [
+    // Deliberately has no directory grant: a student searching the directory
+    // is one query away from enumerating every staff member's name and role,
+    // which the invariant below refuses.
     ...BASE_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_PROFILE_UPDATE_OWN,
@@ -354,6 +375,7 @@ const ROLE_PERMISSIONS = {
 
   [ROLES.SUPPORT_STAFF]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.REQUEST_READ_ASSIGNED,
     P.REQUEST_UPDATE_ASSIGNED,
@@ -374,6 +396,7 @@ const ROLE_PERMISSIONS = {
 
   [ROLES.FACULTY]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_DEPARTMENT,
     P.REQUEST_READ_DEPARTMENT,
@@ -398,6 +421,7 @@ const ROLE_PERMISSIONS = {
 
   [ROLES.HOD]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_DEPARTMENT,
     P.REQUEST_READ_DEPARTMENT,
@@ -441,6 +465,7 @@ const ROLE_PERMISSIONS = {
 
   [ROLES.EXAM_ADMIN]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
     P.REQUEST_READ_INSTITUTION,
@@ -469,6 +494,7 @@ const ROLE_PERMISSIONS = {
 
   [ROLES.ACCOUNTS_ADMIN]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
     P.REQUEST_READ_INSTITUTION,
@@ -495,6 +521,7 @@ const ROLE_PERMISSIONS = {
    */
   [ROLES.HOSTEL_ADMIN]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
     P.HOSTEL_READ_INSTITUTION,
@@ -506,6 +533,7 @@ const ROLE_PERMISSIONS = {
 
   [ROLES.LIBRARY_ADMIN]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
     P.LIBRARY_READ_INSTITUTION,
@@ -517,6 +545,7 @@ const ROLE_PERMISSIONS = {
 
   [ROLES.PLACEMENT_ADMIN]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
     P.PLACEMENT_READ_INSTITUTION,
@@ -532,6 +561,7 @@ const ROLE_PERMISSIONS = {
    */
   [ROLES.DEAN]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
     P.REQUEST_READ_INSTITUTION,
@@ -573,6 +603,7 @@ const ROLE_PERMISSIONS = {
 
   [ROLES.PRINCIPAL]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
     P.REQUEST_READ_INSTITUTION,
@@ -619,6 +650,7 @@ const ROLE_PERMISSIONS = {
    */
   [ROLES.SUPER_ADMIN]: [
     ...BASE_PERMISSIONS,
+    ...STAFF_PERMISSIONS,
     P.STUDENT_PROFILE_READ_OWN,
     P.STUDENT_READ_INSTITUTION,
     P.DEPARTMENT_MANAGE,

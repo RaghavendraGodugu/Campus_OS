@@ -86,6 +86,8 @@ async function createUser({
   fullName,
   isActive = true,
   password = "TestPass123!",
+  designation,
+  expertise,
 } = {}) {
   const suffix = uniqueSuffix();
   const user = new User({
@@ -94,6 +96,8 @@ async function createUser({
     role,
     department: department?._id,
     isActive,
+    ...(designation !== undefined ? { designation } : {}),
+    ...(expertise !== undefined ? { expertise } : {}),
   });
   await user.setPassword(password);
   await user.save();

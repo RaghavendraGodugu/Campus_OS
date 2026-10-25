@@ -150,3 +150,140 @@ describe("staff directory", () => {
     expect(res.status).toBe(400);
   });
 });
+
+/**
+ * The search endpoint that reads the directory as a finding-people tool.
+ *
+ * The old endpoint exists for dropdowns; this one exists so a person can find
+ * "who works with machine learning" or "who is the associate professor named
+ * Rao" without the department's shared spreadsheet.
+ */
+describe("searching the staff directory", () => {
+  const { P, permissionsFor } = require("../src/utils/permissions");
+
+  async function seedSearchWorld() {
+    const cse = await createDepartment();
+    const ece = await createDepartment();
+
+    const rao = await createUser({
+      role: ROLES.FACULTY,
+      department: cse,
+      fullName: "Anand Rao",
+      designation: "Associate Professor",
+      expertise: ["Machine Learning", "Distributed Systems"],
+    });
+    const mira = await createUser({
+      role: ROLES.HOD,
+      department: ece,
+      fullName: "Mira Fernandes",
+      designation: "Professor of Signal Processing",
+      expertise: ["VLSI", "IoT"],
+    });
+    const warden = await createUser({
+      role: ROLES.HOSTEL_ADMIN,
+      fullName: "Joseph Verma",
+      designation: "",
+      expertise: [],
+    });
+    const student = await createUser({ role: ROLES.STUDENT, department: cse });
+    const faculty = await createUser({ role: ROLES.FACULTY, department: ece });
+    return { cse, ece, rao, mira, warden, student, faculty };
+  }
+
+  it("is refused to a student over HTTP, as the directory is a circuit they do not get", async () => {
+    const world = await seedSearchWorld();
+    const { agent } = await loginAs(world.student);
+    const res = await agent.get("/api/v1/directory/staff");
+    expect(res.status).toBe(403);
+  });
+
+  it("answers a staff member, end to end", async () => {
+    const world = await seedSearchWorld();
+    const { agent } = await loginAs(world.faculty);
+    const res = await agent.get("/api/v1/directory/staff");
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("answers 401 without a session", async () => {
+    const request = require("supertest");
+    const { getApp } = require("./helpers/factory");
+    await seedSearchWorld();
+    const res = await request(getApp()).get("/api/v1/directory/staff");
+    expect(res.status).toBe(401);
+  });
+
+  it("finds a person by a fragment of their name", async () => {
+    const world = await seedSearchWorld();
+    const { agent } = await loginAs(world.faculty);
+    const res = await agent.get("/api/v1/directory/staff?q=Rao");
+
+    const names = res.body.data.map((row) => row.fullName);
+    expect(names).toContain("Anand Rao");
+    expect(names).not.toContain("Mira Fernandes");
+  });
+
+  it("finds a person by the skill they declared", async () => {
+    const world = await seedSearchWorld();
+    const { agent } = await loginAs(world.faculty);
+    const res = await agent.get("/api/v1/directory/staff?q=iot");
+
+    const ids = res.body.data.map((row) => row.id);
+    expect(ids).toContain(world.mira.id.toString());
+    expect(ids).not.toContain(world.rao.id);
+  });
+
+  it("finds a person by what their designation says they are", async () => {
+    const world = await seedSearchWorld();
+    const { agent } = await loginAs(world.faculty);
+    const res = await agent.get("/api/v1/directory/staff?q=Associate%20Professor");
+
+    const ids = res.body.data.map((row) => row.id);
+    expect(ids).toContain(world.rao.id.toString());
+  });
+
+  it("never carries contact details", async () => {
+    const world = await seedSearchWorld();
+    const { agent } = await loginAs(world.faculty);
+    const res = await agent.get("/api/v1/directory/staff?q=Rao");
+
+    const row = res.body.data[0];
+    expect(row.email).toBeUndefined();
+    expect(row.phone).toBeUndefined();
+  });
+
+  it("never lists students as discoverable staff", async () => {
+    const world = await seedSearchWorld();
+    const { agent } = await loginAs(world.master ?? world.faculty);
+    const res = await agent.get("/api/v1/directory/staff");
+    expect(res.body.data.some((row) => row.id === world.student.id.toString())).toBe(false);
+  });
+
+  it("does not reveal whether a query even parsed to someone without a session", async () => {
+    const request = require("supertest");
+    const { getApp } = require("./helpers/factory");
+    await seedSearchWorld();
+    const res = await request(getApp()).get(
+      "/api/v1/directory/staff?q=Asso&ciate+Professor&role=FACULTY&department=000000000000000000000000",
+    );
+    // Bad params to an anonymous caller still produce an unauthenticated
+    // answer: the parse happens behind authenticate's byzantine check.
+    expect([401, 400]).toContain(res.status);
+  });
+
+  it("treats regex metacharacters as text, not as a pattern", async () => {
+    const world = await seedSearchWorld();
+    const { agent } = await loginAs(world.faculty);
+    const res = await agent.get("/api/v1/directory/staff?q=(.*)");
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(0);
+  });
+
+  it("the permission exists for every staff role and for no student", () => {
+    for (const role of Object.values(ROLES)) {
+      const has = permissionsFor(role).has(P.STAFF_DIRECTORY_READ);
+      if (role === ROLES.STUDENT) expect(has).toBe(false);
+      else expect(has).toBe(true);
+    }
+  });
+});

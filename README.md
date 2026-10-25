@@ -234,6 +234,11 @@ decision rather than a save state, seats held once per person by a database
 constraint, capacity checked against a live count, registration closed when the
 event starts, and every transition audited.
 
+**Staff directory.** Every role searches the institution's people by name,
+designation or declared expertise; what appears is exactly what each person
+chose to share on their profile. Contact stays behind the request engine;
+students never see the directory — they file requests instead.
+
 **Campus services.** Hostel rooms with capacity and one active allocation per
 student. A library whose last copy is issued atomically and whose copies are
 returned exactly once. Placement drives invisible to students until they are
@@ -302,8 +307,8 @@ campusOs_frontend/    React and Vite
 ## Testing
 
 ```bash
-npm test                    # 906 backend
-npm run test:frontend       # 181 frontend
+npm test                    # 918 backend
+npm run test:frontend       # 190 frontend
 npm run lint                # both, clean
 npm run build               # production bundle
 ```

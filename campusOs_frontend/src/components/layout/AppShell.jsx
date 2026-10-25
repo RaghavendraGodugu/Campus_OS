@@ -27,6 +27,7 @@ import {
   Undo2,
   Upload,
   User,
+  Users,
   X,
 } from "lucide-react";
 
@@ -39,6 +40,7 @@ import ThemeToggle from "./ThemeToggle";
 const ICONS = {
   LayoutDashboard,
   FileText,
+  Users,
   ShieldAlert,
   BadgeCheck,
   Receipt,

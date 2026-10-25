@@ -61,6 +61,22 @@ describe("reading a profile", () => {
 
     const res = await agent.get("/api/v1/profile");
 
+    // Staff maintain their own directory entry: the designation and the areas
+    // of expertise colleagues search them by.
+    expect(res.body.data.editableFields).toEqual([
+      "fullName",
+      "phone",
+      "designation",
+      "expertise",
+    ]);
+  });
+
+  it("keeps a student's editable list at the two personal fields", async () => {
+    const user = await createUser({ role: ROLES.STUDENT });
+    const { agent } = await loginAs(user);
+
+    const res = await agent.get("/api/v1/profile");
+
     expect(res.body.data.editableFields).toEqual(["fullName", "phone"]);
   });
 

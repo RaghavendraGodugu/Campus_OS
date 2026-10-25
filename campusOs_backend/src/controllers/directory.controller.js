@@ -22,4 +22,24 @@ const listStaff = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { listStaff };
+/**
+ * GET /api/v1/directory/staff
+ *
+ * The searchable directory. See directory.service.js for who may call it and
+ * what it leaks, which is as little as a finding-people tool needs.
+ */
+const searchStaff = asyncHandler(async (req, res) => {
+  const results = await directoryService.searchStaff({
+    user: req.user,
+    q: req.validated?.query?.q,
+    departmentId: req.validated?.query?.department,
+    role: req.validated?.query?.role,
+  });
+
+  return sendSuccess(res, {
+    message: `${results.length} results`,
+    data: results,
+  });
+});
+
+module.exports = { listStaff, searchStaff };

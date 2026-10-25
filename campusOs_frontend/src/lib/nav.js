@@ -78,6 +78,12 @@ export const NAV_ITEMS = [
     icon: "CalendarRange",
     permission: "event:read",
   },
+  {
+    to: "/directory",
+    label: "Directory",
+    icon: "Users",
+    permission: "staff-directory:read",
+  },
 
   {
     to: "/placements",

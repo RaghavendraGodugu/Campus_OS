@@ -148,10 +148,20 @@ async function assertDatabaseIsSafeToSeed() {
  * re-hashes (bcrypt at cost 12 is deliberately slow) and never overwrites a
  * password a human has since changed.
  */
-async function seedUser({ email, fullName, role, studentId, departmentId }) {
+async function seedUser({
+  email,
+  fullName,
+  role,
+  studentId,
+  departmentId,
+  designation,
+  expertise,
+}) {
   const setFields = { fullName, role, isActive: true };
   if (studentId) setFields.student = studentId;
   if (departmentId) setFields.department = departmentId;
+  if (designation !== undefined) setFields.designation = designation;
+  if (expertise !== undefined) setFields.expertise = expertise;
 
   const existing = await User.findOne({ email });
 
@@ -292,40 +302,50 @@ async function main() {
       fullName: `${DEMO_PREFIX} HOD`,
       role: ROLES.HOD,
       department: "DEMO-CSE",
+      designation: "Head of Department, Computer Science",
     },
     {
       email: "demo.faculty@campusos.local",
       fullName: `${DEMO_PREFIX} Faculty`,
       role: ROLES.FACULTY,
       department: "DEMO-CSE",
+      designation: "Associate Professor",
+      expertise: ["Machine Learning", "Distributed Systems", "IoT"],
     },
     {
       email: "demo.support@campusos.local",
       fullName: `${DEMO_PREFIX} Support Staff`,
       role: ROLES.SUPPORT_STAFF,
       department: "DEMO-SAFF",
+      designation: "Front Desk",
     },
     {
       email: "demo.accounts@campusos.local",
       fullName: `${DEMO_PREFIX} Accounts Admin`,
       role: ROLES.ACCOUNTS_ADMIN,
       department: "DEMO-SAFF",
+      designation: "Accounts Officer",
+      expertise: ["Fee refunds", "Scholarship disbursement"],
     },
     {
       email: "demo.exam@campusos.local",
       fullName: `${DEMO_PREFIX} Exam Admin`,
       role: ROLES.EXAM_ADMIN,
       department: "DEMO-SAFF",
+      designation: "Controller of Examinations",
     },
     {
       email: "demo.dean@campusos.local",
       fullName: `${DEMO_PREFIX} Dean`,
       role: ROLES.DEAN,
+      designation: "Dean of Academics",
+      expertise: ["Curriculum policy"],
     },
     {
       email: "demo.principal@campusos.local",
       fullName: `${DEMO_PREFIX} Principal`,
       role: ROLES.PRINCIPAL,
+      designation: "Principal",
     },
     /*
      * A demo administrator, and only for the demo database.
@@ -341,6 +361,7 @@ async function main() {
       email: "demo.admin@campusos.local",
       fullName: `${DEMO_PREFIX} Administrator`,
       role: ROLES.SUPER_ADMIN,
+      designation: "Administrator",
     },
   ];
 
@@ -351,6 +372,8 @@ async function main() {
       fullName: spec.fullName,
       role: spec.role,
       departmentId: departments[spec.department]?._id,
+      designation: spec.designation,
+      expertise: spec.expertise,
     });
   }
   process.stdout.write(`  staff accounts   : ${Object.keys(staff).length}\n`);
