@@ -104,7 +104,7 @@ export default function NotificationBell() {
         aria-label={
           count > 0 ? `Notifications, ${count} unread` : "Notifications"
         }
-        className="relative rounded-lg p-2 text-ink-600 hover:bg-ink-100 dark:hover:bg-ink-200/50"
+        className="relative rounded-lg p-2 text-ink-600 dark:text-ink-400 dark:text-ink-500 hover:bg-ink-100 dark:hover:bg-ink-200/50"
       >
         <Bell className="size-5" aria-hidden="true" />
         {count > 0 && (
@@ -122,10 +122,10 @@ export default function NotificationBell() {
         >
           <div className="flex items-center justify-between border-b border-ink-100 dark:border-ink-700/50 px-4 py-2.5">
             <div>
-              <p className="text-sm font-semibold text-ink-900">
+              <p className="text-sm font-semibold text-ink-900 dark:text-ink-100">
                 Notifications
               </p>
-              <p className="text-xs text-ink-500 dark:text-ink-400">
+              <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 {count > 0 ? `${count} unread` : "All caught up"}
               </p>
             </div>
@@ -134,7 +134,7 @@ export default function NotificationBell() {
                 type="button"
                 onClick={() => markAllRead.mutate()}
                 disabled={markAllRead.isPending}
-                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/20 disabled:text-ink-400"
+                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/20 disabled:text-ink-400 dark:text-ink-500"
               >
                 <CheckCheck className="size-3.5" aria-hidden="true" />
                 Mark all read
@@ -144,7 +144,7 @@ export default function NotificationBell() {
 
           <ul className="max-h-96 divide-y divide-ink-100 overflow-y-auto">
             {list.isLoading && (
-              <li className="px-4 py-6 text-center text-xs text-ink-500 dark:text-ink-400">
+              <li className="px-4 py-6 text-center text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 Loading…
               </li>
             )}
@@ -187,10 +187,10 @@ export default function NotificationBell() {
                       <p className="text-sm font-medium text-ink-800">
                         {notification.title}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {notification.body}
                       </p>
-                      <p className="mt-1 text-[11px] text-ink-400 dark:text-ink-500">
+                      <p className="mt-1 text-[11px] text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {humanise(notification.type)} ·{" "}
                         {formatRelative(notification.createdAt)}
                       </p>

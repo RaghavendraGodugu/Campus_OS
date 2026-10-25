@@ -115,10 +115,10 @@ export default function Events() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Events
           </h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Workshops, fests and seminars for the campus. Registration closes
             when the event begins.
           </p>
@@ -159,20 +159,20 @@ export default function Events() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_CLASS[ev.status] ?? "bg-ink-100 text-ink-700"}`}
+                      className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_CLASS[ev.status] ?? "bg-ink-100 text-ink-700 dark:text-ink-300"}`}
                     >
                       {(STATUS_LABEL[ev.status] ?? ev.status).toUpperCase()}
                     </span>
-                    <span className="text-[11px] font-medium uppercase tracking-wide text-ink-500">
+                    <span className="text-[11px] font-medium uppercase tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500">
                       {kindLabel(ev.kind).toUpperCase()}
                     </span>
                     {ev.capacity != null && ev.status === "PUBLISHED" && (
-                      <span className="text-[11px] font-medium text-ink-500">
+                      <span className="text-[11px] font-medium text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {ev.rsvpCount}/{ev.capacity} registered
                       </span>
                     )}
                   </div>
-                  <h2 className="mt-1.5 font-semibold text-ink-900">
+                  <h2 className="mt-1.5 font-semibold text-ink-900 dark:text-ink-100">
                     {ev.title}
                   </h2>
                   <p className="mt-0.5 text-sm text-ink-600 dark:text-ink-300">
@@ -180,7 +180,7 @@ export default function Events() {
                     {ev.endsAt ? ` – ${clock(ev.endsAt)}` : ""}
                     {ev.venue ? ` · ${ev.venue}` : ""}
                   </p>
-                  <p className="mt-1 max-w-prose text-sm text-ink-500 dark:text-ink-400">
+                  <p className="mt-1 max-w-prose text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {ev.description}
                   </p>
                 </div>

@@ -39,10 +39,10 @@ export default function Complaints({ mode = "own" }) {
     <div className="mx-auto max-w-4xl space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             {mode === "assigned" ? "Complaints" : "Your complaints"}
           </h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Confidential. Handled by a small number of staff.
           </p>
         </div>
@@ -96,10 +96,10 @@ export default function Complaints({ mode = "own" }) {
                 >
                   <div className="min-w-0 flex-1">
                     {/* The subject is a category label, not the grievance text. */}
-                    <p className="truncate text-sm font-medium text-ink-900">
+                    <p className="truncate text-sm font-medium text-ink-900 dark:text-ink-100">
                       {complaint.subject ?? "Complaint"}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                       {complaint.reference}
                       {complaint.category &&
                         ` · ${complaint.category.replace(/_/g, " ").toLowerCase()}`}

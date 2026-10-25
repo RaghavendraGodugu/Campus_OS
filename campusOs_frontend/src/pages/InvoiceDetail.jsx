@@ -126,7 +126,7 @@ export default function InvoiceDetail() {
     <div className="mx-auto max-w-3xl space-y-6">
       <Link
         to="/finance/invoices"
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 hover:text-ink-800"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         All invoices
@@ -135,10 +135,10 @@ export default function InvoiceDetail() {
       <header className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-lg font-semibold tracking-tight text-ink-900">
+            <h1 className="text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               {invoice.purpose}
             </h1>
-            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
               {invoice.reference}
             </p>
           </div>
@@ -165,7 +165,7 @@ export default function InvoiceDetail() {
         </div>
 
         {invoice.dueAt && (
-          <p className="mt-4 text-xs text-ink-500 dark:text-ink-400">
+          <p className="mt-4 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Due {formatDate(invoice.dueAt)}
           </p>
         )}
@@ -194,14 +194,14 @@ export default function InvoiceDetail() {
               >
                 <div className="min-w-0">
                   <p className="text-sm text-ink-800">{item.description}</p>
-                  <p className="text-xs text-ink-500 dark:text-ink-400">
+                  <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {item.quantity} ×{" "}
                     {formatMoney(item.unitAmount, { showSymbol: false })}
                     {item.taxPercent > 0 &&
                       ` · ${item.taxPercent}% tax (${formatMoney(item.taxAmount, { showSymbol: false })})`}
                   </p>
                 </div>
-                <p className="shrink-0 text-sm font-medium tabular-nums text-ink-900">
+                <p className="shrink-0 text-sm font-medium tabular-nums text-ink-900 dark:text-ink-100">
                   {formatMoney(item.amount)}
                 </p>
               </li>
@@ -220,15 +220,15 @@ export default function InvoiceDetail() {
                 className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-ink-900">
+                  <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
                     {formatMoney(payment.capturedAmount ?? payment.amount)}
                     {payment.refundedAmount > 0 && (
-                      <span className="ml-2 text-xs font-normal text-ink-500 dark:text-ink-400">
+                      <span className="ml-2 text-xs font-normal text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {formatMoney(payment.refundedAmount)} refunded
                       </span>
                     )}
                   </p>
-                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {payment.verifiedAt
                       ? `Confirmed ${formatDateTime(payment.verifiedAt)}`
                       : "Awaiting confirmation"}
@@ -355,13 +355,13 @@ export default function InvoiceDetail() {
 
 function Figure({ label, value, tone = "default" }) {
   const tones = {
-    default: "text-ink-900",
+    default: "text-ink-900 dark:text-ink-100",
     good: "text-emerald-700 dark:text-emerald-300",
     warn: "text-amber-700 dark:text-amber-300",
   };
   return (
     <div>
-      <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+      <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
         {label}
       </p>
       <p className={`mt-1 text-lg font-semibold tabular-nums ${tones[tone]}`}>

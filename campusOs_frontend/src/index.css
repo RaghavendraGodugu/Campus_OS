@@ -134,7 +134,7 @@
 @layer base {
   html { -webkit-text-size-adjust: 100%; }
   body {
-    @apply text-ink-800 antialiased;
+    @apply text-ink-800 dark:text-ink-100 antialiased;
     background-color: var(--color-canvas);
     background-image:
       radial-gradient(ellipse 46rem 30rem at 6% -12rem,

@@ -29,7 +29,7 @@ export function Card({
         >
           <div className="min-w-0">
             {title && (
-              <h2 className="text-[0.9375rem] font-semibold tracking-tight text-ink-900">
+              <h2 className="text-[0.9375rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
                 {title}
               </h2>
             )}
@@ -63,7 +63,7 @@ export function Card({
  */
 export function Stat({ label, value, hint, tone = "default", icon: Icon }) {
   const tones = {
-    default: "text-ink-900",
+    default: "text-ink-900 dark:text-ink-100",
     good: "text-emerald-700 dark:text-emerald-300",
     warn: "text-amber-700 dark:text-amber-300",
     bad: "text-red-700 dark:text-red-300",

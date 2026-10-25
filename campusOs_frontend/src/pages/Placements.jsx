@@ -40,7 +40,7 @@ const APPLICATION_TONE = {
     "bg-brand-50 text-brand-700 ring-1 ring-brand-200/70 dark:bg-brand-500/15 dark:text-brand-300 dark:ring-brand-400/25",
   REJECTED:
     "bg-red-50 text-red-700 ring-1 ring-red-200/70 dark:bg-red-500/12 dark:text-red-300 dark:ring-red-400/25",
-  WITHDRAWN: "bg-ink-100 text-ink-500 dark:bg-ink-200/40 dark:text-ink-400",
+  WITHDRAWN: "bg-ink-100 text-ink-500 dark:bg-ink-200/40 dark:text-ink-400 dark:text-ink-500",
 };
 
 export default function Placements() {
@@ -104,10 +104,10 @@ export default function Placements() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Placements
           </h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             {isStudent
               ? "Open drives you are eligible for, and the status of your applications."
               : "Companies, drives and the applications against them."}
@@ -156,11 +156,11 @@ export default function Placements() {
             <article key={drive.id ?? drive._id} className="surface p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-ink-500 dark:text-ink-400">
+                  <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {drive.company?.name ?? "Company"} ·{" "}
                     {drive.company?.sector || "—"}
                   </p>
-                  <h2 className="mt-1 text-base font-semibold tracking-tight text-ink-900">
+                  <h2 className="mt-1 text-base font-semibold tracking-tight text-ink-900 dark:text-ink-100">
                     {drive.title}
                   </h2>
                   <p className="mt-0.5 text-sm text-ink-600 dark:text-ink-300">
@@ -176,26 +176,26 @@ export default function Placements() {
 
               <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <dt className="text-ink-500 dark:text-ink-400">Apply by</dt>
+                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">Apply by</dt>
                   <dd className="mt-0.5 flex items-center gap-1.5 text-ink-800 dark:text-ink-200">
                     <CalendarDays className="size-3.5" aria-hidden="true" />{" "}
                     {formatDate(drive.applicationDeadline)}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-ink-500 dark:text-ink-400">Drive</dt>
+                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">Drive</dt>
                   <dd className="mt-0.5 text-ink-800 dark:text-ink-200">
                     {formatDate(drive.driveDate)}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-ink-500 dark:text-ink-400">Location</dt>
+                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">Location</dt>
                   <dd className="mt-0.5 text-ink-800 dark:text-ink-200">
                     {drive.location || "—"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-ink-500 dark:text-ink-400">CTC</dt>
+                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">CTC</dt>
                   <dd className="mt-0.5 text-ink-800 dark:text-ink-200">
                     {drive.ctcPaise ? formatMoney(drive.ctcPaise) : "—"}
                   </dd>
@@ -265,7 +265,7 @@ export default function Placements() {
                     </Button>
                   )}
                   {deadlinePassed && !application && (
-                    <p className="text-xs text-ink-500 dark:text-ink-400">
+                    <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                       The deadline has passed.
                     </p>
                   )}
@@ -310,7 +310,7 @@ function MyApplications({ query }) {
 
   return (
     <section className="space-y-3">
-      <h2 className="text-[0.9375rem] font-semibold text-ink-900">
+      <h2 className="text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">
         My applications
       </h2>
       <div className="surface divide-y divide-ink-100/90 dark:divide-ink-700/50">
@@ -320,10 +320,10 @@ function MyApplications({ query }) {
             className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5"
           >
             <div>
-              <p className="text-sm font-medium text-ink-900">
+              <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
                 {application.drive?.company?.name} · {application.drive?.title}
               </p>
-              <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+              <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 Applied {formatDate(application.appliedAt)}
               </p>
             </div>
@@ -623,7 +623,7 @@ function ApplicationsDialog({ drive, onClose }) {
         />
       )}
       {query.isSuccess && rows.length === 0 && (
-        <p className="text-sm text-ink-500 dark:text-ink-400">
+        <p className="text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           No applications yet.
         </p>
       )}
@@ -636,10 +636,10 @@ function ApplicationsDialog({ drive, onClose }) {
                 className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-medium text-ink-900">
+                  <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
                     {application.student?.user?.fullName ?? "Student"}
                   </p>
-                  <p className="font-mono text-[0.6875rem] text-ink-500">
+                  <p className="font-mono text-[0.6875rem] text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {application.student?.rollNumber}
                   </p>
                 </div>

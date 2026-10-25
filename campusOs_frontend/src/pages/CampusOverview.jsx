@@ -54,10 +54,10 @@ export default function CampusOverview() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Campus overview
         </h1>
-        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Live figures from the hostel, library, placements and academic
           records. Every number is computed at read time; nothing here is a
           stored total.
@@ -214,7 +214,7 @@ export default function CampusOverview() {
         </section>
       )}
 
-      <p className="text-xs text-ink-500 dark:text-ink-400">
+      <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
         Generated {new Date(data.generatedAt).toLocaleString()}. Sections you
         cannot read are omitted rather than shown as zero.
       </p>
@@ -225,12 +225,12 @@ export default function CampusOverview() {
 function SectionHeading({ icon: Icon, title, note }) {
   return (
     <div className="flex items-baseline gap-2">
-      <Icon className="size-4 text-ink-400" aria-hidden="true" />
-      <h2 className="text-[0.9375rem] font-semibold tracking-tight text-ink-900">
+      <Icon className="size-4 text-ink-400 dark:text-ink-500" aria-hidden="true" />
+      <h2 className="text-[0.9375rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
         {title}
       </h2>
       {note && (
-        <span className="text-xs text-ink-500 dark:text-ink-400">· {note}</span>
+        <span className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">· {note}</span>
       )}
     </div>
   );

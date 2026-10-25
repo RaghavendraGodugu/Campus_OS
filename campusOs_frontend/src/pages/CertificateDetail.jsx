@@ -94,7 +94,7 @@ export default function CertificateDetail() {
             ? "/management/certificates"
             : "/certificates"
         }
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 hover:text-ink-800"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         All certificates
@@ -103,11 +103,11 @@ export default function CertificateDetail() {
       <header className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-lg font-semibold tracking-tight text-ink-900">
+            <h1 className="text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               {humanise(certificate.type)}
               {certificate.copies > 1 && ` · ${certificate.copies} copies`}
             </h1>
-            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
               {certificate.reference}
               {certificate.purpose && ` · ${certificate.purpose}`}
             </p>
@@ -230,7 +230,7 @@ export default function CertificateDetail() {
                   {entry.from ? `${humanise(entry.from)} → ` : ""}
                   {humanise(entry.to)}
                 </p>
-                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   {formatDateTime(entry.at)}
                   {entry.actorRole && ` · ${humanise(entry.actorRole)}`}
                   {entry.note && ` · ${entry.note}`}
@@ -247,7 +247,7 @@ export default function CertificateDetail() {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
         {label}
       </dt>
       <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>

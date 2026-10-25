@@ -34,10 +34,10 @@ export default function ForgotPassword() {
         <span className="mx-auto grid size-12 place-items-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
           <MailCheck className="size-6" aria-hidden="true" />
         </span>
-        <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900">
+        <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Check your inbox
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+        <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
           If{" "}
           <span className="font-medium text-ink-700 dark:text-ink-200">
             {email.trim()}
@@ -45,7 +45,7 @@ export default function ForgotPassword() {
           has an account, a reset link is on its way. It expires in one hour and
           works once.
         </p>
-        <p className="mt-3 text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+        <p className="mt-3 text-sm leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Nothing arrived? The address may not be registered, or the message may
           have been filtered as spam.
         </p>
@@ -64,10 +64,10 @@ export default function ForgotPassword() {
   return (
     <div className="flex min-h-screen items-center justify-center px-6 py-12">
       <div className="surface-raised w-full max-w-md p-6 sm:p-7">
-        <h1 className="text-xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Reset your password
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Tell us your college address and we will send a link.
         </p>
 

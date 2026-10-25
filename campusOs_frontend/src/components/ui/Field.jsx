@@ -31,7 +31,7 @@ export default function Field({
     <div className={className}>
       <label
         htmlFor={htmlFor}
-        className="block text-[0.8125rem] font-medium text-ink-700"
+        className="block text-[0.8125rem] font-medium text-ink-700 dark:text-ink-300"
       >
         {label}
         {required && (

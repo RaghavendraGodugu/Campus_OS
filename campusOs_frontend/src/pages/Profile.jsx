@@ -136,10 +136,10 @@ export default function Profile() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Your profile
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           What the college knows about you, and what you may change.
         </p>
       </header>
@@ -402,7 +402,7 @@ export default function Profile() {
         <summary className="cursor-pointer text-sm font-medium text-ink-800">
           What my role can do ({profile.permissions.length})
         </summary>
-        <p className="mt-2 text-xs text-ink-500 dark:text-ink-400">
+        <p className="mt-2 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Decided by the server from your role, and re-checked on every request.
           This list is here so you can see it, not to control it.
         </p>
@@ -410,7 +410,7 @@ export default function Profile() {
           {profile.permissions.map((permission) => (
             <li
               key={permission}
-              className="rounded bg-ink-50 dark:bg-ink-100/40 px-2 py-0.5 font-mono text-[11px] text-ink-600"
+              className="rounded bg-ink-50 dark:bg-ink-100/40 px-2 py-0.5 font-mono text-[11px] text-ink-600 dark:text-ink-400 dark:text-ink-500"
             >
               {permission}
             </li>
@@ -476,7 +476,7 @@ function PasswordSection() {
       )}
 
       {!open ? (
-        <p className="text-sm text-ink-500 dark:text-ink-400">
+        <p className="text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Last changed — the audit trail records when.
         </p>
       ) : (
@@ -501,7 +501,7 @@ function PasswordSection() {
               <button
                 type="button"
                 onClick={() => setShowCurrent(!showCurrent)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                 aria-label={showCurrent ? "Hide password" : "Show password"}
               >
                 {showCurrent ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
@@ -529,7 +529,7 @@ function PasswordSection() {
               <button
                 type="button"
                 onClick={() => setShowNext(!showNext)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                 aria-label={showNext ? "Hide password" : "Show password"}
               >
                 {showNext ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
@@ -556,7 +556,7 @@ function PasswordSection() {
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                 aria-label={showConfirm ? "Hide password" : "Show password"}
               >
                 {showConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
@@ -598,7 +598,7 @@ function PasswordSection() {
       )}
 
       {!open && (
-        <p className="mt-3 flex items-start gap-2 text-xs text-ink-400 dark:text-ink-500">
+        <p className="mt-3 flex items-start gap-2 text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
           <AlertTriangle
             className="mt-0.5 size-3.5 shrink-0"
             aria-hidden="true"
@@ -613,7 +613,7 @@ function PasswordSection() {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
         {label}
       </dt>
       <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
@@ -671,7 +671,7 @@ function ExpertiseEditor({ expertise, onChange }) {
                 type="button"
                 aria-label={`Remove ${skill}`}
                 onClick={() => onChange(expertise.filter((s) => s !== skill))}
-                className="text-ink-500 transition hover:text-red-600"
+                className="text-ink-500 dark:text-ink-400 dark:text-ink-500 transition hover:text-red-600"
               >
                 ×
               </button>
@@ -679,7 +679,7 @@ function ExpertiseEditor({ expertise, onChange }) {
           ))}
         </div>
       )}
-      <p className="text-xs text-ink-500 dark:text-ink-400">
+      <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
         Comma-separated. They are seen by everyone who can search the staff
         directory.
       </p>

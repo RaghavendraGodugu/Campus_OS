@@ -122,11 +122,11 @@ export default function Modal({
       >
         <header className="flex items-start justify-between gap-4 border-b border-ink-200/70 dark:border-ink-700/60 px-5 py-4 sm:px-6">
           <div className="min-w-0">
-            <h2 className="text-base font-semibold tracking-tight text-ink-900">
+            <h2 className="text-base font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               {title}
             </h2>
             {description && (
-              <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400">
+              <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 {description}
               </p>
             )}
@@ -135,7 +135,7 @@ export default function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="-mt-1 -mr-1 grid size-8 shrink-0 place-items-center rounded-lg text-ink-400 dark:text-ink-500 transition-colors hover:bg-ink-100 dark:hover:bg-ink-200/50 hover:text-ink-700"
+            className="-mt-1 -mr-1 grid size-8 shrink-0 place-items-center rounded-lg text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 transition-colors hover:bg-ink-100 dark:hover:bg-ink-200/50 hover:text-ink-700 dark:text-ink-300"
           >
             <X className="size-4" aria-hidden="true" />
           </button>

@@ -184,10 +184,10 @@ export default function PayDialog({ invoice, onClose, onVerified }) {
       <div className="w-full max-w-md rounded-2xl bg-white dark:bg-surface p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="pay-title" className="text-lg font-semibold text-ink-900">
+            <h2 id="pay-title" className="text-lg font-semibold text-ink-900 dark:text-ink-100">
               Pay {invoice.purpose}
             </h2>
-            <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+            <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
               {invoice.reference}
             </p>
           </div>
@@ -196,17 +196,17 @@ export default function PayDialog({ invoice, onClose, onVerified }) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-md p-1 text-ink-400 dark:text-ink-500 hover:bg-ink-100 dark:hover:bg-ink-200/50"
+            className="rounded-md p-1 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:bg-ink-100 dark:hover:bg-ink-200/50"
           >
             <X className="size-5" aria-hidden="true" />
           </button>
         </div>
 
         <div className="mt-5 rounded-xl bg-ink-50 dark:bg-ink-100/40 px-4 py-4 text-center">
-          <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+          <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
             Amount due
           </p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-ink-900">
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-ink-900 dark:text-ink-100">
             {invoice.balanceDueFormatted ??
               formatMoney(invoice.balanceDue ?? invoice.total)}
           </p>
@@ -247,7 +247,7 @@ export default function PayDialog({ invoice, onClose, onVerified }) {
         </div>
 
         {phase === "verifying" && (
-          <p className="mt-3 flex items-center justify-center gap-2 text-xs text-ink-500 dark:text-ink-400">
+          <p className="mt-3 flex items-center justify-center gap-2 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
             <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
             Asking Razorpay whether the money arrived
           </p>
@@ -260,7 +260,7 @@ export default function PayDialog({ invoice, onClose, onVerified }) {
           </p>
         )}
 
-        <p className="mt-4 text-center text-[11px] text-ink-400 dark:text-ink-500">
+        <p className="mt-4 text-center text-[11px] text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
           This browser never decides that money was paid. The server checks with
           Razorpay first.
         </p>

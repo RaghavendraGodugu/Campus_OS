@@ -11,7 +11,7 @@ import { AlertTriangle, Inbox, Loader2 } from "lucide-react";
 export function Loading({ label = "Loading" }) {
   return (
     <div
-      className="flex items-center justify-center gap-3 py-16 text-ink-500 dark:text-ink-400"
+      className="flex items-center justify-center gap-3 py-16 text-ink-500 dark:text-ink-400 dark:text-ink-500"
       role="status"
     >
       <Loader2 className="size-5 animate-spin" aria-hidden="true" />
@@ -24,12 +24,12 @@ export function EmptyState({ title, description, action, icon: Icon = Inbox }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-ink-200 dark:border-ink-700/70 bg-white/50 dark:bg-surface px-6 py-16 text-center">
       <Icon
-        className="size-8 text-ink-300 dark:text-ink-500"
+        className="size-8 text-ink-300 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
         aria-hidden="true"
       />
       <h3 className="text-sm font-semibold text-ink-800">{title}</h3>
       {description && (
-        <p className="max-w-sm text-sm text-ink-500 dark:text-ink-400">
+        <p className="max-w-sm text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           {description}
         </p>
       )}
@@ -78,10 +78,10 @@ export function UnconfirmedState({ onRetry }) {
         className="mx-auto size-10 text-amber-500 dark:text-amber-400"
         aria-hidden="true"
       />
-      <h2 className="mt-4 text-lg font-semibold text-ink-900">
+      <h2 className="mt-4 text-lg font-semibold text-ink-900 dark:text-ink-100">
         We could not confirm your session
       </h2>
-      <p className="mt-2 text-sm text-ink-600">
+      <p className="mt-2 text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500">
         You are still signed in, but the server did not answer. This is usually
         temporary — check your connection and try again.
       </p>

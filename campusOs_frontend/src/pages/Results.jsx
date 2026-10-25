@@ -74,10 +74,10 @@ export default function Results() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Results
         </h1>
-        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
           {isStudent
             ? "Results appear here once your programme's results office releases them. Marks are never shown before release."
             : "Enter component marks, check the derived grades, then release the programme's results."}
@@ -161,7 +161,7 @@ function StudentResults() {
       <section className="surface p-6">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-ink-500 dark:text-ink-400">
+            <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500">
               {data.term.name} · released{" "}
               {new Date(data.release.publishedAt).toLocaleDateString()}
             </p>
@@ -169,7 +169,7 @@ function StudentResults() {
               {data.overall?.percentage ?? "—"}
               <span className="text-2xl">%</span>
             </p>
-            <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+            <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
               {data.overall
                 ? `${data.overall.obtained} of ${data.overall.maxMarks} marks`
                 : "No marks recorded"}
@@ -197,10 +197,10 @@ function StudentResults() {
             <section key={result.subject.id} className="surface p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-sm font-semibold text-ink-900">
+                  <h2 className="text-sm font-semibold text-ink-900 dark:text-ink-100">
                     {result.subject.code} · {result.subject.name}
                   </h2>
-                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {result.obtained} / {result.maxMarks} marks
                   </p>
                 </div>
@@ -208,7 +208,7 @@ function StudentResults() {
                   <p className={`text-2xl font-semibold ${gradeTone}`}>
                     {result.percentage ?? "—"}%
                   </p>
-                  <p className="text-xs font-medium text-ink-500 dark:text-ink-400">
+                  <p className="text-xs font-medium text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     Grade {result.grade ?? "—"}
                   </p>
                 </div>
@@ -222,7 +222,7 @@ function StudentResults() {
                   >
                     <span className="text-ink-600 dark:text-ink-300">
                       {component.name}{" "}
-                      <span className="text-ink-400">
+                      <span className="text-ink-400 dark:text-ink-500">
                         ({KIND_LABEL[component.kind] ?? component.kind})
                       </span>
                     </span>
@@ -316,7 +316,7 @@ function MarksWorkspace({ canPublish }) {
         <div className="w-full max-w-sm">
           <label
             htmlFor="result-subject"
-            className="block text-[0.8125rem] font-medium text-ink-700"
+            className="block text-[0.8125rem] font-medium text-ink-700 dark:text-ink-300"
           >
             Subject
           </label>
@@ -386,10 +386,10 @@ function MarksWorkspace({ canPublish }) {
                 <div key={assessment.id} className="surface p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-sm font-semibold text-ink-900">
+                      <p className="text-sm font-semibold text-ink-900 dark:text-ink-100">
                         {assessment.name}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {KIND_LABEL[assessment.kind] ?? assessment.kind} · max{" "}
                         {assessment.maxMarks}
                       </p>
@@ -409,17 +409,17 @@ function MarksWorkspace({ canPublish }) {
 
           <div className="surface overflow-hidden">
             <div className="border-b border-ink-200/60 dark:border-ink-700/50 px-5 py-4">
-              <h2 className="text-[0.9375rem] font-semibold text-ink-900">
+              <h2 className="text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">
                 Derived results
               </h2>
-              <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+              <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 {data.term.name}. Percentages and grades are computed from the
                 component marks; nothing is stored.
               </p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="border-b border-ink-200/70 dark:border-ink-700/60 text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">
+                <thead className="border-b border-ink-200/70 dark:border-ink-700/60 text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   <tr>
                     <th className="px-5 py-3 font-medium">Roll</th>
                     <th className="px-5 py-3 font-medium">Student</th>
@@ -435,7 +435,7 @@ function MarksWorkspace({ canPublish }) {
                       <td className="px-5 py-3 font-mono text-xs text-ink-600 dark:text-ink-300">
                         {student.rollNumber}
                       </td>
-                      <td className="px-5 py-3 font-medium text-ink-900">
+                      <td className="px-5 py-3 font-medium text-ink-900 dark:text-ink-100">
                         {student.name}
                       </td>
                       <td className="px-5 py-3 tabular-nums text-ink-600 dark:text-ink-300">
@@ -695,10 +695,10 @@ function MarksDialog({ assessment, students, subjectId, onClose }) {
               className="flex items-center justify-between gap-4 px-4 py-2.5"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-ink-900">
+                <p className="truncate text-sm font-medium text-ink-900 dark:text-ink-100">
                   {student.name}
                 </p>
-                <p className="font-mono text-[0.6875rem] text-ink-500">
+                <p className="font-mono text-[0.6875rem] text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   {student.rollNumber}
                 </p>
               </div>
@@ -784,7 +784,7 @@ function PublishDialog({ subject, term, onClose }) {
             in <strong>{term.name}</strong> visible to students. It cannot be
             undone from this screen.
           </p>
-          <p className="text-xs text-ink-500 dark:text-ink-400">
+          <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Every component of every subject must have a mark for every student.
             The release is refused if anything is missing.
           </p>

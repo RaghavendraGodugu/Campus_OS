@@ -80,14 +80,14 @@ export default function VerifyCertificate() {
             >
               C
             </span>
-            <span className="text-base font-semibold tracking-tight text-ink-900">
+            <span className="text-base font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               CampusOS
             </span>
           </span>
 
           <Link
             to="/login"
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 transition-colors hover:bg-white/70 hover:text-brand-800"
+            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 dark:text-ink-400 dark:text-ink-500 transition-colors hover:bg-white/70 hover:text-brand-800"
           >
             Staff sign in
             <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -102,10 +102,10 @@ export default function VerifyCertificate() {
               Open to anyone — no account needed
             </span>
 
-            <h1 className="mt-5 text-3xl font-semibold tracking-tight text-ink-900 sm:text-[2.5rem] sm:leading-[1.1]">
+            <h1 className="mt-5 text-3xl font-semibold tracking-tight text-ink-900 dark:text-ink-100 sm:text-[2.5rem] sm:leading-[1.1]">
               Is this certificate genuine?
             </h1>
-            <p className="mx-auto mt-3 max-w-md text-[0.9375rem] leading-relaxed text-ink-600">
+            <p className="mx-auto mt-3 max-w-md text-[0.9375rem] leading-relaxed text-ink-600 dark:text-ink-400 dark:text-ink-500">
               Type the verification code printed on the certificate. The check
               runs against the institute's own records.
             </p>
@@ -116,7 +116,7 @@ export default function VerifyCertificate() {
                 Verification code
               </label>
               <div className="surface-raised flex items-center gap-2 p-2">
-                <span className="grid size-10 shrink-0 place-items-center text-ink-400 dark:text-ink-500">
+                <span className="grid size-10 shrink-0 place-items-center text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   <Hash className="size-5" aria-hidden="true" />
                 </span>
                 <input
@@ -130,7 +130,7 @@ export default function VerifyCertificate() {
                   spellCheck={false}
                   maxLength={24}
                   aria-describedby="code-hint"
-                  className="min-w-0 flex-1 bg-transparent py-2 font-mono text-base tracking-wider text-ink-900 uppercase placeholder:font-sans placeholder:tracking-normal placeholder:text-ink-400 focus:outline-none"
+                  className="min-w-0 flex-1 bg-transparent py-2 font-mono text-base tracking-wider text-ink-900 dark:text-ink-100 uppercase placeholder:font-sans placeholder:tracking-normal placeholder:text-ink-400 dark:text-ink-500 focus:outline-none"
                 />
                 <Button
                   type="submit"
@@ -144,7 +144,7 @@ export default function VerifyCertificate() {
               </div>
               <p
                 id="code-hint"
-                className="mt-2.5 text-xs text-ink-500 dark:text-ink-400"
+                className="mt-2.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500"
               >
                 Printed beneath the registrar's seal. Letters and numbers only.
               </p>
@@ -164,7 +164,7 @@ export default function VerifyCertificate() {
           </div>
         </div>
 
-        <footer className="pb-2 text-center text-xs text-ink-500 dark:text-ink-400">
+        <footer className="pb-2 text-center text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Verification confirms the certificate's status only. It does not
           disclose who it was issued to.
         </footer>
@@ -184,10 +184,10 @@ function NotRecognised({ message }) {
         <Ban className="size-5" aria-hidden="true" />
       </span>
       <div>
-        <p className="text-sm font-semibold text-ink-900">
+        <p className="text-sm font-semibold text-ink-900 dark:text-ink-100">
           No certificate with that code
         </p>
-        <p className="mt-1 text-sm leading-relaxed text-ink-600">
+        <p className="mt-1 text-sm leading-relaxed text-ink-600 dark:text-ink-400 dark:text-ink-500">
           {message} Check for a typo, or for characters that may have been
           smudged in printing.
         </p>
@@ -232,10 +232,10 @@ function Result({ valid, data }) {
             )}
           </span>
           <div className="min-w-0">
-            <p className="text-xs font-semibold tracking-[0.08em] text-ink-500 dark:text-ink-400 uppercase">
+            <p className="text-xs font-semibold tracking-[0.08em] text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
               {valid ? "Authentic" : "Not valid"}
             </p>
-            <p className="mt-0.5 text-lg font-semibold tracking-tight text-ink-900">
+            <p className="mt-0.5 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               {valid
                 ? "This certificate is genuine and currently valid"
                 : "This certificate is no longer valid"}
@@ -264,7 +264,7 @@ function Result({ valid, data }) {
         </dl>
       </div>
 
-      <p className="mt-3 flex items-start gap-2 px-1 text-xs leading-relaxed text-ink-500 dark:text-ink-400">
+      <p className="mt-3 flex items-start gap-2 px-1 text-xs leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
         <BadgeCheck
           className="mt-0.5 size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
           aria-hidden="true"
@@ -280,13 +280,13 @@ function Row({ icon: Icon, label, value, muted = false }) {
   return (
     <div className="flex items-start gap-3">
       <Icon
-        className="mt-0.5 size-4 shrink-0 text-ink-400 dark:text-ink-500"
+        className="mt-0.5 size-4 shrink-0 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
         aria-hidden="true"
       />
       <div className="min-w-0">
-        <dt className="text-xs text-ink-500 dark:text-ink-400">{label}</dt>
+        <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">{label}</dt>
         <dd
-          className={`text-sm ${muted ? "text-ink-400 dark:text-ink-500" : "text-ink-900"}`}
+          className={`text-sm ${muted ? "text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500" : "text-ink-900 dark:text-ink-100"}`}
         >
           {value}
         </dd>

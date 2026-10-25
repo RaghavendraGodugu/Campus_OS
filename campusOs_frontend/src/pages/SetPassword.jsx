@@ -86,7 +86,7 @@ export default function SetPassword() {
           >
             C
           </span>
-          <span className="text-lg font-semibold tracking-tight text-ink-900">
+          <span className="text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             CampusOS
           </span>
         </div>
@@ -96,10 +96,10 @@ export default function SetPassword() {
             <KeyRound className="size-6" aria-hidden="true" />
           </span>
 
-          <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900">
+          <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Choose your password
           </h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-ink-600">
+          <p className="mt-1.5 text-sm leading-relaxed text-ink-600 dark:text-ink-400 dark:text-ink-500">
             Hello {user?.fullName?.split(" ")[0] ?? "there"}. Your account was
             set up by an administrator with a temporary password, which they
             still know. Choose your own to replace it.
@@ -124,7 +124,7 @@ export default function SetPassword() {
                 <button
                   type="button"
                   onClick={() => setShowCurrent(!showCurrent)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                   aria-label={showCurrent ? "Hide password" : "Show password"}
                 >
                   {showCurrent ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
@@ -152,7 +152,7 @@ export default function SetPassword() {
                 <button
                   type="button"
                   onClick={() => setShowNext(!showNext)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                   aria-label={showNext ? "Hide password" : "Show password"}
                 >
                   {showNext ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
@@ -179,7 +179,7 @@ export default function SetPassword() {
                 <button
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                   aria-label={showConfirm ? "Hide password" : "Show password"}
                 >
                   {showConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
@@ -207,7 +207,7 @@ export default function SetPassword() {
             </Button>
 
             {touched && !ready && (
-              <p className="text-xs text-ink-500 dark:text-ink-400">
+              <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 Enter the temporary password, then a new one of at least 12
                 characters, and confirm it.
               </p>
@@ -217,14 +217,14 @@ export default function SetPassword() {
           <button
             type="button"
             onClick={logout}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-500 dark:text-ink-400 transition-colors hover:bg-ink-100 dark:hover:bg-ink-200/50 hover:text-ink-800"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-500 dark:text-ink-400 dark:text-ink-500 transition-colors hover:bg-ink-100 dark:hover:bg-ink-200/50 hover:text-ink-800"
           >
             <LogOut className="size-4" aria-hidden="true" />
             Sign out instead
           </button>
         </div>
 
-        <p className="mt-4 flex items-start justify-center gap-2 px-2 text-center text-xs text-ink-500 dark:text-ink-400">
+        <p className="mt-4 flex items-start justify-center gap-2 px-2 text-center text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
           <ShieldCheck
             className="mt-0.5 size-3.5 shrink-0"
             aria-hidden="true"

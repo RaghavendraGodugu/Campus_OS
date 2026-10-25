@@ -148,10 +148,10 @@ export default function ComposeAnnouncement() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Post a notice
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Visible immediately to everyone in the audience you choose.
         </p>
       </header>
@@ -195,7 +195,7 @@ export default function ComposeAnnouncement() {
               </Field>
 
               <div className="flex items-end pb-2">
-                <label className="flex items-center gap-2.5 text-sm text-ink-700">
+                <label className="flex items-center gap-2.5 text-sm text-ink-700 dark:text-ink-300">
                   <input
                     type="checkbox"
                     checked={pinned}
@@ -224,13 +224,13 @@ export default function ComposeAnnouncement() {
               className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-card border border-dashed border-ink-300 bg-ink-50/60 px-6 py-8 text-center transition-colors hover:border-brand-600 hover:bg-brand-50/50 focus-within:border-brand-600 dark:border-ink-600 dark:bg-ink-100/40 dark:hover:border-brand-500 dark:hover:bg-brand-500/10"
             >
               <ImageIcon
-                className="size-6 text-ink-500 dark:text-ink-400"
+                className="size-6 text-ink-500 dark:text-ink-400 dark:text-ink-500"
                 aria-hidden="true"
               />
               <span className="text-sm font-medium text-ink-800 dark:text-ink-100">
                 {image ? image.name : "Choose a JPEG or PNG"}
               </span>
-              <span className="text-xs text-ink-500 dark:text-ink-400">
+              <span className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 Up to 5 MB. Square or wide images work best.
               </span>
               <input
@@ -286,7 +286,7 @@ export default function ComposeAnnouncement() {
 
             {scope === "ROLES" && (
               <fieldset>
-                <legend className="text-sm font-medium text-ink-700">
+                <legend className="text-sm font-medium text-ink-700 dark:text-ink-300">
                   Roles{" "}
                   <span className="text-red-600 dark:text-red-400">*</span>
                 </legend>
@@ -294,7 +294,7 @@ export default function ComposeAnnouncement() {
                   {ROLES.map(([value, label]) => (
                     <label
                       key={value}
-                      className="flex items-center gap-2 text-sm text-ink-700"
+                      className="flex items-center gap-2 text-sm text-ink-700 dark:text-ink-300"
                     >
                       <input
                         type="checkbox"
@@ -347,7 +347,7 @@ export default function ComposeAnnouncement() {
             )}
 
             {scope !== "ALL" && (
-              <p className="rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3 py-2 text-xs text-ink-600">
+              <p className="rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3 py-2 text-xs text-ink-600 dark:text-ink-400 dark:text-ink-500">
                 Only this audience will see the notice. Anyone else receives a
                 404 if they follow a link to it directly.
               </p>

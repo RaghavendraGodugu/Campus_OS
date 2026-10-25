@@ -68,10 +68,10 @@ export default function NewComplaint() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Raise a complaint
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Treated confidentially from the moment it is filed.
         </p>
       </header>
@@ -118,7 +118,7 @@ export default function NewComplaint() {
             </Field>
 
             {chosen?.slaHours && (
-              <p className="rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3 py-2 text-xs text-ink-600">
+              <p className="rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3 py-2 text-xs text-ink-600 dark:text-ink-400 dark:text-ink-500">
                 A first response is due within{" "}
                 <strong className="font-medium">{chosen.slaHours} hours</strong>{" "}
                 of this being filed.
@@ -167,9 +167,9 @@ export default function NewComplaint() {
                 onChange={(event) => setConfidential(event.target.checked)}
                 className="mt-0.5 size-4 rounded border-ink-300 dark:border-ink-600 text-brand-600 focus:ring-brand-600"
               />
-              <span className="text-sm text-ink-700">
+              <span className="text-sm text-ink-700 dark:text-ink-300">
                 Mark as strictly confidential
-                <span className="mt-0.5 block text-xs text-ink-500 dark:text-ink-400">
+                <span className="mt-0.5 block text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   Restricts this to the Dean and Principal. Use this for
                   anything sensitive.
                 </span>

@@ -93,7 +93,7 @@ export default function RequestDetail() {
     <div className="mx-auto max-w-4xl space-y-6">
       <Link
         to={can("request:read:assigned") ? "/management/requests" : "/requests"}
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 hover:text-ink-800"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         All requests
@@ -102,10 +102,10 @@ export default function RequestDetail() {
       <header className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-lg font-semibold tracking-tight text-ink-900">
+            <h1 className="text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               {request.title}
             </h1>
-            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
               {request.reference}
               {request.requestType?.name && ` · ${request.requestType.name}`}
               {request.department?.name && ` · ${request.department.name}`}
@@ -115,7 +115,7 @@ export default function RequestDetail() {
         </div>
 
         {request.description && (
-          <p className="mt-3 text-sm leading-relaxed text-ink-600">
+          <p className="mt-3 text-sm leading-relaxed text-ink-600 dark:text-ink-400 dark:text-ink-500">
             {request.description}
           </p>
         )}
@@ -143,7 +143,7 @@ export default function RequestDetail() {
               .filter(([key]) => !key.startsWith("__"))
               .map(([key, value]) => (
                 <div key={key}>
-                  <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+                  <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
                     {humanise(key)}
                   </dt>
                   <dd className="mt-0.5 text-sm text-ink-800">
@@ -219,7 +219,7 @@ export default function RequestDetail() {
                   {entry.from ? `${humanise(entry.from)} → ` : ""}
                   {humanise(entry.to)}
                 </p>
-                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   {formatDateTime(entry.at)}
                   {entry.actorRole && ` · ${humanise(entry.actorRole)}`}
                   {entry.note && ` · ${entry.note}`}
@@ -278,7 +278,7 @@ export default function RequestDetail() {
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               placeholder="Add something for the handler…"
-              className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 dark:ring-ink-500 placeholder:text-ink-400 focus:ring-2 focus:ring-brand-600"
+              className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 dark:ring-ink-500 placeholder:text-ink-400 dark:text-ink-500 focus:ring-2 focus:ring-brand-600"
             />
             <div className="flex justify-end">
               <Button
@@ -404,7 +404,7 @@ function InternalNotePanel({ request, onDone }) {
           value={note}
           onChange={(event) => setNote(event.target.value)}
           placeholder="Context for whoever picks this up…"
-          className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 dark:ring-ink-500 placeholder:text-ink-400 focus:ring-2 focus:ring-brand-600"
+          className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 dark:ring-ink-500 placeholder:text-ink-400 dark:text-ink-500 focus:ring-2 focus:ring-brand-600"
         />
         <div className="flex justify-end">
           <Button
@@ -424,7 +424,7 @@ function InternalNotePanel({ request, onDone }) {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
         {label}
       </dt>
       <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>

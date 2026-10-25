@@ -70,10 +70,10 @@ export default function StaffDirectory() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Staff directory
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Find people by name, designation or expertise. Contact details are
           deliberately not listed here.
         </p>
@@ -88,7 +88,7 @@ export default function StaffDirectory() {
       >
         <div className="relative min-w-[220px] flex-1">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-400"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-400 dark:text-ink-500"
             aria-hidden="true"
           />
           <input
@@ -147,7 +147,7 @@ export default function StaffDirectory() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="font-semibold text-ink-900">{person.fullName}</h2>
+                  <h2 className="font-semibold text-ink-900 dark:text-ink-100">{person.fullName}</h2>
                   <p className="mt-0.5 text-sm text-ink-600 dark:text-ink-300">
                     {roleLabel(person.role)}
                     {person.designation ? ` · ${person.designation}` : ""}

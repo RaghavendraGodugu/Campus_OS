@@ -85,14 +85,14 @@ export default function Grievance() {
             >
               C
             </span>
-            <span className="text-base font-semibold tracking-tight text-ink-900">
+            <span className="text-base font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               CampusOS
             </span>
           </span>
 
           <Link
             to="/login"
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 transition-colors hover:bg-white/70 hover:text-brand-800"
+            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 dark:text-ink-400 dark:text-ink-500 transition-colors hover:bg-white/70 hover:text-brand-800"
           >
             Staff sign in
             <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -106,10 +106,10 @@ export default function Grievance() {
               No account, no name, no login
             </span>
 
-            <h1 className="mt-5 text-3xl font-semibold tracking-tight text-ink-900 sm:text-[2.25rem] sm:leading-tight">
+            <h1 className="mt-5 text-3xl font-semibold tracking-tight text-ink-900 dark:text-ink-100 sm:text-[2.25rem] sm:leading-tight">
               Report something, without your name on it
             </h1>
-            <p className="mx-auto mt-3 max-w-lg text-[0.9375rem] leading-relaxed text-ink-600">
+            <p className="mx-auto mt-3 max-w-lg text-[0.9375rem] leading-relaxed text-ink-600 dark:text-ink-400 dark:text-ink-500">
               Read what anonymity costs before you decide. It is a real trade,
               not a free benefit.
             </p>
@@ -135,7 +135,7 @@ export default function Grievance() {
                   className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-150 sm:flex-none ${
                     tab === item.id
                       ? "aurora text-white shadow-brand"
-                      : "text-ink-600 hover:bg-white hover:text-ink-900"
+                      : "text-ink-600 dark:text-ink-400 dark:text-ink-500 hover:bg-white hover:text-ink-900 dark:text-ink-100"
                   }`}
                 >
                   <Icon className="size-4" aria-hidden="true" />
@@ -154,7 +154,7 @@ export default function Grievance() {
           </div>
         </div>
 
-        <footer className="pb-2 text-center text-xs text-ink-500 dark:text-ink-400">
+        <footer className="pb-2 text-center text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
           If you are in immediate danger, contact the emergency services first.
         </footer>
       </div>
@@ -198,12 +198,12 @@ function ReportForm({ onTrack }) {
           <CheckCircle2 className="size-6" aria-hidden="true" />
         </span>
 
-        <h2 className="mt-4 text-xl font-semibold tracking-tight text-ink-900">
+        <h2 className="mt-4 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Your report has been filed
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-ink-600">
+        <p className="mt-1.5 text-sm leading-relaxed text-ink-600 dark:text-ink-400 dark:text-ink-500">
           Reference{" "}
-          <span className="font-mono font-medium text-ink-900">
+          <span className="font-mono font-medium text-ink-900 dark:text-ink-100">
             {issued.reference}
           </span>
           {issued.confidential && (
@@ -220,7 +220,7 @@ function ReportForm({ onTrack }) {
           <p className="text-xs font-semibold tracking-wide text-brand-700 dark:text-brand-300 uppercase">
             Your tracking code
           </p>
-          <p className="mt-2 font-mono text-xl font-semibold tracking-widest break-all text-ink-900 select-all">
+          <p className="mt-2 font-mono text-xl font-semibold tracking-widest break-all text-ink-900 dark:text-ink-100 select-all">
             {issued.code}
           </p>
           <Button
@@ -250,9 +250,9 @@ function ReportForm({ onTrack }) {
           {issued.notice}
         </p>
 
-        <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-ink-500 dark:text-ink-400">
+        <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
           <AlertTriangle
-            className="mt-0.5 size-3.5 shrink-0 text-ink-400 dark:text-ink-500"
+            className="mt-0.5 size-3.5 shrink-0 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
             aria-hidden="true"
           />
           We store only a hash of this code, so nobody — including an
@@ -286,10 +286,10 @@ function ReportForm({ onTrack }) {
           will be able to do afterwards.
         */}
         <div className="rounded-2xl border border-ink-200 dark:border-ink-700/70 bg-ink-50/70 dark:bg-ink-100/40 p-4">
-          <p className="text-xs font-semibold tracking-wide text-ink-700 uppercase">
+          <p className="text-xs font-semibold tracking-wide text-ink-700 dark:text-ink-300 uppercase">
             What anonymity costs
           </p>
-          <ul className="mt-2 space-y-1.5 text-[0.8125rem] leading-relaxed text-ink-600">
+          <ul className="mt-2 space-y-1.5 text-[0.8125rem] leading-relaxed text-ink-600 dark:text-ink-400 dark:text-ink-500">
             {[
               "Nobody can reply to you, because we will not know who you are.",
               "No email or message will reach you at any point.",
@@ -299,7 +299,7 @@ function ReportForm({ onTrack }) {
               <li key={line} className="flex gap-2">
                 <span
                   aria-hidden="true"
-                  className="text-ink-300 dark:text-ink-500"
+                  className="text-ink-300 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
                 >
                   —
                 </span>
@@ -307,7 +307,7 @@ function ReportForm({ onTrack }) {
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-[0.8125rem] leading-relaxed text-ink-600">
+          <p className="mt-3 text-[0.8125rem] leading-relaxed text-ink-600 dark:text-ink-400 dark:text-ink-500">
             Need an answer, or want to be contacted?{" "}
             <Link
               to="/login"
@@ -425,7 +425,7 @@ function ReportForm({ onTrack }) {
             File this report anonymously
           </Button>
 
-          <p className="text-center text-xs text-ink-500 dark:text-ink-400">
+          <p className="text-center text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Your IP address is not stored with the report.
           </p>
         </form>
@@ -461,7 +461,7 @@ function TrackForm() {
         >
           <div className="relative">
             <Hash
-              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400 dark:text-ink-500"
+              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
               aria-hidden="true"
             />
             <input
@@ -501,9 +501,9 @@ function TrackForm() {
       {found && <TrackResult result={found} />}
 
       {found && (
-        <p className="mt-5 flex items-start gap-2 border-t border-ink-200/70 dark:border-ink-700/60 pt-5 text-xs leading-relaxed text-ink-500 dark:text-ink-400">
+        <p className="mt-5 flex items-start gap-2 border-t border-ink-200/70 dark:border-ink-700/60 pt-5 text-xs leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
           <EyeOff
-            className="mt-0.5 size-3.5 shrink-0 text-ink-400 dark:text-ink-500"
+            className="mt-0.5 size-3.5 shrink-0 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
             aria-hidden="true"
           />
           This deliberately shows the state of your report and nothing else —
@@ -545,10 +545,10 @@ function TrackResult({ result }) {
             <Icon className="size-5" />
           </span>
           <div className="min-w-0">
-            <p className="text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-500 dark:text-ink-400 uppercase">
+            <p className="text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
               {humanise(result.status)}
             </p>
-            <p className="mt-0.5 text-base font-semibold tracking-tight text-ink-900">
+            <p className="mt-0.5 text-base font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               {result.resolved
                 ? "This report is closed"
                 : "This report is being handled"}
@@ -558,30 +558,30 @@ function TrackResult({ result }) {
 
         <dl className="grid gap-x-6 gap-y-4 px-5 py-5 sm:grid-cols-2">
           <div>
-            <dt className="text-xs text-ink-500 dark:text-ink-400">
+            <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
               Reference
             </dt>
-            <dd className="mt-0.5 font-mono text-sm text-ink-900">
+            <dd className="mt-0.5 font-mono text-sm text-ink-900 dark:text-ink-100">
               {result.reference}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-ink-500 dark:text-ink-400">Filed</dt>
-            <dd className="mt-0.5 text-sm text-ink-900">
+            <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">Filed</dt>
+            <dd className="mt-0.5 text-sm text-ink-900 dark:text-ink-100">
               {formatDate(result.submittedAt)}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-ink-500 dark:text-ink-400">
+            <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
               Last movement
             </dt>
-            <dd className="mt-0.5 text-sm text-ink-900">
+            <dd className="mt-0.5 text-sm text-ink-900 dark:text-ink-100">
               {formatDate(result.lastActivityAt)}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-ink-500 dark:text-ink-400">Updates</dt>
-            <dd className="mt-0.5 text-sm text-ink-900">
+            <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">Updates</dt>
+            <dd className="mt-0.5 text-sm text-ink-900 dark:text-ink-100">
               {result.updateCount === 0
                 ? "None yet"
                 : `${result.updateCount} recorded`}

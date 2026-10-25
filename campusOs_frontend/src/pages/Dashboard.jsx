@@ -84,10 +84,10 @@ export default function Dashboard() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Hello, {firstName}
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           {isStudent && student
             ? `${humanise(user.role)} · Roll ${student.rollNumber}`
             : humanise(user?.role)}
@@ -164,7 +164,7 @@ export default function Dashboard() {
                       <p className="truncate text-sm font-medium text-ink-800">
                         {request.title}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {request.reference} ·{" "}
                         {formatRelative(request.createdAt)}
                       </p>
@@ -212,12 +212,12 @@ export default function Dashboard() {
                       <p className="truncate text-sm font-medium text-ink-800">
                         {invoice.purpose}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {invoice.reference} · due {formatDate(invoice.dueAt)}
                       </p>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-sm font-semibold tabular-nums text-ink-900">
+                      <p className="text-sm font-semibold tabular-nums text-ink-900 dark:text-ink-100">
                         {invoice.totalFormatted ?? formatMoney(invoice.total)}
                       </p>
                       <Badge status={invoice.status} className="mt-1" />
@@ -288,10 +288,10 @@ function StudentStrip({ student }) {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
         {label}
       </dt>
-      <dd className="mt-0.5 text-sm font-medium text-ink-900">
+      <dd className="mt-0.5 text-sm font-medium text-ink-900 dark:text-ink-100">
         {value ?? "—"}
       </dd>
     </div>
@@ -433,7 +433,7 @@ function QuickLinks() {
           <Link
             key={to}
             to={to}
-            className="inline-flex items-center gap-2 rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3.5 py-2 text-sm font-medium text-ink-700 ring-1 ring-ink-200 dark:ring-ink-600 transition-colors hover:bg-white hover:text-brand-700 hover:ring-brand-300"
+            className="inline-flex items-center gap-2 rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3.5 py-2 text-sm font-medium text-ink-700 dark:text-ink-300 ring-1 ring-ink-200 dark:ring-ink-600 transition-colors hover:bg-white hover:text-brand-700 hover:ring-brand-300"
           >
             <Icon className="size-4" aria-hidden="true" />
             {label}
@@ -533,7 +533,7 @@ function StudentAttendance({ query }) {
             {percentage}
             <span className="text-2xl">%</span>
           </p>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             {data.overall.attended} of {data.overall.held} classes attended
           </p>
           <span
@@ -554,7 +554,7 @@ function StudentAttendance({ query }) {
               style={{ width: `${Math.min(100, percentage)}%` }}
             />
           </div>
-          <p className="mt-1.5 text-xs text-ink-500 dark:text-ink-400">
+          <p className="mt-1.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Institutional threshold {data.threshold}%.
           </p>
 
@@ -620,10 +620,10 @@ const ATTENDANCE_PALETTE = {
     chip: "bg-red-50 text-red-700 ring-1 ring-red-200/70 dark:bg-red-500/12 dark:text-red-300 dark:ring-red-400/25",
   },
   muted: {
-    text: "text-ink-500",
+    text: "text-ink-500 dark:text-ink-400 dark:text-ink-500",
     bar: "bg-ink-300",
     dot: "bg-ink-300",
     label: "No data",
-    chip: "bg-ink-100 text-ink-600",
+    chip: "bg-ink-100 text-ink-600 dark:text-ink-400 dark:text-ink-500",
   },
 };

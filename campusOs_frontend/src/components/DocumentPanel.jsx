@@ -174,7 +174,7 @@ export default function DocumentPanel({
         )}
 
         {isLoading && (
-          <p className="text-sm text-ink-500 dark:text-ink-400">
+          <p className="text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Loading documents…
           </p>
         )}
@@ -200,14 +200,14 @@ export default function DocumentPanel({
                 className="flex flex-wrap items-center gap-3 py-3 first:pt-0"
               >
                 <FileText
-                  className="size-4 shrink-0 text-ink-400 dark:text-ink-500"
+                  className="size-4 shrink-0 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
                   aria-hidden="true"
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-ink-800">
                     {document.label ?? document.originalName}
                   </p>
-                  <p className="text-xs text-ink-500 dark:text-ink-400">
+                  <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {size(document.size)} ·{" "}
                     {document.mimeType.replace("application/", "")}
                   </p>
@@ -258,7 +258,7 @@ export default function DocumentPanel({
             <div>
               <label
                 htmlFor="document-file"
-                className="block text-sm font-medium text-ink-700"
+                className="block text-sm font-medium text-ink-700 dark:text-ink-300"
               >
                 Choose a file
               </label>
@@ -269,7 +269,7 @@ export default function DocumentPanel({
                 accept={ACCEPT}
                 onChange={onFile}
                 disabled={upload.isPending}
-                className="mt-1.5 block w-full text-sm text-ink-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3.5 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100"
+                className="mt-1.5 block w-full text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3.5 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100"
               />
             </div>
           </div>
@@ -277,7 +277,7 @@ export default function DocumentPanel({
 
         {upload.isPending && (
           <p
-            className="flex items-center gap-2 text-xs text-ink-500 dark:text-ink-400"
+            className="flex items-center gap-2 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500"
             role="status"
           >
             <Upload className="size-3.5 animate-pulse" aria-hidden="true" />

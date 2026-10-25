@@ -105,17 +105,17 @@ export default function NewRequest() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Raise a request
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Choose the service you need and answer its questions.
         </p>
       </header>
 
       {available.length === 0 ? (
         <Card>
-          <p className="text-sm text-ink-600">
+          <p className="text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500">
             No services are published yet. An administrator can add them from
             the catalogue.
           </p>
@@ -146,7 +146,7 @@ export default function NewRequest() {
                       {type.name}
                     </span>
                     {type.description && (
-                      <span className="mt-0.5 block text-xs text-ink-500 dark:text-ink-400">
+                      <span className="mt-0.5 block text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {type.description}
                       </span>
                     )}

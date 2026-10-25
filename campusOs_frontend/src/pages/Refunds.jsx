@@ -35,10 +35,10 @@ export default function Refunds() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Refunds
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Refunds you have asked for, and what happened to them.
         </p>
       </header>
@@ -67,10 +67,10 @@ export default function Refunds() {
               <li key={refund.id} className="px-5 py-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-ink-900">
+                    <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
                       {refund.refundAmountFormatted ?? refund.refundAmount}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                       {refund.reference} · requested{" "}
                       {formatDateTime(refund.requestedAt ?? refund.createdAt)}
                     </p>
@@ -78,23 +78,23 @@ export default function Refunds() {
                   <Badge status={refund.status} />
                 </div>
 
-                <p className="mt-2 text-sm text-ink-600">{refund.reason}</p>
+                <p className="mt-2 text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500">{refund.reason}</p>
 
                 {refund.rejectionReason && (
-                  <p className="mt-2 rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3 py-2 text-xs text-ink-600">
+                  <p className="mt-2 rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3 py-2 text-xs text-ink-600 dark:text-ink-400 dark:text-ink-500">
                     <span className="font-medium">Declined:</span>{" "}
                     {refund.rejectionReason}
                   </p>
                 )}
 
                 {refund.approvalNote && refund.status !== "REJECTED" && (
-                  <p className="mt-2 text-xs text-ink-500 dark:text-ink-400">
+                  <p className="mt-2 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {refund.approvalNote}
                   </p>
                 )}
 
                 {refund.razorpayRefundId && (
-                  <p className="mt-2 text-[11px] text-ink-400 dark:text-ink-500">
+                  <p className="mt-2 text-[11px] text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     Provider reference {refund.razorpayRefundId}
                   </p>
                 )}
@@ -113,17 +113,17 @@ export default function Refunds() {
         </Card>
       )}
 
-      <ol className="rounded-xl bg-white dark:bg-surface px-5 py-4 text-xs text-ink-500 dark:text-ink-400 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
+      <ol className="rounded-xl bg-white dark:bg-surface px-5 py-4 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <li className="flex gap-2">
-          <span className="font-semibold text-ink-700">1.</span> You ask for a
+          <span className="font-semibold text-ink-700 dark:text-ink-300">1.</span> You ask for a
           refund on an invoice.
         </li>
         <li className="mt-1.5 flex gap-2">
-          <span className="font-semibold text-ink-700">2.</span> Accounts staff
+          <span className="font-semibold text-ink-700 dark:text-ink-300">2.</span> Accounts staff
           review it and approve or decline, with a reason.
         </li>
         <li className="mt-1.5 flex gap-2">
-          <span className="font-semibold text-ink-700">3.</span> Only then is
+          <span className="font-semibold text-ink-700 dark:text-ink-300">3.</span> Only then is
           Razorpay asked to return the money.
         </li>
       </ol>

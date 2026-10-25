@@ -46,10 +46,10 @@ export default function Invoices() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Invoices
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Fees raised against your account.
         </p>
       </header>
@@ -80,22 +80,22 @@ export default function Invoices() {
                 className="flex flex-wrap items-center gap-4 px-5 py-4"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-ink-900">
+                  <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
                     {invoice.purpose}
                   </p>
-                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {invoice.reference}
                     {invoice.dueAt && ` · due ${formatDate(invoice.dueAt)}`}
                   </p>
                 </div>
 
                 <div className="text-right">
-                  <p className="text-sm font-semibold tabular-nums text-ink-900">
+                  <p className="text-sm font-semibold tabular-nums text-ink-900 dark:text-ink-100">
                     {invoice.totalFormatted ?? formatMoney(invoice.total)}
                   </p>
                   {invoice.balanceDue > 0 &&
                     invoice.balanceDue !== invoice.total && (
-                      <p className="text-xs text-ink-500 dark:text-ink-400">
+                      <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {invoice.balanceDueFormatted ??
                           formatMoney(invoice.balanceDue)}{" "}
                         due
@@ -136,7 +136,7 @@ export default function Invoices() {
         />
       )}
 
-      <p className="text-xs text-ink-400 dark:text-ink-500">
+      <p className="text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
         A receipt is issued automatically once Razorpay confirms a payment.
       </p>
     </div>

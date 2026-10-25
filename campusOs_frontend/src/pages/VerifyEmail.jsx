@@ -44,10 +44,10 @@ export default function VerifyEmail() {
       <div className="surface-raised w-full max-w-md p-6 text-center sm:p-7">
         {verify.isPending && (
           <>
-            <h1 className="text-xl font-semibold tracking-tight text-ink-900">
+            <h1 className="text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               Confirming your address
             </h1>
-            <p className="mt-2 text-sm text-ink-500 dark:text-ink-400">
+            <p className="mt-2 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
               One moment.
             </p>
           </>
@@ -58,10 +58,10 @@ export default function VerifyEmail() {
             <span className="mx-auto grid size-12 place-items-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
               <CheckCircle2 className="size-6" aria-hidden="true" />
             </span>
-            <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900">
+            <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               Email confirmed
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+            <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
               Your college can reach you at this address, and password resets
               will arrive here.
             </p>
@@ -79,10 +79,10 @@ export default function VerifyEmail() {
             <span className="mx-auto grid size-12 place-items-center rounded-full bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300">
               <XCircle className="size-6" aria-hidden="true" />
             </span>
-            <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900">
+            <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               That link did not work
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+            <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
               Confirmation links work once and last 24 hours. If you are signed
               in, ask for a new one from your profile.
             </p>

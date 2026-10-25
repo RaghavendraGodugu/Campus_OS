@@ -174,7 +174,7 @@ export default function Login() {
             >
               C
             </span>
-            <span className="text-lg font-semibold tracking-tight text-ink-900">
+            <span className="text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               CampusOS
             </span>
           </div>
@@ -182,10 +182,10 @@ export default function Login() {
           <div className="surface-raised p-6 sm:p-7">
             {challenge ? (
               <form onSubmit={submitCode} className="space-y-5" noValidate>
-                <h2 className="text-xl font-semibold tracking-tight text-ink-900">
+                <h2 className="text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
                   Enter your code
                 </h2>
-                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   Six digits from your authenticator app for{" "}
                   <span className="font-medium text-ink-700 dark:text-ink-200">
                     {challenge.maskedAccount}
@@ -239,10 +239,10 @@ export default function Login() {
               </form>
             ) : (
               <>
-                <h2 className="text-xl font-semibold tracking-tight text-ink-900">
+                <h2 className="text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
                   Sign in
                 </h2>
-                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   Use your college account.
                 </p>
 
@@ -278,7 +278,7 @@ export default function Login() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                         aria-label={showPassword ? "Hide password" : "Show password"}
                       >
                         {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
@@ -322,7 +322,7 @@ export default function Login() {
               <p className="text-sm font-medium text-ink-800">
                 Just checking a certificate?
               </p>
-              <p className="mt-1 text-xs leading-relaxed text-ink-500 dark:text-ink-400">
+              <p className="mt-1 text-xs leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 Verify one by its printed code — no account needed.
               </p>
               <Link
@@ -337,10 +337,10 @@ export default function Login() {
 
           {import.meta.env.VITE_SHOW_DEMO_BANNER === "true" && (
             <div className="mt-10 border-t border-ink-200 dark:border-ink-700/70 pt-6">
-              <p className="text-xs font-medium tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+              <p className="text-xs font-medium tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
                 Demo accounts
               </p>
-              <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+              <p className="mt-1 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 Shared password{" "}
                 <code className="font-mono">Demo@Campus123</code>
               </p>
@@ -355,7 +355,7 @@ export default function Login() {
                     <span className="block font-medium text-ink-800">
                       {account.label}
                     </span>
-                    <span className="block truncate text-[11px] text-ink-500 dark:text-ink-400">
+                    <span className="block truncate text-[11px] text-ink-500 dark:text-ink-400 dark:text-ink-500">
                       {account.name}
                     </span>
                   </button>

@@ -339,7 +339,7 @@ export default function ApplyCertificate() {
                     <span className="flex items-center gap-2">
                       <span
                         id={`certificate-label-${option.value}`}
-                        className="text-sm font-semibold text-ink-900"
+                        className="text-sm font-semibold text-ink-900 dark:text-ink-100"
                       >
                         {option.label}
                       </span>
@@ -362,14 +362,14 @@ export default function ApplyCertificate() {
                         </span>
                       )}
                     </span>
-                    <span className="mt-1 block text-xs leading-relaxed text-ink-500 dark:text-ink-400">
+                    <span className="mt-1 block text-xs leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
                       {option.blurb}
                     </span>
                     <span className="mt-2 flex flex-wrap gap-1.5">
-                      <span className="rounded-md bg-ink-100/80 dark:bg-ink-200/40 px-1.5 py-0.5 text-[0.6875rem] text-ink-600">
+                      <span className="rounded-md bg-ink-100/80 dark:bg-ink-200/40 px-1.5 py-0.5 text-[0.6875rem] text-ink-600 dark:text-ink-400 dark:text-ink-500">
                         {option.office}
                       </span>
-                      <span className="rounded-md bg-ink-100/80 dark:bg-ink-200/40 px-1.5 py-0.5 text-[0.6875rem] text-ink-500 dark:text-ink-400">
+                      <span className="rounded-md bg-ink-100/80 dark:bg-ink-200/40 px-1.5 py-0.5 text-[0.6875rem] text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {option.for}
                       </span>
                     </span>
@@ -390,7 +390,7 @@ export default function ApplyCertificate() {
           )}
 
           {!type && !errors.type && (
-            <p className="mt-3 text-xs text-ink-400 dark:text-ink-500">
+            <p className="mt-3 text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
               Nothing selected yet — use the arrow keys to move between cards.
             </p>
           )}
@@ -434,7 +434,7 @@ export default function ApplyCertificate() {
                     onClick={() => setCopies((n) => Math.max(1, n - 1))}
                     disabled={copies <= 1}
                     aria-label="One fewer copy"
-                    className="grid size-9 place-items-center rounded-lg text-ink-600 transition-colors hover:bg-white hover:text-ink-900 disabled:pointer-events-none disabled:opacity-40"
+                    className="grid size-9 place-items-center rounded-lg text-ink-600 dark:text-ink-400 dark:text-ink-500 transition-colors hover:bg-white hover:text-ink-900 dark:text-ink-100 disabled:pointer-events-none disabled:opacity-40"
                   >
                     <Minus className="size-4" aria-hidden="true" />
                   </button>
@@ -442,7 +442,7 @@ export default function ApplyCertificate() {
                   <span
                     aria-live="polite"
                     aria-label="Number of copies"
-                    className="w-12 text-center text-sm font-semibold text-ink-900 tabular-nums"
+                    className="w-12 text-center text-sm font-semibold text-ink-900 dark:text-ink-100 tabular-nums"
                   >
                     {copies}
                   </span>
@@ -454,13 +454,13 @@ export default function ApplyCertificate() {
                     }
                     disabled={copies >= MAX_COPIES}
                     aria-label="One more copy"
-                    className="grid size-9 place-items-center rounded-lg text-ink-600 transition-colors hover:bg-white hover:text-ink-900 disabled:pointer-events-none disabled:opacity-40"
+                    className="grid size-9 place-items-center rounded-lg text-ink-600 dark:text-ink-400 dark:text-ink-500 transition-colors hover:bg-white hover:text-ink-900 dark:text-ink-100 disabled:pointer-events-none disabled:opacity-40"
                   >
                     <Plus className="size-4" aria-hidden="true" />
                   </button>
                 </div>
 
-                <p className="text-xs text-ink-500 dark:text-ink-400">
+                <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   {copies === 1
                     ? "One stamped copy."
                     : `${copies} stamped copies, issued together.`}
@@ -496,9 +496,9 @@ export default function ApplyCertificate() {
                 />
 
                 <div className="border-t border-ink-100/90 dark:border-ink-700/50 pt-4">
-                  <p className="flex items-start gap-2 text-xs leading-relaxed text-ink-500 dark:text-ink-400">
+                  <p className="flex items-start gap-2 text-xs leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     <Building2
-                      className="mt-0.5 size-3.5 shrink-0 text-ink-400 dark:text-ink-500"
+                      className="mt-0.5 size-3.5 shrink-0 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
                       aria-hidden="true"
                     />
                     Issued by the {chosen?.office ?? "relevant office"}, from
@@ -538,7 +538,7 @@ export default function ApplyCertificate() {
                 </p>
               )}
 
-              <p className="mt-4 flex items-start gap-2 text-[0.6875rem] leading-relaxed text-ink-400 dark:text-ink-500">
+              <p className="mt-4 flex items-start gap-2 text-[0.6875rem] leading-relaxed text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 <FileText
                   className="mt-0.5 size-3 shrink-0"
                   aria-hidden="true"
@@ -560,18 +560,18 @@ function SummaryRow({ icon: Icon, label, value, muted = false }) {
       <span
         className={`grid size-8 shrink-0 place-items-center rounded-lg ring-1 ring-inset ${
           muted
-            ? "bg-ink-50 dark:bg-ink-100/40 text-ink-300 dark:text-ink-500 ring-ink-200 dark:ring-ink-600"
+            ? "bg-ink-50 dark:bg-ink-100/40 text-ink-300 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 ring-ink-200 dark:ring-ink-600"
             : "bg-brand-50 dark:bg-brand-500/15 text-brand-600 ring-brand-200 dark:ring-brand-400/25"
         }`}
       >
         <Icon className="size-4" aria-hidden="true" />
       </span>
       <div className="min-w-0">
-        <p className="text-[0.6875rem] font-medium tracking-wide text-ink-400 dark:text-ink-500 uppercase">
+        <p className="text-[0.6875rem] font-medium tracking-wide text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
           {label}
         </p>
         <p
-          className={`mt-0.5 text-sm ${muted ? "text-ink-400 dark:text-ink-500 italic" : "text-ink-800"}`}
+          className={`mt-0.5 text-sm ${muted ? "text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 italic" : "text-ink-800"}`}
         >
           {value}
         </p>

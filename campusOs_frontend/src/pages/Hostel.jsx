@@ -26,7 +26,7 @@ const STATUS_TONE = {
   REJECTED:
     "bg-red-50 text-red-700 ring-red-200/70 dark:bg-red-500/12 dark:text-red-300 dark:ring-red-400/25",
   CANCELLED:
-    "bg-ink-100 text-ink-600 ring-ink-200 dark:bg-ink-200/40 dark:text-ink-300",
+    "bg-ink-100 text-ink-600 dark:text-ink-400 dark:text-ink-500 ring-ink-200 dark:bg-ink-200/40 dark:text-ink-300",
 };
 
 const KINDS = ["BOYS", "GIRLS", "COED"];
@@ -88,23 +88,23 @@ function StudentHostel() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Hostel
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Your room, and leave requests against it.
         </p>
       </header>
 
       {allocation ? (
         <section className="surface p-6">
-          <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-ink-500 dark:text-ink-400">
+          <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Current allocation · {allocation.academicYear}
           </p>
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-ink-900">
+          <p className="mt-2 text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             {allocation.hostel?.name} · Room {allocation.room?.number}
           </p>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             {allocation.hostel?.kind} hostel · capacity{" "}
             {allocation.room?.capacity}
           </p>
@@ -119,7 +119,7 @@ function StudentHostel() {
 
       {allocation && (
         <section className="surface p-5">
-          <h2 className="text-[0.9375rem] font-semibold text-ink-900">
+          <h2 className="text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">
             Request leave
           </h2>
           <form
@@ -200,7 +200,7 @@ function StudentHostel() {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-[0.9375rem] font-semibold text-ink-900">
+        <h2 className="text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">
           My leave requests
         </h2>
         {data.leaves?.length ? (
@@ -211,11 +211,11 @@ function StudentHostel() {
                 className="surface flex flex-wrap items-center justify-between gap-3 p-4"
               >
                 <div>
-                  <p className="text-sm font-medium text-ink-900">
+                  <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
                     {new Date(leave.fromDate).toLocaleDateString()} →{" "}
                     {new Date(leave.toDate).toLocaleDateString()}
                   </p>
-                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {leave.reason}
                   </p>
                 </div>
@@ -228,7 +228,7 @@ function StudentHostel() {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-ink-500 dark:text-ink-400">
+          <p className="text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             No leave requests yet.
           </p>
         )}
@@ -260,10 +260,10 @@ function WardenHostel({ canManage, canApprove }) {
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Hostel
           </h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Allocations, leave decisions and the rooms behind them.
           </p>
         </div>
@@ -293,7 +293,7 @@ function WardenHostel({ canManage, canApprove }) {
             className={`rounded-xl px-3.5 py-2 text-sm font-medium transition-all ${
               tab === value
                 ? "aurora text-white shadow-brand"
-                : "text-ink-600 hover:bg-white hover:text-ink-900"
+                : "text-ink-600 dark:text-ink-400 dark:text-ink-500 hover:bg-white hover:text-ink-900 dark:text-ink-100"
             }`}
           >
             {label}
@@ -352,7 +352,7 @@ function AllocationsTab({ query, canManage }) {
     <div className="surface overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-ink-200/70 dark:border-ink-700/60 text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">
+          <thead className="border-b border-ink-200/70 dark:border-ink-700/60 text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500">
             <tr>
               <th className="px-5 py-3 font-medium">Student</th>
               <th className="px-5 py-3 font-medium">Room</th>
@@ -365,10 +365,10 @@ function AllocationsTab({ query, canManage }) {
             {rows.map((row) => (
               <tr key={row.id}>
                 <td className="px-5 py-3">
-                  <span className="font-medium text-ink-900">
+                  <span className="font-medium text-ink-900 dark:text-ink-100">
                     {row.student?.user?.fullName ?? "—"}
                   </span>
-                  <span className="ml-2 font-mono text-xs text-ink-500">
+                  <span className="ml-2 font-mono text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {row.student?.rollNumber}
                   </span>
                 </td>
@@ -458,13 +458,13 @@ function LeavesTab({ query, canApprove }) {
           className="surface flex flex-wrap items-center justify-between gap-4 p-4"
         >
           <div>
-            <p className="text-sm font-medium text-ink-900">
+            <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
               {leave.student?.user?.fullName ?? "Student"}{" "}
-              <span className="font-mono text-xs text-ink-500">
+              <span className="font-mono text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 {leave.student?.rollNumber}
               </span>
             </p>
-            <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+            <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
               {new Date(leave.fromDate).toLocaleDateString()} →{" "}
               {new Date(leave.toDate).toLocaleDateString()} · {leave.reason}
             </p>
@@ -542,10 +542,10 @@ function SetupTab({ hostels, canManage }) {
             <div key={hostel.id} className="surface p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-ink-900">
+                  <p className="text-sm font-semibold text-ink-900 dark:text-ink-100">
                     {hostel.name}
                   </p>
-                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                  <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {hostel.code} · {hostel.kind.toLowerCase()} ·{" "}
                     {hostel.roomCount} rooms · {hostel.occupied}/
                     {hostel.capacity} beds

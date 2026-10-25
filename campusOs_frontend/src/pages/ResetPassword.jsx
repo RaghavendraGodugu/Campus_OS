@@ -84,10 +84,10 @@ export default function ResetPassword() {
           <span className="mx-auto grid size-12 place-items-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
             <CheckCircle2 className="size-6" aria-hidden="true" />
           </span>
-          <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900">
+          <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Password changed
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+          <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Every other session has been signed out. If that was not what you
             wanted, change it again now and tell your college.
           </p>
@@ -108,12 +108,12 @@ export default function ResetPassword() {
     return (
       <div className="flex min-h-screen items-center justify-center px-6 py-12">
         <div className="surface-raised w-full max-w-md p-6 text-center sm:p-7">
-          <h1 className="text-xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             {linkStatus === "expired"
               ? "That link has expired"
               : "That link is not valid"}
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+          <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Reset links last one hour and work once. Ask for a new one and use
             it straight away.
           </p>
@@ -134,10 +134,10 @@ export default function ResetPassword() {
         <span className="grid size-11 place-items-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300">
           <KeyRound className="size-5" aria-hidden="true" />
         </span>
-        <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900">
+        <h1 className="mt-4 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Choose a new password
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           At least 10 characters, with an uppercase letter, a lowercase letter
           and a number.
         </p>
@@ -165,7 +165,7 @@ export default function ResetPassword() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
@@ -192,7 +192,7 @@ export default function ResetPassword() {
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                 aria-label={showConfirm ? "Hide password" : "Show password"}
               >
                 {showConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}

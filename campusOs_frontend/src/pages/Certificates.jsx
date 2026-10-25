@@ -50,10 +50,10 @@ export default function Certificates({ mode = "own" }) {
     <div className="mx-auto max-w-4xl space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Certificates
           </h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             {mode === "own"
               ? "Applications you have made, and the documents issued."
               : "Certificate applications in your department."}
@@ -150,14 +150,14 @@ export default function Certificates({ mode = "own" }) {
                     </Link>
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-ink-900">
+                        <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
                           {String(certificate.type ?? "")
                             .replace(/_/g, " ")
                             .toLowerCase()}
                           {certificate.copies > 1 &&
                             ` · ${certificate.copies} copies`}
                         </p>
-                        <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                        <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                           {certificate.reference}
                           {certificate.purpose && ` · ${certificate.purpose}`}
                         </p>
@@ -190,7 +190,7 @@ export default function Certificates({ mode = "own" }) {
                     </div>
 
                     {certificate.verificationCode && (
-                      <p className="mt-2 text-[11px] text-ink-400 dark:text-ink-500">
+                      <p className="mt-2 text-[11px] text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         Verification code {certificate.verificationCode} ·
                         issued {formatDate(certificate.issuedAt)}
                       </p>

@@ -32,10 +32,10 @@ export default function Announcements() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Announcements
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Notices addressed to you.
         </p>
       </header>
@@ -68,11 +68,11 @@ export default function Announcements() {
                 <div className="flex flex-wrap items-center gap-2">
                   {announcement.pinned && (
                     <Pin
-                      className="size-3.5 text-ink-400 dark:text-ink-500"
+                      className="size-3.5 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
                       aria-label="Pinned"
                     />
                   )}
-                  <h2 className="text-sm font-semibold text-ink-900">
+                  <h2 className="text-sm font-semibold text-ink-900 dark:text-ink-100">
                     {announcement.title}
                   </h2>
                   {announcement.priority !== "NORMAL" && (
@@ -80,11 +80,11 @@ export default function Announcements() {
                   )}
                 </div>
 
-                <p className="mt-1.5 line-clamp-2 text-sm text-ink-600">
+                <p className="mt-1.5 line-clamp-2 text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500">
                   {announcement.body}
                 </p>
 
-                <p className="mt-2 text-xs text-ink-400 dark:text-ink-500">
+                <p className="mt-2 text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   {announcement.reference} ·{" "}
                   {formatDate(announcement.publishedAt)}
                   {announcement.author?.fullName &&

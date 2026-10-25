@@ -69,7 +69,7 @@ const TONE_TEXT = {
   good: "text-brand-700 dark:text-brand-300",
   warn: "text-amber-700 dark:text-amber-300",
   bad: "text-red-600 dark:text-red-300",
-  ink: "text-ink-500 dark:text-ink-400",
+  ink: "text-ink-500 dark:text-ink-400 dark:text-ink-500",
 };
 
 const TONE_BAR = {
@@ -91,10 +91,10 @@ export default function Attendance() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Attendance
         </h1>
-        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
           Every percentage is derived from the class registers. A correction
           changes the register, not a total, and always carries a reason.
         </p>
@@ -160,7 +160,7 @@ function StudentAttendance() {
       <div className="surface p-6">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-ink-500 dark:text-ink-400">
+            <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500">
               Overall attendance · {data.term.name}
             </p>
             <p
@@ -169,7 +169,7 @@ function StudentAttendance() {
               {data.overall.percentage}
               <span className="text-2xl">%</span>
             </p>
-            <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+            <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
               {data.overall.attended} of {data.overall.held} classes attended
             </p>
           </div>
@@ -181,7 +181,7 @@ function StudentAttendance() {
                 style={{ width: `${Math.min(100, data.overall.percentage)}%` }}
               />
             </div>
-            <p className="mt-2 text-xs text-ink-500 dark:text-ink-400">
+            <p className="mt-2 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
               Institutional threshold {data.threshold}%.{" "}
               {data.overall.belowThreshold
                 ? "You are below the threshold."
@@ -193,7 +193,7 @@ function StudentAttendance() {
 
       <div className="surface overflow-hidden">
         <div className="border-b border-ink-200/60 dark:border-ink-700/50 px-5 py-4">
-          <h2 className="text-[0.9375rem] font-semibold text-ink-900">
+          <h2 className="text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">
             By subject
           </h2>
         </div>
@@ -204,10 +204,10 @@ function StudentAttendance() {
               <li key={row.subject.id} className="px-5 py-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <div>
-                    <p className="text-sm font-medium text-ink-900">
+                    <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
                       {row.subject.code} · {row.subject.name}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                       {row.attended} of {row.held} classes · {row.present}{" "}
                       present
                       {row.late ? `, ${row.late} late` : ""}
@@ -250,10 +250,10 @@ function MarkingPanel() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight text-ink-900">
+          <h2 className="text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Mark a register
           </h2>
-          <p className="mt-0.5 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-0.5 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             {WEEKDAY[query.data?.data?.weekday] ?? "Choose a date"} · your
             classes only
           </p>
@@ -298,14 +298,14 @@ function MarkingPanel() {
               className="surface flex flex-wrap items-center justify-between gap-4 p-4"
             >
               <div className="min-w-0">
-                <p className="font-mono text-[0.6875rem] text-ink-500">
+                <p className="font-mono text-[0.6875rem] text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   {timeFromMinutes(item.entry.startMinute)}–
                   {timeFromMinutes(item.entry.endMinute)}
                 </p>
-                <p className="mt-0.5 text-sm font-semibold text-ink-900">
+                <p className="mt-0.5 text-sm font-semibold text-ink-900 dark:text-ink-100">
                   {item.entry.subject.code} · {item.entry.subject.name}
                 </p>
-                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   {[item.entry.room?.block, item.entry.room?.name]
                     .filter(Boolean)
                     .join(" · ")}
@@ -447,7 +447,7 @@ function RegisterForm({ context, entry, date, onClose }) {
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs text-ink-500 dark:text-ink-400">
+        <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
           {context.roster.length} student
           {context.roster.length === 1 ? "" : "s"} on the roster
         </p>
@@ -471,10 +471,10 @@ function RegisterForm({ context, entry, date, onClose }) {
                 className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-ink-900">
+                  <p className="truncate text-sm font-medium text-ink-900 dark:text-ink-100">
                     {student.name}
                   </p>
-                  <p className="font-mono text-[0.6875rem] text-ink-500">
+                  <p className="font-mono text-[0.6875rem] text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {student.rollNumber}
                   </p>
                 </div>
@@ -500,7 +500,7 @@ function RegisterForm({ context, entry, date, onClose }) {
                         className={`min-w-9 rounded-md px-2 py-1 text-[0.6875rem] font-medium transition-colors ${
                           selected
                             ? "bg-brand-600 text-white shadow-brand"
-                            : "bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-200/40 dark:text-ink-300 dark:hover:bg-ink-200/60"
+                            : "bg-ink-100 text-ink-600 dark:text-ink-400 dark:text-ink-500 hover:bg-ink-200 dark:bg-ink-200/40 dark:text-ink-300 dark:hover:bg-ink-200/60"
                         }`}
                       >
                         {option.short}
@@ -519,7 +519,7 @@ function RegisterForm({ context, entry, date, onClose }) {
         <div>
           <label
             htmlFor="correction-reason"
-            className="block text-[0.8125rem] font-medium text-ink-700"
+            className="block text-[0.8125rem] font-medium text-ink-700 dark:text-ink-300"
           >
             Reason for the correction
             <span className="ml-0.5 text-red-500" aria-hidden="true">
@@ -535,7 +535,7 @@ function RegisterForm({ context, entry, date, onClose }) {
             placeholder="Why is the register changing?"
             maxLength={500}
           />
-          <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Stored with the register and audited. At least 5 characters.
           </p>
         </div>
@@ -605,10 +605,10 @@ function Overview() {
     <section className="space-y-3">
       <div className="flex items-baseline justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight text-ink-900">
+          <h2 className="text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Attendance roll-up
           </h2>
-          <p className="mt-0.5 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-0.5 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             {data.term.name} · threshold {data.threshold}%
           </p>
         </div>
@@ -617,7 +617,7 @@ function Overview() {
       <div className="surface overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-ink-200/70 dark:border-ink-700/60 text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">
+            <thead className="border-b border-ink-200/70 dark:border-ink-700/60 text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500">
               <tr>
                 <th className="px-5 py-3 font-medium">Subject</th>
                 <th className="px-5 py-3 font-medium">Sessions</th>
@@ -631,7 +631,7 @@ function Overview() {
               {data.subjects.map((row) => (
                 <tr key={row.subject.id}>
                   <td className="px-5 py-3">
-                    <span className="font-medium text-ink-900">
+                    <span className="font-medium text-ink-900 dark:text-ink-100">
                       {row.subject.code}
                     </span>
                     <span className="ml-2 text-ink-600 dark:text-ink-300">

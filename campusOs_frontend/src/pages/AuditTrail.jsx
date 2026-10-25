@@ -47,10 +47,10 @@ export default function AuditTrail() {
     <div className="mx-auto max-w-5xl space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             {deniedOnly ? "Access-denied trail" : "Audit trail"}
           </h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Every privileged action, who took it and when.
           </p>
         </div>
@@ -75,7 +75,7 @@ export default function AuditTrail() {
               setPage(1);
             }}
             aria-label="Filter by action"
-            className="h-9 rounded-xl border-0 bg-white dark:bg-surface px-3 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200 dark:ring-ink-600 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
+            className="h-9 rounded-xl border-0 bg-white dark:bg-surface px-3 text-sm text-ink-900 dark:text-ink-100 shadow-sm ring-1 ring-ink-200 dark:ring-ink-600 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
           >
             <option value="">All actions</option>
             {[
@@ -151,25 +151,25 @@ export default function AuditTrail() {
                 <tr className="border-b border-ink-200 dark:border-ink-700/70 bg-ink-50 dark:bg-ink-100/40 text-left">
                   <th
                     scope="col"
-                    className="px-5 py-2.5 text-xs font-semibold tracking-wide text-ink-600 uppercase"
+                    className="px-5 py-2.5 text-xs font-semibold tracking-wide text-ink-600 dark:text-ink-400 dark:text-ink-500 uppercase"
                   >
                     When
                   </th>
                   <th
                     scope="col"
-                    className="px-3 py-2.5 text-xs font-semibold tracking-wide text-ink-600 uppercase"
+                    className="px-3 py-2.5 text-xs font-semibold tracking-wide text-ink-600 dark:text-ink-400 dark:text-ink-500 uppercase"
                   >
                     Who
                   </th>
                   <th
                     scope="col"
-                    className="px-3 py-2.5 text-xs font-semibold tracking-wide text-ink-600 uppercase"
+                    className="px-3 py-2.5 text-xs font-semibold tracking-wide text-ink-600 dark:text-ink-400 dark:text-ink-500 uppercase"
                   >
                     Action
                   </th>
                   <th
                     scope="col"
-                    className="px-3 py-2.5 text-xs font-semibold tracking-wide text-ink-600 uppercase"
+                    className="px-3 py-2.5 text-xs font-semibold tracking-wide text-ink-600 dark:text-ink-400 dark:text-ink-500 uppercase"
                   >
                     Resource
                   </th>
@@ -178,7 +178,7 @@ export default function AuditTrail() {
               <tbody className="divide-y divide-ink-100">
                 {items.map((entry) => (
                   <tr key={entry.id}>
-                    <td className="px-5 py-2.5 whitespace-nowrap text-ink-600">
+                    <td className="px-5 py-2.5 whitespace-nowrap text-ink-600 dark:text-ink-400 dark:text-ink-500">
                       {formatDateTime(entry.createdAt)}
                     </td>
                     <td className="px-3 py-2.5">
@@ -188,11 +188,11 @@ export default function AuditTrail() {
                           "System"}
                       </span>
                       {entry.actor?.deleted && (
-                        <span className="ml-1.5 text-xs text-ink-400 dark:text-ink-500">
+                        <span className="ml-1.5 text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                           (removed)
                         </span>
                       )}
-                      <span className="block text-xs text-ink-500 dark:text-ink-400">
+                      <span className="block text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                         {humanise(entry.actor?.role)}
                       </span>
                     </td>
@@ -209,10 +209,10 @@ export default function AuditTrail() {
                         {humanise(entry.action)}
                       </Badge>
                     </td>
-                    <td className="px-3 py-2.5 text-ink-700">
+                    <td className="px-3 py-2.5 text-ink-700 dark:text-ink-300">
                       {entry.entity}
                       {entry.entityRef && (
-                        <span className="ml-1.5 font-mono text-xs text-ink-500 dark:text-ink-400">
+                        <span className="ml-1.5 font-mono text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                           {entry.entityRef}
                         </span>
                       )}

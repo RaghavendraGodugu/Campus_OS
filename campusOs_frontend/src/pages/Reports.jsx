@@ -80,10 +80,10 @@ export default function Reports() {
     <div className="mx-auto max-w-5xl space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Reports
           </h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             {data.scope === "DEPARTMENT"
               ? "Your department"
               : "The whole institution"}{" "}
@@ -92,14 +92,14 @@ export default function Reports() {
         </div>
 
         <div className="flex items-center gap-2">
-          <label htmlFor="range" className="text-sm text-ink-600">
+          <label htmlFor="range" className="text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500">
             Period
           </label>
           <select
             id="range"
             value={days}
             onChange={(event) => setDays(Number(event.target.value))}
-            className="h-9 rounded-xl border-0 bg-white dark:bg-surface px-3 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200 dark:ring-ink-600 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
+            className="h-9 rounded-xl border-0 bg-white dark:bg-surface px-3 text-sm text-ink-900 dark:text-ink-100 shadow-sm ring-1 ring-ink-200 dark:ring-ink-600 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
           >
             {RANGES.map((option) => (
               <option key={option.days} value={option.days}>
@@ -121,7 +121,7 @@ export default function Reports() {
           <h2 className="text-sm font-semibold text-ink-900 dark:text-ink-100">
             Take these figures with you
           </h2>
-          <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+          <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
             The same numbers, the same period, and the same access rules as this
             page.
           </p>
@@ -212,7 +212,7 @@ export default function Reports() {
       {students.data && students.data.data.available !== false && (
         <Card title="Enrolment by department">
           {students.data.data.byDepartment.length === 0 ? (
-            <p className="text-sm text-ink-500 dark:text-ink-400">
+            <p className="text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
               No students in this period.
             </p>
           ) : (
@@ -242,7 +242,7 @@ function StatusBreakdown({ byStatus }) {
 
   if (entries.length === 0)
     return (
-      <p className="text-sm text-ink-500 dark:text-ink-400">
+      <p className="text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
         No requests in this period.
       </p>
     );
@@ -271,8 +271,8 @@ function BarList({ rows, total }) {
       {rows.map((row) => (
         <li key={row.label}>
           <div className="flex items-center justify-between gap-3 text-sm">
-            <span className="truncate text-ink-700">{row.label}</span>
-            <span className="shrink-0 font-medium tabular-nums text-ink-900">
+            <span className="truncate text-ink-700 dark:text-ink-300">{row.label}</span>
+            <span className="shrink-0 font-medium tabular-nums text-ink-900 dark:text-ink-100">
               {row.value}
             </span>
           </div>
@@ -284,7 +284,7 @@ function BarList({ rows, total }) {
           </div>
         </li>
       ))}
-      <li className="pt-1 text-xs text-ink-500 dark:text-ink-400">
+      <li className="pt-1 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
         Total {total.toLocaleString("en-IN")}
       </li>
     </ul>
@@ -293,21 +293,21 @@ function BarList({ rows, total }) {
 
 function Figure({ label, value, hint, tone = "default" }) {
   const tones = {
-    default: "text-ink-900",
+    default: "text-ink-900 dark:text-ink-100",
     good: "text-emerald-700 dark:text-emerald-300",
     warn: "text-amber-700 dark:text-amber-300",
   };
 
   return (
     <div>
-      <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+      <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
         {label}
       </p>
       <p className={`mt-1 text-lg font-semibold tabular-nums ${tones[tone]}`}>
         {value}
       </p>
       {hint && (
-        <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500">{hint}</p>
+        <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">{hint}</p>
       )}
     </div>
   );

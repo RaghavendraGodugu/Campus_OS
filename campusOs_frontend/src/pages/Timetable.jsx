@@ -95,10 +95,10 @@ export default function Timetable() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Timetable
           </h1>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
             {term
               ? `${term.name} · ${term.academicYear}. Times are the college's local time.`
               : "No academic term is currently open."}
@@ -157,10 +157,10 @@ export default function Timetable() {
             return (
               <section key={day.value} className="surface p-4">
                 <header className="mb-3 flex items-baseline justify-between gap-2">
-                  <h2 className="text-sm font-semibold tracking-tight text-ink-900">
+                  <h2 className="text-sm font-semibold tracking-tight text-ink-900 dark:text-ink-100">
                     {day.label}
                   </h2>
-                  <span className="text-xs text-ink-400 dark:text-ink-500">
+                  <span className="text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     {classes.length === 0
                       ? "Free"
                       : `${classes.length} class${classes.length === 1 ? "" : "es"}`}
@@ -168,7 +168,7 @@ export default function Timetable() {
                 </header>
 
                 {classes.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-ink-200/80 dark:border-ink-700/70 px-3 py-5 text-center text-xs text-ink-400 dark:text-ink-500">
+                  <p className="rounded-xl border border-dashed border-ink-200/80 dark:border-ink-700/70 px-3 py-5 text-center text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                     No classes
                   </p>
                 ) : (
@@ -208,7 +208,7 @@ function ClassCard({ entry, canManage, onRemove }) {
   return (
     <li className="rounded-xl bg-white/60 dark:bg-surface/60 p-3 ring-1 ring-ink-200/70 dark:ring-ink-700/60">
       <div className="flex items-start justify-between gap-2">
-        <p className="font-mono text-[0.6875rem] text-ink-500">
+        <p className="font-mono text-[0.6875rem] text-ink-500 dark:text-ink-400 dark:text-ink-500">
           {timeFromMinutes(entry.startMinute)}–
           {timeFromMinutes(entry.endMinute)}
         </p>
@@ -221,7 +221,7 @@ function ClassCard({ entry, canManage, onRemove }) {
               type="button"
               onClick={onRemove}
               aria-label={`Remove ${subject?.code ?? "this class"} from ${DAY_LABEL[entry.dayOfWeek]}`}
-              className="rounded-md p-1 text-ink-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+              className="rounded-md p-1 text-ink-400 dark:text-ink-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-300"
             >
               <Trash2 className="size-3.5" aria-hidden="true" />
             </button>
@@ -229,7 +229,7 @@ function ClassCard({ entry, canManage, onRemove }) {
         </div>
       </div>
 
-      <p className="mt-1 text-sm font-semibold tracking-tight text-ink-900">
+      <p className="mt-1 text-sm font-semibold tracking-tight text-ink-900 dark:text-ink-100">
         {subject?.code}
         <span className="font-normal text-ink-600 dark:text-ink-300">
           {" · "}
@@ -237,12 +237,12 @@ function ClassCard({ entry, canManage, onRemove }) {
         </span>
       </p>
 
-      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink-500 dark:text-ink-400">
+      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
         <UserRound className="size-3.5 shrink-0" aria-hidden="true" />
         {faculty?.fullName ?? "Unassigned"}
       </p>
 
-      <p className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-500 dark:text-ink-400">
+      <p className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
         <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
         {room ? [room.block, room.name].filter(Boolean).join(" · ") : "No room"}
       </p>

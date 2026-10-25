@@ -52,10 +52,10 @@ export default function Library() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Library
           </h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Search the catalogue, see what is available, and track loans.
           </p>
         </div>
@@ -75,7 +75,7 @@ export default function Library() {
       >
         <div className="relative min-w-64 flex-1">
           <Search
-            className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400"
+            className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400 dark:text-ink-500"
             aria-hidden="true"
           />
           <input
@@ -105,7 +105,7 @@ export default function Library() {
 
       <section className="surface overflow-hidden">
         <div className="border-b border-ink-200/60 dark:border-ink-700/50 px-5 py-4">
-          <h2 className="text-[0.9375rem] font-semibold text-ink-900">
+          <h2 className="text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">
             Catalogue
           </h2>
         </div>
@@ -135,7 +135,7 @@ export default function Library() {
         {books.isSuccess && (books.data?.data?.books ?? []).length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-ink-200/70 dark:border-ink-700/60 text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">
+              <thead className="border-b border-ink-200/70 dark:border-ink-700/60 text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500">
                 <tr>
                   <th className="px-5 py-3 font-medium">Title</th>
                   <th className="px-5 py-3 font-medium">Author</th>
@@ -149,7 +149,7 @@ export default function Library() {
                   const available = book.copiesTotal - book.copiesIssued;
                   return (
                     <tr key={book.id}>
-                      <td className="px-5 py-3 font-medium text-ink-900">
+                      <td className="px-5 py-3 font-medium text-ink-900 dark:text-ink-100">
                         {book.title}
                       </td>
                       <td className="px-5 py-3 text-ink-600 dark:text-ink-300">
@@ -225,7 +225,7 @@ function MyLoans({ query }) {
   return (
     <section className="surface overflow-hidden">
       <div className="border-b border-ink-200/60 dark:border-ink-700/50 px-5 py-4">
-        <h2 className="text-[0.9375rem] font-semibold text-ink-900">
+        <h2 className="text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">
           My loans
         </h2>
       </div>
@@ -239,10 +239,10 @@ function MyLoans({ query }) {
               className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5"
             >
               <div>
-                <p className="text-sm font-medium text-ink-900">
+                <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
                   {issue.book?.title}
                 </p>
-                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   {issue.book?.author} · due{" "}
                   {new Date(issue.dueAt).toLocaleDateString()}
                 </p>
@@ -296,20 +296,20 @@ function IssuedList({ query }) {
   return (
     <section className="surface overflow-hidden">
       <div className="border-b border-ink-200/60 dark:border-ink-700/50 px-5 py-4">
-        <h2 className="text-[0.9375rem] font-semibold text-ink-900">
+        <h2 className="text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">
           Books on loan
         </h2>
       </div>
       {rows.length === 0 ? (
         <div className="p-5">
-          <p className="text-sm text-ink-500 dark:text-ink-400">
+          <p className="text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             Nothing is currently issued.
           </p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-ink-200/70 dark:border-ink-700/60 text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">
+            <thead className="border-b border-ink-200/70 dark:border-ink-700/60 text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500">
               <tr>
                 <th className="px-5 py-3 font-medium">Student</th>
                 <th className="px-5 py-3 font-medium">Book</th>
@@ -321,10 +321,10 @@ function IssuedList({ query }) {
               {rows.map((issue) => (
                 <tr key={issue.id}>
                   <td className="px-5 py-3">
-                    <span className="font-medium text-ink-900">
+                    <span className="font-medium text-ink-900 dark:text-ink-100">
                       {issue.student?.user?.fullName ?? "—"}
                     </span>
-                    <span className="ml-2 font-mono text-xs text-ink-500">
+                    <span className="ml-2 font-mono text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                       {issue.student?.rollNumber}
                     </span>
                   </td>

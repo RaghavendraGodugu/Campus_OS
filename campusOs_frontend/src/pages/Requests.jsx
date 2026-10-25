@@ -57,10 +57,10 @@ export default function Requests({ mode = "own" }) {
     <div className="mx-auto max-w-5xl space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             {mode === "assigned" ? "Assigned to you" : "Your requests"}
           </h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
             {mode === "assigned"
               ? "Work currently with you."
               : "Everything you have raised, and where it has got to."}
@@ -81,7 +81,7 @@ export default function Requests({ mode = "own" }) {
       {/* Filter. A select rather than a row of pills: eleven statuses is too
           many to show at once, and the list is usually filtered by one. */}
       <div className="flex items-center gap-2">
-        <label htmlFor="status-filter" className="text-sm text-ink-600">
+        <label htmlFor="status-filter" className="text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500">
           Status
         </label>
         <select
@@ -91,7 +91,7 @@ export default function Requests({ mode = "own" }) {
             setStatus(event.target.value);
             setPage(1);
           }}
-          className="h-9 rounded-xl border-0 bg-white dark:bg-surface px-3 text-sm text-ink-900 shadow-sm ring-1 ring-ink-200 dark:ring-ink-600 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
+          className="h-9 rounded-xl border-0 bg-white dark:bg-surface px-3 text-sm text-ink-900 dark:text-ink-100 shadow-sm ring-1 ring-ink-200 dark:ring-ink-600 transition-all duration-150 hover:ring-ink-300 focus:ring-2 focus:ring-brand-500"
         >
           <option value="">All</option>
           {STATUSES.map((value) => (
@@ -145,10 +145,10 @@ export default function Requests({ mode = "own" }) {
                   className="flex flex-wrap items-center gap-3 px-5 py-4 hover:bg-ink-50 dark:hover:bg-ink-200/40"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-ink-900">
+                    <p className="truncate text-sm font-medium text-ink-900 dark:text-ink-100">
                       {request.title}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
                       {request.reference}
                       {request.requestType?.name &&
                         ` · ${request.requestType.name}`}
@@ -159,7 +159,7 @@ export default function Requests({ mode = "own" }) {
                   </div>
 
                   {request.assignedTo && (
-                    <span className="hidden text-xs text-ink-500 dark:text-ink-400 sm:inline">
+                    <span className="hidden text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500 sm:inline">
                       {request.assignedTo.fullName}
                     </span>
                   )}

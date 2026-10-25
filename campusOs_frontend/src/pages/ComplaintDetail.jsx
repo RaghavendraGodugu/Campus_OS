@@ -85,7 +85,7 @@ export default function ComplaintDetail() {
     <div className="mx-auto max-w-3xl space-y-6">
       <Link
         to={backTo}
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 hover:text-ink-800"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         All complaints
@@ -108,10 +108,10 @@ export default function ComplaintDetail() {
       <header className="rounded-xl bg-white dark:bg-surface px-6 py-5 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-lg font-semibold tracking-tight text-ink-900">
+            <h1 className="text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               {complaint.subject}
             </h1>
-            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
               {complaint.reference} ·{" "}
               {String(complaint.category ?? "")
                 .replace(/_/g, " ")
@@ -142,7 +142,7 @@ export default function ComplaintDetail() {
 
       <Card title="What was reported">
         {/* Rendered as text, never as markup: nothing here is trusted HTML. */}
-        <p className="text-sm leading-relaxed whitespace-pre-wrap text-ink-700">
+        <p className="text-sm leading-relaxed whitespace-pre-wrap text-ink-700 dark:text-ink-300">
           {complaint.description}
         </p>
       </Card>
@@ -155,8 +155,8 @@ export default function ComplaintDetail() {
                 key={update._id}
                 className="border-l-2 border-brand-200 dark:border-brand-400/25 pl-3"
               >
-                <p className="text-sm text-ink-700">{update.body}</p>
-                <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500">
+                <p className="text-sm text-ink-700 dark:text-ink-300">{update.body}</p>
+                <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   {formatDateTime(update.at)} · {humanise(update.authorRole)}
                 </p>
               </li>
@@ -295,7 +295,7 @@ function InternalNote({ reference, onDone }) {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
         {label}
       </dt>
       <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
