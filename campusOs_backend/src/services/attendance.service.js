@@ -528,7 +528,13 @@ async function mine({ user, termId }) {
     .lean();
 
   if (!student) {
-    throw ApiError.forbidden("No student record is linked to this account");
+    // Return empty state instead of error — the student may not be linked yet
+    return {
+      term: null,
+      threshold: ATTENDANCE_THRESHOLD_PERCENT,
+      overall: null,
+      subjects: [],
+    };
   }
 
   const term = await resolveTerm(termId);

@@ -78,7 +78,7 @@ export default function AppShell() {
   const { user, canAny, logout } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
 
-  const items = visibleNavItems(canAny);
+  const items = user ? visibleNavItems(canAny) : [];
 
   return (
     <div className="relative isolate min-h-screen lg:flex">
