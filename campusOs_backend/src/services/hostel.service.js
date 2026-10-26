@@ -36,8 +36,7 @@ async function studentFor(user) {
   const student = await Student.findOne({ user: user._id }).select(
     "rollNumber semester program"
   );
-  if (!student) throw ApiError.forbidden("No student record is linked to this account");
-  return student;
+  return student; // null if no student record linked
 }
 
 const ROOM_POPULATE = [{ path: "hostel", select: "name code kind" }];

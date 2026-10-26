@@ -28,6 +28,7 @@ const {
 } = require("../utils/permissions");
 const { STAFF_ROLES } = require("../config/constants");
 const User = require("../models/User");
+const Student = require("../models/Student");
 
 /**
  * Attach `req.user` when a valid access cookie is present.
@@ -247,14 +248,19 @@ function attachPermissionHelpers(req, res, next) {
  * Require a Student-linked account on student-only routes.
  *
  * A staff account must not be able to submit a request "as" a student, so this
- * rejects any authenticated user without a linked Student profile.
+ * attaches the student record (or null) and continues. The service layer
+ * decides what to do when no student record exists.
  */
 const requireStudentAccount = asyncHandler(async (req, res, next) => {
   if (!req.user) {
     throw ApiError.unauthenticated("Authentication required");
   }
-  if (!req.user.student) {
-    throw ApiError.forbidden("This action is only available to student accounts");
+  if (req.user.student) {
+    req.student = await Student.findById(req.user.student)
+      .select("rollNumber semester program department feeStatus batchYear")
+      .lean();
+  } else {
+    req.student = null;
   }
   next();
 });

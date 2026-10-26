@@ -38,8 +38,7 @@ function escapeRegex(value) {
 
 async function studentFor(user) {
   const student = await Student.findOne({ user: user._id }).select("rollNumber semester");
-  if (!student) throw ApiError.forbidden("No student record is linked to this account");
-  return student;
+  return student; // null if no student record linked
 }
 
 async function listBooks({ q, category } = {}) {

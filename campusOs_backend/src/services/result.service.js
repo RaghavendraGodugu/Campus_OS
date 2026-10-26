@@ -627,7 +627,14 @@ async function studentResults({ user, termId }) {
     .lean();
 
   if (!student) {
-    throw ApiError.forbidden("No student record is linked to this account");
+    return {
+      published: false,
+      term: null,
+      release: null,
+      results: [],
+      overall: null,
+      arrears: [],
+    };
   }
 
   const term = await resolveTerm(termId);

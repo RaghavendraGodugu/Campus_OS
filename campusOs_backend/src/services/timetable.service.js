@@ -106,7 +106,7 @@ async function resolveScope(user) {
       .select("program semester")
       .lean();
     if (!student) {
-      throw ApiError.forbidden("No student record is linked to this account");
+      return { mode: "student", program: null, semester: null };
     }
     return { mode: "student", program: student.program, semester: student.semester };
   }
