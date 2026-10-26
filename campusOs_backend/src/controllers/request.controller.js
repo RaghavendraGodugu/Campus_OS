@@ -58,6 +58,7 @@ const listRequests = asyncHandler(async (req, res) => {
     page,
     limit,
     sort: req.validated.query.sort,
+    req,
   });
 
   return sendPaginated(res, {
@@ -74,6 +75,7 @@ const getRequest = asyncHandler(async (req, res) => {
   const request = await requestService.getRequest({
     requestId: req.validated.params.id,
     user: req.user,
+    req,
   });
 
   // The student-facing timeline excludes internal-only steps, computed on the

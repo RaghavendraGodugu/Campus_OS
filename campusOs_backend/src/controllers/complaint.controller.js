@@ -48,6 +48,7 @@ const listComplaints = asyncHandler(async (req, res) => {
     filters,
     page,
     limit,
+    req,
   });
 
   return sendPaginated(res, {

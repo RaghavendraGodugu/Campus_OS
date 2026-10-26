@@ -18,6 +18,7 @@
 
 const Complaint = require("../models/Complaint");
 const Counter = require("../models/Counter");
+const Student = require("../models/Student");
 const { ApiError, ERROR_CODE } = require("../utils/ApiError");
 const { userHasPermission, P } = require("../utils/permissions");
 const crypto = require("crypto");
@@ -62,11 +63,12 @@ async function generateReference(year = new Date().getFullYear()) {
  * @param {object} user
  * @returns {object} A Mongo filter.
  */
-function buildVisibilityFilter(user) {
+function buildVisibilityFilter(user, req) {
   if (user.role === ROLES.STUDENT) {
     // Own complaints only. `confidential: false` is redundant for the owner but
     // harmless, and keeping the shape uniform avoids a subtle future mistake.
-    return { student: user.student };
+    const student = req?.student;
+    return { student: student?._id ?? null };
   }
 
   // Roles that may read any complaint regardless of confidentiality.
@@ -121,33 +123,31 @@ function buildVisibilityFilter(user) {
  * @param {object} complaint
  * @param {object} user
  */
-function canRead(complaint, user) {
+function canRead(complaint, user, _req) {
   const id = (value) => (value && value._id ? value._id.toString() : value?.toString());
 
+  // Student can read their own complaints (confidential or not)
   if (user.role === ROLES.STUDENT) {
-    return id(complaint.student) === user.student?.toString();
+    // _req.student is set by middleware; fallback to user.student (ObjectId) for tests
+    const studentId = _req?.student?._id?.toString() ?? user.student?.toString();
+    return complaint.student && complaint.student.toString() === studentId;
   }
 
-  // Confidential: restricted to oversight roles and the assigned handler.
+  // Confidential complaints: only complainant, assigned handler, and oversight roles
   if (complaint.confidential) {
+    // Oversight roles can read any confidential complaint
     if (userHasPermission(user, P.COMPLAINT_READ_CONFIDENTIAL)) return true;
-    if (id(complaint.assignedTo) === user._id.toString()) return true;
+    // Assigned handler can always read their assigned complaint
+    if (complaint.assignedTo && id(complaint.assignedTo) === user._id.toString()) return true;
+    // Complainant (student) can read their own confidential complaint
+    if (complaint.student && _req?.student && id(complaint.student) === _req.student._id.toString()) return true;
     return false;
   }
 
+  // Non-confidential complaints
   if (userHasPermission(user, P.COMPLAINT_READ_INSTITUTION)) return true;
-  if (id(complaint.assignedTo) === user._id.toString()) return true;
-  // Department staff may read their department's queue, including unassigned
-  // complaints, so that triage is possible.
-  if (
-    userHasPermission(user, P.COMPLAINT_READ_DEPARTMENT) &&
-    complaint.department &&
-    id(complaint.department) === user.department?.toString()
-  ) {
-    return true;
-  }
-  // Triage rights over the non-restricted queue. The confidential case above
-  // has already returned by this point, so this cannot expose one.
+  if (complaint.assignedTo && complaint.assignedTo.toString() === user._id.toString()) return true;
+  if (userHasPermission(user, P.COMPLAINT_READ_DEPARTMENT) && complaint.department && complaint.department.toString() === user.department?.toString()) return true;
   if (userHasPermission(user, P.COMPLAINT_TRIAGE)) return true;
   return false;
 }
@@ -162,8 +162,10 @@ function canRead(complaint, user) {
  * @returns {Promise<object>}
  */
 async function fileComplaint({ user, payload, req }) {
-  if (!user.student) {
-    throw ApiError.forbidden("Only student accounts can file complaints");
+  // Support both middleware-attached student (req.student) and legacy user.student
+  const student = req?.student ?? (user.student ? await Student.findById(user.student).lean() : null);
+  if (!student) {
+    throw ApiError.forbidden("Only student accounts with a linked student profile can file complaints");
   }
 
   const now = new Date();
@@ -186,7 +188,7 @@ async function fileComplaint({ user, payload, req }) {
 
   const complaint = await Complaint.create({
     reference,
-    student: user.student,
+    student: student._id,
     department: payload.department ?? null,
     subject: payload.subject,
     description: payload.description,
@@ -232,11 +234,11 @@ async function fileComplaint({ user, payload, req }) {
  * @param {number} [params.page]
  * @param {number} [params.limit]
  */
-async function listComplaints({ user, filters = {}, page = 1, limit = 20 }) {
+async function listComplaints({ user, filters = {}, page = 1, limit = 20, req }) {
   const safePage = Math.max(1, Number(page) || 1);
   const safeLimit = Math.min(Math.max(1, Number(limit) || 20), 100);
 
-  const query = { ...buildVisibilityFilter(user), ...buildFilters(filters, user) };
+  const query = { ...buildVisibilityFilter(user, req), ...buildFilters(filters, user, req) };
 
   const [items, total] = await Promise.all([
     Complaint.find(query)
@@ -266,7 +268,7 @@ function shapeForReader(complaint, canSeeInternal) {
 }
 
 /** Client filters, intersected with — never widening — the visibility scope. */
-function buildFilters(filters, user) {
+function buildFilters(filters, user, _req) {
   const query = {};
 
   if (filters.status) query.status = filters.status;
@@ -302,7 +304,7 @@ function buildFilters(filters, user) {
  *
  * @throws 404 when absent or not visible — never 403.
  */
-async function getComplaint({ complaintId, user }) {
+async function getComplaint({ complaintId, user, req }) {
   const complaint = await Complaint.findOne({
     $or: [{ _id: toObjectId(complaintId) }, { reference: String(complaintId) }],
   })
@@ -314,7 +316,7 @@ async function getComplaint({ complaintId, user }) {
     throw ApiError.notFound("Complaint not found");
   }
 
-  if (!canRead(complaint, user)) {
+  if (!(await canRead(complaint, user, req))) {
     // Identical to a genuinely missing record.
     throw ApiError.notFound("Complaint not found");
   }
@@ -425,7 +427,7 @@ async function transition({
 
   // Visibility is re-checked here so a caller cannot drive a transition on a
   // complaint they are not permitted to read.
-  if (!canRead(current, user)) {
+  if (!(await canRead(current, user, req))) {
     throw ApiError.notFound("Complaint not found");
   }
 

@@ -224,13 +224,10 @@ function buildDownloadableFilter(user) {
  * Apply for a certificate.
  */
 async function apply({ user, type, purpose, copies, department, req }) {
-  if (!user.student) {
-    throw ApiError.forbidden("Only student accounts can apply for certificates");
-  }
-
-  const student = await Student.findById(user.student);
+  // Support both middleware-attached student (req.student) and legacy user.student
+  const student = req?.student ?? (user.student ? await Student.findById(user.student).lean() : null);
   if (!student) {
-    throw ApiError.notFound("Student profile not found");
+    throw ApiError.forbidden("Only student accounts with a linked student profile can apply for certificates");
   }
 
   const reference = await generateReference();

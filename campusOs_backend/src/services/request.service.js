@@ -22,6 +22,7 @@
 const Request = require("../models/Request");
 const RequestType = require("../models/RequestType");
 const Counter = require("../models/Counter");
+const Student = require("../models/Student");
 const { ApiError, ERROR_CODE } = require("../utils/ApiError");
 const { userHasPermission, P, SCOPE } = require("../utils/permissions");
 const { ROLES, REQUEST_STATUS, AUDIT_ACTION } = require("../config/constants");
@@ -62,10 +63,12 @@ async function generateReference(year = new Date().getFullYear()) {
  * @param {object} user
  * @returns {object|null}
  */
-function buildScopeFilter(user) {
+async function buildScopeFilter(user, req) {
   // A student is limited to their own records, full stop.
   if (user.role === ROLES.STUDENT) {
-    return { student: user.student };
+    // Support both middleware-attached student (req.student) and legacy user.student
+    const student = req?.student ?? (user.student ? await Student.findById(user.student).lean() : null);
+    return { student: student?._id ?? null };
   }
 
   if (userHasPermission(user, P.REQUEST_READ_INSTITUTION)) {
@@ -107,14 +110,16 @@ async function submitRequest({
   idempotencyKey,
   req,
 }) {
-  if (!user.student) {
-    throw ApiError.forbidden("Only student accounts can submit requests");
+  // Support both middleware-attached student (req.student) and legacy user.student
+  const student = req?.student ?? (user.student ? await Student.findById(user.student).lean() : null);
+  if (!student) {
+    throw ApiError.forbidden("Only student accounts with a linked student profile can submit requests");
   }
 
   // An idempotent retry returns the original rather than a duplicate.
   if (idempotencyKey) {
     const existing = await Request.findOne({
-      student: user.student,
+      student: student._id,
       "data.__idempotencyKey": idempotencyKey,
     });
     if (existing) {
@@ -150,7 +155,7 @@ async function submitRequest({
   const request = await Request.create({
     reference,
     requestType: requestType._id,
-    student: user.student,
+    student: student._id,
     department: requestType.department,
     title: title?.trim() || requestType.name,
     data: {
@@ -177,7 +182,7 @@ async function submitRequest({
     entity: "Request",
     entityId: request._id,
     entityRef: request.reference,
-    metadata: { requestType: requestType.code, department: requestType.department },
+    metadata: { requestType: requestType.code, department: requestType.department, student: student._id },
     actor: user,
     req,
   });
@@ -306,12 +311,12 @@ function validateAgainstType(data, fields) {
  * @param {string} [params.sort]
  * @returns {Promise<{items: object[], total: number, page: number, limit: number}>}
  */
-async function listRequests({ user, filters = {}, page = 1, limit = 20, sort }) {
+async function listRequests({ user, filters = {}, page = 1, limit = 20, sort, req }) {
   const safePage = Math.max(1, Number(page) || 1);
   const safeLimit = Math.min(Math.max(1, Number(limit) || 20), 100);
 
   // Scope first: this is what prevents cross-student access.
-  const scope = buildScopeFilter(user) ?? {};
+  const scope = (await buildScopeFilter(user, req)) ?? {};
   const query = { ...scope, ...buildFilters(filters, user) };
 
   const sortSpec = parseSort(sort);
@@ -391,7 +396,7 @@ function parseSort(sort) {
  * A caller who may not see a record receives the same 404 as one that does not
  * exist, so ids cannot be probed to discover other students' requests.
  */
-async function getRequest({ requestId, user }) {
+async function getRequest({ requestId, user, req }) {
   // Accept either an ObjectId or a reference. Resolving first avoids building
   // a `$or` whose `_id` branch may hold a non-ObjectId string, which Mongoose
   // rejects with a CastError (a 500 on a perfectly valid request).
@@ -410,7 +415,7 @@ async function getRequest({ requestId, user }) {
     throw ApiError.notFound("Request not found");
   }
 
-  const scope = buildScopeFilter(user);
+  const scope = (await buildScopeFilter(user, req)) ?? {};
   if (scope && !matchesScope(request, scope)) {
     // Indistinguishable from "does not exist".
     throw ApiError.notFound("Request not found");

@@ -99,6 +99,7 @@ router.post(
 router.get(
   "/requests",
   authenticate,
+  requireStudentAccount,
   validate({ query: listRequestsSchema }),
   requestController.listRequests
 );
@@ -107,6 +108,7 @@ router.get(
 router.get(
   "/requests/:id",
   authenticate,
+  requireStudentAccount,
   validate({ params: getRequestSchema }),
   requestController.getRequest
 );

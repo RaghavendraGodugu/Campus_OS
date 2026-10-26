@@ -47,6 +47,7 @@ router.get("/complaints/sla-policy", authenticate, complaintController.getSlaPol
 router.get(
   "/complaints",
   authenticate,
+  requireStudentAccount,
   validate({ query: listComplaintsSchema }),
   complaintController.listComplaints
 );
@@ -92,6 +93,7 @@ router.get(
 router.get(
   "/complaints/:id",
   authenticate,
+  requireStudentAccount,
   validate({ params: getComplaintSchema }),
   complaintController.getComplaint
 );
