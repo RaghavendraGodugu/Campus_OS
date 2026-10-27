@@ -54,8 +54,6 @@ services:
         sync: false
       - key: RAZORPAY_KEY_SECRET
         sync: false
-      - key: RAZORPAY_WEBHOOK_SECRET
-        sync: false
 
       - key: SMTP_HOST
         sync: false
