@@ -6,9 +6,9 @@ so its URL can be supplied to the frontend build.
 
 ## 1. Deploy the API to Render
 
-Create a Render Blueprint from `campusOs_backend/render.yaml`. Keep the Docker
-context as the repository root; the backend Dockerfile relies on the root npm
-workspace lockfile.
+Create a Render Blueprint from `render.yaml`. Render runs the backend directly
+with Node from `campusOs_backend/`, using its committed backend lockfile. No
+Docker settings are required.
 
 Set every `sync: false` value in Render. At minimum, production needs:
 

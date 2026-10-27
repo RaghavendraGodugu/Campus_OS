@@ -1,7 +1,7 @@
 # Render blueprint for the CampusOS API.
 #
-# The frontend is deployed separately on Vercel. This blueprint builds the API
-# image from the repository root so the root npm workspace lockfile is available.
+# The frontend is deployed separately on Vercel. Render runs the API directly
+# with Node from its own directory; no Docker image or build context is needed.
 #
 # Values marked `sync: false` are secrets or deployment-specific URLs: Render
 # prompts for them when the blueprint is created. Never commit real values here.
@@ -9,11 +9,12 @@
 services:
   - type: web
     name: campusos-api
-    runtime: docker
+    runtime: node
     plan: free
     region: oregon
-    dockerfilePath: ./campusOs_backend/Dockerfile
-    dockerContext: .
+    rootDir: ./campusOs_backend
+    buildCommand: npm ci --omit=dev --ignore-scripts
+    startCommand: npm start
     healthCheckPath: /health/ready
     autoDeploy: true
     envVars:
