@@ -22,7 +22,6 @@
 const Request = require("../models/Request");
 const RequestType = require("../models/RequestType");
 const Counter = require("../models/Counter");
-const Student = require("../models/Student");
 const { ApiError, ERROR_CODE } = require("../utils/ApiError");
 const { userHasPermission, P, SCOPE } = require("../utils/permissions");
 const { ROLES, REQUEST_STATUS, AUDIT_ACTION } = require("../config/constants");
@@ -66,8 +65,8 @@ async function generateReference(year = new Date().getFullYear()) {
 async function buildScopeFilter(user, req) {
   // A student is limited to their own records, full stop.
   if (user.role === ROLES.STUDENT) {
-    // Support both middleware-attached student (req.student) and legacy user.student
-    const student = req?.student ?? (user.student ? await Student.findById(user.student).lean() : null);
+    const { resolveStudentProfile } = require("../middleware/auth");
+    const student = req?.student ?? (await resolveStudentProfile(user));
     return { student: student?._id ?? null };
   }
 
@@ -110,10 +109,12 @@ async function submitRequest({
   idempotencyKey,
   req,
 }) {
-  // Support both middleware-attached student (req.student) and legacy user.student
-  const student = req?.student ?? (user.student ? await Student.findById(user.student).lean() : null);
+  const { resolveStudentProfile } = require("../middleware/auth");
+  const student = req?.student ?? (await resolveStudentProfile(user));
   if (!student) {
-    throw ApiError.forbidden("Only student accounts with a linked student profile can submit requests");
+    throw ApiError.forbidden(
+      "Only student accounts with a linked student profile can submit requests"
+    );
   }
 
   // An idempotent retry returns the original rather than a duplicate.
@@ -182,7 +183,11 @@ async function submitRequest({
     entity: "Request",
     entityId: request._id,
     entityRef: request.reference,
-    metadata: { requestType: requestType.code, department: requestType.department, student: student._id },
+    metadata: {
+      requestType: requestType.code,
+      department: requestType.department,
+      student: student._id,
+    },
     actor: user,
     req,
   });

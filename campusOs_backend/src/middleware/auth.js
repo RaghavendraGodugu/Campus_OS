@@ -26,7 +26,7 @@ const {
   describePermissions,
   isDepartmentScoped,
 } = require("../utils/permissions");
-const { STAFF_ROLES } = require("../config/constants");
+const { STAFF_ROLES, ROLES } = require("../config/constants");
 const User = require("../models/User");
 const Student = require("../models/Student");
 
@@ -245,6 +245,91 @@ function attachPermissionHelpers(req, res, next) {
 }
 
 /**
+ * Resolves or auto-provisions a Student profile for a student account.
+ */
+async function resolveStudentProfile(user) {
+  if (!user) return null;
+
+  let student = null;
+  if (user.student) {
+    student = await Student.findById(user.student)
+      .select(
+        "rollNumber semester year section program department feeStatus batchYear user"
+      )
+      .lean();
+  }
+  if (!student) {
+    student = await Student.findOne({ user: user._id })
+      .select(
+        "rollNumber semester year section program department feeStatus batchYear user"
+      )
+      .lean();
+  }
+
+  // If user is STUDENT and still has no Student record, auto-create one
+  if (!student && user.role === ROLES.STUDENT) {
+    try {
+      const Department = require("../models/Department");
+      const Program = require("../models/Program");
+
+      let department = user.department
+        ? await Department.findById(user.department)
+        : null;
+      if (!department) {
+        department = await Department.findOne({ isActive: true });
+      }
+      let program = null;
+      if (department) {
+        program = await Program.findOne({ department: department._id, isActive: true });
+      }
+      if (!program) {
+        program = await Program.findOne({ isActive: true });
+      }
+      if (!department && program) {
+        department = await Department.findById(program.department);
+      }
+
+      if (department && program) {
+        const rollSuffix = user._id.toString().slice(-6).toUpperCase();
+        const rollNumber = `STU-${rollSuffix}`;
+        const created = await Student.findOneAndUpdate(
+          { user: user._id },
+          {
+            $setOnInsert: {
+              user: user._id,
+              rollNumber,
+              department: department._id,
+              program: program._id,
+              semester: 1,
+              year: 1,
+              section: "A",
+              feeStatus: "CLEAR",
+              batchYear: new Date().getFullYear(),
+              enrolmentDate: new Date(),
+              isActive: true,
+            },
+          },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        ).lean();
+
+        student = created;
+        await User.updateOne({ _id: user._id }, { $set: { student: created._id } });
+        user.student = created._id;
+      }
+    } catch {
+      // Non-fatal fallback
+    }
+  }
+
+  if (student && !user.student) {
+    await User.updateOne({ _id: user._id }, { $set: { student: student._id } });
+    user.student = student._id;
+  }
+
+  return student;
+}
+
+/**
  * Require a Student-linked account on student-only routes.
  *
  * A staff account must not be able to submit a request "as" a student, so this
@@ -255,13 +340,7 @@ const requireStudentAccount = asyncHandler(async (req, res, next) => {
   if (!req.user) {
     throw ApiError.unauthenticated("Authentication required");
   }
-  if (req.user.student) {
-    req.student = await Student.findById(req.user.student)
-      .select("rollNumber semester program department feeStatus batchYear")
-      .lean();
-  } else {
-    req.student = null;
-  }
+  req.student = await resolveStudentProfile(req.user);
   next();
 });
 
@@ -286,5 +365,6 @@ module.exports = {
   requireStudentAccount,
   requireStaff,
   attachPermissionHelpers,
+  resolveStudentProfile,
   ERROR_CODE,
 };

@@ -22,6 +22,10 @@ const ROLES = [
   ["PRINCIPAL", "Principal"],
 ];
 
+/** The server's announcement-image limits, checked here to fail before upload. */
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png"]);
+
 /**
  * Post a notice.
  *
@@ -67,6 +71,7 @@ export default function ComposeAnnouncement() {
    * Reading a ref during render is not allowed, and rendering from state is.
    */
   const previewRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Revoke on unmount, or the last previewed image stays in memory for the
   // life of the tab.
@@ -79,6 +84,8 @@ export default function ComposeAnnouncement() {
 
   const chooseImage = (event) => {
     const file = event.target.files?.[0] ?? null;
+    // Reset immediately so choosing the same file again still fires `change`.
+    event.target.value = "";
 
     if (previewRef.current) {
       URL.revokeObjectURL(previewRef.current);
@@ -86,9 +93,32 @@ export default function ComposeAnnouncement() {
     }
     setPreview(null);
     setImageNote("");
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.image;
+      return next;
+    });
 
     if (!file) {
       setImage(null);
+      return;
+    }
+
+    if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
+      setImage(null);
+      setErrors((prev) => ({
+        ...prev,
+        image: "Choose a JPEG or PNG image.",
+      }));
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_BYTES) {
+      setImage(null);
+      setErrors((prev) => ({
+        ...prev,
+        image: "That image is over 5 MB. Choose a smaller file.",
+      }));
       return;
     }
 
@@ -98,24 +128,43 @@ export default function ComposeAnnouncement() {
     setImage(file);
   };
 
+  const removeImage = () => {
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (previewRef.current) {
+      URL.revokeObjectURL(previewRef.current);
+      previewRef.current = null;
+    }
+    setPreview(null);
+    setImage(null);
+    setImageNote("");
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.image;
+      return next;
+    });
+  };
+
   const departments = useQuery({
     queryKey: ["departments"],
     queryFn: () => apiGet("/departments"),
   });
 
   const post = useMutation({
-    mutationFn: async (payload) => {
-      const response = await apiPost("/announcements", payload);
+    mutationFn: async ({ imageFile, ...announcementPayload }) => {
+      const response = await apiPost("/announcements", announcementPayload);
 
       // The image is a second request. The notice is already published by the
       // time this runs, so a failed image must not undo it — the officer gets
       // the notice plus an explanation, rather than losing both.
-      if (payload.image) {
+      if (imageFile) {
         try {
-          await apiUpload(
-            `/announcements/${response.data.announcement.id}/image`,
-            { field: "image", file: payload.image },
-          );
+          const identifier =
+            response.data?.announcement?.reference ??
+            response.data?.announcement?.id;
+          await apiUpload(`/announcements/${identifier}/image`, {
+            field: "image",
+            file: imageFile,
+          });
         } catch {
           setImageNote(
             "The notice was posted, but the image could not be uploaded.",
@@ -127,13 +176,60 @@ export default function ComposeAnnouncement() {
     },
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["announcements"] });
-      navigate(`/announcements/${response.data.announcement.reference}`);
+      const identifier =
+        response.data?.announcement?.reference ??
+        response.data?.announcement?.id;
+      navigate(`/announcements/${identifier}`);
     },
     onError: (error) => setErrors(error.fieldErrors ?? {}),
   });
 
   const submit = (event) => {
     event.preventDefault();
+
+    const newErrors = {};
+    const trimmedTitle = title.trim();
+    const trimmedBody = body.trim();
+
+    if (!trimmedTitle) {
+      newErrors.title = "Title is required";
+    } else if (trimmedTitle.length < 3) {
+      newErrors.title = "Title must be at least 3 characters";
+    }
+
+    if (!trimmedBody) {
+      newErrors.body = "Body is required";
+    } else if (trimmedBody.length < 10) {
+      newErrors.body = "Body must be at least 10 characters";
+    }
+
+    if (scope === "ROLES" && (!roles || roles.length === 0)) {
+      newErrors["audience.roles"] = "Select at least one role";
+    }
+
+    if (scope === "DEPARTMENT" && !department) {
+      newErrors["audience.department"] = "Please select a department";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      const firstKey = Object.keys(newErrors)[0];
+      const targetId =
+        firstKey === "audience.roles"
+          ? "scope"
+          : firstKey === "audience.department"
+            ? "department"
+            : firstKey;
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.focus();
+        targetEl.scrollIntoView?.({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
+
+    setErrors({});
+    setImageNote("");
 
     // Only the selector relevant to the chosen scope is sent. The schema
     // refuses an announcement that carries both a scope and an unrelated
@@ -142,7 +238,14 @@ export default function ComposeAnnouncement() {
     if (scope === "ROLES") audience.roles = roles;
     if (scope === "DEPARTMENT") audience.department = department;
 
-    post.mutate({ title, body, priority, pinned, audience, image });
+    post.mutate({
+      title: trimmedTitle,
+      body: trimmedBody,
+      priority,
+      pinned,
+      audience,
+      imageFile: image,
+    });
   };
 
   return (
@@ -164,7 +267,16 @@ export default function ComposeAnnouncement() {
                 id="title"
                 value={title}
                 maxLength={160}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (errors.title) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.title;
+                      return next;
+                    });
+                  }
+                }}
                 className={inputClass}
               />
             </Field>
@@ -175,7 +287,16 @@ export default function ComposeAnnouncement() {
                 rows={7}
                 value={body}
                 maxLength={5000}
-                onChange={(e) => setBody(e.target.value)}
+                onChange={(e) => {
+                  setBody(e.target.value);
+                  if (errors.body) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.body;
+                      return next;
+                    });
+                  }
+                }}
                 className={`${inputClass} resize-y`}
               />
             </Field>
@@ -224,16 +345,17 @@ export default function ComposeAnnouncement() {
               className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-card border border-dashed border-ink-300 bg-ink-50/60 px-6 py-8 text-center transition-colors hover:border-brand-600 hover:bg-brand-50/50 focus-within:border-brand-600 dark:border-ink-600 dark:bg-ink-100/40 dark:hover:border-brand-500 dark:hover:bg-brand-500/10"
             >
               <ImageIcon
-                className="size-6 text-ink-500 dark:text-ink-400 dark:text-ink-500"
+                className="size-6 text-ink-500 dark:text-ink-400"
                 aria-hidden="true"
               />
               <span className="text-sm font-medium text-ink-800 dark:text-ink-100">
                 {image ? image.name : "Choose a JPEG or PNG"}
               </span>
-              <span className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+              <span className="text-xs text-ink-500 dark:text-ink-400">
                 Up to 5 MB. Square or wide images work best.
               </span>
               <input
+                ref={fileInputRef}
                 id="announcement-image"
                 type="file"
                 accept="image/jpeg,image/png"
@@ -243,11 +365,31 @@ export default function ComposeAnnouncement() {
             </label>
 
             {image && preview && (
-              <img
-                src={preview}
-                alt={`Preview of the image chosen for this notice: ${image.name}`}
-                className="max-h-56 w-full rounded-card object-cover"
-              />
+              <div className="space-y-2">
+                <img
+                  src={preview}
+                  alt={`Preview of the image chosen for this notice: ${image.name}`}
+                  className="max-h-56 w-full rounded-card object-cover"
+                />
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                  >
+                    Remove image
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {errors.image && (
+              <p
+                role="alert"
+                className="text-xs text-red-600 dark:text-red-400"
+              >
+                {errors.image}
+              </p>
             )}
 
             {imageNote && (
@@ -275,7 +417,22 @@ export default function ComposeAnnouncement() {
               <select
                 id="scope"
                 value={scope}
-                onChange={(e) => setScope(e.target.value)}
+                onChange={(e) => {
+                  setScope(e.target.value);
+                  if (
+                    errors["audience.scope"] ||
+                    errors["audience.roles"] ||
+                    errors["audience.department"]
+                  ) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next["audience.scope"];
+                      delete next["audience.roles"];
+                      delete next["audience.department"];
+                      return next;
+                    });
+                  }
+                }}
                 className={inputClass}
               >
                 <option value="ALL">Everyone in the college</option>
@@ -299,13 +456,20 @@ export default function ComposeAnnouncement() {
                       <input
                         type="checkbox"
                         checked={roles.includes(value)}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setRoles((current) =>
                             e.target.checked
                               ? [...current, value]
                               : current.filter((r) => r !== value),
-                          )
-                        }
+                          );
+                          if (errors["audience.roles"]) {
+                            setErrors((prev) => {
+                              const next = { ...prev };
+                              delete next["audience.roles"];
+                              return next;
+                            });
+                          }
+                        }}
                         className="size-4 rounded border-ink-300 dark:border-ink-600 text-brand-600 focus:ring-brand-600"
                       />
                       {label}
@@ -333,7 +497,16 @@ export default function ComposeAnnouncement() {
                 <select
                   id="department"
                   value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
+                  onChange={(e) => {
+                    setDepartment(e.target.value);
+                    if (errors["audience.department"]) {
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next["audience.department"];
+                        return next;
+                      });
+                    }
+                  }}
                   className={inputClass}
                 >
                   <option value="">Choose a department…</option>
@@ -355,12 +528,13 @@ export default function ComposeAnnouncement() {
           </div>
         </Card>
 
-        {post.isError && !Object.keys(errors).length && (
+        {post.isError && (
           <p
             role="alert"
             className="rounded-lg bg-red-50 dark:bg-red-500/12 px-3 py-2 text-sm text-red-700 dark:text-red-300"
           >
-            {post.error?.message}
+            {post.error?.message ||
+              "Failed to post notice. Please check the details above and try again."}
           </p>
         )}
 

@@ -7,6 +7,7 @@ const { ApiError } = require("../utils/ApiError");
 const profileService = require("../services/profile.service");
 const avatarService = require("../services/avatar.service");
 const { asyncHandler } = require("../utils/asyncHandler");
+const { sendPrivateMedia } = require("../utils/mediaResponse");
 const { sendSuccess } = require("../utils/response");
 
 /** GET /api/v1/profile */
@@ -66,22 +67,23 @@ const removeAvatar = asyncHandler(async (req, res) => {
  *
  * Separate from the profile endpoint because an <img> tag cannot send a custom
  * header, and because the picture is served as bytes rather than as part of a
- * JSON record. Private: no store, never cached by a shared proxy.
+ * JSON record. Private and revalidated rather than re-fetched on every paint.
  */
 const readAvatar = asyncHandler(async (req, res) => {
   const target = await User.findById(req.params.userId).select("avatar");
   if (!target) throw ApiError.notFound("No such account");
 
-  const { redirect, buffer, mimeType } = await avatarService.readAvatar({
-    user: target,
+  const storageKey = target.avatar?.storageKey;
+  if (!storageKey) throw ApiError.notFound("No profile picture");
+
+  return sendPrivateMedia(req, res, {
+    storageKey,
+    mimeType: target.avatar.mimeType,
+    load: async () => {
+      const { buffer } = await avatarService.readAvatar({ user: target });
+      return buffer;
+    },
   });
-
-  if (redirect) return res.redirect(302, redirect);
-
-  res.setHeader("Content-Type", mimeType ?? "application/octet-stream");
-  res.setHeader("Cache-Control", "private, no-store");
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  return res.send(buffer);
 });
 
 /**

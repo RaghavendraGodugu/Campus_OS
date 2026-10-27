@@ -62,7 +62,7 @@ export default function Refunds() {
 
       {items.length > 0 && (
         <Card className="overflow-hidden p-0">
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-ink-100 dark:divide-ink-700/50">
             {items.map((refund) => (
               <li key={refund.id} className="px-5 py-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -78,7 +78,9 @@ export default function Refunds() {
                   <Badge status={refund.status} />
                 </div>
 
-                <p className="mt-2 text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500">{refund.reason}</p>
+                <p className="mt-2 text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500">
+                  {refund.reason}
+                </p>
 
                 {refund.rejectionReason && (
                   <p className="mt-2 rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3 py-2 text-xs text-ink-600 dark:text-ink-400 dark:text-ink-500">
@@ -115,16 +117,22 @@ export default function Refunds() {
 
       <ol className="rounded-xl bg-white dark:bg-surface px-5 py-4 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
         <li className="flex gap-2">
-          <span className="font-semibold text-ink-700 dark:text-ink-300">1.</span> You ask for a
-          refund on an invoice.
+          <span className="font-semibold text-ink-700 dark:text-ink-300">
+            1.
+          </span>{" "}
+          You ask for a refund on an invoice.
         </li>
         <li className="mt-1.5 flex gap-2">
-          <span className="font-semibold text-ink-700 dark:text-ink-300">2.</span> Accounts staff
-          review it and approve or decline, with a reason.
+          <span className="font-semibold text-ink-700 dark:text-ink-300">
+            2.
+          </span>{" "}
+          Accounts staff review it and approve or decline, with a reason.
         </li>
         <li className="mt-1.5 flex gap-2">
-          <span className="font-semibold text-ink-700 dark:text-ink-300">3.</span> Only then is
-          Razorpay asked to return the money.
+          <span className="font-semibold text-ink-700 dark:text-ink-300">
+            3.
+          </span>{" "}
+          Only then is Razorpay asked to return the money.
         </li>
       </ol>
     </div>

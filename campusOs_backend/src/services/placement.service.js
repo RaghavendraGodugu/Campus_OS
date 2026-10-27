@@ -16,7 +16,6 @@
 const Company = require("../models/Company");
 const PlacementDrive = require("../models/PlacementDrive");
 const PlacementApplication = require("../models/PlacementApplication");
-const Student = require("../models/Student");
 const {
   AUDIT_ACTION,
   PLACEMENT_DRIVE_STATUS,
@@ -33,10 +32,8 @@ function assertManage(user) {
 }
 
 async function studentFor(user) {
-  const student = await Student.findOne({ user: user._id }).select(
-    "rollNumber program semester"
-  );
-  return student; // null if no student record linked
+  const { resolveStudentProfile } = require("../middleware/auth");
+  return resolveStudentProfile(user);
 }
 
 const DRIVE_TRANSITIONS = {
@@ -221,6 +218,9 @@ async function withdraw({ user, driveId, req }) {
 
 async function mine({ user }) {
   const student = await studentFor(user);
+  if (!student) {
+    return [];
+  }
   return PlacementApplication.find({
     student: student._id,
     status: { $ne: PLACEMENT_APPLICATION_STATUS.WITHDRAWN },

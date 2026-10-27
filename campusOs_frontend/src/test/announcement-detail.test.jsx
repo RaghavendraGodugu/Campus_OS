@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, afterEach } from "vitest";
@@ -104,5 +104,33 @@ describe("announcement detail", () => {
     expect(
       screen.queryByRole("button", { name: /download attachment/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("offers a retry when the image fails to load", async () => {
+    stubApi([["/announcements/AN-2026-000005", envelopeFor("AN-2026-000005")]]);
+
+    renderAt("AN-2026-000005");
+
+    const image = await screen.findByRole("img", {
+      name: /image attached to the notice/i,
+    });
+    fireEvent.error(image);
+
+    expect(
+      await screen.findByText(/attached image could not be loaded/i),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /try again/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("img", {
+          name: /image attached to the notice/i,
+        }),
+      ).toHaveAttribute(
+        "src",
+        "/api/v1/announcements/AN-2026-000005/attachment?retry=1",
+      ),
+    );
   });
 });

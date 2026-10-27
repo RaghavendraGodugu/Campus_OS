@@ -31,7 +31,9 @@ const DIRECTORY = {
 };
 
 function renderPage() {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   return render(
     <QueryClientProvider client={client}>
       <AuthProvider>
@@ -63,9 +65,7 @@ describe("StaffDirectory", () => {
     ).toBeVisible();
     expect(screen.getByText(/Associate Professor/)).toBeVisible();
     expect(screen.getByText("Machine Learning")).toBeVisible();
-    expect(
-      screen.getByRole("heading", { name: "Joseph Verma" }),
-    ).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Joseph Verma" })).toBeVisible();
   });
 
   it("sends the typed query and the role filter to the server", async () => {
@@ -79,10 +79,7 @@ describe("StaffDirectory", () => {
     await screen.findByRole("heading", { name: "Anand Rao" });
 
     const user = userEvent.setup();
-    await user.type(
-      screen.getByLabelText("Search the staff directory"),
-      "Rao",
-    );
+    await user.type(screen.getByLabelText("Search the staff directory"), "Rao");
     await user.selectOptions(
       screen.getByLabelText("Filter by role"),
       "FACULTY",
@@ -90,7 +87,9 @@ describe("StaffDirectory", () => {
     await user.click(screen.getByRole("button", { name: "Search" }));
 
     await waitFor(() => {
-      expect(requests.some((r) => r.url.includes("/directory/staff"))).toBe(true);
+      expect(requests.some((r) => r.url.includes("/directory/staff"))).toBe(
+        true,
+      );
     });
     const search = requests
       .map((r) => r.url)
@@ -112,7 +111,9 @@ describe("StaffDirectory", () => {
   it("never shows contact fields even if a careless server ever sent them", async () => {
     const leaky = {
       success: true,
-      data: [{ ...DIRECTORY.data[0], email: "rao@campusos.local", phone: "+911" }],
+      data: [
+        { ...DIRECTORY.data[0], email: "rao@campusos.local", phone: "+911" },
+      ],
     };
     stubApi([
       ["/auth/me", session()],

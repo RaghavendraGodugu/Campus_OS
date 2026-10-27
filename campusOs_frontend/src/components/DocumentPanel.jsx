@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, FileText, Paperclip, Trash2, Upload } from "lucide-react";
 
-import { apiDelete, apiGet, apiPost } from "../api/client";
+import { apiAssetUrl, apiDelete, apiGet, apiPost } from "../api/client";
 import { Card } from "./ui/Card";
 import Button from "./ui/Button";
 import Field, { inputClass } from "./ui/Field";
@@ -102,7 +102,7 @@ export default function DocumentPanel({
   const download = async (id) => {
     try {
       setError(null);
-      const response = await fetch(`/api/v1/documents/${id}/download`, {
+      const response = await fetch(apiAssetUrl(`/documents/${id}/download`), {
         credentials: "include",
       });
       if (!response.ok) {
@@ -193,21 +193,21 @@ export default function DocumentPanel({
         )}
 
         {documents.length > 0 && (
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-ink-100 dark:divide-ink-700/50">
             {documents.map((document) => (
               <li
                 key={document.id}
                 className="flex flex-wrap items-center gap-3 py-3 first:pt-0"
               >
                 <FileText
-                  className="size-4 shrink-0 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
+                  className="size-4 shrink-0 text-ink-400 dark:text-ink-400"
                   aria-hidden="true"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-ink-800">
+                  <p className="truncate text-sm font-medium text-ink-800 dark:text-ink-100">
                     {document.label ?? document.originalName}
                   </p>
-                  <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                  <p className="text-xs text-ink-500 dark:text-ink-400">
                     {size(document.size)} ·{" "}
                     {document.mimeType.replace("application/", "")}
                   </p>

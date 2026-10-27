@@ -110,7 +110,7 @@ describe("publishing and visibility", () => {
         user: world.dean,
         id: event.id,
         payload: { status: "DRAFT" },
-      }),
+      })
     ).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
   });
 
@@ -128,7 +128,7 @@ describe("publishing and visibility", () => {
         user: world.dean,
         id: event.id,
         payload: { status: "PUBLISHED" },
-      }),
+      })
     ).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
 
     const visible = await eventService.listEvents({ user: world.student.user });
@@ -156,7 +156,7 @@ describe("publishing and visibility", () => {
         payload: sessionPayload({
           endsAt: new Date(Date.now() + 1000).toISOString(),
         }),
-      }),
+      })
     ).rejects.toMatchObject({ statusCode: 400 });
   });
 
@@ -173,7 +173,7 @@ describe("publishing and visibility", () => {
           startsAt: new Date(before + 10_000).toISOString(),
           endsAt: new Date(before).toISOString(),
         },
-      }),
+      })
     ).rejects.toMatchObject({ statusCode: 400 });
   });
 });
@@ -184,10 +184,10 @@ describe("seats", () => {
     const event = await published(world);
 
     await expect(
-      eventService.rsvp({ user: world.student.user, id: event.id }),
+      eventService.rsvp({ user: world.student.user, id: event.id })
     ).resolves.toMatchObject({ rsvped: true });
     await expect(
-      eventService.rsvp({ user: world.student.user, id: event.id }),
+      eventService.rsvp({ user: world.student.user, id: event.id })
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
@@ -197,10 +197,10 @@ describe("seats", () => {
 
     await eventService.rsvp({ user: world.student.user, id: event.id });
     await expect(
-      eventService.withdraw({ user: world.student.user, id: event.id }),
+      eventService.withdraw({ user: world.student.user, id: event.id })
     ).resolves.toMatchObject({ rsvped: false });
     await expect(
-      eventService.rsvp({ user: world.second.user, id: event.id }),
+      eventService.rsvp({ user: world.second.user, id: event.id })
     ).resolves.toMatchObject({ rsvped: true });
   });
 
@@ -210,7 +210,7 @@ describe("seats", () => {
 
     await eventService.rsvp({ user: world.student.user, id: event.id });
     await expect(
-      eventService.rsvp({ user: world.second.user, id: event.id }),
+      eventService.rsvp({ user: world.second.user, id: event.id })
     ).rejects.toMatchObject({ statusCode: 409, message: /full/ });
   });
 
@@ -218,7 +218,7 @@ describe("seats", () => {
     const world = await seed();
     const event = await published(world);
     await expect(
-      eventService.withdraw({ user: world.student.user, id: event.id }),
+      eventService.withdraw({ user: world.student.user, id: event.id })
     ).rejects.toMatchObject({ statusCode: 404 });
   });
 
@@ -229,7 +229,7 @@ describe("seats", () => {
       payload: sessionPayload(),
     });
     await expect(
-      eventService.rsvp({ user: world.student.user, id: created.id }),
+      eventService.rsvp({ user: world.student.user, id: created.id })
     ).rejects.toMatchObject({ statusCode: 404 });
   });
 
@@ -243,7 +243,7 @@ describe("seats", () => {
     });
 
     await expect(
-      eventService.rsvp({ user: world.student.user, id: event.id }),
+      eventService.rsvp({ user: world.student.user, id: event.id })
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
@@ -254,7 +254,7 @@ describe("seats", () => {
     });
 
     await expect(
-      eventService.rsvp({ user: world.student.user, id: event.id }),
+      eventService.rsvp({ user: world.student.user, id: event.id })
     ).rejects.toMatchObject({ statusCode: 409, message: /started/ });
   });
 });
@@ -348,7 +348,7 @@ describe("over HTTP", () => {
     expect(release.body.data.rsvped).toBe(false);
 
     await expect(
-      eventService.rsvp({ user: world.second.user, id: event.id }),
+      eventService.rsvp({ user: world.second.user, id: event.id })
     ).resolves.toMatchObject({ rsvped: true });
   });
 });

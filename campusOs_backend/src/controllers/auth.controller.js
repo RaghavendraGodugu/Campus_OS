@@ -10,12 +10,13 @@ const authService = require("../services/auth.service");
 const twoFactorService = require("../services/twoFactor.service");
 const emailAuthService = require("../services/emailAuth.service");
 const auditService = require("../services/audit.service");
-const Student = require("../models/Student");
 const User = require("../models/User");
 const { asyncHandler } = require("../utils/asyncHandler");
+const { resolveStudentProfile } = require("../middleware/auth");
 const { sendSuccess } = require("../utils/response");
 const { ApiError, ERROR_CODE } = require("../utils/ApiError");
 const { setAuthCookies, clearAuthCookies, COOKIE_NAMES } = require("../utils/cookies");
+const { isTrustedOrigin } = require("../middleware/csrf");
 const { AUDIT_ACTION } = require("../config/constants");
 
 /**
@@ -50,10 +51,13 @@ const login = asyncHandler(async (req, res) => {
 
   setAuthCookies(res, { accessToken, refreshToken, csrfToken });
 
+  const student = await resolveStudentProfile(user);
+  const sessionPayload = authService.buildSessionPayload(user, student);
+
   return sendSuccess(res, {
     message: "Signed in successfully",
     data: {
-      user: user.toPublicJSON(),
+      ...sessionPayload,
       // Lets the SPA schedule a refresh just before the access token expires.
       expiresAt: expiresAt.toISOString(),
     },
@@ -64,23 +68,26 @@ const login = asyncHandler(async (req, res) => {
 /**
  * POST /api/v1/auth/refresh
  *
- * Rotates the refresh token and reissues the access token. Safe to call without
- * CSRF validation because it does not rely on an ambient credential: it requires
- * the refresh cookie *and* the matching CSRF cookie, and rotates both.
+ * Rotates the refresh token and reissues the access token. A trusted browser
+ * Origin is sufficient proof; otherwise the caller must present a matching
+ * CSRF cookie/header pair. The route is unauthenticated, so it cannot use the
+ * identity-bound token path.
  */
 const refresh = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies?.[COOKIE_NAMES.REFRESH_TOKEN];
   const csrfCookie = req.cookies?.[COOKIE_NAMES.CSRF_TOKEN];
   const csrfHeader = req.get("x-csrf-token");
 
-  // Both must be present and agree. This is the CSRF check for this route: a
-  // cross-origin attacker can cause the refresh cookie to be sent, but cannot
-  // read it to populate the matching header.
-  if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
-    throw new ApiError(
-      ERROR_CODE.CSRF_INVALID,
-      "CSRF token missing or invalid. Refresh the page and try again."
-    );
+  if (!isTrustedOrigin(req)) {
+    // No Origin: a non-browser caller. Both values must be present and agree.
+    // The Vercel page cannot read the API host's cookie, which is why a
+    // trusted Origin is accepted without this fallback.
+    if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
+      throw new ApiError(
+        ERROR_CODE.CSRF_INVALID,
+        "CSRF token missing or invalid. Refresh the page and try again."
+      );
+    }
   }
 
   const {
@@ -106,12 +113,8 @@ const refresh = asyncHandler(async (req, res) => {
  * permissions. Safe methods are exempt from CSRF by design.
  */
 const me = asyncHandler(async (req, res) => {
-  // A student account has a linked Student profile; fetch it for the dashboard.
-  const student = req.user.student
-    ? await Student.findById(req.user.student).select(
-        "rollNumber semester year section program department feeStatus batchYear"
-      )
-    : null;
+  // A student account has a linked Student profile; fetch or auto-link it for the dashboard.
+  const student = await resolveStudentProfile(req.user);
 
   return sendSuccess(res, {
     message: "Current session retrieved",
@@ -222,10 +225,13 @@ const completeTwoFactor = asyncHandler(async (req, res) => {
     csrfToken: result.csrfToken,
   });
 
+  const student = await resolveStudentProfile(result.user);
+  const sessionPayload = authService.buildSessionPayload(result.user, student);
+
   return sendSuccess(res, {
     message: "Signed in",
     data: {
-      user: result.user.toPublicJSON(),
+      ...sessionPayload,
       expiresAt: result.expiresAt.toISOString(),
     },
     status: 200,

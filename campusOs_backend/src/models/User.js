@@ -424,7 +424,10 @@ userSchema.methods.toPublicJSON = function toPublicJSON() {
     // Staff-only self-descriptive fields; undefined for students so the
     // payload does not change shape for them.
     designation: this.designation || undefined,
-    expertise: Array.isArray(this.expertise) && this.expertise.length > 0 ? this.expertise : undefined,
+    expertise:
+      Array.isArray(this.expertise) && this.expertise.length > 0
+        ? this.expertise
+        : undefined,
     department: this.department ?? null,
     student: this.student ?? null,
     isActive: this.isActive,

@@ -62,7 +62,28 @@ export default function NewComplaint() {
     );
   }
 
-  const categories = policy.data?.data?.categories ?? [];
+  const rawCategories = policy.data?.data?.categories;
+  const categories =
+    Array.isArray(rawCategories) && rawCategories.length > 0
+      ? rawCategories
+      : policy.data?.data?.categoryResponseHours
+        ? Object.entries(policy.data.data.categoryResponseHours).map(
+            ([key, hours]) => ({
+              value: key,
+              label:
+                key.charAt(0) + key.slice(1).toLowerCase().replace(/_/g, " "),
+              slaHours: hours,
+            }),
+          )
+        : [
+            { value: "ACADEMICS", label: "Academics", slaHours: 48 },
+            { value: "HARASSMENT", label: "Harassment", slaHours: 12 },
+            { value: "SAFETY", label: "Safety", slaHours: 12 },
+            { value: "FACILITIES", label: "Facilities", slaHours: 72 },
+            { value: "HOSTEL", label: "Hostel", slaHours: 24 },
+            { value: "FEES", label: "Fees", slaHours: 48 },
+            { value: "OTHER", label: "Other", slaHours: 72 },
+          ];
   const chosen = categories.find((c) => (c.value ?? c.key ?? c) === category);
 
   return (

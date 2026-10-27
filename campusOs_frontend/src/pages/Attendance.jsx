@@ -286,7 +286,7 @@ function MarkingPanel() {
         <EmptyState
           icon={ClipboardCheck}
           title="No classes on this date"
-          description="You do not teach anything on this weekday, or the timetable has not been set up for that day."
+          description="You do not teach anything on this date, or the timetable has not been set up for that day."
         />
       )}
 

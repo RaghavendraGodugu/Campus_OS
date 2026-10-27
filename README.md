@@ -24,17 +24,17 @@ audit trail. Everyone who needs to act on it can see the same thing.
 
 ## What it does
 
-| Area | What a user can actually do |
-| --- | --- |
-| **Requests** | Raise one against a published service. Assigned staff accept it, add progress notes, resolve, reject or forward it. SLA breaches escalate, and the dean sees them. |
-| **Complaints** | Raise one with attachments. Confidential complaints are invisible to staff until assigned. Anyone can file anonymously at `/grievance` with no account, no name and no IP stored, and track it by a code that is stored only as a hash. |
-| **Certificates** | Apply for any of nine types. Staff issue, verify and revoke. A PDF is generated, stored privately and served only after an authorisation check. Anyone can verify a paper certificate at `/verify` without an account. |
-| **Finance** | Invoices in integer paise, totals computed server-side. Razorpay orders, webhook *and* direct verification, receipts, partial and full refunds, reconciliation. Instalments, late-payment penalties, and GST with the correct CGST/SGST-versus-IGST split. |
-| **Announcements** | Compose and publish to a whole audience, with an image, and see who was notified. |
-| **Reports** | Role-scoped figures that omit what you may not see rather than showing zero. Export to CSV or PDF. |
-| **Directory** | Departments, programmes and services, with retirement blocked while anything still depends on them. Head of department appointed from the interface. |
-| **Administration** | Create staff, change a role, deactivate, reset a password, deactivate, import students in bulk. |
-| **Accounts** | Each person owns their profile. The academic record is institution-owned and cannot be self-edited. |
+| Area               | What a user can actually do                                                                                                                                                                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Requests**       | Raise one against a published service. Assigned staff accept it, add progress notes, resolve, reject or forward it. SLA breaches escalate, and the dean sees them.                                                                                         |
+| **Complaints**     | Raise one with attachments. Confidential complaints are invisible to staff until assigned. Anyone can file anonymously at `/grievance` with no account, no name and no IP stored, and track it by a code that is stored only as a hash.                    |
+| **Certificates**   | Apply for any of nine types. Staff issue, verify and revoke. A PDF is generated, stored privately and served only after an authorisation check. Anyone can verify a paper certificate at `/verify` without an account.                                     |
+| **Finance**        | Invoices in integer paise, totals computed server-side. Razorpay orders, webhook _and_ direct verification, receipts, partial and full refunds, reconciliation. Instalments, late-payment penalties, and GST with the correct CGST/SGST-versus-IGST split. |
+| **Announcements**  | Compose and publish to a whole audience, with an image, and see who was notified.                                                                                                                                                                          |
+| **Reports**        | Role-scoped figures that omit what you may not see rather than showing zero. Export to CSV or PDF.                                                                                                                                                         |
+| **Directory**      | Departments, programmes and services, with retirement blocked while anything still depends on them. Head of department appointed from the interface.                                                                                                       |
+| **Administration** | Create staff, change a role, deactivate, reset a password, deactivate, import students in bulk.                                                                                                                                                            |
+| **Accounts**       | Each person owns their profile. The academic record is institution-owned and cannot be self-edited.                                                                                                                                                        |
 
 Every role is real and different. Nine of them, plus a super administrator.
 Permissions are computed on the server and re-checked on every request.
@@ -65,12 +65,12 @@ cp campusOs_backend/.env.example campusOs_backend/.env
 
 Edit `campusOs_backend/.env`. Four values are required:
 
-| Variable | What it is |
-| --- | --- |
-| `MONGO_URI` | Your Atlas connection string. |
-| `JWT_SECRET` | Any long random string. |
+| Variable               | What it is                      |
+| ---------------------- | ------------------------------- |
+| `MONGO_URI`            | Your Atlas connection string.   |
+| `JWT_SECRET`           | Any long random string.         |
 | `REFRESH_TOKEN_SECRET` | A different long random string. |
-| `CSRF_SECRET` | A third one, different again. |
+| `CSRF_SECRET`          | A third one, different again.   |
 
 The rest have working defaults in development.
 
@@ -120,17 +120,17 @@ npm run create-admin
 
 **Demo accounts** — all use `Demo@Campus123`:
 
-| Email | Sees |
-| --- | --- |
-| `demo.student.democs001@campusos.local` | Own requests, complaints, certificates, fees |
-| `demo.faculty@campusos.local` | Department requests and approvals |
-| `demo.hod@campusos.local` | Whole-department scope |
-| `demo.exam@campusos.local` | Examinations |
-| `demo.accounts@campusos.local` | Invoices, payments, refunds, tax registration |
-| `demo.support@campusos.local` | Service desk |
-| `demo.dean@campusos.local` | Escalations, institution-wide oversight |
-| `demo.principal@campusos.local` | Institution-wide |
-| `demo.admin@campusos.local` | Structure, roles, academic terms, certificate templates |
+| Email                                   | Sees                                                    |
+| --------------------------------------- | ------------------------------------------------------- |
+| `demo.student.democs001@campusos.local` | Own requests, complaints, certificates, fees            |
+| `demo.faculty@campusos.local`           | Department requests and approvals                       |
+| `demo.hod@campusos.local`               | Whole-department scope                                  |
+| `demo.exam@campusos.local`              | Examinations                                            |
+| `demo.accounts@campusos.local`          | Invoices, payments, refunds, tax registration           |
+| `demo.support@campusos.local`           | Service desk                                            |
+| `demo.dean@campusos.local`              | Escalations, institution-wide oversight                 |
+| `demo.principal@campusos.local`         | Institution-wide                                        |
+| `demo.admin@campusos.local`             | Structure, roles, academic terms, certificate templates |
 
 **Two public pages need no account:**
 
@@ -161,29 +161,29 @@ Run from the repository root unless it says otherwise.
 
 ### Everyday
 
-| Command | Does |
-| --- | --- |
-| `npm run dev:backend` | API with file watching |
-| `npm run dev:frontend` | Interface with hot reload |
-| `npm test` | Backend tests |
-| `npm run test:frontend` | Frontend tests |
-| `npm run lint` | ESLint, both projects |
-| `npm run format` | Prettier, both projects |
-| `npm run build` | Production bundle |
+| Command                 | Does                      |
+| ----------------------- | ------------------------- |
+| `npm run dev:backend`   | API with file watching    |
+| `npm run dev:frontend`  | Interface with hot reload |
+| `npm test`              | Backend tests             |
+| `npm run test:frontend` | Frontend tests            |
+| `npm run lint`          | ESLint, both projects     |
+| `npm run format`        | Prettier, both projects   |
+| `npm run build`         | Production bundle         |
 
 ### Checks that use a real browser
 
-| Command | Does |
-| --- | --- |
-| `npm run verify:login -w campusos-frontend` | Signs in and confirms each role lands correctly |
+| Command                                     | Does                                                                                               |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `npm run verify:login -w campusos-frontend` | Signs in and confirms each role lands correctly                                                    |
 | `npm run verify:roles -w campusos-frontend` | Every page, per role, plus the public pages with no session, plus a 375px and 320px overflow check |
 
 ### Operations
 
-| Command | Does |
-| --- | --- |
-| `npm run backup -w campusos-backend` | Writes a timestamped archive |
-| `npm run restore -w campusos-backend` | Restores one, and asks first |
+| Command                                       | Does                         |
+| --------------------------------------------- | ---------------------------- |
+| `npm run backup -w campusos-backend`          | Writes a timestamped archive |
+| `npm run restore -w campusos-backend`         | Restores one, and asks first |
 | `npm run migrate:indexes -w campusos-backend` | Syncs indexes on the cluster |
 | `npm run run:escalations -w campusos-backend` | Applies SLA escalation rules |
 
@@ -192,24 +192,24 @@ Run from the repository root unless it says otherwise.
 These hit real integrations and print what happened. Start with the dry-run
 version.
 
-| Command | Does |
-| --- | --- |
+| Command                                      | Does                                     |
+| -------------------------------------------- | ---------------------------------------- |
 | `npm run razorpay:check -w campusos-backend` | Checks Razorpay connectivity, no charges |
-| `npm run razorpay:live -w campusos-backend` | A real order and payment, then a refund |
-| `npm run finance:drill -w campusos-backend` | Invoice, partial payment, refund |
-| `npm run reports:drill -w campusos-backend` | Generates reports for every scope |
-| `npm run comms:drill -w campusos-backend` | Notification fan-out |
+| `npm run razorpay:live -w campusos-backend`  | A real order and payment, then a refund  |
+| `npm run finance:drill -w campusos-backend`  | Invoice, partial payment, refund         |
+| `npm run reports:drill -w campusos-backend`  | Generates reports for every scope        |
+| `npm run comms:drill -w campusos-backend`    | Notification fan-out                     |
 
 ---
 
 ## What is built
 
 **Accounts and sessions.** Login, HttpOnly cookies with no token in
-`localStorage`, HMAC-bound CSRF, rotating refresh tokens with reuse detection and
+`localStorage`, HMAC-bound CSRF plus trusted-Origin checks, rotating refresh tokens with reuse detection and
 family revocation, sign-out-everywhere, login throttling and lockout.
 
 **Privacy.** A confidential complaint is invisible to staff until assigned, and
-that access is *deliberately not* granted to the super administrator. Anonymous
+that access is _deliberately not_ granted to the super administrator. Anonymous
 grievances store no name and no IP address. Audit entries are redacted of free
 text, so reading the trail cannot leak a complaint's contents.
 
@@ -244,7 +244,7 @@ student. A library whose last copy is issued atomically and whose copies are
 returned exactly once. Placement drives invisible to students until they are
 opened, with eligibility, deadline and one-application rules.
 
-**Correctness that is checked rather than assumed.** 906 backend tests and 186
+**Correctness that is checked rather than assumed.** 942 backend tests and 198
 frontend tests. Contrast ratios computed, not eyeballed. Spreadsheet exports
 neutralise formula injection. CSV exports reuse the same service the screen
 uses, so the two cannot disagree about who may see what.
@@ -307,8 +307,8 @@ campusOs_frontend/    React and Vite
 ## Testing
 
 ```bash
-npm test                    # 918 backend
-npm run test:frontend       # 190 frontend
+npm test                    # 942 backend
+npm run test:frontend       # 198 frontend
 npm run lint                # both, clean
 npm run build               # production bundle
 ```
@@ -333,32 +333,36 @@ with no session at all, and fails if any page scrolls sideways at 375px or 320px
 
 See **[DEPLOY.md](DEPLOY.md)** for the full walkthrough.
 
-The short version: two Dockerfiles, a compose file, an nginx config that
-proxies the API and sets the security headers, and an environment contract the
-app refuses to start without.
+The supported path is **Vercel** for the frontend, **Render** for the API, and
+**MongoDB Atlas** for data. `vercel.json` and `render.yaml` are checked in, and
+the app refuses to start in production without a named database URI, Razorpay,
+Cloudinary and SMTP configured.
 
 ```bash
-docker compose up -d
+# Vercel: import the repository root and set VITE_API_URL
+# Render: apply render.yaml, then fill the sync:false secrets
 ```
 
-`COOKIE_SECURE=true` and real Razorpay secrets are required in production, and
-the app fails loudly at boot rather than starting half-configured.
+The Dockerfiles and compose file remain as a single-host fallback. `docker
+compose up -d` serves the frontend through nginx and proxies the API; the
+compose file uses the same production environment contract.
 
-**One thing to be honest about:** the images have never been built, because
-Docker was not installed on the machine this was written on. See `FEATURES.md`.
+**One thing to be honest about:** the Docker images have not been built here,
+because Docker was not installed on the machine this was written on. The
+Vercel/Render path does not depend on them.
 
 ---
 
 ## Where the detail lives
 
-| File | For |
-| --- | --- |
-| **[FEATURES.md](FEATURES.md)** | Every feature, ticked or not, with reasons. The honest inventory. |
-| **[ACADEMICS.md](ACADEMICS.md)** | The academic core: terms, subjects, timetable, attendance, marks and release. |
-| **[CAMPUS_SERVICES.md](CAMPUS_SERVICES.md)** | Hostel, library and placements: the desks and their invariants. |
-| **[ANALYTICS.md](ANALYTICS.md)** | The campus overview figures and how each is derived. |
-| **[DEPLOY.md](DEPLOY.md)** | Deployment, backups, restore, the environment contract. |
-| `.env.example` | Every variable, with what it is for. |
+| File                                         | For                                                                           |
+| -------------------------------------------- | ----------------------------------------------------------------------------- |
+| **[FEATURES.md](FEATURES.md)**               | Every feature, ticked or not, with reasons. The honest inventory.             |
+| **[ACADEMICS.md](ACADEMICS.md)**             | The academic core: terms, subjects, timetable, attendance, marks and release. |
+| **[CAMPUS_SERVICES.md](CAMPUS_SERVICES.md)** | Hostel, library and placements: the desks and their invariants.               |
+| **[ANALYTICS.md](ANALYTICS.md)**             | The campus overview figures and how each is derived.                          |
+| **[DEPLOY.md](DEPLOY.md)**                   | Deployment, backups, restore, the environment contract.                       |
+| `.env.example`                               | Every variable, with what it is for.                                          |
 
 ---
 

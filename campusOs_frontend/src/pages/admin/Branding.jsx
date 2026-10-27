@@ -1,11 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Image,
-  Eye,
-  Check,
-  Save,
-} from "lucide-react";
+import { Image, Eye, Check, Save } from "lucide-react";
 
 import { apiGet, apiPatch, apiPost } from "../../api/client";
 // import { formatDate } from "../../lib/format";
@@ -44,10 +39,14 @@ const PALETTE_SWATCHES = {
 };
 
 function PaletteSwatch({ paletteId }) {
-  const colors = PALETTE_SWATCHES[paletteId] ?? PALETTE_SWATCHES["midnight-vanilla"];
+  const colors =
+    PALETTE_SWATCHES[paletteId] ?? PALETTE_SWATCHES["midnight-vanilla"];
 
   return (
-    <div className="absolute inset-0 rounded-xl overflow-hidden" aria-hidden="true">
+    <div
+      className="absolute inset-0 rounded-xl overflow-hidden"
+      aria-hidden="true"
+    >
       <div className="flex h-full">
         {colors.map((color, i) => (
           <div key={i} className="flex-1" style={{ backgroundColor: color }} />
@@ -147,12 +146,17 @@ function Branding() {
         {branding.isLoading ? (
           <Loading label="Loading branding" />
         ) : branding.isError ? (
-          <ErrorState message={branding.error?.message} onRetry={() => branding.refetch()} />
+          <ErrorState
+            message={branding.error?.message}
+            onRetry={() => branding.refetch()}
+          />
         ) : (
           <>
             <section className="grid gap-6 lg:grid-cols-2">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-ink-900">Identity</h3>
+                <h3 className="text-lg font-semibold text-ink-900 dark:text-ink-100">
+                  Identity
+                </h3>
 
                 <div className="surface rounded-xl p-4 space-y-4">
                   <div className="flex items-center gap-4">
@@ -160,18 +164,27 @@ function Branding() {
                       <img
                         src={data.logoUrl}
                         alt={`${data.institutionName} logo`}
-                        className="size-16 rounded-lg border border-ink-200 object-contain bg-surface"
+                        className="size-16 rounded-lg border border-ink-200 dark:border-ink-700 object-contain bg-surface"
                       />
                     ) : (
-                      <div className="size-16 rounded-lg border border-ink-200 flex items-center justify-center bg-ink-50">
-                        <Image className="size-8 text-ink-400" aria-hidden="true" />
+                      <div className="size-16 rounded-lg border border-ink-200 dark:border-ink-700 flex items-center justify-center bg-ink-50 dark:bg-ink-800">
+                        <Image
+                          className="size-8 text-ink-400"
+                          aria-hidden="true"
+                        />
                       </div>
                     )}
                     <div>
-                      <p className="font-semibold text-ink-900">{data.institutionName}</p>
-                      <p className="text-sm text-ink-500">{data.shortName}</p>
+                      <p className="font-semibold text-ink-900 dark:text-ink-100">
+                        {data.institutionName}
+                      </p>
+                      <p className="text-sm text-ink-500 dark:text-ink-400">
+                        {data.shortName}
+                      </p>
                       {data.logoUrl && (
-                        <p className="text-xs text-ink-400 mt-1">Logo configured</p>
+                        <p className="text-xs text-ink-400 mt-1">
+                          Logo configured
+                        </p>
                       )}
                     </div>
                   </div>
@@ -186,7 +199,12 @@ function Branding() {
                       <input
                         id="brand-name"
                         value={data.institutionName}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, institutionName: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            institutionName: e.target.value,
+                          }))
+                        }
                         maxLength={120}
                         className={inputClass}
                         disabled={!editing}
@@ -202,7 +220,12 @@ function Branding() {
                       <input
                         id="brand-short"
                         value={data.shortName}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, shortName: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            shortName: e.target.value,
+                          }))
+                        }
                         maxLength={24}
                         className={inputClass}
                         disabled={!editing}
@@ -219,7 +242,12 @@ function Branding() {
                         id="brand-logo"
                         type="url"
                         value={data.logoUrl ?? ""}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, logoUrl: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            logoUrl: e.target.value,
+                          }))
+                        }
                         className={inputClass}
                         disabled={!editing}
                       />
@@ -235,7 +263,12 @@ function Branding() {
                         id="brand-favicon"
                         type="url"
                         value={data.faviconUrl ?? ""}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, faviconUrl: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            faviconUrl: e.target.value,
+                          }))
+                        }
                         className={inputClass}
                         disabled={!editing}
                       />
@@ -246,7 +279,9 @@ function Branding() {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-ink-900">Palette</h3>
+                  <h3 className="text-lg font-semibold text-ink-900 dark:text-ink-100">
+                    Palette
+                  </h3>
                   {editing && (
                     <Button
                       variant="outline"
@@ -264,19 +299,27 @@ function Branding() {
                   {palettes.isLoading ? (
                     <Loading label="Loading palettes" />
                   ) : palettes.isError ? (
-                    <ErrorState message={palettes.error?.message} onRetry={() => palettes.refetch()} />
+                    <ErrorState
+                      message={palettes.error?.message}
+                      onRetry={() => palettes.refetch()}
+                    />
                   ) : (
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                       {paletteList.map((palette) => (
                         <button
                           key={palette.id}
                           type="button"
-                          onClick={() => setFormData((prev) => ({ ...prev, palette: palette.id }))}
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              palette: palette.id,
+                            }))
+                          }
                           disabled={!editing}
                           className={`relative aspect-square rounded-xl border-2 transition-all ${
                             data.palette === palette.id
                               ? "border-brand-600 ring-2 ring-brand-600/20"
-                              : "border-ink-200 hover:border-ink-300"
+                              : "border-ink-200 dark:border-ink-700 hover:border-ink-300 dark:hover:border-ink-600"
                           }`}
                         >
                           <PaletteSwatch paletteId={palette.id} />
@@ -287,7 +330,10 @@ function Branding() {
                           </div>
                           {data.palette === palette.id && (
                             <div className="absolute top-2 right-2 flex">
-                              <Check className="size-4 text-brand-600 bg-white/90 rounded-full p-0.5" aria-hidden="true" />
+                              <Check
+                                className="size-4 text-brand-600 bg-white/90 rounded-full p-0.5"
+                                aria-hidden="true"
+                              />
                             </div>
                           )}
                         </button>
@@ -300,11 +346,18 @@ function Branding() {
                     hint="JSON object with CSS variable overrides (e.g., {'color-brand-600': '#1a1a2e'}). Applied on top of the selected palette."
                   >
                     <textarea
-                      value={JSON.stringify(data.customVariables ?? {}, null, 2)}
+                      value={JSON.stringify(
+                        data.customVariables ?? {},
+                        null,
+                        2,
+                      )}
                       onChange={(e) => {
                         try {
                           const parsed = JSON.parse(e.target.value);
-                          setFormData((prev) => ({ ...prev, customVariables: parsed }));
+                          setFormData((prev) => ({
+                            ...prev,
+                            customVariables: parsed,
+                          }));
                         } catch {
                           // Ignore invalid JSON while typing
                         }
@@ -317,13 +370,15 @@ function Branding() {
                 </div>
 
                 <div className="surface rounded-xl p-4">
-                  <h3 className="text-lg font-semibold text-ink-900 mb-4">Status</h3>
+                  <h3 className="text-lg font-semibold text-ink-900 dark:text-ink-100 mb-4">
+                    Status
+                  </h3>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-ink-900">
+                      <p className="font-medium text-ink-900 dark:text-ink-100">
                         Branding is {data.isActive ? "active" : "inactive"}
                       </p>
-                      <p className="text-sm text-ink-500">
+                      <p className="text-sm text-ink-500 dark:text-ink-400">
                         {data.isActive
                           ? "CSS variables are injected on every page load."
                           : "Built-in defaults are used instead."}
@@ -343,10 +398,19 @@ function Branding() {
 
             {editing && (
               <div className="flex justify-end gap-3 border-t border-ink-200 pt-4">
-                <Button variant="secondary" onClick={() => { setEditing(false); setErrors({}); }}>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setEditing(false);
+                    setErrors({});
+                  }}
+                >
                   Cancel
                 </Button>
-                <Button onClick={() => update.mutate(formData)} disabled={update.isPending}>
+                <Button
+                  onClick={() => update.mutate(formData)}
+                  disabled={update.isPending}
+                >
                   <Save className="size-4 mr-1.5" aria-hidden="true" />
                   Save changes
                 </Button>

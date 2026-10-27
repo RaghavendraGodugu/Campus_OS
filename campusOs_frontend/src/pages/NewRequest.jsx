@@ -142,11 +142,11 @@ export default function NewRequest() {
                     className="mt-1 size-4 text-brand-600 focus:ring-brand-600"
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-medium text-ink-800">
+                    <span className="block text-sm font-medium text-ink-800 dark:text-ink-100">
                       {type.name}
                     </span>
                     {type.description && (
-                      <span className="mt-0.5 block text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                      <span className="mt-0.5 block text-xs text-ink-500 dark:text-ink-400">
                         {type.description}
                       </span>
                     )}

@@ -87,9 +87,8 @@ const brandingSchema = new mongoose.Schema(
   }
 );
 
-brandingSchema.pre("save", function (next) {
+brandingSchema.pre("save", function () {
   this.updatedAt = new Date();
-  next();
 });
 
 /** Resolve the full set of CSS variable overrides for this branding. */
@@ -148,7 +147,7 @@ const PALETTES = {
     "color-brand-300": "oklch(0.78 0.04 18)",
     "color-brand-400": "oklch(0.65 0.05 18)",
     "color-brand-500": "oklch(0.52 0.06 18)",
-    "color-brand-600": "oklch(0.295 0.055 18.3)",   // #4A1F24
+    "color-brand-600": "oklch(0.295 0.055 18.3)", // #4A1F24
     "color-brand-700": "oklch(0.25 0.05 18)",
     "color-brand-800": "oklch(0.2 0.045 18)",
     "color-brand-900": "oklch(0.155 0.038 18)",
@@ -156,7 +155,7 @@ const PALETTES = {
     "color-brand-ink": "oklch(0.22 0.045 18)",
     "color-accent-50": "oklch(0.98 0.01 55)",
     "color-accent-100": "oklch(0.96 0.018 55)",
-    "color-accent-200": "oklch(0.93 0.022 55)",    // #F1E7D6
+    "color-accent-200": "oklch(0.93 0.022 55)", // #F1E7D6
     "color-accent-300": "oklch(0.9 0.028 55)",
     "color-accent-400": "oklch(0.85 0.035 52)",
     "color-accent-500": "oklch(0.78 0.045 50)",
@@ -183,7 +182,7 @@ const PALETTES = {
     "color-brand-300": "oklch(0.78 0.04 188)",
     "color-brand-400": "oklch(0.65 0.05 188)",
     "color-brand-500": "oklch(0.52 0.06 188)",
-    "color-brand-600": "oklch(0.236 0.055 188.3)",  // #0C3B3A
+    "color-brand-600": "oklch(0.236 0.055 188.3)", // #0C3B3A
     "color-brand-700": "oklch(0.2 0.05 188)",
     "color-brand-800": "oklch(0.16 0.045 188)",
     "color-brand-900": "oklch(0.125 0.038 188)",
@@ -191,7 +190,7 @@ const PALETTES = {
     "color-brand-ink": "oklch(0.18 0.045 188)",
     "color-accent-50": "oklch(0.98 0.01 95)",
     "color-accent-100": "oklch(0.96 0.018 95)",
-    "color-accent-200": "oklch(0.93 0.022 95)",    // #E9E7DE
+    "color-accent-200": "oklch(0.93 0.022 95)", // #E9E7DE
     "color-accent-300": "oklch(0.9 0.028 95)",
     "color-accent-400": "oklch(0.85 0.035 95)",
     "color-accent-500": "oklch(0.78 0.045 95)",
@@ -218,7 +217,7 @@ const PALETTES = {
     "color-brand-300": "oklch(0.78 0.02 280)",
     "color-brand-400": "oklch(0.65 0.025 280)",
     "color-brand-500": "oklch(0.52 0.03 280)",
-    "color-brand-600": "oklch(0.11 0.02 280.3)",    // #1C1D21
+    "color-brand-600": "oklch(0.11 0.02 280.3)", // #1C1D21
     "color-brand-700": "oklch(0.09 0.018 280)",
     "color-brand-800": "oklch(0.07 0.015 280)",
     "color-brand-900": "oklch(0.055 0.012 280)",
@@ -226,7 +225,7 @@ const PALETTES = {
     "color-brand-ink": "oklch(0.08 0.015 280)",
     "color-accent-50": "oklch(0.98 0.01 115)",
     "color-accent-100": "oklch(0.96 0.018 115)",
-    "color-accent-200": "oklch(0.93 0.022 115)",   // #EDECE6
+    "color-accent-200": "oklch(0.93 0.022 115)", // #EDECE6
     "color-accent-300": "oklch(0.9 0.028 115)",
     "color-accent-400": "oklch(0.85 0.035 115)",
     "color-accent-500": "oklch(0.78 0.045 115)",
@@ -253,7 +252,7 @@ const PALETTES = {
     "color-brand-300": "oklch(0.78 0.04 258)",
     "color-brand-400": "oklch(0.65 0.05 258)",
     "color-brand-500": "oklch(0.52 0.06 258)",
-    "color-brand-600": "oklch(0.25 0.055 258.3)",   // #14243A
+    "color-brand-600": "oklch(0.25 0.055 258.3)", // #14243A
     "color-brand-700": "oklch(0.22 0.05 258)",
     "color-brand-800": "oklch(0.17 0.045 258)",
     "color-brand-900": "oklch(0.13 0.038 258)",
@@ -261,7 +260,7 @@ const PALETTES = {
     "color-brand-ink": "oklch(0.19 0.045 258)",
     "color-accent-50": "oklch(0.98 0.01 45)",
     "color-accent-100": "oklch(0.96 0.018 45)",
-    "color-accent-200": "oklch(0.93 0.022 45)",    // #F2E9DC
+    "color-accent-200": "oklch(0.93 0.022 45)", // #F2E9DC
     "color-accent-300": "oklch(0.9 0.028 45)",
     "color-accent-400": "oklch(0.85 0.035 45)",
     "color-accent-500": "oklch(0.78 0.045 45)",
@@ -288,7 +287,7 @@ const PALETTES = {
     "color-brand-300": "oklch(0.78 0.04 322)",
     "color-brand-400": "oklch(0.65 0.05 322)",
     "color-brand-500": "oklch(0.52 0.06 322)",
-    "color-brand-600": "oklch(0.23 0.055 322.3)",   // #3A2340
+    "color-brand-600": "oklch(0.23 0.055 322.3)", // #3A2340
     "color-brand-700": "oklch(0.2 0.05 322)",
     "color-brand-800": "oklch(0.16 0.045 322)",
     "color-brand-900": "oklch(0.125 0.038 322)",
@@ -296,7 +295,7 @@ const PALETTES = {
     "color-brand-ink": "oklch(0.18 0.045 322)",
     "color-accent-50": "oklch(0.98 0.01 340)",
     "color-accent-100": "oklch(0.96 0.018 340)",
-    "color-accent-200": "oklch(0.93 0.022 340)",   // #F0E9EE
+    "color-accent-200": "oklch(0.93 0.022 340)", // #F0E9EE
     "color-accent-300": "oklch(0.9 0.028 340)",
     "color-accent-400": "oklch(0.85 0.035 340)",
     "color-accent-500": "oklch(0.78 0.045 340)",
@@ -318,5 +317,4 @@ const PALETTES = {
   },
 };
 
-module.exports =
-  mongoose.models.Branding || mongoose.model("Branding", brandingSchema);
+module.exports = mongoose.models.Branding || mongoose.model("Branding", brandingSchema);

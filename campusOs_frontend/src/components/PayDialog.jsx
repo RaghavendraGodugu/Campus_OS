@@ -184,7 +184,10 @@ export default function PayDialog({ invoice, onClose, onVerified }) {
       <div className="w-full max-w-md rounded-2xl bg-white dark:bg-surface p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="pay-title" className="text-lg font-semibold text-ink-900 dark:text-ink-100">
+            <h2
+              id="pay-title"
+              className="text-lg font-semibold text-ink-900 dark:text-ink-100"
+            >
               Pay {invoice.purpose}
             </h2>
             <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">

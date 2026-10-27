@@ -105,6 +105,9 @@ async function setAvatar({ user, file }) {
     // Generated. A user's email or name never becomes part of a storage path.
     filename: `avatar-${user._id}.${ALLOWED_AVATAR_TYPES[verified]}`,
     mimeType: verified,
+    // Displayed at 36-64 CSS px. 512 is generous for a retina screen and
+    // keeps a 2 MB upload from becoming a 2 MB download for every viewer.
+    transformation: { width: 512, height: 512, crop: "limit", quality: "auto" },
   });
 
   const updated = await User.findByIdAndUpdate(
@@ -197,24 +200,14 @@ async function clearAvatar({ user }) {
   }
 }
 
-/** The bytes, or a signed redirect when the adapter is a CDN. */
+/** The avatar bytes, fetched server-side from whatever storage adapter is configured. */
 async function readAvatar({ user }) {
   const key = user.avatar?.storageKey;
   if (!key) throw ApiError.notFound("No profile picture");
 
   const storage = getStorage();
-
-  if (typeof storage.getSignedUrl === "function") {
-    return {
-      redirect: await storage.getSignedUrl(key, {
-        mimeType: user.avatar.mimeType,
-        download: false,
-      }),
-      mimeType: user.avatar.mimeType,
-    };
-  }
-
-  return { buffer: await storage.read(key), mimeType: user.avatar.mimeType };
+  const mimeType = user.avatar.mimeType;
+  return { buffer: await storage.read(key, { mimeType }), mimeType };
 }
 
 module.exports = {

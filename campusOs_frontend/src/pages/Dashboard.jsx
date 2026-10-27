@@ -154,17 +154,17 @@ export default function Dashboard() {
               />
             )}
             {myRequests.data?.data?.length > 0 && (
-              <ul className="divide-y divide-ink-100">
+              <ul className="divide-y divide-ink-100 dark:divide-ink-700/50">
                 {myRequests.data.data.map((request) => (
                   <li
                     key={request.id}
                     className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-ink-800">
+                      <p className="truncate text-sm font-medium text-ink-800 dark:text-ink-100">
                         {request.title}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                         {request.reference} ·{" "}
                         {formatRelative(request.createdAt)}
                       </p>
@@ -202,17 +202,17 @@ export default function Dashboard() {
               />
             )}
             {myInvoices.data?.data?.length > 0 && (
-              <ul className="divide-y divide-ink-100">
+              <ul className="divide-y divide-ink-100 dark:divide-ink-700/50">
                 {myInvoices.data.data.map((invoice) => (
                   <li
                     key={invoice.id}
                     className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-ink-800">
+                      <p className="truncate text-sm font-medium text-ink-800 dark:text-ink-100">
                         {invoice.purpose}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                         {invoice.reference} · due {formatDate(invoice.dueAt)}
                       </p>
                     </div>
@@ -247,8 +247,8 @@ function AnnouncementStrip({ items }) {
           to={`/announcements/${announcement.reference}`}
           className={`flex items-start gap-3 rounded-xl px-4 py-3 ring-1 transition-colors ${
             announcement.priority === "URGENT"
-              ? "bg-red-50 dark:bg-red-500/12 text-red-900 dark:text-red-200 ring-red-200 dark:ring-red-400/25 hover:bg-red-100"
-              : "bg-white text-ink-800 ring-ink-200 dark:ring-ink-600 hover:bg-ink-50 dark:hover:bg-ink-200/40"
+              ? "bg-red-50 dark:bg-red-500/15 text-red-900 dark:text-red-200 ring-red-200 dark:ring-red-400/25 hover:bg-red-100 dark:hover:bg-red-500/25"
+              : "bg-white dark:bg-surface text-ink-800 dark:text-ink-100 ring-ink-200 dark:ring-ink-700 hover:bg-ink-50 dark:hover:bg-surface-raised"
           }`}
         >
           <Megaphone className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
@@ -433,7 +433,7 @@ function QuickLinks() {
           <Link
             key={to}
             to={to}
-            className="inline-flex items-center gap-2 rounded-lg bg-ink-50 dark:bg-ink-100/40 px-3.5 py-2 text-sm font-medium text-ink-700 dark:text-ink-300 ring-1 ring-ink-200 dark:ring-ink-600 transition-colors hover:bg-white hover:text-brand-700 hover:ring-brand-300"
+            className="inline-flex items-center gap-2 rounded-lg bg-ink-50 dark:bg-surface px-3.5 py-2 text-sm font-medium text-ink-700 dark:text-ink-300 ring-1 ring-ink-200 dark:ring-ink-600 transition-colors hover:bg-white dark:hover:bg-surface-raised hover:text-brand-700 dark:hover:text-brand-300 hover:ring-brand-300"
           >
             <Icon className="size-4" aria-hidden="true" />
             {label}

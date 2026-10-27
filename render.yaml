@@ -1,0 +1,69 @@
+# Render blueprint for the CampusOS API.
+#
+# The frontend is deployed separately on Vercel. This blueprint builds the API
+# image from the repository root so the root npm workspace lockfile is available.
+#
+# Values marked `sync: false` are secrets or deployment-specific URLs: Render
+# prompts for them when the blueprint is created. Never commit real values here.
+
+services:
+  - type: web
+    name: campusos-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./campusOs_backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health/ready
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: LOG_PRETTY
+        value: "false"
+      - key: LOG_LEVEL
+        value: info
+
+      # Browser origin allowed by CORS. Must exactly match the Vercel
+      # production origin, with no trailing slash.
+      - key: CLIENT_URL
+        sync: false
+      # Origin used in verification and password-reset email links.
+      - key: WEB_URL
+        sync: false
+
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        sync: false
+      - key: CSRF_SECRET
+        sync: false
+
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false

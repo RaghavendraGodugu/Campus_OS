@@ -225,12 +225,17 @@ export default function CampusOverview() {
 function SectionHeading({ icon: Icon, title, note }) {
   return (
     <div className="flex items-baseline gap-2">
-      <Icon className="size-4 text-ink-400 dark:text-ink-500" aria-hidden="true" />
+      <Icon
+        className="size-4 text-ink-400 dark:text-ink-500"
+        aria-hidden="true"
+      />
       <h2 className="text-[0.9375rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
         {title}
       </h2>
       {note && (
-        <span className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">· {note}</span>
+        <span className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+          · {note}
+        </span>
       )}
     </div>
   );

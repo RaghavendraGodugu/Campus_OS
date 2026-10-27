@@ -40,6 +40,7 @@ const {
 const MONDAY = new Date("2026-10-05T00:00:00.000Z");
 const NEXT_MONDAY = new Date("2026-10-12T00:00:00.000Z");
 const TUESDAY = new Date("2026-10-06T00:00:00.000Z");
+const NEXT_TUESDAY = new Date("2026-10-13T00:00:00.000Z");
 
 async function seed() {
   const department = await createDepartment();
@@ -196,6 +197,50 @@ describe("attendance", () => {
         payload: {
           entry: world.entry.id,
           date: TUESDAY,
+          records: recordsFor(world),
+        },
+      })
+    ).rejects.toMatchObject({ statusCode: 400 });
+  });
+
+  it("marks a one-off class only on its scheduled date", async () => {
+    const world = await seed();
+    const oneOff = await timetableService.create({
+      user: world.admin,
+      payload: {
+        term: world.term._id,
+        subject: world.subject.id,
+        faculty: world.faculty._id,
+        room: world.room.id,
+        startsOn: TUESDAY,
+        repeatsWeekly: false,
+        startMinute: 540,
+        endMinute: 600,
+      },
+    });
+
+    const result = await attendanceService.mark({
+      user: world.faculty,
+      payload: {
+        entry: oneOff.id,
+        date: TUESDAY,
+        records: recordsFor(world),
+      },
+    });
+    expect(result.session.date).toBe("2026-10-06");
+
+    const day = await attendanceService.day({
+      user: world.faculty,
+      date: TUESDAY,
+    });
+    expect(day.classes.map((item) => item.entry.id)).toContain(oneOff.id);
+
+    await expect(
+      attendanceService.mark({
+        user: world.faculty,
+        payload: {
+          entry: oneOff.id,
+          date: NEXT_TUESDAY,
           records: recordsFor(world),
         },
       })

@@ -28,17 +28,17 @@
   /* Light mode: 50–400 are warm paper (vanilla side), 500–950 are cold ink.
      The seam at 400/500 is where L is closest — used least, so the jump
      is invisible in practice. */
-  --color-brand-50:  oklch(0.978 0.008  95);  /* barely-tinted vanilla */
-  --color-brand-100: oklch(0.945 0.018  96);  /* ≈ vanilla #EEEBDA */
-  --color-brand-200: oklch(0.905 0.028  96);
-  --color-brand-300: oklch(0.84  0.042  95);
-  --color-brand-400: oklch(0.74  0.055  93);
-  --color-brand-500: oklch(0.58  0.065  278); /* bridge */
-  --color-brand-600: oklch(0.425 0.058  278); /* primary buttons, rings */
-  --color-brand-700: oklch(0.32  0.052  279);
-  --color-brand-800: oklch(0.24  0.045  280);
-  --color-brand-900: oklch(0.17  0.038  281);
-  --color-brand-950: oklch(0.11  0.028  282);
+  --color-brand-50: oklch(0.978 0.008 95); /* barely-tinted vanilla */
+  --color-brand-100: oklch(0.945 0.018 96); /* ≈ vanilla #EEEBDA */
+  --color-brand-200: oklch(0.905 0.028 96);
+  --color-brand-300: oklch(0.84 0.042 95);
+  --color-brand-400: oklch(0.74 0.055 93);
+  --color-brand-500: oklch(0.58 0.065 278); /* bridge */
+  --color-brand-600: oklch(0.425 0.058 278); /* primary buttons, rings */
+  --color-brand-700: oklch(0.32 0.052 279);
+  --color-brand-800: oklch(0.24 0.045 280);
+  --color-brand-900: oklch(0.17 0.038 281);
+  --color-brand-950: oklch(0.11 0.028 282);
 
   /* Dark mode sidebar rail — lifted so it reads on dark canvas. */
   --color-brand-ink: oklch(0.35 0.045 279);
@@ -46,52 +46,50 @@
   /* ── Accent (vanilla) ───────────────────────────────────────────── */
   /* Mirrors the brand light side exactly — every cream chip IS the
      other half of the palette, not an approximation. */
-  --color-accent-50:  oklch(0.985 0.008  95);
-  --color-accent-100: oklch(0.965 0.015  96);
-  --color-accent-200: oklch(0.945 0.018  96); /* ≈ vanilla #EEEBDA */
-  --color-accent-300: oklch(0.91  0.025  96);
-  --color-accent-400: oklch(0.86  0.035  94);
-  --color-accent-500: oklch(0.79  0.042  92);
-  --color-accent-600: oklch(0.71  0.048  91);
-  --color-accent-700: oklch(0.58  0.045  89);
-  --color-accent-800: oklch(0.48  0.042  87);
+  --color-accent-50: oklch(0.985 0.008 95);
+  --color-accent-100: oklch(0.965 0.015 96);
+  --color-accent-200: oklch(0.945 0.018 96); /* ≈ vanilla #EEEBDA */
+  --color-accent-300: oklch(0.91 0.025 96);
+  --color-accent-400: oklch(0.86 0.035 94);
+  --color-accent-500: oklch(0.79 0.042 92);
+  --color-accent-600: oklch(0.71 0.048 91);
+  --color-accent-700: oklch(0.58 0.045 89);
+  --color-accent-800: oklch(0.48 0.042 87);
 
   /* ── Pop (periwinkle) ───────────────────────────────────────────── */
   /* One saturated mark — dots, chart lines, progress ends. Never text. */
-  --color-pop:        oklch(0.55 0.14  270); /* #6E74A8 */
+  --color-pop: oklch(0.55 0.14 270); /* #6E74A8 */
 
   /* ── Ink (neutrals with brand hue) ──────────────────────────────── */
   /* Light: paper → ink. Dark: inverted. Hue stays ~280 so greys feel
      like they belong to the palette, not generic grey. */
-  --color-ink-50:  oklch(0.988 0.003  95);
-  --color-ink-100: oklch(0.97  0.005  96);
-  --color-ink-200: oklch(0.94  0.007  96);
-  --color-ink-300: oklch(0.89  0.009  96);
-  --color-ink-400: oklch(0.58  0.012  96); /* secondary text */
-  --color-ink-500: oklch(0.42  0.018  280);
-  --color-ink-600: oklch(0.35  0.020  280);
-  --color-ink-700: oklch(0.28  0.022  280);
-  --color-ink-800: oklch(0.20  0.024  280); /* body text */
-  --color-ink-900: oklch(0.13  0.026  281);
+  --color-ink-50: oklch(0.988 0.003 95);
+  --color-ink-100: oklch(0.97 0.005 96);
+  --color-ink-200: oklch(0.94 0.007 96);
+  --color-ink-300: oklch(0.89 0.009 96);
+  --color-ink-400: oklch(0.58 0.012 96); /* secondary text */
+  --color-ink-500: oklch(0.42 0.018 280);
+  --color-ink-600: oklch(0.35 0.02 280);
+  --color-ink-700: oklch(0.28 0.022 280);
+  --color-ink-800: oklch(0.2 0.024 280); /* body text */
+  --color-ink-900: oklch(0.13 0.026 281);
 
   /* ── Canvas / Surface ───────────────────────────────────────────── */
-  --color-surface: oklch(0.988 0.006  95); /* #FCFAF4 */
-  --color-canvas:  oklch(0.945 0.018  96); /* #EEEBDA vanilla */
+  --color-surface: oklch(0.988 0.006 95); /* #FCFAF4 */
+  --color-canvas: oklch(0.945 0.018 96); /* #EEEBDA vanilla */
 
   /* ── Radius / Motion / Shadows ──────────────────────────────────── */
   --radius-card: 1.125rem;
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
-  --animate-rise:  rise 0.4s var(--ease-out-soft) both;
-  --animate-fade:  fade 0.28s var(--ease-out-soft) both;
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-rise: rise 0.4s var(--ease-out-soft) both;
+  --animate-fade: fade 0.28s var(--ease-out-soft) both;
 
   --shadow-card:
-    inset 0 1px 0 oklch(1 0 0 / 0.7),
-    0 1px 2px -1px oklch(0.2 0.03 280 / 0.08),
+    inset 0 1px 0 oklch(1 0 0 / 0.7), 0 1px 2px -1px oklch(0.2 0.03 280 / 0.08),
     0 12px 32px -12px oklch(0.25 0.06 280 / 0.22);
   --shadow-raised:
-    inset 0 1px 0 oklch(1 0 0 / 0.75),
-    0 2px 6px -2px oklch(0.2 0.03 280 / 0.1),
+    inset 0 1px 0 oklch(1 0 0 / 0.75), 0 2px 6px -2px oklch(0.2 0.03 280 / 0.1),
     0 24px 48px -16px oklch(0.22 0.07 280 / 0.28);
   --shadow-pop:
     inset 0 1px 0 oklch(1 0 0 / 0.8),
@@ -107,48 +105,102 @@
 
 /* ── Keyframes (unchanged) ────────────────────────────────────────── */
 @keyframes rise {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 @keyframes liquid-morph {
-  0%,100% { border-radius: 44% 56% 60% 40% / 42% 44% 56% 58%; }
-  33%     { border-radius: 60% 40% 36% 64% / 56% 62% 38% 44%; }
-  66%     { border-radius: 38% 62% 56% 44% / 64% 36% 60% 40%; }
+  0%,
+  100% {
+    border-radius: 44% 56% 60% 40% / 42% 44% 56% 58%;
+  }
+  33% {
+    border-radius: 60% 40% 36% 64% / 56% 62% 38% 44%;
+  }
+  66% {
+    border-radius: 38% 62% 56% 44% / 64% 36% 60% 40%;
+  }
 }
 @keyframes liquid-drift {
-  0%,100% { transform: translate3d(0,0,0) scale(1); }
-  50%     { transform: translate3d(2.2rem,-1.6rem,0) scale(1.07); }
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2.2rem, -1.6rem, 0) scale(1.07);
+  }
 }
 @keyframes liquid-flow {
-  0%,100% { background-position: 0% 50%; }
-  50%     { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 @keyframes sheen-sweep {
-  0%   { transform: translateX(-160%) skewX(-18deg); }
-  55%,100% { transform: translateX(320%) skewX(-18deg); }
+  0% {
+    transform: translateX(-160%) skewX(-18deg);
+  }
+  55%,
+  100% {
+    transform: translateX(320%) skewX(-18deg);
+  }
 }
-@keyframes shimmer-sweep { to { transform: translateX(100%); } }
+@keyframes shimmer-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
 
 /* ── Base layer ───────────────────────────────────────────────────── */
 @layer base {
-  html { -webkit-text-size-adjust: 100%; }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
   body {
     @apply text-ink-800 dark:text-ink-100 antialiased;
     background-color: var(--color-canvas);
     background-image:
-      radial-gradient(ellipse 46rem 30rem at 6% -12rem,
-        oklch(0.99 0.01 96 / 0.5), transparent 62%),
-      radial-gradient(ellipse 52rem 34rem at 102% 6%,
-        oklch(0.85 0.05 278 / 0.05), transparent 64%),
-      radial-gradient(ellipse 44rem 30rem at 48% 116%,
-        oklch(0.78 0.06 280 / 0.06), transparent 66%);
+      radial-gradient(
+        ellipse 46rem 30rem at 6% -12rem,
+        oklch(0.99 0.01 96 / 0.5),
+        transparent 62%
+      ),
+      radial-gradient(
+        ellipse 52rem 34rem at 102% 6%,
+        oklch(0.85 0.05 278 / 0.05),
+        transparent 64%
+      ),
+      radial-gradient(
+        ellipse 44rem 30rem at 48% 116%,
+        oklch(0.78 0.06 280 / 0.06),
+        transparent 66%
+      );
     background-attachment: fixed;
-    font-feature-settings: "cv02","cv03","cv04","cv11";
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
-  :focus-visible { @apply outline-2 outline-offset-2 outline-brand-600; }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
@@ -167,8 +219,16 @@
     position: relative;
     border-radius: var(--radius-card);
     border: 1px solid oklch(1 0 0 / 0.6);
-    background-color: color-mix(in oklab, var(--color-surface) 74%, transparent);
-    background-image: linear-gradient(142deg, oklch(1 0 0 / 0.5), transparent 44%);
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) 74%,
+      transparent
+    );
+    background-image: linear-gradient(
+      142deg,
+      oklch(1 0 0 / 0.5),
+      transparent 44%
+    );
     box-shadow: var(--shadow-card);
     backdrop-filter: blur(22px) saturate(135%);
     -webkit-backdrop-filter: blur(22px) saturate(135%);
@@ -177,67 +237,147 @@
     position: relative;
     border-radius: var(--radius-card);
     border: 1px solid oklch(1 0 0 / 0.7);
-    background-color: color-mix(in oklab, var(--color-surface) 82%, transparent);
-    background-image: linear-gradient(142deg, oklch(1 0 0 / 0.55), transparent 46%);
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) 82%,
+      transparent
+    );
+    background-image: linear-gradient(
+      142deg,
+      oklch(1 0 0 / 0.55),
+      transparent 46%
+    );
     box-shadow: var(--shadow-raised);
     backdrop-filter: blur(28px) saturate(140%);
     -webkit-backdrop-filter: blur(28px) saturate(140%);
   }
   .dark .surface {
     border-color: oklch(1 0 0 / 0.1);
-    background-color: color-mix(in oklab, var(--color-surface) 82%, transparent);
-    background-image: linear-gradient(142deg, oklch(1 0 0 / 0.045), transparent 46%);
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) 82%,
+      transparent
+    );
+    background-image: linear-gradient(
+      142deg,
+      oklch(1 0 0 / 0.045),
+      transparent 46%
+    );
   }
   .dark .surface-raised {
     border-color: oklch(1 0 0 / 0.12);
-    background-color: color-mix(in oklab, var(--color-surface) 88%, transparent);
-    background-image: linear-gradient(142deg, oklch(1 0 0 / 0.06), transparent 48%);
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) 88%,
+      transparent
+    );
+    background-image: linear-gradient(
+      142deg,
+      oklch(1 0 0 / 0.06),
+      transparent 48%
+    );
   }
 
   .liquid-blob {
     border-radius: 44% 56% 60% 40% / 42% 44% 56% 58%;
-    animation: liquid-morph 22s cubic-bezier(0.45,0,0.55,1) infinite,
-               liquid-drift 28s cubic-bezier(0.45,0,0.55,1) infinite;
+    animation:
+      liquid-morph 22s cubic-bezier(0.45, 0, 0.55, 1) infinite,
+      liquid-drift 28s cubic-bezier(0.45, 0, 0.55, 1) infinite;
     will-change: border-radius, transform;
   }
-  .liquid-sheen { position: relative; overflow: hidden; isolation: isolate; }
+  .liquid-sheen {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
   .liquid-sheen::after {
-    content: ""; position: absolute; top: -60%; bottom: -60%; left: -30%; width: 45%;
-    background: linear-gradient(100deg, transparent 24%, oklch(1 0 0 / 0.32) 50%, transparent 76%);
+    content: "";
+    position: absolute;
+    top: -60%;
+    bottom: -60%;
+    left: -30%;
+    width: 45%;
+    background: linear-gradient(
+      100deg,
+      transparent 24%,
+      oklch(1 0 0 / 0.32) 50%,
+      transparent 76%
+    );
     transform: translateX(-160%) skewX(-18deg);
     animation: sheen-sweep 7.5s var(--ease-out-soft) infinite;
     pointer-events: none;
   }
   .liquid-mesh {
     background-image:
-      radial-gradient(60% 70% at 15% 8%, oklch(0.46 0.09 279 / 0.65), transparent 62%),
-      radial-gradient(48% 58% at 88% 18%, oklch(0.9 0.04 96 / 0.22), transparent 60%),
-      radial-gradient(72% 84% at 52% 104%, oklch(0.3 0.07 282 / 0.8), transparent 66%);
+      radial-gradient(
+        60% 70% at 15% 8%,
+        oklch(0.46 0.09 279 / 0.65),
+        transparent 62%
+      ),
+      radial-gradient(
+        48% 58% at 88% 18%,
+        oklch(0.9 0.04 96 / 0.22),
+        transparent 60%
+      ),
+      radial-gradient(
+        72% 84% at 52% 104%,
+        oklch(0.3 0.07 282 / 0.8),
+        transparent 66%
+      );
     background-size: 190% 190%;
     animation: liquid-flow 24s ease-in-out infinite;
   }
 
   .aurora {
-    background-image: linear-gradient(135deg, var(--color-brand-600) 0%,
-      var(--color-brand-800) 52%, var(--color-brand-900) 100%);
+    background-image: linear-gradient(
+      135deg,
+      var(--color-brand-600) 0%,
+      var(--color-brand-800) 52%,
+      var(--color-brand-900) 100%
+    );
   }
   .aurora-vanilla {
-    background-image: linear-gradient(135deg, var(--color-accent-100) 0%,
-      var(--color-accent-300) 52%, var(--color-accent-400) 100%);
+    background-image: linear-gradient(
+      135deg,
+      var(--color-accent-100) 0%,
+      var(--color-accent-300) 52%,
+      var(--color-accent-400) 100%
+    );
   }
   .shimmer::after {
-    content: ""; position: absolute; inset: 0; transform: translateX(-100%);
-    background-image: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.55), transparent);
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      oklch(1 0 0 / 0.55),
+      transparent
+    );
     animation: shimmer-sweep 2.4s var(--ease-out-soft) infinite;
   }
   .dark .shimmer::after {
-    background-image: linear-gradient(90deg, transparent, oklch(0.9 0.03 96 / 0.16), transparent);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      oklch(0.9 0.03 96 / 0.16),
+      transparent
+    );
   }
 
   .grid-texture {
     background-image:
-      linear-gradient(to right, oklch(0.45 0.05 279 / 0.06) 1px, transparent 1px),
-      linear-gradient(to bottom, oklch(0.45 0.05 279 / 0.06) 1px, transparent 1px);
+      linear-gradient(
+        to right,
+        oklch(0.45 0.05 279 / 0.06) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        oklch(0.45 0.05 279 / 0.06) 1px,
+        transparent 1px
+      );
     background-size: 56px 56px;
   }
 }
@@ -245,45 +385,45 @@
 /* ── Dark theme (perceptual mirror of light) ─────────────────────── */
 @layer base {
   .dark {
-    /* Ink ramp inverted — same hue, L swapped so 50 is darkest, 900 lightest. */
-    --color-ink-50:  oklch(0.13  0.025 280);
-    --color-ink-100: oklch(0.18  0.028 280);
-    --color-ink-200: oklch(0.24  0.030 280);
-    --color-ink-300: oklch(0.33  0.032 280);
-    --color-ink-400: oklch(0.55  0.018 96);  /* secondary text */
-    --color-ink-500: oklch(0.65  0.017 96);
-    --color-ink-600: oklch(0.74  0.015 96);
-    --color-ink-700: oklch(0.82  0.014 96);
-    --color-ink-800: oklch(0.90  0.014 96);  /* body text */
-    --color-ink-900: oklch(0.96  0.012 96);
+    /* In dark mode: ink 50–300 are light text and 700–900 are dark containers/borders,
+       aligning with standard Tailwind utility usage (dark:text-ink-100, dark:border-ink-700, etc.) */
+    --color-ink-50: oklch(0.985 0.005 96);
+    --color-ink-100: oklch(0.96 0.008 96); /* headings, inputs, strong text */
+    --color-ink-200: oklch(0.9 0.01 96);
+    --color-ink-300: oklch(0.82 0.014 96); /* field labels, subheadings */
+    --color-ink-400: oklch(0.72 0.015 96); /* hints, muted copy */
+    --color-ink-500: oklch(
+      0.62 0.018 280
+    ); /* tertiary copy, icons, uppercase badges */
+    --color-ink-600: oklch(0.42 0.022 280); /* subtle dark borders/rings */
+    --color-ink-700: oklch(0.28 0.025 280); /* dark container borders */
+    --color-ink-800: oklch(0.2 0.028 280); /* dark pills and panels */
+    --color-ink-900: oklch(0.14 0.03 281); /* dark canvas base */
 
     /* Brand lifted so filled buttons read on dark canvas. */
-    --color-brand-500: oklch(0.58  0.065 278);
-    --color-brand-600: oklch(0.52  0.062 278); /* primary buttons */
-    --color-brand-700: oklch(0.45  0.058 279);
-    --color-brand-800: oklch(0.38  0.052 280);
-    --color-brand-900: oklch(0.30  0.048 281);
-    --color-brand-950: oklch(0.22  0.040 282);
+    --color-brand-500: oklch(0.58 0.065 278);
+    --color-brand-600: oklch(0.52 0.062 278); /* primary buttons */
+    --color-brand-700: oklch(0.45 0.058 279);
+    --color-brand-800: oklch(0.38 0.052 280);
+    --color-brand-900: oklch(0.3 0.048 281);
+    --color-brand-950: oklch(0.22 0.04 282);
 
     /* Sidebar rail — visible on dark canvas. */
     --color-brand-ink: oklch(0.42 0.045 279);
 
     /* Surfaces — not black. Warm dark indigo so glass cards glow. */
-    --color-surface: oklch(0.22  0.030 280);
-    --color-canvas:  oklch(0.155 0.028 280);
+    --color-surface: oklch(0.22 0.03 280);
+    --color-canvas: oklch(0.155 0.028 280);
 
     /* Shadows — inset highlight carries the depth on dark. */
     --shadow-card:
-      inset 0 1px 0 oklch(1 0 0 / 0.06),
-      0 1px 2px -1px oklch(0 0 0 / 0.4),
+      inset 0 1px 0 oklch(1 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.4),
       0 12px 32px -12px oklch(0 0 0 / 0.5);
     --shadow-raised:
-      inset 0 1px 0 oklch(1 0 0 / 0.08),
-      0 2px 6px -2px oklch(0 0 0 / 0.45),
+      inset 0 1px 0 oklch(1 0 0 / 0.08), 0 2px 6px -2px oklch(0 0 0 / 0.45),
       0 24px 48px -16px oklch(0 0 0 / 0.6);
     --shadow-pop:
-      inset 0 1px 0 oklch(1 0 0 / 0.1),
-      0 8px 20px -6px oklch(0 0 0 / 0.5),
+      inset 0 1px 0 oklch(1 0 0 / 0.1), 0 8px 20px -6px oklch(0 0 0 / 0.5),
       0 36px 64px -18px oklch(0 0 0 / 0.7);
 
     color-scheme: dark;
@@ -291,11 +431,72 @@
 
   .dark body {
     background-image:
-      radial-gradient(ellipse 48rem 32rem at 8% -10rem,
-        oklch(0.42 0.09 280 / 0.35), transparent 62%),
-      radial-gradient(ellipse 44rem 30rem at 100% 112%,
-        oklch(0.55 0.05 96 / 0.10), transparent 64%);
+      radial-gradient(
+        ellipse 48rem 32rem at 8% -10rem,
+        oklch(0.42 0.09 280 / 0.35),
+        transparent 62%
+      ),
+      radial-gradient(
+        ellipse 44rem 30rem at 100% 112%,
+        oklch(0.55 0.05 96 / 0.1),
+        transparent 64%
+      );
   }
 
-  :root:not(.dark) { color-scheme: light; }
+  .dark input,
+  .dark textarea,
+  .dark select {
+    color: var(--color-ink-100);
+    caret-color: var(--color-ink-100);
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: var(--color-ink-400);
+  }
+
+  .dark input:-webkit-autofill,
+  .dark textarea:-webkit-autofill,
+  .dark select:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-ink-100);
+    -webkit-box-shadow: 0 0 0px 1000px var(--color-surface) inset;
+    box-shadow: 0 0 0px 1000px var(--color-surface) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  :root:not(.dark) {
+    color-scheme: light;
+  }
+}
+
+/* ── Dark theme utility safeguards ───────────────────────────────── */
+@layer utilities {
+  /* In dark mode, if an element was given light-mode dark ink text without an explicit
+     dark:text-* variant, adapt it to high-contrast light ink rather than rendering dark on dark. */
+  .dark :where(.text-ink-900:not([class*="dark:text-"])) {
+    color: var(--color-ink-100);
+  }
+  .dark :where(.text-ink-800:not([class*="dark:text-"])) {
+    color: var(--color-ink-200);
+  }
+  .dark :where(.text-ink-700:not([class*="dark:text-"])) {
+    color: var(--color-ink-300);
+  }
+  .dark :where(.text-ink-600:not([class*="dark:text-"])) {
+    color: var(--color-ink-300);
+  }
+
+  /* Dividers without explicit dark:divide classes shouldn't glow stark off-white on dark mode */
+  .dark
+    :where([class*="divide-ink-100"]:not([class*="dark:divide-"]))
+    > :not([hidden])
+    ~ :not([hidden]) {
+    border-color: oklch(1 0 0 / 0.08);
+  }
+  .dark
+    :where([class*="divide-ink-200"]:not([class*="dark:divide-"]))
+    > :not([hidden])
+    ~ :not([hidden]) {
+    border-color: oklch(1 0 0 / 0.12);
+  }
 }

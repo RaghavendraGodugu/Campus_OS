@@ -6,6 +6,7 @@
  */
 
 const announcementService = require("../services/announcement.service");
+const { sendPrivateMedia } = require("../utils/mediaResponse");
 const announcementImageService = require("../services/announcementImage.service");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { sendSuccess, sendCreated, sendPaginated } = require("../utils/response");
@@ -179,21 +180,18 @@ const downloadAttachment = asyncHandler(async (req, res) => {
     id: req.params.id,
   });
 
-  const { redirect, buffer } = await announcementService.readAttachmentBytes({
+  return sendPrivateMedia(req, res, {
     storageKey: resolved.storageKey,
+    mimeType: resolved.mimeType,
+    filename: resolved.filename,
+    load: async () => {
+      const { buffer } = await announcementService.readAttachmentBytes({
+        storageKey: resolved.storageKey,
+        mimeType: resolved.mimeType,
+      });
+      return buffer;
+    },
   });
-
-  if (redirect) {
-    return res.redirect(302, redirect);
-  }
-
-  res.setHeader("Content-Type", resolved.mimeType ?? "application/octet-stream");
-  res.setHeader("Content-Disposition", `inline; filename="${resolved.filename}"`);
-  // An announcement attachment is private: never cached by a shared proxy.
-  res.setHeader("Cache-Control", "private, no-store");
-  res.setHeader("X-Content-Type-Options", "nosniff");
-
-  return res.send(buffer);
 });
 
 module.exports = {

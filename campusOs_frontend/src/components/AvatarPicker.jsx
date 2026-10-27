@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Camera, ImageOff, Trash2 } from "lucide-react";
 
-import { apiDelete, apiUpload } from "../api/client";
+import { apiAssetUrl, apiDelete, apiUpload } from "../api/client";
 import Button from "./ui/Button";
 
 /**
@@ -93,7 +93,7 @@ export default function AvatarPicker({ userId, hasAvatar, onChange }) {
   };
 
   const src =
-    preview ?? (hasAvatar ? `/api/v1/profile/avatar/${userId}` : null);
+    preview ?? (hasAvatar ? apiAssetUrl(`/profile/avatar/${userId}`) : null);
 
   return (
     <div className="flex items-center gap-4">

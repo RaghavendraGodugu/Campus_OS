@@ -185,7 +185,7 @@ export default function Login() {
                 <h2 className="text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
                   Enter your code
                 </h2>
-                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
                   Six digits from your authenticator app for{" "}
                   <span className="font-medium text-ink-700 dark:text-ink-200">
                     {challenge.maskedAccount}
@@ -242,7 +242,7 @@ export default function Login() {
                 <h2 className="text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
                   Sign in
                 </h2>
-                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
                   Use your college account.
                 </p>
 
@@ -278,10 +278,16 @@ export default function Login() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-400 hover:text-ink-600 dark:hover:text-ink-200"
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
                       >
-                        {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                        {showPassword ? (
+                          <EyeOff className="size-5" />
+                        ) : (
+                          <Eye className="size-5" />
+                        )}
                       </button>
                     </div>
                   </Field>
@@ -319,15 +325,15 @@ export default function Login() {
             {/* Someone holding a paper certificate is the other kind of visitor
               to this page, and they have no account. */}
             <div className="mt-6 rounded-2xl border border-dashed border-brand-200 dark:border-brand-400/25 bg-brand-50/60 dark:bg-brand-500/12 p-4">
-              <p className="text-sm font-medium text-ink-800">
+              <p className="text-sm font-medium text-ink-800 dark:text-ink-100">
                 Just checking a certificate?
               </p>
-              <p className="mt-1 text-xs leading-relaxed text-ink-500 dark:text-ink-400 dark:text-ink-500">
+              <p className="mt-1 text-xs leading-relaxed text-ink-500 dark:text-ink-300">
                 Verify one by its printed code — no account needed.
               </p>
               <Link
                 to="/verify"
-                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 dark:text-brand-300 transition-colors hover:text-brand-900"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 dark:text-brand-300 transition-colors hover:text-brand-900 dark:hover:text-brand-100"
               >
                 Verify a certificate
                 <span aria-hidden="true">→</span>
@@ -337,12 +343,14 @@ export default function Login() {
 
           {import.meta.env.VITE_SHOW_DEMO_BANNER === "true" && (
             <div className="mt-10 border-t border-ink-200 dark:border-ink-700/70 pt-6">
-              <p className="text-xs font-medium tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
+              <p className="text-xs font-medium tracking-wide text-ink-500 dark:text-ink-400 uppercase">
                 Demo accounts
               </p>
-              <p className="mt-1 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+              <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
                 Shared password{" "}
-                <code className="font-mono">Demo@Campus123</code>
+                <code className="font-mono text-ink-700 dark:text-ink-200">
+                  Demo@Campus123
+                </code>
               </p>
               <div className="mt-3 grid grid-cols-2 gap-1.5">
                 {DEMO_ACCOUNTS.map((account) => (
@@ -350,12 +358,12 @@ export default function Login() {
                     key={account.email}
                     type="button"
                     onClick={() => applyDemoAccount(account.email)}
-                    className="rounded-xl border border-ink-200/90 dark:border-ink-700/70 bg-surface px-2.5 py-2 text-left text-xs shadow-card transition-all duration-150 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-raised"
+                    className="rounded-xl border border-ink-200/90 dark:border-ink-700/70 bg-surface px-2.5 py-2 text-left text-xs shadow-card transition-all duration-150 hover:-translate-y-0.5 hover:border-brand-300 dark:hover:border-brand-500 hover:shadow-raised"
                   >
-                    <span className="block font-medium text-ink-800">
+                    <span className="block font-medium text-ink-800 dark:text-ink-100">
                       {account.label}
                     </span>
-                    <span className="block truncate text-[11px] text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                    <span className="block truncate text-[11px] text-ink-500 dark:text-ink-400">
                       {account.name}
                     </span>
                   </button>

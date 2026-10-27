@@ -14,17 +14,20 @@
  *
  * ## The defence
  *
- *  1. The server sets a CSRF cookie that JavaScript **can** read.
- *  2. The frontend echoes it in the `X-CSRF-Token` header.
- *  3. The server recomputes the expected value from the authenticated user and
- *     session, and requires both to match.
+ * The primary browser defence is the `Origin` header. Browsers set it on
+ * cross-origin mutating requests and a page cannot forge it. A request from the
+ * configured `CLIENT_URL` is accepted; a request carrying any other Origin is
+ * rejected even if it also has a token.
  *
- * A cross-origin attacker cannot read the cookie (the same-origin policy
- * forbids it), so it cannot construct a matching header.
+ * The `X-CSRF-Token` double-submit check remains for callers that do not send
+ * Origin (curl, native clients, older browsers). It cannot be the only
+ * defence across Vercel and Render: cookies set by the API belong to the API's
+ * host, so JavaScript on the Vercel page cannot read the CSRF cookie. That is
+ * why the browser path uses Origin, and the token path is a fallback for
+ * non-browser callers.
  *
- * Binding to the user and session closes the flaw in naive double-submit: an
- * attacker who *can* set a cookie (via a subdomain, say) cannot forge a token
- * that also satisfies the server's HMAC, because they do not hold CSRF_SECRET.
+ * The token is still bound to the user and session, so an attacker who can set
+ * a cookie on the API host cannot forge one without CSRF_SECRET.
  *
  * ## Safe methods are exempt
  *
@@ -33,11 +36,45 @@
  * where it is meaningful.
  */
 
+const { getEnv } = require("../config/env");
 const { ApiError, ERROR_CODE } = require("../utils/ApiError");
 const { generateCsrfToken, verifyCsrfToken } = require("../utils/tokens");
 const { COOKIE_NAMES, requiresCsrf } = require("../utils/cookies");
 
 const CSRF_HEADER = "x-csrf-token";
+
+/** Is the request's browser Origin one of the configured frontend origins? */
+function isTrustedOrigin(req) {
+  const origin = req.get("origin");
+  return Boolean(origin) && getEnv().CLIENT_URL.includes(origin);
+}
+
+/**
+ * Reject an explicitly untrusted browser Origin on every mutating request.
+ *
+ * CORS stops such a page from reading the response, but not from causing the
+ * request to run. This guard runs before the routes so login, logout, password
+ * reset, and other public mutations get the same protection as authenticated
+ * ones. Requests with no Origin (server-to-server, curl, the Razorpay webhook)
+ * pass through to route-specific authentication or signature checks.
+ */
+function originGuard(req, res, next) {
+  if (!requiresCsrf(req)) {
+    return next();
+  }
+
+  const origin = req.get("origin");
+  if (!origin || isTrustedOrigin(req)) {
+    return next();
+  }
+
+  return next(
+    new ApiError(
+      ERROR_CODE.CSRF_INVALID,
+      "CSRF origin is not trusted. Use the configured frontend origin."
+    )
+  );
+}
 
 /**
  * Validate the CSRF token on state-changing requests.
@@ -46,23 +83,36 @@ const CSRF_HEADER = "x-csrf-token";
  * token is derived from `req.user` and `req.sessionId` (both set by
  * `authenticate`).
  *
- * On unauthenticated mutating endpoints (login, refresh) no user exists yet.
- * Those routes are protected differently: `refresh` verifies that the
- * presented token matches the CSRF cookie, and `login` is safe without CSRF
- * because it authenticates rather than relies on an existing session — an
- * attacker can only force a login the victim controls, which is a known,
- * bounded exposure. See routes/auth.routes.js for that reasoning inline.
+ * On unauthenticated mutating endpoints no user exists yet, so `originGuard`
+ * has already rejected an untrusted browser Origin before the route runs.
+ * `refresh` additionally checks the token when no Origin is present. `login`
+ * needs no token because it authenticates rather than relying on an existing
+ * session; forcing a login only signs the victim into an account the attacker
+ * does not control. See routes/auth.routes.js for that reasoning inline.
  */
 function csrfProtection(req, res, next) {
   if (!requiresCsrf(req)) {
     return next();
   }
 
+  if (isTrustedOrigin(req)) {
+    return next();
+  }
+
+  if (req.get("origin")) {
+    return next(
+      new ApiError(
+        ERROR_CODE.CSRF_INVALID,
+        "CSRF origin is not trusted. Use the configured frontend origin."
+      )
+    );
+  }
+
   const cookieToken = req.cookies?.[COOKIE_NAMES.CSRF_TOKEN];
   const headerToken = req.get(CSRF_HEADER);
 
-  // Missing on both sides: almost always a non-browser client that was never
-  // issued a token.
+  // No Origin means a non-browser caller. Missing on both sides is almost
+  // always a client that was never issued a token.
   if (!cookieToken || !headerToken) {
     return next(
       new ApiError(
@@ -110,5 +160,7 @@ function csrfProtection(req, res, next) {
 
 module.exports = {
   csrfProtection,
+  originGuard,
+  isTrustedOrigin,
   CSRF_HEADER,
 };

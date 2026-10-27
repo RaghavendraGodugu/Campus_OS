@@ -1,16 +1,17 @@
 # syntax=docker/dockerfile:1
 
 # ===== build =====
-# Dependencies first, in their own layer. Editing application code must not
-# reinstall the world — that turns every deploy into a ten-minute cache miss.
+# The repository is an npm workspace with one lockfile at the root. Copy both
+# workspace manifests as well as the root lockfile so `npm ci` can resolve the
+# backend workspace without inventing a second, drifting lockfile.
 FROM node:22-alpine AS deps
 
 WORKDIR /app
 
-COPY campusOs_backend/package.json campusOs_backend/package-lock.json* ./
-# `npm ci` fails rather than guessing when the lockfile and the manifest
-# disagree, which is exactly what should happen in a build.
-RUN npm ci --omit=dev --ignore-scripts
+COPY package.json package-lock.json ./
+COPY campusOs_backend/package.json ./campusOs_backend/package.json
+COPY campusOs_frontend/package.json ./campusOs_frontend/package.json
+RUN npm ci --omit=dev --ignore-scripts --workspace campusOs_backend
 
 # ===== runtime =====
 FROM node:22-alpine AS runtime
@@ -22,22 +23,27 @@ RUN apk add --no-cache tini
 
 WORKDIR /app
 ENV NODE_ENV=production
+ENV PORT=5050
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY campusOs_backend/package.json ./
-COPY campusOs_backend/src ./src
-COPY campusOs_backend/scripts ./scripts
+COPY package.json ./
+COPY campusOs_backend/package.json ./campusOs_backend/package.json
+COPY campusOs_backend/src ./campusOs_backend/src
+COPY campusOs_backend/scripts ./campusOs_backend/scripts
+
+# Run from the backend directory so scripts and the relative `.env` lookup match
+# a normal checkout. Node still resolves dependencies from /app/node_modules.
+WORKDIR /app/campusOs_backend
 
 # Never root. A container escape should not start from uid 0.
 USER node
 
 EXPOSE 5050
 
-# The orchestrator restarts on this, and it fails if the database is unreachable
-# — a "healthy" API that cannot serve a request is not healthy, and reporting it
-# as healthy is how an outage goes unnoticed for an hour.
+# Readiness, not liveness: a process that cannot reach MongoDB must not be
+# reported healthy to an orchestrator that will send it traffic.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||5050)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||5050)+'/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "src/server.js"]

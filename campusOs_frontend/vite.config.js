@@ -6,7 +6,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-import { cspPlugin, DEV_CSP } from "./build/csp";
+import { cspPlugin, DEV_CSP } from "./build/csp.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 

@@ -102,7 +102,8 @@ export default function Terms() {
   });
 
   const rollover = useMutation({
-    mutationFn: (payload) => apiPost("/academic-terms/rollover/prepare-next-year", payload),
+    mutationFn: (payload) =>
+      apiPost("/academic-terms/rollover/prepare-next-year", payload),
     onSuccess: () => {
       invalidate();
       setRollingOver(false);
@@ -593,4 +594,3 @@ function RolloverDialog({
     </Modal>
   );
 }
-

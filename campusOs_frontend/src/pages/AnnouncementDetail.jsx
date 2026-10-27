@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Paperclip } from "lucide-react";
+import { ArrowLeft, ImageOff, Paperclip } from "lucide-react";
 
-import { apiGet, fetchDocument } from "../api/client";
+import { apiAssetUrl, apiGet, fetchDocument } from "../api/client";
 import { formatDateTime, humanise } from "../lib/format";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
@@ -111,12 +112,12 @@ export default function AnnouncementDetail() {
       */}
       {isImage && (
         <figure className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-ink-200/70 dark:bg-surface dark:ring-ink-600">
-          <img
-            src={`/api/v1/announcements/${reference}/attachment`}
-            alt={`Image attached to the notice "${announcement.title}"`}
-            loading="lazy"
-            decoding="async"
-            className="max-h-[28rem] w-full bg-ink-50 object-cover dark:bg-ink-100/50"
+          {/* Keyed by reference: a different notice starts with a fresh retry
+              state rather than inheriting the previous image's failure. */}
+          <AttachmentImage
+            key={reference}
+            reference={reference}
+            title={announcement.title}
           />
         </figure>
       )}
@@ -136,5 +137,53 @@ export default function AnnouncementDetail() {
         )}
       </div>
     </article>
+  );
+}
+
+/** The inline image, with a retry state that belongs to this reference alone. */
+function AttachmentImage({ reference, title }) {
+  const [attempt, setAttempt] = useState(0);
+  const [failed, setFailed] = useState(false);
+
+  const retry = () => {
+    setFailed(false);
+    setAttempt((value) => value + 1);
+  };
+
+  if (failed) {
+    return (
+      <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
+        <ImageOff
+          className="size-6 text-ink-400 dark:text-ink-500"
+          aria-hidden="true"
+        />
+        <div>
+          <p className="text-sm font-medium text-ink-800 dark:text-ink-100">
+            The attached image could not be loaded.
+          </p>
+          <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+            The notice itself is still available.
+          </p>
+        </div>
+        <Button variant="secondary" size="sm" onClick={retry}>
+          Try again
+        </Button>
+      </div>
+    );
+  }
+
+  const src = `${apiAssetUrl(
+    `/announcements/${reference}/attachment`,
+  )}${attempt ? `?retry=${attempt}` : ""}`;
+
+  return (
+    <img
+      src={src}
+      alt={`Image attached to the notice "${title}"`}
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+      className="max-h-[28rem] w-full bg-ink-50 object-cover dark:bg-ink-100/50"
+    />
   );
 }

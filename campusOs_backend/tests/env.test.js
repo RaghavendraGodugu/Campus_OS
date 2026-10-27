@@ -7,7 +7,7 @@
  * malformed URI, because it looks like working software.
  */
 
-const { databaseNameFrom } = require("../src/config/env");
+const { databaseNameFrom, parseEnv } = require("../src/config/env");
 
 describe("databaseNameFrom", () => {
   it("reads the name from an Atlas SRV string", () => {
@@ -114,5 +114,48 @@ describe("explaining a DNS failure", () => {
 
   it("says nothing about an authentication failure", () => {
     expect(explainDnsFailure({ code: "AUTHENTICATION_FAILED" }, SRV_URI)).toBeNull();
+  });
+});
+
+describe("production integration validation", () => {
+  const production = {
+    NODE_ENV: "production",
+    PORT: "5050",
+    MONGO_URI:
+      "mongodb+srv://user:pass@cluster.mongodb.net/campusos?retryWrites=true&w=majority",
+    CLIENT_URL: "https://campusos.vercel.app",
+    WEB_URL: "https://campusos.vercel.app",
+    JWT_SECRET: "a".repeat(48),
+    REFRESH_TOKEN_SECRET: "b".repeat(48),
+    CSRF_SECRET: "c".repeat(48),
+    COOKIE_SECURE: "true",
+    CLOUDINARY_CLOUD_NAME: "campusos",
+    CLOUDINARY_API_KEY: "cloudinary-key",
+    CLOUDINARY_API_SECRET: "cloudinary-secret",
+    RAZORPAY_KEY_ID: "rzp_live_example",
+    RAZORPAY_KEY_SECRET: "razorpay-secret",
+    RAZORPAY_WEBHOOK_SECRET: "webhook-secret",
+    SMTP_HOST: "smtp.example.com",
+  };
+
+  it("accepts a production environment with every integration configured", () => {
+    const parsed = parseEnv(production);
+
+    expect(parsed.NODE_ENV).toBe("production");
+    expect(parsed.CLIENT_URL).toEqual(["https://campusos.vercel.app"]);
+  });
+
+  it("rejects a missing Cloudinary secret", () => {
+    expect(() => parseEnv({ ...production, CLOUDINARY_API_SECRET: "" })).toThrow(
+      /CLOUDINARY_API_SECRET/
+    );
+  });
+
+  it("rejects a missing SMTP host", () => {
+    expect(() => parseEnv({ ...production, SMTP_HOST: "" })).toThrow(/SMTP_HOST/);
+  });
+
+  it("rejects a missing public frontend URL", () => {
+    expect(() => parseEnv({ ...production, WEB_URL: "" })).toThrow(/WEB_URL/);
   });
 });

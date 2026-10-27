@@ -81,8 +81,12 @@ export default function Profile() {
         // The fields in a submission match what the server said this person
         // may change — the staff self-description only goes out when an
         // editableFields list grants it.
-        ...(data.data.editableFields.includes("designation") ? { designation } : {}),
-        ...(data.data.editableFields.includes("expertise") ? { expertise } : {}),
+        ...(data.data.editableFields.includes("designation")
+          ? { designation }
+          : {}),
+        ...(data.data.editableFields.includes("expertise")
+          ? { expertise }
+          : {}),
       }),
     onSuccess: async (response) => {
       setEditing(false);
@@ -260,36 +264,34 @@ export default function Profile() {
               />
             </Field>
 
-            {isStaff &&
-              data.data.editableFields.includes("designation") && (
-                <Field
-                  label="Designation"
-                  htmlFor="designation"
-                  hint="Optional. What the directory shows beside your name."
-                >
-                  <input
-                    id="designation"
-                    value={designation}
-                    onChange={(event) => setDesignation(event.target.value)}
-                    maxLength={120}
-                    placeholder="Associate Professor"
-                    className={inputClass}
-                  />
-                </Field>
-              )}
+            {isStaff && data.data.editableFields.includes("designation") && (
+              <Field
+                label="Designation"
+                htmlFor="designation"
+                hint="Optional. What the directory shows beside your name."
+              >
+                <input
+                  id="designation"
+                  value={designation}
+                  onChange={(event) => setDesignation(event.target.value)}
+                  maxLength={120}
+                  placeholder="Associate Professor"
+                  className={inputClass}
+                />
+              </Field>
+            )}
 
-            {isStaff &&
-              data.data.editableFields.includes("expertise") && (
-                <Field
-                  label="Expertise"
-                  hint="Optional. Up to twelve areas colleagues can search you by."
-                >
-                  <ExpertiseEditor
-                    expertise={expertise}
-                    onChange={setExpertise}
-                  />
-                </Field>
-              )}
+            {isStaff && data.data.editableFields.includes("expertise") && (
+              <Field
+                label="Expertise"
+                hint="Optional. Up to twelve areas colleagues can search you by."
+              >
+                <ExpertiseEditor
+                  expertise={expertise}
+                  onChange={setExpertise}
+                />
+              </Field>
+            )}
 
             <div className="flex justify-end gap-2">
               <Button
@@ -307,26 +309,27 @@ export default function Profile() {
         ) : (
           <>
             <dl className="grid gap-4 sm:grid-cols-2">
-            <Detail label="Name" value={account.fullName} />
-            <Detail label="Email" value={account.email} />
-            <Detail label="Phone" value={account.phone} />
-            <Detail label="Role" value={humanise(account.role)} />
-            {account.designation && (
-              <Detail label="Designation" value={account.designation} />
-            )}
+              <Detail label="Name" value={account.fullName} />
+              <Detail label="Email" value={account.email} />
+              <Detail label="Phone" value={account.phone} />
+              <Detail label="Role" value={humanise(account.role)} />
+              {account.designation && (
+                <Detail label="Designation" value={account.designation} />
+              )}
             </dl>
-            {Array.isArray(account.expertise) && account.expertise.length > 0 && (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {account.expertise.map((skill) => (
-                  <span
-                    key={skill}
-                    className="rounded-full bg-ink-100 px-2.5 py-0.5 text-xs font-medium text-ink-700 dark:bg-ink-800 dark:text-ink-300"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            )}
+            {Array.isArray(account.expertise) &&
+              account.expertise.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {account.expertise.map((skill) => (
+                    <span
+                      key={skill}
+                      className="rounded-full bg-ink-100 px-2.5 py-0.5 text-xs font-medium text-ink-700 dark:bg-ink-800 dark:text-ink-300"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              )}
           </>
         )}
       </Card>
@@ -399,10 +402,10 @@ export default function Profile() {
       </Card>
 
       <details className="rounded-xl bg-white dark:bg-surface px-5 py-4 shadow-sm ring-1 ring-ink-200/70 dark:ring-ink-600">
-        <summary className="cursor-pointer text-sm font-medium text-ink-800">
+        <summary className="cursor-pointer text-sm font-medium text-ink-800 dark:text-ink-100">
           What my role can do ({profile.permissions.length})
         </summary>
-        <p className="mt-2 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+        <p className="mt-2 text-xs text-ink-500 dark:text-ink-400">
           Decided by the server from your role, and re-checked on every request.
           This list is here so you can see it, not to control it.
         </p>
@@ -504,7 +507,11 @@ function PasswordSection() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                 aria-label={showCurrent ? "Hide password" : "Show password"}
               >
-                {showCurrent ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                {showCurrent ? (
+                  <EyeOff className="size-5" />
+                ) : (
+                  <Eye className="size-5" />
+                )}
               </button>
             </div>
           </Field>
@@ -532,7 +539,11 @@ function PasswordSection() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                 aria-label={showNext ? "Hide password" : "Show password"}
               >
-                {showNext ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                {showNext ? (
+                  <EyeOff className="size-5" />
+                ) : (
+                  <Eye className="size-5" />
+                )}
               </button>
             </div>
           </Field>
@@ -559,7 +570,11 @@ function PasswordSection() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                 aria-label={showConfirm ? "Hide password" : "Show password"}
               >
-                {showConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                {showConfirm ? (
+                  <EyeOff className="size-5" />
+                ) : (
+                  <Eye className="size-5" />
+                )}
               </button>
             </div>
           </Field>
@@ -613,10 +628,12 @@ function PasswordSection() {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
         {label}
       </dt>
-      <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
+      <dd className="mt-0.5 text-sm text-ink-800 dark:text-ink-200">
+        {value ?? "—"}
+      </dd>
     </div>
   );
 }

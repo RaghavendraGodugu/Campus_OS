@@ -16,7 +16,7 @@ const eventRsvpSchema = new mongoose.Schema(
     },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 eventRsvpSchema.index({ event: 1, user: 1 }, { unique: true });

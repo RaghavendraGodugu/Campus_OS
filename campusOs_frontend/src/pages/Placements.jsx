@@ -40,7 +40,8 @@ const APPLICATION_TONE = {
     "bg-brand-50 text-brand-700 ring-1 ring-brand-200/70 dark:bg-brand-500/15 dark:text-brand-300 dark:ring-brand-400/25",
   REJECTED:
     "bg-red-50 text-red-700 ring-1 ring-red-200/70 dark:bg-red-500/12 dark:text-red-300 dark:ring-red-400/25",
-  WITHDRAWN: "bg-ink-100 text-ink-500 dark:bg-ink-200/40 dark:text-ink-400 dark:text-ink-500",
+  WITHDRAWN:
+    "bg-ink-100 text-ink-500 dark:bg-ink-200/40 dark:text-ink-400 dark:text-ink-500",
 };
 
 export default function Placements() {
@@ -176,26 +177,34 @@ export default function Placements() {
 
               <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">Apply by</dt>
+                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                    Apply by
+                  </dt>
                   <dd className="mt-0.5 flex items-center gap-1.5 text-ink-800 dark:text-ink-200">
                     <CalendarDays className="size-3.5" aria-hidden="true" />{" "}
                     {formatDate(drive.applicationDeadline)}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">Drive</dt>
+                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                    Drive
+                  </dt>
                   <dd className="mt-0.5 text-ink-800 dark:text-ink-200">
                     {formatDate(drive.driveDate)}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">Location</dt>
+                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                    Location
+                  </dt>
                   <dd className="mt-0.5 text-ink-800 dark:text-ink-200">
                     {drive.location || "—"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">CTC</dt>
+                  <dt className="text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                    CTC
+                  </dt>
                   <dd className="mt-0.5 text-ink-800 dark:text-ink-200">
                     {drive.ctcPaise ? formatMoney(drive.ctcPaise) : "—"}
                   </dd>

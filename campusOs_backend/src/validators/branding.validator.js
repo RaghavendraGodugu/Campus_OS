@@ -19,9 +19,12 @@ const brandingShape = {
   isActive: z.boolean().optional(),
 };
 
-const updateBrandingSchema = z.object(brandingShape).strict().refine((v) => Object.keys(v).length > 0, {
-  message: "Supply at least one field to change",
-});
+const updateBrandingSchema = z
+  .object(brandingShape)
+  .strict()
+  .refine((v) => Object.keys(v).length > 0, {
+    message: "Supply at least one field to change",
+  });
 
 const toggleBrandingSchema = z
   .object({

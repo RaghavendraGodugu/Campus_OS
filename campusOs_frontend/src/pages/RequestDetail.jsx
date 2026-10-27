@@ -9,7 +9,7 @@ import { formatDateTime, humanise } from "../lib/format";
 import { Card } from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
-import Field from "../components/ui/Field";
+import Field, { inputClass } from "../components/ui/Field";
 import TransitionPanel from "../components/TransitionPanel";
 import DocumentPanel from "../components/DocumentPanel";
 import { ErrorState } from "../components/ui/States";
@@ -93,7 +93,7 @@ export default function RequestDetail() {
     <div className="mx-auto max-w-4xl space-y-6">
       <Link
         to={can("request:read:assigned") ? "/management/requests" : "/requests"}
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-800"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400 hover:text-ink-800 dark:hover:text-ink-200"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         All requests
@@ -143,10 +143,10 @@ export default function RequestDetail() {
               .filter(([key]) => !key.startsWith("__"))
               .map(([key, value]) => (
                 <div key={key}>
-                  <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
+                  <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
                     {humanise(key)}
                   </dt>
-                  <dd className="mt-0.5 text-sm text-ink-800">
+                  <dd className="mt-0.5 text-sm text-ink-800 dark:text-ink-200">
                     {typeof value === "boolean"
                       ? value
                         ? "Yes"
@@ -215,7 +215,7 @@ export default function RequestDetail() {
                 )}
               </div>
               <div className="pb-1">
-                <p className="text-sm font-medium text-ink-800">
+                <p className="text-sm font-medium text-ink-800 dark:text-ink-100">
                   {entry.from ? `${humanise(entry.from)} → ` : ""}
                   {humanise(entry.to)}
                 </p>
@@ -278,7 +278,7 @@ export default function RequestDetail() {
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               placeholder="Add something for the handler…"
-              className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 dark:ring-ink-500 placeholder:text-ink-400 dark:text-ink-500 focus:ring-2 focus:ring-brand-600"
+              className={`${inputClass} resize-y`}
             />
             <div className="flex justify-end">
               <Button
@@ -404,7 +404,7 @@ function InternalNotePanel({ request, onDone }) {
           value={note}
           onChange={(event) => setNote(event.target.value)}
           placeholder="Context for whoever picks this up…"
-          className="block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-ink-300 dark:ring-ink-500 placeholder:text-ink-400 dark:text-ink-500 focus:ring-2 focus:ring-brand-600"
+          className={`${inputClass} resize-y`}
         />
         <div className="flex justify-end">
           <Button
@@ -424,10 +424,12 @@ function InternalNotePanel({ request, onDone }) {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
         {label}
       </dt>
-      <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
+      <dd className="mt-0.5 text-sm text-ink-800 dark:text-ink-200">
+        {value ?? "—"}
+      </dd>
     </div>
   );
 }

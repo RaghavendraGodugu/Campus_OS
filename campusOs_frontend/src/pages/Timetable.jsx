@@ -58,11 +58,41 @@ function minutesFromTime(value) {
   return hours * 60 + minutes;
 }
 
+/** "2026-11-02" → 1 (Monday). */
+function weekdayFromDate(value) {
+  const date = new Date(`${value}T00:00:00.000Z`);
+  const day = date.getUTCDay();
+  return day === 0 ? 7 : day;
+}
+
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+/** "2026-11-02" → "2 Nov 2026". */
+function formatDate(value) {
+  if (!value) return "";
+  const [year, month, day] = String(value).slice(0, 10).split("-");
+  return `${Number(day)} ${MONTHS[Number(month) - 1]} ${year}`;
+}
+
 const EMPTY_FORM = {
   subject: "",
   faculty: "",
   room: "",
-  dayOfWeek: "1",
+  repeat: "WEEKLY",
+  date: "",
   start: "09:00",
   end: "10:00",
 };
@@ -82,14 +112,29 @@ export default function Timetable() {
   // Memoised so the day bucket does not recompute on every render just because
   // `?? []` produced a fresh array.
   const entries = useMemo(() => query.data?.data?.entries ?? [], [query.data]);
+  const weeklyEntries = useMemo(
+    () => entries.filter((entry) => entry.repeatsWeekly !== false),
+    [entries],
+  );
+  const oneOffEntries = useMemo(
+    () =>
+      entries
+        .filter((entry) => entry.repeatsWeekly === false)
+        .sort((left, right) =>
+          `${left.startsOn}-${left.startMinute}`.localeCompare(
+            `${right.startsOn}-${right.startMinute}`,
+          ),
+        ),
+    [entries],
+  );
 
   const byDay = useMemo(() => {
     const map = new Map(DAYS.map((day) => [day.value, []]));
-    for (const entry of entries) {
+    for (const entry of weeklyEntries) {
       map.get(entry.dayOfWeek)?.push(entry);
     }
     return map;
-  }, [entries]);
+  }, [weeklyEntries]);
 
   return (
     <div className="space-y-6">
@@ -150,7 +195,7 @@ export default function Timetable() {
         />
       )}
 
-      {query.isSuccess && term && entries.length > 0 && (
+      {query.isSuccess && term && weeklyEntries.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {DAYS.map((day) => {
             const classes = byDay.get(day.value) ?? [];
@@ -189,6 +234,30 @@ export default function Timetable() {
         </div>
       )}
 
+      {query.isSuccess && term && oneOffEntries.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-sm font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              One-off classes
+            </h2>
+            <span className="text-xs text-ink-400 dark:text-ink-500">
+              {oneOffEntries.length} scheduled
+            </span>
+          </div>
+          <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {oneOffEntries.map((entry) => (
+              <ClassCard
+                key={entry.id}
+                entry={entry}
+                dateLabel={formatDate(entry.startsOn)}
+                canManage={canManage}
+                onRemove={() => setRemoving(entry)}
+              />
+            ))}
+          </ul>
+        </section>
+      )}
+
       {canManage && term && (
         <ScheduleDialog
           open={adding}
@@ -202,11 +271,17 @@ export default function Timetable() {
   );
 }
 
-function ClassCard({ entry, canManage, onRemove }) {
+function ClassCard({ entry, canManage, onRemove, dateLabel }) {
   const { subject, faculty, room } = entry;
 
   return (
     <li className="rounded-xl bg-white/60 dark:bg-surface/60 p-3 ring-1 ring-ink-200/70 dark:ring-ink-700/60">
+      {dateLabel && (
+        <p className="mb-1.5 flex items-center gap-1.5 text-[0.6875rem] font-medium uppercase tracking-wide text-brand-700 dark:text-brand-300">
+          <CalendarDays className="size-3" aria-hidden="true" />
+          {dateLabel}
+        </p>
+      )}
       <div className="flex items-start justify-between gap-2">
         <p className="font-mono text-[0.6875rem] text-ink-500 dark:text-ink-400 dark:text-ink-500">
           {timeFromMinutes(entry.startMinute)}–
@@ -220,7 +295,11 @@ function ClassCard({ entry, canManage, onRemove }) {
             <button
               type="button"
               onClick={onRemove}
-              aria-label={`Remove ${subject?.code ?? "this class"} from ${DAY_LABEL[entry.dayOfWeek]}`}
+              aria-label={`Remove ${subject?.code ?? "this class"} ${
+                dateLabel
+                  ? `on ${dateLabel}`
+                  : `from ${DAY_LABEL[entry.dayOfWeek]}`
+              }`}
               className="rounded-md p-1 text-ink-400 dark:text-ink-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-300"
             >
               <Trash2 className="size-3.5" aria-hidden="true" />
@@ -252,7 +331,8 @@ function ClassCard({ entry, canManage, onRemove }) {
 
 function ScheduleDialog({ open, onClose, term }) {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState(EMPTY_FORM);
+  const emptyForm = () => ({ ...EMPTY_FORM, date: term.startsOn ?? "" });
+  const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
 
   const subjectsQuery = useQuery({
@@ -277,9 +357,15 @@ function ScheduleDialog({ open, onClose, term }) {
 
   const endMinutes = minutesFromTime(form.end);
   const startMinutes = minutesFromTime(form.start);
+  const isWeekly = form.repeat === "WEEKLY";
+  const dateDay = form.date ? weekdayFromDate(form.date) : null;
 
   const invalid =
-    !form.subject || !form.faculty || !form.room || endMinutes <= startMinutes;
+    !form.subject ||
+    !form.faculty ||
+    !form.room ||
+    !form.date ||
+    endMinutes <= startMinutes;
 
   const create = useMutation({
     mutationFn: () =>
@@ -288,13 +374,15 @@ function ScheduleDialog({ open, onClose, term }) {
         subject: form.subject,
         faculty: form.faculty,
         room: form.room,
-        dayOfWeek: Number(form.dayOfWeek),
+        dayOfWeek: dateDay,
+        startsOn: form.date,
+        repeatsWeekly: isWeekly,
         startMinute: startMinutes,
         endMinute: endMinutes,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timetable"] });
-      setForm(EMPTY_FORM);
+      setForm(emptyForm());
       setError("");
       onClose();
     },
@@ -311,7 +399,11 @@ function ScheduleDialog({ open, onClose, term }) {
       open={open}
       onClose={onClose}
       title="Schedule a class"
-      description={`Added to ${term.name}. The week repeats until the class is removed.`}
+      description={`Added to ${term.name}. ${
+        isWeekly
+          ? "It repeats weekly until the class is removed."
+          : "It is held once on the selected date."
+      }`}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
@@ -409,27 +501,49 @@ function ScheduleDialog({ open, onClose, term }) {
           </Field>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Day" htmlFor="class-day" required>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Repeats" htmlFor="class-repeat" required>
             <select
-              id="class-day"
+              id="class-repeat"
               className={inputClass}
-              value={form.dayOfWeek}
+              value={form.repeat}
               onChange={(event) =>
                 setForm((current) => ({
                   ...current,
-                  dayOfWeek: event.target.value,
+                  repeat: event.target.value,
                 }))
               }
             >
-              {DAYS.map((day) => (
-                <option key={day.value} value={day.value}>
-                  {day.label}
-                </option>
-              ))}
+              <option value="WEEKLY">Weekly</option>
+              <option value="ONE_OFF">One-off</option>
             </select>
           </Field>
 
+          <Field
+            label={isWeekly ? "First class date" : "Class date"}
+            htmlFor="class-date"
+            required
+            hint={
+              dateDay
+                ? `${isWeekly ? "Repeats every" : "Held on"} ${DAY_LABEL[dateDay]}`
+                : undefined
+            }
+          >
+            <input
+              id="class-date"
+              type="date"
+              className={inputClass}
+              min={term.startsOn ?? undefined}
+              max={term.endsOn ?? undefined}
+              value={form.date}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, date: event.target.value }))
+              }
+            />
+          </Field>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Starts" htmlFor="class-start" required>
             <input
               id="class-start"
@@ -493,14 +607,19 @@ function RemoveDialog({ entry, onClose }) {
 
   if (!entry) return null;
 
+  const when =
+    entry.repeatsWeekly === false
+      ? `${formatDate(entry.startsOn)} at ${timeFromMinutes(entry.startMinute)}`
+      : `every ${DAY_LABEL[entry.dayOfWeek]} at ${timeFromMinutes(
+          entry.startMinute,
+        )}${entry.startsOn ? ` from ${formatDate(entry.startsOn)}` : ""}`;
+
   return (
     <Modal
       open={Boolean(entry)}
       onClose={onClose}
       title="Remove this class?"
-      description={`${entry.subject?.code ?? "This class"} on ${
-        DAY_LABEL[entry.dayOfWeek]
-      } at ${timeFromMinutes(entry.startMinute)}. It disappears from the weekly grid; the history stays.`}
+      description={`${entry.subject?.code ?? "This class"} ${when}. It disappears from the timetable; the history stays.`}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>

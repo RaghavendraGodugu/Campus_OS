@@ -167,7 +167,7 @@ export default function People() {
         )}
 
         {users.length > 0 && (
-          <ul className="divide-y divide-ink-100/90">
+          <ul className="divide-y divide-ink-100/90 dark:divide-ink-700/50">
             {users.map((person) => (
               <PersonRow
                 key={person.id ?? person._id}
@@ -270,10 +270,10 @@ function PersonRow({ person, isMe, onEdit, onDeactivate, onReset }) {
         </span>
 
         <div className="min-w-0">
-          <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900">
+          <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900 dark:text-ink-100">
             {person.fullName}
             {isMe && (
-              <span className="rounded-md bg-ink-100 dark:bg-ink-200/40 px-1.5 py-0.5 text-[0.6875rem] font-medium text-ink-600">
+              <span className="rounded-md bg-ink-100 dark:bg-ink-800 px-1.5 py-0.5 text-[0.6875rem] font-medium text-ink-600 dark:text-ink-300">
                 You
               </span>
             )}
@@ -708,9 +708,9 @@ function ReasonDialog({
         }}
         className="space-y-4"
       >
-        <p className="flex items-start gap-2.5 rounded-xl bg-ink-50 dark:bg-ink-100/40 px-3.5 py-3 text-xs leading-relaxed text-ink-600 ring-1 ring-ink-200 dark:ring-ink-600 ring-inset">
+        <p className="flex items-start gap-2.5 rounded-xl bg-ink-50 dark:bg-ink-800/50 px-3.5 py-3 text-xs leading-relaxed text-ink-600 dark:text-ink-300 ring-1 ring-ink-200 dark:ring-ink-600 ring-inset">
           <AlertTriangle
-            className="mt-0.5 size-4 shrink-0 text-ink-400 dark:text-ink-500"
+            className="mt-0.5 size-4 shrink-0 text-ink-400 dark:text-ink-400"
             aria-hidden="true"
           />
           {description}
@@ -764,9 +764,9 @@ function TemporaryPasswordDialog({ issued, onClose }) {
       footer={<Button onClick={onClose}>Done</Button>}
     >
       <div className="space-y-4">
-        <p className="text-sm text-ink-600">
+        <p className="text-sm text-ink-600 dark:text-ink-300">
           Give this to{" "}
-          <strong className="font-medium text-ink-900">
+          <strong className="font-medium text-ink-900 dark:text-ink-100">
             {issued?.email ?? issued?.who}
           </strong>{" "}
           directly. They will be asked to replace it the first time they sign
@@ -774,7 +774,7 @@ function TemporaryPasswordDialog({ issued, onClose }) {
         </p>
 
         <div className="surface flex items-center justify-between gap-3 px-4 py-3.5">
-          <code className="select-all font-mono text-sm tracking-wider break-all text-ink-900">
+          <code className="select-all font-mono text-sm tracking-wider break-all text-ink-900 dark:text-ink-100">
             {issued?.temporaryPassword}
           </code>
           <Button

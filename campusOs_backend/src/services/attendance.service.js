@@ -112,6 +112,8 @@ function presentEntry(entry) {
   return {
     id: String(entry._id),
     dayOfWeek: entry.dayOfWeek,
+    startsOn: entry.startsOn ? dateKey(entry.startsOn) : null,
+    repeatsWeekly: entry.repeatsWeekly !== false,
     startMinute: entry.startMinute,
     endMinute: entry.endMinute,
     subject: entry.subject
@@ -139,6 +141,15 @@ function presentEntry(entry) {
         }
       : null,
   };
+}
+
+function occursOn(entry, date) {
+  if (entry.repeatsWeekly === false) {
+    return Boolean(entry.startsOn) && dateKey(entry.startsOn) === dateKey(date);
+  }
+
+  if (isoWeekday(date) !== entry.dayOfWeek) return false;
+  return !entry.startsOn || date >= new Date(entry.startsOn);
 }
 
 function presentSession(session) {
@@ -304,9 +315,9 @@ async function mark({ user, payload, req }) {
     );
   }
 
-  if (isoWeekday(payload.date) !== entry.dayOfWeek) {
+  if (!occursOn(entry, payload.date)) {
     throw ApiError.badRequest(
-      "That class does not meet on this date. Check the weekday and the date."
+      "That class does not meet on this date. Check the class date and the date selected."
     );
   }
 
@@ -443,7 +454,7 @@ async function entryContext({ user, entryId, date }) {
     throw ApiError.forbidden("You cannot open this class register");
   }
 
-  if (isoWeekday(date) !== entry.dayOfWeek) {
+  if (!occursOn(entry, date)) {
     throw ApiError.badRequest("That class does not meet on this date");
   }
 
@@ -487,8 +498,19 @@ async function day({ user, date }) {
 
   const entries = await TimetableEntry.find({
     faculty: user._id,
-    dayOfWeek: weekday,
     isActive: true,
+    $or: [
+      {
+        repeatsWeekly: { $ne: false },
+        dayOfWeek: weekday,
+        $or: [
+          { startsOn: null },
+          { startsOn: { $exists: false } },
+          { startsOn: { $lte: date } },
+        ],
+      },
+      { repeatsWeekly: false, startsOn: date },
+    ],
   })
     .populate(ENTRY_POPULATE)
     .sort({ startMinute: 1 });

@@ -6,7 +6,7 @@ const listEvents = asyncHandler(async (req, res) =>
   sendSuccess(res, {
     message: "Events listed",
     data: { events: await service.listEvents({ user: req.user }) },
-  }),
+  })
 );
 
 const createEvent = asyncHandler(async (req, res) =>
@@ -19,7 +19,7 @@ const createEvent = asyncHandler(async (req, res) =>
         req,
       }),
     },
-  }),
+  })
 );
 
 const updateEvent = asyncHandler(async (req, res) =>
@@ -33,21 +33,21 @@ const updateEvent = asyncHandler(async (req, res) =>
         req,
       }),
     },
-  }),
+  })
 );
 
 const rsvp = asyncHandler(async (req, res) =>
   sendCreated(res, {
     message: "Registered",
     data: await service.rsvp({ user: req.user, id: req.validated.params.id, req }),
-  }),
+  })
 );
 
 const withdraw = asyncHandler(async (req, res) =>
   sendSuccess(res, {
     message: "Registration released",
     data: await service.withdraw({ user: req.user, id: req.validated.params.id, req }),
-  }),
+  })
 );
 
 module.exports = { listEvents, createEvent, updateEvent, rsvp, withdraw };

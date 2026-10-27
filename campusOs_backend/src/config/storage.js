@@ -296,21 +296,30 @@ class CloudinaryStorage {
     this.cloudName = cloudName;
   }
 
-  async save(buffer, { folder, filename, mimeType }) {
+  async save(buffer, { folder, filename, mimeType, transformation }) {
     assertStorable(buffer, mimeType);
     const key = buildStorageKey({ folder, filename, mimeType });
     const resourceType = resourceTypeForStored(key, mimeType);
 
+    const options = {
+      // `key` already contains the folder. Passing `folder` as well makes
+      // Cloudinary prepend it a second time.
+      public_id: key,
+      resource_type: resourceType,
+      type: "authenticated", // private delivery
+      overwrite: false,
+    };
+
+    // An incoming transformation stores the optimised image once, so every
+    // later read is smaller without a per-request resize. Documents are never
+    // transformed: a signed certificate must stay byte-for-byte intact.
+    if (transformation && resourceType === "image") {
+      options.transformation = transformation;
+    }
+
     const result = await new Promise((resolve, reject) => {
-      const stream = this.cloudinary.uploader.upload_stream(
-        {
-          public_id: key,
-          folder,
-          resource_type: resourceType,
-          type: "authenticated", // private delivery
-          overwrite: false,
-        },
-        (error, uploaded) => (error ? reject(error) : resolve(uploaded))
+      const stream = this.cloudinary.uploader.upload_stream(options, (error, uploaded) =>
+        error ? reject(error) : resolve(uploaded)
       );
       stream.end(buffer);
     });
@@ -326,39 +335,63 @@ class CloudinaryStorage {
     };
   }
 
-  async read() {
-    // Bytes are never returned through the CDN; the caller redirects to a
-    // short-lived signed URL instead. See getSignedUrl().
-    throw new ApiError(
-      ERROR_CODE.INTEGRATION_ERROR,
-      "Read this file through its signed download URL"
-    );
-  }
-
   /**
-   * Mint a short-lived signed delivery URL.
-   * The signature proves recency, not the holder's right to read.
+   * Fetch bytes from Cloudinary server-side and return them as a Buffer.
+   *
+   * We intentionally avoid redirecting the browser to a Cloudinary URL because:
+   *  1. Cloudinary's `private_download_url` points at `api.cloudinary.com/…/image/download`,
+   *     which is an admin API endpoint that requires API-key auth — not suitable for
+   *     browser `<img>` tags.
+   *  2. Even a CDN-delivery signed URL would require `img-src https://res.cloudinary.com`
+   *     in the Content Security Policy, weakening it.
+   *
+   * Fetching server-side keeps the CSP tight (`img-src 'self'`) and means the
+   * session cookie the browser already holds is the only credential required.
+   *
+   * @param {string} key  The Cloudinary public_id (storage key).
+   * @param {{mimeType?: string}} [options]
+   * @returns {Promise<Buffer>}
    */
-  /**
-   * @param {string} key Stored key.
-   * @param {{expiresInSeconds?: number, mimeType?: string, download?: boolean}} [options]
-   *   `download` forces an attachment disposition. Images default to inline so a
-   *   thumbnail renders in the page rather than downloading; documents default
-   *   to attachment, because nobody wants a certificate silently opening in a
-   *   new tab.
-   */
-  async getSignedUrl(
-    key,
-    { expiresInSeconds = SIGNED_URL_TTL_SECONDS, mimeType, download } = {}
-  ) {
+  async read(key, { mimeType } = {}) {
     const resourceType = resourceTypeForStored(key, mimeType);
-    const isImage = resourceType === "image";
-    return this.cloudinary.utils.private_download_url(key, {
+
+    // Build a short-lived signed download URL using the Cloudinary SDK.
+    // The URL is only fetched once, server-side, so the API credentials never
+    // leave the server and the browser never sees this URL.
+    const signedUrl = this.cloudinary.utils.private_download_url(key, null, {
       resource_type: resourceType,
       type: "authenticated",
-      expires_at: Math.floor(Date.now() / 1000) + expiresInSeconds,
-      attachment: (download ?? !isImage) === true ? true : false,
+      expires_at: Math.floor(Date.now() / 1000) + SIGNED_URL_TTL_SECONDS,
+      attachment: false,
     });
+
+    let response;
+    try {
+      response = await fetch(signedUrl, {
+        signal: AbortSignal.timeout(15_000),
+      });
+    } catch (err) {
+      logger.warn({ err, key }, "Cloudinary server-side fetch failed (network error)");
+      throw new ApiError(
+        ERROR_CODE.INTEGRATION_ERROR,
+        "Could not retrieve file from storage"
+      );
+    }
+
+    if (!response.ok) {
+      const body = (await response.text().catch(() => "")).slice(0, 500);
+      logger.warn(
+        { status: response.status, body, key },
+        "Cloudinary server-side fetch returned non-2xx"
+      );
+      throw new ApiError(
+        ERROR_CODE.INTEGRATION_ERROR,
+        "Could not retrieve file from storage"
+      );
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
   }
 
   async exists() {

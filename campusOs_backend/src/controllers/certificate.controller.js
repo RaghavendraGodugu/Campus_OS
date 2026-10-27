@@ -162,12 +162,8 @@ const download = asyncHandler(async (req, res) => {
 
   const payload = await certificateService.readDocument({
     storageKey: resolved.storageKey,
+    mimeType: "application/pdf",
   });
-
-  if (payload.redirect) {
-    // Cloudinary serves the bytes under its own short-lived signature.
-    return res.redirect(302, payload.redirect);
-  }
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `attachment; filename="${resolved.filename}"`);

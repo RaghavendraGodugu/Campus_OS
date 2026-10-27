@@ -147,7 +147,10 @@ export default function DynamicField({ field, value, error, onChange }) {
             {...described}
           />
           <div>
-            <label htmlFor={id} className="text-sm font-medium text-ink-700 dark:text-ink-300">
+            <label
+              htmlFor={id}
+              className="text-sm font-medium text-ink-700 dark:text-ink-300"
+            >
               {field.label}
               {field.required && (
                 <span className="ml-0.5 text-red-600 dark:text-red-400">*</span>

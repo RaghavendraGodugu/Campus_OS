@@ -142,9 +142,9 @@ export default function NotificationBell() {
             )}
           </div>
 
-          <ul className="max-h-96 divide-y divide-ink-100 overflow-y-auto">
+          <ul className="max-h-96 divide-y divide-ink-100 dark:divide-ink-700/50 overflow-y-auto">
             {list.isLoading && (
-              <li className="px-4 py-6 text-center text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+              <li className="px-4 py-6 text-center text-xs text-ink-500 dark:text-ink-400">
                 Loading…
               </li>
             )}
@@ -184,13 +184,13 @@ export default function NotificationBell() {
                       />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-ink-800">
+                      <p className="text-sm font-medium text-ink-800 dark:text-ink-100">
                         {notification.title}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                      <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                         {notification.body}
                       </p>
-                      <p className="mt-1 text-[11px] text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                      <p className="mt-1 text-[11px] text-ink-400 dark:text-ink-400">
                         {humanise(notification.type)} ·{" "}
                         {formatRelative(notification.createdAt)}
                       </p>

@@ -1,11 +1,7 @@
 import { useAuth } from "../context/AuthContext";
 import { EmptyState } from "./ui/States";
 import { ShieldAlert } from "lucide-react";
-import {
-  SkeletonHeading,
-  SkeletonStats,
-  SkeletonPanel,
-} from "./ui/Skeleton";
+import { SkeletonHeading, SkeletonStats, SkeletonPanel } from "./ui/Skeleton";
 
 /**
  * Gate for a route that needs a permission.
@@ -37,7 +33,13 @@ export default function RequirePermission({
   permissions,
   children,
 }) {
-  const { canAny, user, isLoading, isAuthenticated, permissions: userPerms } = useAuth();
+  const {
+    canAny,
+    user,
+    isLoading,
+    isAuthenticated,
+    permissions: userPerms,
+  } = useAuth();
 
   const required =
     permissions ??
@@ -57,7 +59,12 @@ export default function RequirePermission({
 
   // Authenticated but permissions array is empty → still hydrating after login.
   // Show skeleton instead of false denial.
-  if (isAuthenticated && user && required.length > 0 && userPerms.length === 0) {
+  if (
+    isAuthenticated &&
+    user &&
+    required.length > 0 &&
+    userPerms.length === 0
+  ) {
     return (
       <div className="mx-auto max-w-4xl space-y-6">
         <SkeletonHeading width="30%" />

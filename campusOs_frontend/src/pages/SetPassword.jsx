@@ -127,7 +127,11 @@ export default function SetPassword() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                   aria-label={showCurrent ? "Hide password" : "Show password"}
                 >
-                  {showCurrent ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  {showCurrent ? (
+                    <EyeOff className="size-5" />
+                  ) : (
+                    <Eye className="size-5" />
+                  )}
                 </button>
               </div>
             </Field>
@@ -155,7 +159,11 @@ export default function SetPassword() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                   aria-label={showNext ? "Hide password" : "Show password"}
                 >
-                  {showNext ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  {showNext ? (
+                    <EyeOff className="size-5" />
+                  ) : (
+                    <Eye className="size-5" />
+                  )}
                 </button>
               </div>
             </Field>
@@ -182,7 +190,11 @@ export default function SetPassword() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300"
                   aria-label={showConfirm ? "Hide password" : "Show password"}
                 >
-                  {showConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  {showConfirm ? (
+                    <EyeOff className="size-5" />
+                  ) : (
+                    <Eye className="size-5" />
+                  )}
                 </button>
               </div>
             </Field>

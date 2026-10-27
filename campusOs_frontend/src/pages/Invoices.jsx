@@ -73,7 +73,7 @@ export default function Invoices() {
 
       {items.length > 0 && (
         <Card className="overflow-hidden p-0">
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-ink-100 dark:divide-ink-700/50">
             {items.map((invoice) => (
               <li
                 key={invoice.id}

@@ -405,15 +405,10 @@ async function resolveDownload({ user, documentId }) {
   };
 }
 
-/** Document bytes, or a signed redirect when the adapter is a CDN. */
-async function readBytes({ storageKey }) {
+/** Document bytes, fetched server-side from whatever storage adapter is configured. */
+async function readBytes({ storageKey, mimeType } = {}) {
   const storage = getStorage();
-
-  if (typeof storage.getSignedUrl === "function") {
-    return { redirect: await storage.getSignedUrl(storageKey) };
-  }
-
-  return { buffer: await storage.read(storageKey) };
+  return { buffer: await storage.read(storageKey, { mimeType }) };
 }
 
 /** Remove a document. Only the uploader may, and only while it is unread. */

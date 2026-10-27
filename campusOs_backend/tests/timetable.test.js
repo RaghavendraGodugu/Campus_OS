@@ -39,6 +39,9 @@ const TERM = {
   endsOn: new Date("2026-12-20T00:00:00.000Z"),
 };
 
+const MONDAY_DATE = new Date("2026-10-05T00:00:00.000Z");
+const NEXT_MONDAY_DATE = new Date("2026-10-12T00:00:00.000Z");
+
 async function makeTerm(overrides = {}) {
   return AcademicTerm.create({
     ...TERM,
@@ -135,6 +138,105 @@ describe("academic timetable", () => {
     expect(entry.faculty.fullName).toBe(world.faculty.fullName);
     expect(entry.dayOfWeek).toBe(1);
     expect(entry.startMinute).toBe(540);
+  });
+
+  it("derives the weekday and stores a one-off class date", async () => {
+    const world = await seed();
+    const payload = entryPayload(world);
+    delete payload.dayOfWeek;
+
+    const entry = await timetableService.create({
+      user: world.admin,
+      payload: {
+        ...payload,
+        startsOn: MONDAY_DATE,
+        repeatsWeekly: false,
+      },
+    });
+
+    expect(entry.dayOfWeek).toBe(1);
+    expect(entry.startsOn).toBe("2026-10-05");
+    expect(entry.repeatsWeekly).toBe(false);
+  });
+
+  it("allows one-off classes on different dates but refuses a same-date clash", async () => {
+    const world = await seed();
+    const payload = entryPayload(world);
+    delete payload.dayOfWeek;
+
+    await timetableService.create({
+      user: world.admin,
+      payload: { ...payload, startsOn: MONDAY_DATE, repeatsWeekly: false },
+    });
+    const next = await timetableService.create({
+      user: world.admin,
+      payload: { ...payload, startsOn: NEXT_MONDAY_DATE, repeatsWeekly: false },
+    });
+
+    expect(next.startsOn).toBe("2026-10-12");
+
+    await expect(
+      timetableService.create({
+        user: world.admin,
+        payload: { ...payload, startsOn: MONDAY_DATE, repeatsWeekly: false },
+      })
+    ).rejects.toMatchObject({ statusCode: 409 });
+  });
+
+  it("creates a one-off class over HTTP from the date picker payload", async () => {
+    const world = await seed();
+    const { agent, csrfToken } = await loginAs(world.admin);
+
+    const res = await agent
+      .post("/api/v1/timetable")
+      .set("X-CSRF-Token", csrfToken)
+      .send({
+        ...entryPayload(world),
+        startsOn: "2026-10-06",
+        repeatsWeekly: false,
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.entry.startsOn).toBe("2026-10-06");
+    expect(res.body.data.entry.repeatsWeekly).toBe(false);
+    expect(res.body.data.entry.dayOfWeek).toBe(2);
+  });
+
+  it("does not clash a weekly start date with an earlier one-off class", async () => {
+    const world = await seed();
+    const payload = entryPayload(world);
+    delete payload.dayOfWeek;
+
+    await timetableService.create({
+      user: world.admin,
+      payload: { ...payload, startsOn: MONDAY_DATE, repeatsWeekly: false },
+    });
+
+    const weekly = await timetableService.create({
+      user: world.admin,
+      payload: { ...payload, startsOn: NEXT_MONDAY_DATE, repeatsWeekly: true },
+    });
+
+    expect(weekly.dayOfWeek).toBe(1);
+    expect(weekly.startsOn).toBe("2026-10-12");
+    expect(weekly.repeatsWeekly).toBe(true);
+  });
+
+  it("refuses a class date outside the term", async () => {
+    const world = await seed();
+    const payload = entryPayload(world);
+    delete payload.dayOfWeek;
+
+    await expect(
+      timetableService.create({
+        user: world.admin,
+        payload: {
+          ...payload,
+          startsOn: new Date("2027-01-04T00:00:00.000Z"),
+          repeatsWeekly: false,
+        },
+      })
+    ).rejects.toThrow(/outside/i);
   });
 
   it("refuses an overlapping room booking, not just the same start minute", async () => {
@@ -412,6 +514,28 @@ describe("academic timetable", () => {
         },
       })
     ).rejects.toMatchObject({ statusCode: 400 });
+  });
+
+  it("lists subjects and rooms with the id field the scheduler submits", async () => {
+    const world = await seed();
+    const hod = await createUser({ role: ROLES.HOD, department: world.department });
+    const { agent } = await loginAs(hod);
+
+    const [subjectsRes, roomsRes] = await Promise.all([
+      agent.get("/api/v1/subjects?active=true"),
+      agent.get("/api/v1/rooms?active=true"),
+    ]);
+
+    expect(subjectsRes.status).toBe(200);
+    expect(roomsRes.status).toBe(200);
+
+    const subject = subjectsRes.body.data.subjects.find((item) => item.code === "CS301");
+    const room = roomsRes.body.data.rooms.find((item) => item.name === "LH-204");
+
+    expect(subject.id).toBe(String(world.subject.id));
+    expect(subject._id).toBeUndefined();
+    expect(room.id).toBe(String(world.room.id));
+    expect(room._id).toBeUndefined();
   });
 
   it("returns 403 when a student attempts to schedule a class over HTTP", async () => {

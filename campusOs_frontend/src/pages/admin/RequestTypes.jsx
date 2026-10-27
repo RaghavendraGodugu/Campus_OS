@@ -108,14 +108,14 @@ export default function RequestTypes() {
         )}
 
         {types.length > 0 && (
-          <ul className="divide-y divide-ink-100/90">
+          <ul className="divide-y divide-ink-100/90 dark:divide-ink-700/50">
             {types.map((type) => (
               <li
                 key={type.id}
                 className="flex flex-wrap items-start justify-between gap-4 px-4 py-4 sm:px-5"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900">
+                  <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900 dark:text-ink-100">
                     {type.name}
                     {!type.isActive && (
                       <span className="rounded-md bg-red-50 dark:bg-red-500/12 px-1.5 py-0.5 text-[0.6875rem] font-medium text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset">
@@ -130,14 +130,14 @@ export default function RequestTypes() {
                   </p>
 
                   {type.description && (
-                    <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-ink-600">
+                    <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-ink-600 dark:text-ink-300">
                       {type.description}
                     </p>
                   )}
 
                   {/* The shape of the form a student will actually fill in. */}
                   <p className="mt-2 flex flex-wrap gap-1.5">
-                    <span className="rounded-md bg-ink-100/80 dark:bg-ink-200/40 px-1.5 py-0.5 text-[0.6875rem] text-ink-600">
+                    <span className="rounded-md bg-ink-100/80 dark:bg-ink-800 px-1.5 py-0.5 text-[0.6875rem] text-ink-600 dark:text-ink-300">
                       {(type.fields?.length ?? 0) === 0
                         ? "No extra questions"
                         : `${type.fields.length} question${type.fields.length === 1 ? "" : "s"}`}
@@ -373,7 +373,7 @@ function ServiceForm({ open, service, departments, onClose, onDone }) {
         </Field>
 
         {service && (
-          <p className="rounded-xl bg-ink-50 dark:bg-ink-100/40 px-3.5 py-3 text-xs leading-relaxed text-ink-600 ring-1 ring-ink-200 dark:ring-ink-600 ring-inset">
+          <p className="rounded-xl bg-ink-50 dark:bg-ink-800/50 px-3.5 py-3 text-xs leading-relaxed text-ink-600 dark:text-ink-300 ring-1 ring-ink-200 dark:ring-ink-600 ring-inset">
             This service asks {service.fields?.length ?? 0} question
             {(service.fields?.length ?? 0) === 1 ? "" : "s"} and requires{" "}
             {service.requiredDocuments?.length ?? 0} document

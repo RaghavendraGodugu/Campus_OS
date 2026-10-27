@@ -37,8 +37,8 @@ function escapeRegex(value) {
 }
 
 async function studentFor(user) {
-  const student = await Student.findOne({ user: user._id }).select("rollNumber semester");
-  return student; // null if no student record linked
+  const { resolveStudentProfile } = require("../middleware/auth");
+  return resolveStudentProfile(user);
 }
 
 async function listBooks({ q, category } = {}) {
@@ -158,6 +158,9 @@ async function listIssues({ status } = {}) {
 
 async function mine({ user }) {
   const student = await studentFor(user);
+  if (!student) {
+    return [];
+  }
   return BookIssue.find({ student: student._id })
     .populate("book", "title author category")
     .sort({ issuedAt: -1 })

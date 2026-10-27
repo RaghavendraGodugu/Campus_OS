@@ -36,7 +36,7 @@ async function list({ query = {} } = {}) {
     filter.$or = [{ name: pattern }, { block: pattern }];
   }
 
-  return Room.find(filter).sort({ block: 1, name: 1 }).lean();
+  return Room.find(filter).sort({ block: 1, name: 1 });
 }
 
 async function getById(id) {

@@ -85,7 +85,10 @@ async function getProfile({ user }) {
       createdAt: fresh.createdAt,
       lastLoginAt: fresh.lastLoginAt ?? null,
       designation: fresh.designation || undefined,
-      expertise: Array.isArray(fresh.expertise) && fresh.expertise.length > 0 ? fresh.expertise : undefined,
+      expertise:
+        Array.isArray(fresh.expertise) && fresh.expertise.length > 0
+          ? fresh.expertise
+          : undefined,
     },
 
     /** Academic record. Read-only, and absent for staff. */

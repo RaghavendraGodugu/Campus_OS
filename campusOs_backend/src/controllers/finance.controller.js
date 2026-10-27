@@ -402,13 +402,10 @@ const getReceipt = asyncHandler(async (req, res) => {
     user: req.user,
   });
 
-  const { redirect, buffer } = await receiptService.readReceiptBytes({
+  const { buffer } = await receiptService.readReceiptBytes({
     storageKey: resolved.storageKey,
+    mimeType: "application/pdf",
   });
-
-  if (redirect) {
-    return res.redirect(302, redirect);
-  }
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `inline; filename="${resolved.filename}"`);

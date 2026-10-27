@@ -143,12 +143,19 @@ export function AuthProvider({ children }) {
 
       applySession(response.data);
 
+      if (
+        !response.data.permissions ||
+        response.data.permissions.length === 0
+      ) {
+        await refresh();
+      }
+
       // Cached data belongs to the previous session.
       queryClient.clear();
 
       return response.data.user;
     },
-    [applySession, queryClient],
+    [applySession, refresh, queryClient],
   );
 
   /** The second step of a two-factor sign-in. */
@@ -157,11 +164,19 @@ export function AuthProvider({ children }) {
       const response = await apiPost("/auth/2fa/complete", { challenge, code });
 
       applySession(response.data);
+
+      if (
+        !response.data.permissions ||
+        response.data.permissions.length === 0
+      ) {
+        await refresh();
+      }
+
       queryClient.clear();
 
       return response.data.user;
     },
-    [applySession, queryClient],
+    [applySession, refresh, queryClient],
   );
 
   const logout = useCallback(async () => {

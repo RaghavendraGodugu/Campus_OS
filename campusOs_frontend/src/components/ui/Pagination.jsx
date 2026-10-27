@@ -17,9 +17,16 @@ export default function Pagination({ page, limit, total, onPage }) {
       aria-label="Pagination"
     >
       <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
-        Showing <span className="font-medium text-ink-700 dark:text-ink-300">{from}</span>–
-        <span className="font-medium text-ink-700 dark:text-ink-300">{to}</span> of{" "}
-        <span className="font-medium text-ink-700 dark:text-ink-300">{total}</span>
+        Showing{" "}
+        <span className="font-medium text-ink-700 dark:text-ink-300">
+          {from}
+        </span>
+        –
+        <span className="font-medium text-ink-700 dark:text-ink-300">{to}</span>{" "}
+        of{" "}
+        <span className="font-medium text-ink-700 dark:text-ink-300">
+          {total}
+        </span>
       </p>
 
       <div className="flex items-center gap-2">

@@ -11,13 +11,15 @@
  *
  * ## CSRF
  *
- * The one cookie the server deliberately makes *readable* is the CSRF token,
- * because the client has to echo it in a header. That is safe in the way a
- * double-submit token is safe: an attacker on another origin can cause the
- * browser to *send* the cookie but cannot *read* it to build the header.
+ * The one cookie the server deliberately makes *readable* is the CSRF token.
+ * In development the API is same-origin through the Vite proxy, so the client
+ * can echo it in a header. In the Vercel/Render split the cookie belongs to the
+ * API host and page JavaScript cannot read it; the API accepts the browser's
+ * unforgeable `Origin` header on that path instead.
  *
- * The token is read fresh on every unsafe request rather than cached at login,
- * because the server rotates it and a cached copy silently starts failing.
+ * The token is still read fresh on every unsafe same-origin request rather
+ * than cached at login, because the server rotates it and a cached copy
+ * silently starts failing.
  *
  * ## Money is never parsed here
  *
@@ -43,7 +45,7 @@ const CONFIGURED_BASE = import.meta.env.VITE_API_URL ?? "/api/v1";
 function resolveBaseUrl() {
   const base = CONFIGURED_BASE.replace(/\/+$/, "");
 
-  if (!/(^|\/)v\d+$/.test(base) && !/^https?:\/\//.test(base)) {
+  if (!/(^|\/)v\d+$/.test(base)) {
     throw new Error(
       `VITE_API_URL is "${CONFIGURED_BASE}", which has no API version segment. ` +
         `Every request would 404 and the app would appear to have a server problem. ` +
@@ -55,6 +57,19 @@ function resolveBaseUrl() {
 }
 
 const BASE_URL = resolveBaseUrl();
+
+/**
+ * Build an absolute or same-origin URL for an authenticated media endpoint.
+ *
+ * `<img src>` cannot go through axios, so these URLs bypass `BASE_URL` unless
+ * they are built here. A deployment whose API lives on another origin would
+ * otherwise render every avatar and announcement image against the frontend
+ * origin, where there is no such route.
+ */
+export function apiAssetUrl(path) {
+  const suffix = String(path ?? "");
+  return `${BASE_URL}${suffix.startsWith("/") ? suffix : `/${suffix}`}`;
+}
 
 /** Name of the readable CSRF cookie, set by the server. */
 const CSRF_COOKIE = "cos_ct";

@@ -123,7 +123,10 @@ export default function StaffDirectory() {
 
       {results.isLoading && <Loading label="Looking through the directory" />}
       {results.isError && (
-        <ErrorState message={results.error?.message} onRetry={results.refetch} />
+        <ErrorState
+          message={results.error?.message}
+          onRetry={results.refetch}
+        />
       )}
 
       {!results.isLoading && !results.isError && rows.length === 0 && (
@@ -147,7 +150,9 @@ export default function StaffDirectory() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="font-semibold text-ink-900 dark:text-ink-100">{person.fullName}</h2>
+                  <h2 className="font-semibold text-ink-900 dark:text-ink-100">
+                    {person.fullName}
+                  </h2>
                   <p className="mt-0.5 text-sm text-ink-600 dark:text-ink-300">
                     {roleLabel(person.role)}
                     {person.designation ? ` · ${person.designation}` : ""}

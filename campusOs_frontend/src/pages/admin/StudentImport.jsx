@@ -182,11 +182,11 @@ export default function StudentImport() {
           <CheckCircle2 className="size-6" aria-hidden="true" />
         </span>
 
-        <h2 className="mt-4 text-xl font-semibold tracking-tight text-ink-900">
+        <h2 className="mt-4 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           {result.data.imported} student{result.data.imported === 1 ? "" : "s"}{" "}
           imported
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-ink-600">
+        <p className="mt-1.5 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
           Each one has an account and a student record, linked. Nobody can sign
           in until they replace the password you are about to hand them.
         </p>
@@ -195,7 +195,7 @@ export default function StudentImport() {
           <p className="text-xs font-semibold tracking-wide text-brand-700 dark:text-brand-300 uppercase">
             Temporary passwords
           </p>
-          <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-700">
+          <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-700 dark:text-ink-200">
             {result.meta.notice}
           </p>
           <Button
@@ -224,7 +224,7 @@ export default function StudentImport() {
     <div className="space-y-6">
       <div className="surface overflow-hidden">
         <div className="border-b border-ink-200/70 dark:border-ink-700/60 px-4 py-3.5 sm:px-5">
-          <h2 className="text-[0.9375rem] font-semibold tracking-tight text-ink-900">
+          <h2 className="text-[0.9375rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Choose a file
           </h2>
           <p className="mt-1 text-[0.8125rem] text-ink-500 dark:text-ink-400">
@@ -248,7 +248,7 @@ export default function StudentImport() {
             </Button>
 
             {fileName && (
-              <p className="flex items-center gap-2 text-sm text-ink-600">
+              <p className="flex items-center gap-2 text-sm text-ink-600 dark:text-ink-300">
                 <FileSpreadsheet
                   className="size-4 text-ink-400 dark:text-ink-500"
                   aria-hidden="true"
@@ -267,11 +267,11 @@ export default function StudentImport() {
           </div>
 
           {csv && (
-            <div className="mt-5 rounded-2xl bg-ink-50 dark:bg-ink-100/40 p-4 ring-1 ring-ink-200 dark:ring-ink-600 ring-inset">
-              <p className="text-xs font-semibold tracking-wide text-ink-600 uppercase">
+            <div className="mt-5 rounded-2xl bg-ink-50 dark:bg-ink-800/50 p-4 ring-1 ring-ink-200 dark:ring-ink-600 ring-inset">
+              <p className="text-xs font-semibold tracking-wide text-ink-600 dark:text-ink-300 uppercase">
                 Columns expected
               </p>
-              <p className="mt-2 font-mono text-xs leading-relaxed break-all text-ink-600">
+              <p className="mt-2 font-mono text-xs leading-relaxed break-all text-ink-600 dark:text-ink-300">
                 {COLUMNS.join(", ")}
               </p>
               <p className="mt-3 text-xs leading-relaxed text-ink-500 dark:text-ink-400">
@@ -332,7 +332,7 @@ export default function StudentImport() {
           </>
         }
       >
-        <ul className="space-y-2.5 text-sm text-ink-600">
+        <ul className="space-y-2.5 text-sm text-ink-600 dark:text-ink-300">
           {[
             "Each student gets a generated password, shown once afterwards.",
             "They cannot use their account until they replace it.",
@@ -373,10 +373,10 @@ function Report({ report, onConfirm }) {
           </div>
         </div>
 
-        <ul className="divide-y divide-ink-100/90">
+        <ul className="divide-y divide-ink-100/90 dark:divide-ink-700/50">
           {report.problems.map((problem) => (
             <li key={problem.line} className="px-4 py-3.5 sm:px-5">
-              <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900">
+              <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900 dark:text-ink-100">
                 Line {problem.line}
                 {problem.rollNumber && (
                   <span className="font-mono text-xs text-ink-500 dark:text-ink-400">
@@ -406,14 +406,14 @@ function Report({ report, onConfirm }) {
 
   return (
     <div className="surface overflow-hidden">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-ink-200/70 dark:border-ink-700/60 bg-emerald-50/60 px-4 py-4 sm:px-5">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-ink-200/70 dark:border-ink-700/60 bg-emerald-50/60 dark:bg-emerald-500/12 px-4 py-4 sm:px-5">
         <div className="flex items-start gap-3.5">
           <CheckCircle2
             className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400"
             aria-hidden="true"
           />
           <div>
-            <h3 className="text-[0.9375rem] font-semibold text-emerald-900">
+            <h3 className="text-[0.9375rem] font-semibold text-emerald-900 dark:text-emerald-200">
               {report.totals.toCreate} student
               {report.totals.toCreate === 1 ? "" : "s"} ready
             </h3>
@@ -450,17 +450,21 @@ function Report({ report, onConfirm }) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-ink-100/90">
+          <tbody className="divide-y divide-ink-100/90 dark:divide-ink-700/50">
             {report.preview.map((row) => (
               <tr key={row.line}>
                 <td className="px-4 py-2.5 text-ink-500 dark:text-ink-400 tabular-nums sm:px-5">
                   {row.line}
                 </td>
-                <td className="px-4 py-2.5 font-mono text-xs text-ink-800">
+                <td className="px-4 py-2.5 font-mono text-xs text-ink-800 dark:text-ink-200">
                   {row.rollNumber}
                 </td>
-                <td className="px-4 py-2.5 text-ink-800">{row.fullName}</td>
-                <td className="px-4 py-2.5 text-ink-600">{row.email}</td>
+                <td className="px-4 py-2.5 text-ink-800 dark:text-ink-100">
+                  {row.fullName}
+                </td>
+                <td className="px-4 py-2.5 text-ink-600 dark:text-ink-300">
+                  {row.email}
+                </td>
               </tr>
             ))}
           </tbody>

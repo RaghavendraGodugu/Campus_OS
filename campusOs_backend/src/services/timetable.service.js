@@ -61,6 +61,28 @@ function formatMinutes(value) {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
+/** ISO weekday (1 = Monday … 7 = Sunday) from a UTC-midnight date. */
+function isoWeekday(date) {
+  const day = date.getUTCDay();
+  return day === 0 ? 7 : day;
+}
+
+/** `YYYY-MM-DD` for a stored UTC-midnight date. */
+function dateKey(date) {
+  return new Date(date).toISOString().slice(0, 10);
+}
+
+function assertDateInTerm(date, term) {
+  if (!date) return;
+  if (date < term.startsOn || date > term.endsOn) {
+    throw ApiError.badRequest(
+      `That date is outside ${term.name} (${dateKey(term.startsOn)} to ${dateKey(
+        term.endsOn
+      )})`
+    );
+  }
+}
+
 async function currentTerm() {
   return AcademicTerm.findOne({ isCurrent: true }).lean();
 }
@@ -171,8 +193,10 @@ function presentEntry(entry) {
   const json = entry.toJSON();
 
   return {
-    id: json.id ?? String(json._id),
+    id: String(json.id ?? json._id),
     dayOfWeek: json.dayOfWeek,
+    startsOn: json.startsOn ? dateKey(json.startsOn) : null,
+    repeatsWeekly: json.repeatsWeekly !== false,
     startMinute: json.startMinute,
     endMinute: json.endMinute,
     isActive: json.isActive,
@@ -196,6 +220,8 @@ function presentTerm(term) {
     name: term.name,
     code: term.code,
     academicYear: term.academicYear,
+    startsOn: term.startsOn ? dateKey(term.startsOn) : null,
+    endsOn: term.endsOn ? dateKey(term.endsOn) : null,
     status: term.status,
     isCurrent: Boolean(term.isCurrent),
   };
@@ -257,9 +283,39 @@ async function list({ user, query = {} }) {
  *
  * `excludeId` lets an update re-check its own slot without clashing with itself.
  */
+function occurrenceFilter({ dayOfWeek, date, repeatsWeekly, term }) {
+  if (repeatsWeekly) {
+    const start = date ?? term.startsOn;
+    return {
+      dayOfWeek,
+      $or: [
+        { repeatsWeekly: { $ne: false } },
+        { repeatsWeekly: false, startsOn: { $gte: start, $lte: term.endsOn } },
+      ],
+    };
+  }
+
+  return {
+    dayOfWeek,
+    $or: [
+      {
+        repeatsWeekly: { $ne: false },
+        $or: [
+          { startsOn: null },
+          { startsOn: { $exists: false } },
+          { startsOn: { $lte: date } },
+        ],
+      },
+      { repeatsWeekly: false, startsOn: date },
+    ],
+  };
+}
+
 async function assertNoClash({
-  termId,
+  term,
   dayOfWeek,
+  startsOn,
+  repeatsWeekly,
   startMinute,
   endMinute,
   roomId,
@@ -268,8 +324,13 @@ async function assertNoClash({
   excludeId,
 }) {
   const base = {
-    term: termId,
-    dayOfWeek,
+    term: term._id,
+    ...occurrenceFilter({
+      dayOfWeek,
+      date: startsOn,
+      repeatsWeekly,
+      term,
+    }),
     isActive: true,
     startMinute: { $lt: endMinute },
     endMinute: { $gt: startMinute },
@@ -382,9 +443,24 @@ async function getById(id) {
 async function create({ user, payload, req }) {
   const { term, subject, room, faculty } = await loadTeachingContext({ user, payload });
 
+  const startsOn = payload.startsOn ? new Date(payload.startsOn) : null;
+  const repeatsWeekly = payload.repeatsWeekly ?? true;
+
+  if (!startsOn && !payload.dayOfWeek) {
+    throw ApiError.badRequest("Choose a class date");
+  }
+  if (repeatsWeekly === false && !startsOn) {
+    throw ApiError.badRequest("A one-off class needs a date");
+  }
+  assertDateInTerm(startsOn, term);
+
+  const dayOfWeek = startsOn ? isoWeekday(startsOn) : payload.dayOfWeek;
+
   await assertNoClash({
-    termId: term._id,
-    dayOfWeek: payload.dayOfWeek,
+    term,
+    dayOfWeek,
+    startsOn,
+    repeatsWeekly,
     startMinute: payload.startMinute,
     endMinute: payload.endMinute,
     roomId: room._id,
@@ -394,6 +470,9 @@ async function create({ user, payload, req }) {
 
   const entry = await TimetableEntry.create({
     ...payload,
+    dayOfWeek,
+    startsOn,
+    repeatsWeekly,
     createdBy: user._id,
   });
 
@@ -409,6 +488,8 @@ async function create({ user, payload, req }) {
       faculty: String(faculty._id),
       room: String(room._id),
       dayOfWeek: entry.dayOfWeek,
+      startsOn: entry.startsOn ? dateKey(entry.startsOn) : null,
+      repeatsWeekly: entry.repeatsWeekly !== false,
       startMinute: entry.startMinute,
       endMinute: entry.endMinute,
     },
@@ -436,7 +517,17 @@ async function update({ user, id, payload, req }) {
     existing: entry,
   });
 
-  const dayOfWeek = payload.dayOfWeek ?? entry.dayOfWeek;
+  const startsOn = payload.startsOn ? new Date(payload.startsOn) : entry.startsOn;
+  const repeatsWeekly = payload.repeatsWeekly ?? entry.repeatsWeekly ?? true;
+
+  if (repeatsWeekly === false && !startsOn) {
+    throw ApiError.badRequest("A one-off class needs a date");
+  }
+  assertDateInTerm(startsOn, term);
+
+  const dayOfWeek = startsOn
+    ? isoWeekday(startsOn)
+    : (payload.dayOfWeek ?? entry.dayOfWeek);
   const startMinute = payload.startMinute ?? entry.startMinute;
   const endMinute = payload.endMinute ?? entry.endMinute;
 
@@ -445,8 +536,10 @@ async function update({ user, id, payload, req }) {
   }
 
   await assertNoClash({
-    termId: term._id,
+    term,
     dayOfWeek,
+    startsOn,
+    repeatsWeekly,
     startMinute,
     endMinute,
     roomId: room._id,
@@ -457,11 +550,13 @@ async function update({ user, id, payload, req }) {
 
   const before = {
     dayOfWeek: entry.dayOfWeek,
+    startsOn: entry.startsOn ? dateKey(entry.startsOn) : null,
+    repeatsWeekly: entry.repeatsWeekly !== false,
     startMinute: entry.startMinute,
     endMinute: entry.endMinute,
   };
 
-  Object.assign(entry, payload);
+  Object.assign(entry, payload, { dayOfWeek, startsOn, repeatsWeekly });
   await entry.save();
 
   await auditService.record({
@@ -475,6 +570,8 @@ async function update({ user, id, payload, req }) {
       before,
       after: {
         dayOfWeek: entry.dayOfWeek,
+        startsOn: entry.startsOn ? dateKey(entry.startsOn) : null,
+        repeatsWeekly: entry.repeatsWeekly !== false,
         startMinute: entry.startMinute,
         endMinute: entry.endMinute,
       },
@@ -521,6 +618,8 @@ async function remove({ user, id, req }) {
     entityRef: subject.code,
     metadata: {
       dayOfWeek: entry.dayOfWeek,
+      startsOn: entry.startsOn ? dateKey(entry.startsOn) : null,
+      repeatsWeekly: entry.repeatsWeekly !== false,
       startMinute: entry.startMinute,
       endMinute: entry.endMinute,
     },

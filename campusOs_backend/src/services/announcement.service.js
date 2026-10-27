@@ -676,14 +676,9 @@ async function resolveAttachment({ user, id }) {
   };
 }
 
-async function readAttachmentBytes({ storageKey }) {
+async function readAttachmentBytes({ storageKey, mimeType }) {
   const storage = getStorage();
-
-  if (typeof storage.getSignedUrl === "function") {
-    return { redirect: await storage.getSignedUrl(storageKey) };
-  }
-
-  return { buffer: await storage.read(storageKey) };
+  return { buffer: await storage.read(storageKey, { mimeType }) };
 }
 
 /** Wait for any detached announcement email to settle. Tests only. */

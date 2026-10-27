@@ -355,7 +355,9 @@ async function prepareNextYear({ user, currentYear, nextYearStart, req }) {
         // Term names typically contain one of those years (e.g., "Autumn 2026",
         // "Spring 2027"). Codes often have a 2-digit suffix (e.g., "A26", "S27").
         // We increment any 4-digit year in the name, and any 2-digit year suffix in the code.
-        const [currStart, currEnd] = currentYear.split("-").map((y) => (y.length === 4 ? Number(y) : Number("20" + y)));
+        const [currStart, currEnd] = currentYear
+          .split("-")
+          .map((y) => (y.length === 4 ? Number(y) : Number("20" + y)));
         const nextStart = currStart + 1;
         const nextEnd = currEnd + 1;
 
@@ -367,7 +369,6 @@ async function prepareNextYear({ user, currentYear, nextYearStart, req }) {
           return String(year + 1);
         });
         const newCode = term.code.replace(/\d{2}$/, (match) => {
-
           const year2 = Number(match);
           if (year2 === currStart % 100) return String(nextStart % 100).padStart(2, "0");
           if (year2 === currEnd % 100) return String(nextEnd % 100).padStart(2, "0");
@@ -407,7 +408,10 @@ async function prepareNextYear({ user, currentYear, nextYearStart, req }) {
     req,
   });
 
-  logger.info({ userId: user._id, fromYear: currentYear, toYear: nextYear }, "Next academic year prepared");
+  logger.info(
+    { userId: user._id, fromYear: currentYear, toYear: nextYear },
+    "Next academic year prepared"
+  );
   return created;
 }
 

@@ -33,9 +33,7 @@ async function runPenaltySweep({ now = new Date(), dryRun = false } = {}) {
     "penalty.rateBps": { $gt: 0 },
     "penalty.chargedAmount": { $lt: 1e11 }, // sanity ceiling
   })
-    .select(
-      "_id reference total balanceDue dueAt penalty invoiceNumber student"
-    )
+    .select("_id reference total balanceDue dueAt penalty invoiceNumber student")
     .limit(500)
     .lean();
 

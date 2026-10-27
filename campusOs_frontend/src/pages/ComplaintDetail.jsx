@@ -155,7 +155,9 @@ export default function ComplaintDetail() {
                 key={update._id}
                 className="border-l-2 border-brand-200 dark:border-brand-400/25 pl-3"
               >
-                <p className="text-sm text-ink-700 dark:text-ink-300">{update.body}</p>
+                <p className="text-sm text-ink-700 dark:text-ink-300">
+                  {update.body}
+                </p>
                 <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
                   {formatDateTime(update.at)} · {humanise(update.authorRole)}
                 </p>
@@ -295,10 +297,12 @@ function InternalNote({ reference, onDone }) {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
         {label}
       </dt>
-      <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
+      <dd className="mt-0.5 text-sm text-ink-800 dark:text-ink-200">
+        {value ?? "—"}
+      </dd>
     </div>
   );
 }

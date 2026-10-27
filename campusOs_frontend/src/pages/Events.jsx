@@ -35,7 +35,8 @@ const STATUS_LABEL = {
 
 const STATUS_CLASS = {
   DRAFT: "bg-ink-100 text-ink-700 dark:bg-ink-800 dark:text-ink-300",
-  PUBLISHED: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+  PUBLISHED:
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
   CANCELLED: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
 };
 
@@ -107,6 +108,11 @@ export default function Events() {
       setConfirmCancel(null);
       invalidate();
     },
+  });
+
+  const publish = useMutation({
+    mutationFn: (id) => apiPatch(`/events/${id}`, { status: "PUBLISHED" }),
+    onSuccess: invalidate,
   });
 
   const rows = events.data?.data?.events ?? [];
@@ -208,10 +214,22 @@ export default function Events() {
                         Register
                       </Button>
                     ))}
+                  {canManage && ev.status === "DRAFT" && (
+                    <Button
+                      size="sm"
+                      onClick={() => publish.mutate(ev.id)}
+                      disabled={publish.isPending}
+                      className="mb-2 block w-full"
+                    >
+                      {publish.isPending
+                        ? "Publishing…"
+                        : "Publish to students"}
+                    </Button>
+                  )}
                   {canManage && ev.status !== "CANCELLED" && (
                     <Button
                       variant="ghost"
-                      className="mt-2 block"
+                      className="mt-1 block"
                       onClick={() => setConfirmCancel(ev)}
                       disabled={cancel.isPending}
                     >
@@ -259,6 +277,7 @@ function ComposeModal({ open, onClose, onSaved, saving, error }) {
     capacity: "",
     description: "",
     contact: "",
+    publish: true,
   });
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -267,9 +286,7 @@ function ComposeModal({ open, onClose, onSaved, saving, error }) {
   const startsAt = toIso(
     form.date && form.from ? `${form.date}T${form.from}` : null,
   );
-  const endsAt = toIso(
-    form.date && form.to ? `${form.date}T${form.to}` : null,
-  );
+  const endsAt = toIso(form.date && form.to ? `${form.date}T${form.to}` : null);
 
   const payload = {
     title: form.title.trim(),
@@ -280,6 +297,7 @@ function ComposeModal({ open, onClose, onSaved, saving, error }) {
     endsAt: endsAt || undefined,
     capacity: form.capacity ? Number(form.capacity) : undefined,
     contact: form.contact.trim() || undefined,
+    status: form.publish ? "PUBLISHED" : "DRAFT",
   };
 
   return (
@@ -383,13 +401,26 @@ function ComposeModal({ open, onClose, onSaved, saving, error }) {
             maxLength={4000}
           />
         </Field>
+        <label className="flex items-center gap-2 cursor-pointer pt-1">
+          <input
+            type="checkbox"
+            checked={form.publish}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, publish: e.target.checked }))
+            }
+            className="size-4 rounded border-ink-300 dark:border-ink-600 text-brand-600 focus:ring-brand-600"
+          />
+          <span className="text-sm font-medium text-ink-700 dark:text-ink-200">
+            Publish immediately (visible to all students)
+          </span>
+        </label>
         {error && <ErrorState message={error} />}
         <div className="flex justify-end gap-2 pt-1">
           <Button variant="outline" onClick={onClose}>
             Discard
           </Button>
           <Button type="submit" disabled={saving}>
-            {saving ? "Saving…" : "Save draft"}
+            {saving ? "Saving…" : form.publish ? "Publish event" : "Save draft"}
           </Button>
         </div>
       </form>

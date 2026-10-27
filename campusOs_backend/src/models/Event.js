@@ -51,7 +51,7 @@ const eventSchema = new mongoose.Schema(
         return ret;
       },
     },
-  },
+  }
 );
 
 eventSchema.index({ status: 1, startsAt: -1 });

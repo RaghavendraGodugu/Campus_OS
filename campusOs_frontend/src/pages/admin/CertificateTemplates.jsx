@@ -99,7 +99,7 @@ export default function CertificateTemplates() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Certificate templates
           </h1>
           <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
@@ -136,7 +136,7 @@ export default function CertificateTemplates() {
               className="flex flex-wrap items-center gap-4 px-1 py-4"
             >
               <FileText
-                className="size-5 shrink-0 text-ink-400 dark:text-ink-500"
+                className="size-5 shrink-0 text-ink-400 dark:text-ink-400"
                 aria-hidden="true"
               />
 

@@ -9,6 +9,15 @@ const objectId = z.string().refine((value) => mongoose.Types.ObjectId.isValid(va
 
 const idParam = z.object({ id: objectId }).strict();
 
+const calendarDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use a date in YYYY-MM-DD form")
+  .refine((value) => {
+    const date = new Date(`${value}T00:00:00.000Z`);
+    return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  }, "That is not a real date")
+  .transform((value) => new Date(`${value}T00:00:00.000Z`));
+
 /**
  * Academic structure and timetable schemas.
  *
@@ -123,7 +132,10 @@ const timeShape = {
     .number()
     .int("Weekday must be a whole number")
     .min(1, "Weekday must be 1 (Monday) to 7 (Sunday)")
-    .max(7, "Weekday must be 1 (Monday) to 7 (Sunday)"),
+    .max(7, "Weekday must be 1 (Monday) to 7 (Sunday)")
+    .optional(),
+  startsOn: calendarDate.optional(),
+  repeatsWeekly: z.boolean().optional(),
   startMinute: z.coerce
     .number()
     .int("Start time must be a whole minute")
@@ -147,6 +159,20 @@ const createTimetableEntrySchema = z
         message: "A class must end after it starts",
       });
     }
+    if (!value.dayOfWeek && !value.startsOn) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["startsOn"],
+        message: "Choose a class date",
+      });
+    }
+    if (value.repeatsWeekly === false && !value.startsOn) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["startsOn"],
+        message: "A one-off class needs a date",
+      });
+    }
   });
 
 const updateTimetableEntrySchema = z
@@ -156,6 +182,8 @@ const updateTimetableEntrySchema = z
     faculty: timeShape.faculty.optional(),
     room: timeShape.room.optional(),
     dayOfWeek: timeShape.dayOfWeek.optional(),
+    startsOn: timeShape.startsOn,
+    repeatsWeekly: timeShape.repeatsWeekly,
     startMinute: timeShape.startMinute.optional(),
     endMinute: timeShape.endMinute.optional(),
     isActive: z.boolean().optional(),

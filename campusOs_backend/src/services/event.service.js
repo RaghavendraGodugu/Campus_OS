@@ -55,10 +55,7 @@ async function listEvents({ user }) {
   const canManage = userHasPermission(user, "event:manage:institution");
 
   const filter = canManage ? {} : { status: "PUBLISHED" };
-  const events = await Event.find(filter)
-    .sort({ startsAt: -1 })
-    .limit(200)
-    .lean();
+  const events = await Event.find(filter).sort({ startsAt: -1 }).limit(200).lean();
 
   const counts = await EventRsvp.aggregate([
     { $group: { _id: "$event", count: { $sum: 1 } } },
@@ -90,7 +87,7 @@ async function createEvent({ user, payload, req }) {
 
   const created = await Event.create({
     ...payload,
-    status: "DRAFT",
+    status: payload.status ?? "DRAFT",
     postedBy: user.id,
   });
   await auditService.record({
@@ -108,7 +105,10 @@ async function updateEvent({ user, id, payload, req }) {
   await assertManage(user);
   const existing = await getEventOr404(id);
 
-  assertSaneDates(payload.startsAt ?? existing.startsAt, payload.endsAt ?? existing.endsAt);
+  assertSaneDates(
+    payload.startsAt ?? existing.startsAt,
+    payload.endsAt ?? existing.endsAt
+  );
   if (payload.status && payload.status !== existing.status) {
     assertStatusTransition(existing.status, payload.status);
   }

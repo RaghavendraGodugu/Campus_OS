@@ -78,6 +78,15 @@ jobs:
     name: Browser sweep
     runs-on: ubuntu-latest
 
+    env:
+      MONGO_URI: mongodb://127.0.0.1:27017/campusos
+      PORT: "5050"
+      CLIENT_URL: http://localhost:5173
+      JWT_SECRET: ci-access-secret-not-used-in-production
+      REFRESH_TOKEN_SECRET: ci-refresh-secret-not-used-in-production
+      CSRF_SECRET: ci-csrf-secret-not-used-in-production
+      VITE_SHOW_DEMO_BANNER: "true"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -106,12 +115,6 @@ jobs:
 
       - name: Seed a database
         run: npm run seed:demo --workspace campusOs_backend
-        env:
-          MONGO_URI: mongodb://127.0.0.1:27017/campusos
-          JWT_ACCESS_SECRET: ci-access-secret-not-used-in-production
-          JWT_REFRESH_SECRET: ci-refresh-secret-not-used-in-production
-          CSRF_SECRET: ci-csrf-secret-not-used-in-production
-          VITE_SHOW_DEMO_BANNER: "true"
 
       - name: Start the API
         run: |

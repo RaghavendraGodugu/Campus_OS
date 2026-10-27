@@ -65,6 +65,7 @@ const getComplaint = asyncHandler(async (req, res) => {
   const complaint = await complaintService.getComplaint({
     complaintId: req.validated.params.id,
     user: req.user,
+    req,
   });
 
   const payload = complaint.toJSON ? complaint.toJSON() : { ...complaint };
@@ -168,11 +169,20 @@ const getSlaPolicy = asyncHandler(async (req, res) => {
     description: step.description,
   }));
 
+  const categories = Object.entries(slaPolicy.CATEGORY_RESPONSE_HOURS).map(
+    ([cat, hours]) => ({
+      value: cat,
+      label: cat.charAt(0) + cat.slice(1).toLowerCase().replace(/_/g, " "),
+      slaHours: hours,
+    })
+  );
+
   return sendSuccess(res, {
     message: "SLA policy retrieved",
     data: {
       calendar: slaPolicy.CALENDAR,
       categoryResponseHours: slaPolicy.CATEGORY_RESPONSE_HOURS,
+      categories,
       defaultResponseHours: slaPolicy.DEFAULT_RESPONSE_HOURS,
       escalationLadder: ladder,
       maxEscalationLevel: slaPolicy.MAX_ESCALATION_LEVEL,

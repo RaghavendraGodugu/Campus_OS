@@ -105,13 +105,10 @@ const download = asyncHandler(async (req, res) => {
     documentId: req.params.id,
   });
 
-  const { redirect, buffer } = await documentService.readBytes({
+  const { buffer } = await documentService.readBytes({
     storageKey: resolved.storageKey,
+    mimeType: resolved.mimeType,
   });
-
-  if (redirect) {
-    return res.redirect(302, redirect);
-  }
 
   res.setHeader("Content-Type", resolved.mimeType);
   res.setHeader("Content-Disposition", `attachment; filename="${resolved.originalName}"`);

@@ -44,6 +44,7 @@ require("./models");
 const routes = require("./routes");
 const paymentWebhookRoutes = require("./routes/paymentWebhook.routes");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
+const { originGuard } = require("./middleware/csrf");
 const { ApiError, ERROR_CODE } = require("./utils/ApiError");
 
 /**
@@ -74,7 +75,7 @@ function buildCorsOptions(trustedOrigins) {
     credentials: true,
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token", "Idempotency-Key"],
-    exposedHeaders: ["X-Request-Id"],
+    exposedHeaders: ["X-Request-Id", "Content-Disposition"],
     maxAge: 600,
   };
 }
@@ -141,6 +142,11 @@ function createApp() {
   //    This route mounts its own `express.raw()` and must stay above the next
   //    line. Nothing else in the app needs the raw body.
   app.use("/api/v1", paymentWebhookRoutes);
+
+  // 5b. Reject a mutating request carrying an untrusted browser Origin before
+  //     any body is read. CORS prevents the attacker from reading the response,
+  //     but not from causing the mutation; this is the CSRF origin gate.
+  app.use(originGuard);
 
   // 6. Body parsing with an explicit ceiling. A college request form is small;
   //    1mb is generous and bounds memory use under load.

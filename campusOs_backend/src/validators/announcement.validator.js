@@ -99,6 +99,7 @@ const createAnnouncementSchema = z
     audience: audienceSchema.default({ scope: "ALL" }),
     publishedAt: isoDate.optional(),
     expiresAt: isoDate.nullish(),
+    image: z.any().optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
@@ -130,8 +131,16 @@ const listAnnouncementsSchema = z
   })
   .strict();
 
+const announcementIdOrReference = z
+  .string()
+  .trim()
+  .refine(
+    (value) => /^AN-\d{4}-\d{6}$/i.test(value) || /^[a-f\d]{24}$/i.test(value),
+    "Must be a reference like AN-2026-000001 or a valid ID"
+  );
+
 /** GET /announcements/:id */
-const announcementIdentifier = z.object({ id: announcementReference });
+const announcementIdentifier = z.object({ id: announcementIdOrReference });
 
 module.exports = {
   createAnnouncementSchema,

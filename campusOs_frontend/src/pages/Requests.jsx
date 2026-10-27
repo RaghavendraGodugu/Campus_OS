@@ -81,7 +81,10 @@ export default function Requests({ mode = "own" }) {
       {/* Filter. A select rather than a row of pills: eleven statuses is too
           many to show at once, and the list is usually filtered by one. */}
       <div className="flex items-center gap-2">
-        <label htmlFor="status-filter" className="text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500">
+        <label
+          htmlFor="status-filter"
+          className="text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500"
+        >
           Status
         </label>
         <select
@@ -137,7 +140,7 @@ export default function Requests({ mode = "own" }) {
 
       {items.length > 0 && (
         <Card className="overflow-hidden p-0">
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-ink-100 dark:divide-ink-700/50">
             {items.map((request) => (
               <li key={request._id ?? request.id}>
                 <Link

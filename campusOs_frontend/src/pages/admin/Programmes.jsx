@@ -126,7 +126,7 @@ export default function Programmes() {
         )}
 
         {programmes.length > 0 && (
-          <ul className="divide-y divide-ink-100/90">
+          <ul className="divide-y divide-ink-100/90 dark:divide-ink-700/50">
             {programmes.map((programme) => (
               <li
                 key={programme.id}
@@ -140,7 +140,7 @@ export default function Programmes() {
                     <GraduationCap className="size-5" />
                   </span>
                   <div className="min-w-0">
-                    <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900">
+                    <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink-900 dark:text-ink-100">
                       {programme.name}
                       {!programme.isActive && (
                         <span className="rounded-md bg-red-50 dark:bg-red-500/12 px-1.5 py-0.5 text-[0.6875rem] font-medium text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-400/25 ring-inset">

@@ -8,7 +8,7 @@ human step or a missing screen is left empty and says why.
 means the note that follows it)
 
 - **Last reviewed:** 21 October 2026
-- **Verified:** 906 backend tests, 186 frontend tests, lint and build clean, plus a green 85-check browser sweep against Atlas across nine roles and four public pages
+- **Verified:** 942 backend tests, 198 frontend tests, lint and build clean, plus a green 85-check browser sweep against Atlas across nine roles and four public pages
 - **Databases:** Atlas `campusos` exercised end to end — a real GST invoice
   (₹1,00,000 + 18% CGST/SGST = ₹1,18,000, halves reconciling exactly), an
   opened academic term, a saved tax registration, and a green browser sweep
@@ -31,7 +31,7 @@ means the note that follows it)
 
 - [x] Login with email and password
 - [x] HttpOnly access and refresh cookies; no token in `localStorage`
-- [x] Readable `cos_ct` CSRF token, HMAC-bound, checked on every write
+- [x] Trusted-Origin checks on every write, backed by an HMAC-bound `cos_ct` double-submit token
 - [x] Refresh-token rotation, with reuse detection and family revocation
 - [x] Sign out (single session) — button present in the shell
 - [x] Sign out everywhere — API and profile button; every refresh token revoked

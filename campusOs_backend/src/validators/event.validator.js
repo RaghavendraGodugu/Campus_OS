@@ -5,19 +5,9 @@ const objectId = z.string().refine((v) => mongoose.Types.ObjectId.isValid(v), {
   message: "That is not a valid id",
 });
 const idParam = z.object({ id: objectId }).strict();
-const isoDateTime = z
-  .string()
-  .datetime({ offset: true })
-  .or(z.string().datetime());
+const isoDateTime = z.string().datetime({ offset: true }).or(z.string().datetime());
 
-const EVENT_KINDS = [
-  "WORKSHOP",
-  "FEST",
-  "SEMINAR",
-  "SPORTS",
-  "CULTURAL",
-  "OTHER",
-];
+const EVENT_KINDS = ["WORKSHOP", "FEST", "SEMINAR", "SPORTS", "CULTURAL", "OTHER"];
 
 const createEventSchema = z
   .object({
@@ -30,6 +20,7 @@ const createEventSchema = z
     capacity: z.coerce.number().int().min(1).max(5000).optional(),
     department: objectId.optional(),
     contact: z.string().trim().max(160).optional(),
+    status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
   })
   .strict();
 

@@ -5,7 +5,10 @@ const { validate } = require("../middleware/validate");
 const { authenticate, requirePermission } = require("../middleware/auth");
 const { csrfProtection } = require("../middleware/csrf");
 const { P } = require("../utils/permissions");
-const { updateBrandingSchema, toggleBrandingSchema } = require("../validators/branding.validator");
+const {
+  updateBrandingSchema,
+  toggleBrandingSchema,
+} = require("../validators/branding.validator");
 
 const router = express.Router();
 

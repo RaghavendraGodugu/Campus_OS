@@ -98,4 +98,15 @@ const autoRolloverCheck = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { list, current, getOne, create, update, open, close, remove, prepareNextYear, autoRolloverCheck };
+module.exports = {
+  list,
+  current,
+  getOne,
+  create,
+  update,
+  open,
+  close,
+  remove,
+  prepareNextYear,
+  autoRolloverCheck,
+};

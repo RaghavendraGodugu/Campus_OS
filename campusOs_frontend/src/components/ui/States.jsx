@@ -24,12 +24,14 @@ export function EmptyState({ title, description, action, icon: Icon = Inbox }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-ink-200 dark:border-ink-700/70 bg-white/50 dark:bg-surface px-6 py-16 text-center">
       <Icon
-        className="size-8 text-ink-300 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500"
+        className="size-8 text-ink-300 dark:text-ink-400"
         aria-hidden="true"
       />
-      <h3 className="text-sm font-semibold text-ink-800">{title}</h3>
+      <h3 className="text-sm font-semibold text-ink-800 dark:text-ink-100">
+        {title}
+      </h3>
       {description && (
-        <p className="max-w-sm text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
+        <p className="max-w-sm text-sm text-ink-500 dark:text-ink-400">
           {description}
         </p>
       )}

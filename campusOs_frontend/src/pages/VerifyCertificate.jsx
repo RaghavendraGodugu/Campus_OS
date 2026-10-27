@@ -284,7 +284,9 @@ function Row({ icon: Icon, label, value, muted = false }) {
         aria-hidden="true"
       />
       <div className="min-w-0">
-        <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">{label}</dt>
+        <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+          {label}
+        </dt>
         <dd
           className={`text-sm ${muted ? "text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500" : "text-ink-900 dark:text-ink-100"}`}
         >

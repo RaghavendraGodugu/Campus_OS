@@ -64,6 +64,16 @@ const timetableEntrySchema = new mongoose.Schema(
       max: [7, "Weekday must be 1 (Monday) to 7 (Sunday)"],
     },
 
+    startsOn: {
+      type: Date,
+      default: null,
+    },
+
+    repeatsWeekly: {
+      type: Boolean,
+      default: true,
+    },
+
     /** Minutes from midnight. 0 = 00:00, 540 = 09:00. */
     startMinute: {
       type: Number,

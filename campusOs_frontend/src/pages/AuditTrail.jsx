@@ -175,24 +175,24 @@ export default function AuditTrail() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink-100">
+              <tbody className="divide-y divide-ink-100 dark:divide-ink-700/50">
                 {items.map((entry) => (
                   <tr key={entry.id}>
-                    <td className="px-5 py-2.5 whitespace-nowrap text-ink-600 dark:text-ink-400 dark:text-ink-500">
+                    <td className="px-5 py-2.5 whitespace-nowrap text-ink-600 dark:text-ink-400">
                       {formatDateTime(entry.createdAt)}
                     </td>
                     <td className="px-3 py-2.5">
-                      <span className="text-ink-800">
+                      <span className="text-ink-800 dark:text-ink-100">
                         {entry.actor?.fullName ??
                           entry.actor?.email ??
                           "System"}
                       </span>
                       {entry.actor?.deleted && (
-                        <span className="ml-1.5 text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                        <span className="ml-1.5 text-xs text-ink-400 dark:text-ink-400">
                           (removed)
                         </span>
                       )}
-                      <span className="block text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                      <span className="block text-xs text-ink-500 dark:text-ink-400">
                         {humanise(entry.actor?.role)}
                       </span>
                     </td>

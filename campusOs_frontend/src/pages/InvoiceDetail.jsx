@@ -186,15 +186,17 @@ export default function InvoiceDetail() {
       {/* ===== Line items, as the server calculated them ===== */}
       {Array.isArray(invoice.items) && invoice.items.length > 0 && (
         <Card title="Items">
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-ink-100 dark:divide-ink-700/50">
             {invoice.items.map((item, index) => (
               <li
                 key={item._id ?? index}
                 className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
               >
                 <div className="min-w-0">
-                  <p className="text-sm text-ink-800">{item.description}</p>
-                  <p className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                  <p className="text-sm text-ink-800 dark:text-ink-100">
+                    {item.description}
+                  </p>
+                  <p className="text-xs text-ink-500 dark:text-ink-400">
                     {item.quantity} ×{" "}
                     {formatMoney(item.unitAmount, { showSymbol: false })}
                     {item.taxPercent > 0 &&
@@ -213,7 +215,7 @@ export default function InvoiceDetail() {
       {/* ===== Payments ===== */}
       {payments.length > 0 && (
         <Card title="Payments" description="Recorded against this invoice.">
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-ink-100 dark:divide-ink-700/50">
             {payments.map((payment) => (
               <li
                 key={payment._id}
@@ -223,7 +225,7 @@ export default function InvoiceDetail() {
                   <p className="text-sm font-medium text-ink-900 dark:text-ink-100">
                     {formatMoney(payment.capturedAmount ?? payment.amount)}
                     {payment.refundedAmount > 0 && (
-                      <span className="ml-2 text-xs font-normal text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                      <span className="ml-2 text-xs font-normal text-ink-500 dark:text-ink-400">
                         {formatMoney(payment.refundedAmount)} refunded
                       </span>
                     )}
@@ -361,7 +363,7 @@ function Figure({ label, value, tone = "default" }) {
   };
   return (
     <div>
-      <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
+      <p className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
         {label}
       </p>
       <p className={`mt-1 text-lg font-semibold tabular-nums ${tones[tone]}`}>

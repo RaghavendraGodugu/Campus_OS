@@ -19,7 +19,7 @@ import {
   formatDate,
   formatRelative,
 } from "../lib/format";
-import { http, readCsrfToken, ApiError } from "../api/client";
+import { apiAssetUrl, http, readCsrfToken, ApiError } from "../api/client";
 
 // ===========================================================================
 // Money
@@ -117,6 +117,23 @@ describe("dates", () => {
 
   it("says just now for something a minute old", () => {
     expect(formatRelative(new Date().toISOString())).toBe("just now");
+  });
+});
+
+// ===========================================================================
+// Media URLs
+// ===========================================================================
+
+describe("apiAssetUrl", () => {
+  it("uses the API base for img endpoints", () => {
+    // An <img> bypasses axios, so it also bypasses baseURL. Building the URL
+    // here keeps avatars and announcement images on the configured API origin.
+    expect(apiAssetUrl("/profile/avatar/user-1")).toBe(
+      "/api/v1/profile/avatar/user-1",
+    );
+    expect(apiAssetUrl("profile/avatar/user-1")).toBe(
+      "/api/v1/profile/avatar/user-1",
+    );
   });
 });
 

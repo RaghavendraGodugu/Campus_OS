@@ -65,9 +65,12 @@ function refreshTokenOptions() {
 }
 
 /**
- * The CSRF cookie must be readable by the frontend's JavaScript — that is the
- * whole mechanism. It is never an authentication credential, so `httpOnly` is
- * deliberately false.
+ * The CSRF cookie stays readable because it is part of the double-submit
+ * fallback for same-origin development and non-browser clients. It is never an
+ * authentication credential, so `httpOnly` is deliberately false.
+ *
+ * In the split Vercel/Render deployment the page cannot read a cookie scoped to
+ * the API host; there the server accepts a trusted Origin header instead.
  */
 function csrfTokenOptions() {
   return cookieOptions({ httpOnly: false, maxAge: 15 * 60 * 1000 });

@@ -62,9 +62,9 @@ function fakeCloudinary() {
       },
     },
     utils: {
-      private_download_url(key, options) {
-        calls.signed.push({ key, options });
-        return `https://res.cloudinary.com/demo/image/authenticated/s--sig--/${key}`;
+      private_download_url(key, format, options) {
+        calls.signed.push({ key, format, options });
+        return "https://api.cloudinary.com/v1_1/demo/image/download";
       },
     },
   };
@@ -131,6 +131,41 @@ describe("CloudinaryStorage", () => {
       // `public` here would publish every certificate on the open internet.
       expect(cloudinary.calls.uploads[0].options.type).toBe("authenticated");
     });
+
+    it("does not duplicate the folder in the stored public id", async () => {
+      const saved = await storage.save(PNG, {
+        folder: "announcements",
+        filename: "banner.png",
+        mimeType: "image/png",
+      });
+      // buildStorageKey already includes the folder. Sending `folder` too makes
+      // Cloudinary prepend it again: announcements/announcements/...
+      expect(saved.key).toMatch(/^announcements\//);
+      expect(saved.key).not.toMatch(/^announcements\/announcements\//);
+      expect(cloudinary.calls.uploads[0].options.folder).toBeUndefined();
+    });
+
+    it("stores an image transformation once, instead of resizing every read", async () => {
+      const transformation = { width: 1600, crop: "limit", quality: "auto" };
+      await storage.save(PNG, {
+        folder: "announcements",
+        filename: "banner.png",
+        mimeType: "image/png",
+        transformation,
+      });
+      expect(cloudinary.calls.uploads[0].options.transformation).toEqual(transformation);
+    });
+
+    it("never transforms a document", async () => {
+      await storage.save(PDF, {
+        folder: "certificates",
+        filename: "bonafide.pdf",
+        mimeType: "application/pdf",
+        // A caller mistake must not recompress a signed document.
+        transformation: { width: 1600, quality: "auto" },
+      });
+      expect(cloudinary.calls.uploads[0].options.transformation).toBeUndefined();
+    });
   });
 
   describe("resourceTypeForStored", () => {
@@ -156,38 +191,74 @@ describe("CloudinaryStorage", () => {
     });
   });
 
-  describe("signed URLs", () => {
-    it("signs images as images", async () => {
-      const url = await storage.getSignedUrl("announcements/123-banner.png");
-      expect(cloudinary.calls.signed[0].options.resource_type).toBe("image");
-      expect(url).toContain("authenticated");
+  describe("reading bytes", () => {
+    const body = Buffer.from("stored file bytes");
+
+    beforeEach(() => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => ({
+          ok: true,
+          status: 200,
+          arrayBuffer: async () =>
+            body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength),
+          text: async () => body.toString(),
+        }))
+      );
     });
 
-    it("serves images inline so a thumbnail renders instead of downloading", async () => {
-      await storage.getSignedUrl("announcements/123-banner.png");
-      // Nobody wants to click an image and lose their page.
-      expect(cloudinary.calls.signed[0].options.attachment).toBe(false);
+    afterEach(() => {
+      vi.unstubAllGlobals();
     });
 
-    it("serves documents as an attachment", async () => {
-      await storage.getSignedUrl("certificates/123-bonafide.pdf");
-      // Nobody wants a certificate silently opening in a new tab either.
-      expect(cloudinary.calls.signed[0].options.attachment).toBe(true);
-    });
-
-    it("honours an explicit download override", async () => {
-      await storage.getSignedUrl("announcements/123-banner.png", { download: true });
-      expect(cloudinary.calls.signed[0].options.attachment).toBe(true);
-    });
-
-    it("expires the signature", async () => {
-      const before = Math.floor(Date.now() / 1000);
-      await storage.getSignedUrl("certificates/123-bonafide.pdf", {
-        expiresInSeconds: 60,
+    it("fetches images through the image pipeline", async () => {
+      const bytes = await storage.read("announcements/123-banner.png", {
+        mimeType: "image/png",
       });
+
+      expect(bytes.equals(body)).toBe(true);
+      // The SDK signature is (public_id, format, options). Passing the options
+      // object as `format` produces a 401 Invalid Signature.
+      expect(cloudinary.calls.signed[0].format).toBeNull();
+      expect(cloudinary.calls.signed[0].options.resource_type).toBe("image");
+      expect(cloudinary.calls.signed[0].options.attachment).toBe(false);
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.cloudinary.com/v1_1/demo/image/download",
+        expect.objectContaining({ signal: expect.anything() })
+      );
+    });
+
+    it("fetches documents as raw", async () => {
+      await storage.read("certificates/123-bonafide.pdf", {
+        mimeType: "application/pdf",
+      });
+      expect(cloudinary.calls.signed[0].options.resource_type).toBe("raw");
+    });
+
+    it("expires the signature quickly", async () => {
+      const before = Math.floor(Date.now() / 1000);
+      await storage.read("announcements/123-banner.png");
       const { expires_at: expiresAt } = cloudinary.calls.signed[0].options;
-      expect(expiresAt).toBeGreaterThanOrEqual(before + 60);
-      expect(expiresAt).toBeLessThanOrEqual(before + 65);
+      expect(expiresAt).toBeGreaterThanOrEqual(before + 300);
+      expect(expiresAt).toBeLessThanOrEqual(before + 305);
+    });
+
+    it("maps a rejected download to an integration error", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => ({
+          ok: false,
+          status: 401,
+          text: async () => "Invalid Signature",
+        }))
+      );
+
+      await expect(
+        storage.read("announcements/123-banner.png", { mimeType: "image/png" })
+      ).rejects.toMatchObject({
+        statusCode: 502,
+        message: "Could not retrieve file from storage",
+      });
     });
   });
 
@@ -208,14 +279,6 @@ describe("CloudinaryStorage", () => {
       // asset is still live — the opposite of what the caller assumes.
       cloudinary.uploader.destroy = () => Promise.reject(new Error("cdn down"));
       await expect(storage.delete("certificates/123-bonafide.pdf")).resolves.toBe(false);
-    });
-  });
-
-  describe("refusing to hand out bytes", () => {
-    it("does not return the file body through the CDN", async () => {
-      await expect(storage.read("certificates/123-bonafide.pdf")).rejects.toThrow(
-        /signed download URL/
-      );
     });
   });
 

@@ -92,7 +92,10 @@ export default function Reports() {
         </div>
 
         <div className="flex items-center gap-2">
-          <label htmlFor="range" className="text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500">
+          <label
+            htmlFor="range"
+            className="text-sm text-ink-600 dark:text-ink-400 dark:text-ink-500"
+          >
             Period
           </label>
           <select
@@ -242,7 +245,7 @@ function StatusBreakdown({ byStatus }) {
 
   if (entries.length === 0)
     return (
-      <p className="text-sm text-ink-500 dark:text-ink-400 dark:text-ink-500">
+      <p className="text-sm text-ink-500 dark:text-ink-400">
         No requests in this period.
       </p>
     );
@@ -252,7 +255,7 @@ function StatusBreakdown({ byStatus }) {
       {entries.map(([status, count]) => (
         <li key={status} className="flex items-center justify-between gap-3">
           <Badge status={status} />
-          <span className="text-sm font-medium tabular-nums text-ink-800">
+          <span className="text-sm font-medium tabular-nums text-ink-800 dark:text-ink-100">
             {count}
           </span>
         </li>
@@ -271,7 +274,9 @@ function BarList({ rows, total }) {
       {rows.map((row) => (
         <li key={row.label}>
           <div className="flex items-center justify-between gap-3 text-sm">
-            <span className="truncate text-ink-700 dark:text-ink-300">{row.label}</span>
+            <span className="truncate text-ink-700 dark:text-ink-300">
+              {row.label}
+            </span>
             <span className="shrink-0 font-medium tabular-nums text-ink-900 dark:text-ink-100">
               {row.value}
             </span>
@@ -307,7 +312,9 @@ function Figure({ label, value, hint, tone = "default" }) {
         {value}
       </p>
       {hint && (
-        <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">{hint}</p>
+        <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500 dark:text-ink-400 dark:text-ink-500">
+          {hint}
+        </p>
       )}
     </div>
   );

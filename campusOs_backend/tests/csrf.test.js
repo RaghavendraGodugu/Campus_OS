@@ -68,6 +68,33 @@ describe("CSRF protection", () => {
     expectError(res, 403, "CSRF_INVALID");
   });
 
+  it("accepts a mutation from the configured browser origin without a header", async () => {
+    const user = await createUser({ role: ROLES.SUPER_ADMIN });
+    const { agent } = await loginAs(user);
+
+    // The Vercel page cannot read the API host's CSRF cookie, so the browser
+    // path must rely on the unforgeable Origin header.
+    const res = await agent
+      .post(PROTECTED_MUTATION.path)
+      .set("Origin", "http://localhost:5173")
+      .send({});
+
+    expect(res.status).toBe(200);
+  });
+
+  it("rejects a mutation from an untrusted origin even with a valid token", async () => {
+    const user = await createUser({ role: ROLES.SUPER_ADMIN });
+    const { agent, csrfToken } = await loginAs(user);
+
+    const res = await agent
+      .post(PROTECTED_MUTATION.path)
+      .set("Origin", "https://evil.example.com")
+      .set("X-CSRF-Token", csrfToken)
+      .send({});
+
+    expectError(res, 403, "CSRF_INVALID");
+  });
+
   it("accepts a mutation with a matching CSRF token", async () => {
     const user = await createUser({ role: ROLES.SUPER_ADMIN });
     const { agent, csrfToken } = await loginAs(user);
@@ -107,7 +134,7 @@ describe("CSRF protection", () => {
     expect(res.status).toBe(200);
   });
 
-  it("issues a CSRF cookie that JavaScript can read", async () => {
+  it("issues a CSRF cookie that same-origin JavaScript can read", async () => {
     const res = await request(getApp())
       .post("/api/v1/auth/login")
       .send({ email: (await createUser()).email, password: "TestPass123!" });
@@ -133,6 +160,29 @@ describe("CSRF protection", () => {
 
     // No session, so CSRF is irrelevant; the real answer is 401.
     expectError(res, 401, "UNAUTHENTICATED");
+  });
+
+  it("refreshes from the trusted origin without reading the API-host cookie", async () => {
+    const user = await createUser();
+    const { agent } = await loginAs(user);
+
+    const res = await agent
+      .post("/api/v1/auth/refresh")
+      .set("Origin", "http://localhost:5173")
+      .send({});
+
+    expect(res.status).toBe(200);
+  });
+
+  it("rejects a login from an untrusted origin", async () => {
+    const user = await createUser();
+
+    const res = await request(getApp())
+      .post("/api/v1/auth/login")
+      .set("Origin", "https://evil.example.com")
+      .send({ email: user.email, password: "TestPass123!" });
+
+    expectError(res, 403, "CSRF_INVALID");
   });
 
   it("rejects refresh when the CSRF header does not match the cookie", async () => {

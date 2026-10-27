@@ -226,11 +226,11 @@ export default function CertificateDetail() {
                 )}
               </div>
               <div className="pb-1">
-                <p className="text-sm font-medium text-ink-800">
+                <p className="text-sm font-medium text-ink-800 dark:text-ink-100">
                   {entry.from ? `${humanise(entry.from)} → ` : ""}
                   {humanise(entry.to)}
                 </p>
-                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                   {formatDateTime(entry.at)}
                   {entry.actorRole && ` · ${humanise(entry.actorRole)}`}
                   {entry.note && ` · ${entry.note}`}
@@ -247,10 +247,12 @@ export default function CertificateDetail() {
 function Detail({ label, value }) {
   return (
     <div>
-      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 dark:text-ink-500 uppercase">
+      <dt className="text-xs tracking-wide text-ink-500 dark:text-ink-400 uppercase">
         {label}
       </dt>
-      <dd className="mt-0.5 text-sm text-ink-800">{value ?? "—"}</dd>
+      <dd className="mt-0.5 text-sm text-ink-800 dark:text-ink-200">
+        {value ?? "—"}
+      </dd>
     </div>
   );
 }

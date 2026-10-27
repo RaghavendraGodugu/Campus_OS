@@ -11,31 +11,31 @@ change without hunting.
   runtime storage), 150+ source files, 35 backend test suites and 18 frontend
   test suites.
 
-| Workspace | Package name | Stack | Entry point |
-| --- | --- | --- | --- |
-| `campusOs_backend/` | `campusos-backend` | Node 22, Express 5, Mongoose 9, Zod 4, Vitest | `src/server.js` |
-| `campusOs_frontend/` | `campusos-frontend` | React 19, Vite 8, React Router 7, TanStack Query 5, Tailwind 4 | `src/main.jsx` |
+| Workspace            | Package name        | Stack                                                          | Entry point     |
+| -------------------- | ------------------- | -------------------------------------------------------------- | --------------- |
+| `campusOs_backend/`  | `campusos-backend`  | Node 22, Express 5, Mongoose 9, Zod 4, Vitest                  | `src/server.js` |
+| `campusOs_frontend/` | `campusos-frontend` | React 19, Vite 8, React Router 7, TanStack Query 5, Tailwind 4 | `src/main.jsx`  |
 
 Where the ~70k lines live:
 
-| Area | Files | Lines |
-| --- | ---: | ---: |
-| `campusOs_backend/src/services` | 32 | 13,030 |
-| `campusOs_backend/src/models` | 20 | 3,872 |
-| `campusOs_backend/src/controllers` | 15 | 2,968 |
-| `campusOs_backend/src/utils` | 12 | 2,790 |
-| `campusOs_backend/src/routes` | 16 | 2,108 |
-| `campusOs_backend/src/validators` | 16 | 1,991 |
-| `campusOs_backend/src/config` | 6 | 1,839 |
-| `campusOs_backend/src/middleware` | 6 | 926 |
-| `campusOs_backend/src/jobs` | 1 | 268 |
-| `campusOs_backend/tests` | 37 | 14,909 |
-| `campusOs_backend/scripts` | 12 | 2,868 |
-| `campusOs_frontend/src/pages` | 37 | 11,346 |
-| `campusOs_frontend/src/components` | 24 | 3,871 |
-| `campusOs_frontend/src/test` | 20 | 4,880 |
-| `campusOs_frontend/src/context` + `lib` + `api` | 5 | 1,084 |
-| `campusOs_frontend/scripts` | 2 | 729 |
+| Area                                            | Files |  Lines |
+| ----------------------------------------------- | ----: | -----: |
+| `campusOs_backend/src/services`                 |    32 | 13,030 |
+| `campusOs_backend/src/models`                   |    20 |  3,872 |
+| `campusOs_backend/src/controllers`              |    15 |  2,968 |
+| `campusOs_backend/src/utils`                    |    12 |  2,790 |
+| `campusOs_backend/src/routes`                   |    16 |  2,108 |
+| `campusOs_backend/src/validators`               |    16 |  1,991 |
+| `campusOs_backend/src/config`                   |     6 |  1,839 |
+| `campusOs_backend/src/middleware`               |     6 |    926 |
+| `campusOs_backend/src/jobs`                     |     1 |    268 |
+| `campusOs_backend/tests`                        |    37 | 14,909 |
+| `campusOs_backend/scripts`                      |    12 |  2,868 |
+| `campusOs_frontend/src/pages`                   |    37 | 11,346 |
+| `campusOs_frontend/src/components`              |    24 |  3,871 |
+| `campusOs_frontend/src/test`                    |    20 |  4,880 |
+| `campusOs_frontend/src/context` + `lib` + `api` |     5 |  1,084 |
+| `campusOs_frontend/scripts`                     |     2 |    729 |
 
 ---
 
@@ -61,7 +61,7 @@ Where the ~70k lines live:
 Campus_OS/
 ├── README.md                  product + run instructions + honest feature list
 ├── FEATURES.md                every feature, ticked or not, with reasons
-├── DEPLOY.md                  Docker / managed-host deployment, backup, restore
+├── DEPLOY.md                  Vercel + Render + Atlas deployment, backup, restore
 ├── LICENSE                    MIT / private
 ├── package.json               npm workspaces root: dev, test, lint, build, seed
 ├── package-lock.json          single lockfile for both workspaces
@@ -112,15 +112,15 @@ The server decides permission on every request; the UI only hides things.
 
 ## 2. Repository root
 
-| Path | What it is |
-| --- | --- |
-| `package.json` | Workspace root. Scripts fan out with `--workspace`: `dev:backend`, `dev:frontend`, `test`, `test:frontend`, `lint`, `format`, `build`, `seed:demo`, `create-admin`, `run:escalations`. Requires Node ≥ 20.19. |
-| `docker-compose.yml` | Three services: `db` (mongo:7, not published to host), `api` (port 5050 internal), `web` (nginx on `${WEB_PORT:-8080}`). Named volumes `mongo-data`, `app-storage`. Secrets are required via `${VAR:?}`. |
-| `.github/workflows/gates.yml` | Four jobs: **backend** (lint, format, test), **frontend** (lint, format, test, build), **browser** (seed → start API → start Vite → `verify:roles`), **images** (build both Dockerfiles, never push). |
-| `README.md` | The product view: what it does, how to run, demo accounts, commands, an explicit "what is not built". |
-| `FEATURES.md` | The exhaustive inventory — 16 sections, every item ticked or not, with a reason for every unticked one. Best source for *intent*. |
-| `DEPLOY.md` | Deployment, the environment contract, backup/restore, the first super-admin. |
-| `backups/` | Empty and gitignored. Output target for `npm run backup`. |
+| Path                          | What it is                                                                                                                                                                                                    |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `package.json`                | Workspace root. Scripts fan out with `--workspace`: `dev:backend`, `dev:frontend`, `test`, `test:frontend`, `lint`, `format`, `build`, `seed:demo`, `create-admin`, `run:escalations`. Requires Node ≥ 20.19. |
+| `docker-compose.yml`          | Three services: `db` (mongo:7, not published to host), `api` (port 5050 internal), `web` (nginx on `${WEB_PORT:-8080}`). Named volumes `mongo-data`, `app-storage`. Secrets are required via `${VAR:?}`.      |
+| `.github/workflows/gates.yml` | Four jobs: **backend** (lint, format, test), **frontend** (lint, format, test, build), **browser** (seed → start API → start Vite → `verify:roles`), **images** (build both Dockerfiles, never push).         |
+| `README.md`                   | The product view: what it does, how to run, demo accounts, commands, an explicit "what is not built".                                                                                                         |
+| `FEATURES.md`                 | The exhaustive inventory — 16 sections, every item ticked or not, with a reason for every unticked one. Best source for _intent_.                                                                             |
+| `DEPLOY.md`                   | Deployment, the environment contract, backup/restore, the first super-admin.                                                                                                                                  |
+| `backups/`                    | Empty and gitignored. Output target for `npm run backup`.                                                                                                                                                     |
 
 ---
 
@@ -137,8 +137,8 @@ The layers are strict and the comments say why:
 - **routes** own the URL, the permission gate and middleware order. Nothing else.
 - **controllers** are thin: read `req.validated`, call one service, shape the
   response. No business rule and no authorization decision lives here.
-- **services** own *all* rules, including the second authorization check —
-  "may this person see *this* record", not just "may this role use this route".
+- **services** own _all_ rules, including the second authorization check —
+  "may this person see _this_ record", not just "may this role use this route".
   Query-level ownership/department/confidentiality filters live here.
 - **models** own schema, indexes, invariants and derived fields.
 - **validators** are Zod, `.strict()`, and deliberately do not accept
@@ -146,57 +146,57 @@ The layers are strict and the comments say why:
 
 ### 3.2 Process entry
 
-| File | Lines | What it does |
-| --- | --- | --- |
-| `src/server.js` | 122 | Validates env, registers connection listeners, connects, syncs indexes (dev/test only), starts listening, handles `EADDRINUSE`, drains on SIGTERM/SIGINT. |
-| `src/app.js` | 184 | Builds the Express app. Middleware order is load-bearing and documented: helmet → CORS → pino-http → compression → **raw-body webhook (before JSON)** → `express.json` → cookies → content-type guard → routes → 404 → error handler. Exports `createApp` so tests can run without a socket. |
+| File            | Lines | What it does                                                                                                                                                                                                                                                                                 |
+| --------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/server.js` | 122   | Validates env, registers connection listeners, connects, syncs indexes (dev/test only), starts listening, handles `EADDRINUSE`, drains on SIGTERM/SIGINT.                                                                                                                                    |
+| `src/app.js`    | 184   | Builds the Express app. Middleware order is load-bearing and documented: helmet → CORS → pino-http → compression → **raw-body webhook (before JSON)** → `express.json` → cookies → content-type guard → routes → 404 → error handler. Exports `createApp` so tests can run without a socket. |
 
 ### 3.3 `src/config/` — 6 files, ~1,840 lines
 
-| File | Purpose |
-| --- | --- |
-| `env.js` | Zod-validated environment, parsed once at require time. Requires `MONGO_URI` **with a database name**, `JWT_SECRET`, `REFRESH_TOKEN_SECRET`, `CSRF_SECRET`; refuses equal secrets; in production requires `COOKIE_SECURE=true`, Razorpay credentials, and an Atlas URI. |
-| `db.js` | Mongoose connection with fail-fast timeouts, connection-event logging, `syncIndexes()` (refuses in production), graceful `disconnectDB()`. |
-| `constants.js` | Every closed set: `ROLES` (12 values), request/complaint statuses, certificate types, document visibility, notification categories, etc. |
-| `logger.js` | pino, pretty in dev / JSON in prod, with a redaction list so secrets never reach the log stream. |
-| `razorpay.js` | Payment gateway interface: real Razorpay client or a **mock** when keys are absent (mock refused in production). |
-| `storage.js` | Private file storage behind one interface: local disk (`storage/`) or Cloudinary. Images → Cloudinary `image` pipeline; documents → `raw` byte-for-byte. |
+| File           | Purpose                                                                                                                                                                                                                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env.js`       | Zod-validated environment, parsed once at require time. Requires `MONGO_URI` **with a database name**, `JWT_SECRET`, `REFRESH_TOKEN_SECRET`, `CSRF_SECRET`; refuses equal secrets; in production requires `COOKIE_SECURE=true`, Razorpay/Cloudinary/SMTP settings, `WEB_URL`, and a database URI with a name. |
+| `db.js`        | Mongoose connection with fail-fast timeouts, connection-event logging, `syncIndexes()` (refuses in production), graceful `disconnectDB()`.                                                                                                                                                                    |
+| `constants.js` | Every closed set: `ROLES` (12 values), request/complaint statuses, certificate types, document visibility, notification categories, etc.                                                                                                                                                                      |
+| `logger.js`    | pino, pretty in dev / JSON in prod, with a redaction list so secrets never reach the log stream.                                                                                                                                                                                                              |
+| `razorpay.js`  | Payment gateway interface: real Razorpay client or a **mock** when keys are absent (mock refused in production).                                                                                                                                                                                              |
+| `storage.js`   | Private file storage behind one interface: local disk (`storage/`) or Cloudinary. Images → Cloudinary `image` pipeline; documents → `raw` byte-for-byte.                                                                                                                                                      |
 
 ### 3.4 `src/middleware/` — 6 files, ~930 lines
 
-| File | Purpose |
-| --- | --- |
-| `auth.js` | `authenticate` re-reads the user from MongoDB on every request (never trusts token claims), plus `requirePermission` and scope helpers. |
-| `csrf.js` | Double-submit CSRF with an identity-bound HMAC token; blocks unsafe verbs without a valid header. |
-| `rateLimit.js` | Login throttling per-IP *and* per-email, plus limits on other abuse-prone endpoints. |
-| `upload.js` | multer memory storage, size and count limits — files are never streamed to disk. |
-| `validate.js` | Runs Zod schemas against params/query/body and writes to `req.validated` (Express 5 made `req.query` read-only). |
-| `errorHandler.js` | The single place that turns an exception into an HTTP response; `notFoundHandler` alongside it. Redacts internals in production. |
+| File              | Purpose                                                                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth.js`         | `authenticate` re-reads the user from MongoDB on every request (never trusts token claims), plus `requirePermission` and scope helpers. |
+| `csrf.js`         | Trusted-Origin guard for browser writes, plus identity-bound HMAC double-submit fallback for non-browser callers.                       |
+| `rateLimit.js`    | Login throttling per-IP _and_ per-email, plus limits on other abuse-prone endpoints.                                                    |
+| `upload.js`       | multer memory storage, size and count limits — files are never streamed to disk.                                                        |
+| `validate.js`     | Runs Zod schemas against params/query/body and writes to `req.validated` (Express 5 made `req.query` read-only).                        |
+| `errorHandler.js` | The single place that turns an exception into an HTTP response; `notFoundHandler` alongside it. Redacts internals in production.        |
 
 ### 3.5 `src/models/` — 19 models + registry, ~3,870 lines
 
-| Model | Represents | Key relationships |
-| --- | --- | --- |
-| `User.js` | Login identity: email, password hash, role, status, 2FA, refresh-token families | → `Department`, → `Student` |
-| `Student.js` | Academic record: roll number, programme, semester, batch | → `User`, `Department`, `Program` |
-| `Department.js` | Organisational unit; HOD appointment | → `User` (HOD) |
-| `Program.js` | Degree programme | → `Department` |
-| `RequestType.js` | Catalogue of services: field definitions, workflow, SLA, fee | → `Department` |
-| `Request.js` | A student's application for a service, with status, assignee, SLA | → `Student`, `User`, `Department`, `RequestType`, `Document` |
-| `Complaint.js` | Grievance, optionally confidential or anonymous | → `Student`, `User`, `Department` |
-| `Certificate.js` | Application + issued certificate, verification code, file | → `Student`, `User`, `Department` |
-| `CertificateTemplate.js` | Reusable certificate layout for bulk issue | → `User` |
-| `Invoice.js` | Amount owed; items, subtotal, tax, total, instalments | → `Student`, `User`, `Request` |
-| `Payment.js` | One settlement attempt; gateway order/payment ids | → `Invoice`, `Student` |
-| `Refund.js` | Requested → approved → processed return of money | → `Payment`, `Invoice`, `Student`, `User` |
-| `InstitutionTaxProfile.js` | GSTIN, legal name, state (CGST/SGST vs IGST) | → `User` |
-| `Announcement.js` | Notice to a computed audience, optional image | → `User`, `Department`, `Program` |
-| `Notification.js` | In-app message for exactly one user | → `User` |
-| `Document.js` | File metadata + private storage key | → `Request`, `Certificate`, `Student`, `User` |
-| `AuditLog.js` | Append-only record of privileged actions, redacted metadata | → `User` |
-| `Counter.js` | Concurrency-safe sequence for references (`REQ-2026-000123`) | — |
-| `AcademicTerm.js` | Named term with date range and "current" flag | → `User` |
-| `index.js` | **Model registry** — requires every model so `populate()` never hits `MissingSchemaError`; exports `initIndexes()`. |
+| Model                      | Represents                                                                                                          | Key relationships                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `User.js`                  | Login identity: email, password hash, role, status, 2FA, refresh-token families                                     | → `Department`, → `Student`                                  |
+| `Student.js`               | Academic record: roll number, programme, semester, batch                                                            | → `User`, `Department`, `Program`                            |
+| `Department.js`            | Organisational unit; HOD appointment                                                                                | → `User` (HOD)                                               |
+| `Program.js`               | Degree programme                                                                                                    | → `Department`                                               |
+| `RequestType.js`           | Catalogue of services: field definitions, workflow, SLA, fee                                                        | → `Department`                                               |
+| `Request.js`               | A student's application for a service, with status, assignee, SLA                                                   | → `Student`, `User`, `Department`, `RequestType`, `Document` |
+| `Complaint.js`             | Grievance, optionally confidential or anonymous                                                                     | → `Student`, `User`, `Department`                            |
+| `Certificate.js`           | Application + issued certificate, verification code, file                                                           | → `Student`, `User`, `Department`                            |
+| `CertificateTemplate.js`   | Reusable certificate layout for bulk issue                                                                          | → `User`                                                     |
+| `Invoice.js`               | Amount owed; items, subtotal, tax, total, instalments                                                               | → `Student`, `User`, `Request`                               |
+| `Payment.js`               | One settlement attempt; gateway order/payment ids                                                                   | → `Invoice`, `Student`                                       |
+| `Refund.js`                | Requested → approved → processed return of money                                                                    | → `Payment`, `Invoice`, `Student`, `User`                    |
+| `InstitutionTaxProfile.js` | GSTIN, legal name, state (CGST/SGST vs IGST)                                                                        | → `User`                                                     |
+| `Announcement.js`          | Notice to a computed audience, optional image                                                                       | → `User`, `Department`, `Program`                            |
+| `Notification.js`          | In-app message for exactly one user                                                                                 | → `User`                                                     |
+| `Document.js`              | File metadata + private storage key                                                                                 | → `Request`, `Certificate`, `Student`, `User`                |
+| `AuditLog.js`              | Append-only record of privileged actions, redacted metadata                                                         | → `User`                                                     |
+| `Counter.js`               | Concurrency-safe sequence for references (`REQ-2026-000123`)                                                        | —                                                            |
+| `AcademicTerm.js`          | Named term with date range and "current" flag                                                                       | → `User`                                                     |
+| `index.js`                 | **Model registry** — requires every model so `populate()` never hits `MissingSchemaError`; exports `initIndexes()`. |
 
 ### 3.6 `src/routes/` — 15 feature routers + table, ~2,100 lines
 
@@ -205,23 +205,23 @@ All mounted in `routes/index.js`:
 - Health is **outside** `/api/v1`: `GET /health`, `/health/live`, `/health/ready`.
 - Everything else sits under `/api/v1`.
 
-| Router | Endpoints | Notes |
-| --- | --- | --- |
-| `auth.routes.js` | 15 | login, refresh, logout, logout-all, 2FA enrol/verify/disable, email verify, forgot/reset password |
-| `request.routes.js` | 10 | create/list/detail, transition, assign, notes, documents |
-| `complaint.routes.js` | 10 | create (incl. anonymous), list/detail, triage, transition, SLA policy |
-| `certificate.routes.js` | 14 | apply, list/detail, approve, issue, revoke, download, verify, templates, bulk issue |
-| `finance.routes.js` | 23 | invoices, payments, orders, verify, refunds, receipts, instalments, penalties, tax profile, reconciliation |
-| `paymentWebhook.routes.js` | 1 | Razorpay webhook — mounted in `app.js` **above** the JSON parser for raw-body signature verification |
-| `notification.routes.js` | 4 | list, unread count, mark read, preferences |
-| `announcement.routes.js` | 8 | list/detail, create, publish, image upload |
-| `report.routes.js` | 6 | scoped reports + CSV/PDF export |
-| `audit.routes.js` | 3 | read-only trail, no write verbs by construction |
-| `academicTerm.routes.js` | 8 | terms, current term, activate |
-| `directory.routes.js` | 1 | staff lookup for the assignment dropdown |
-| `document.routes.js` | 6 | upload, metadata, authorised download, delete |
-| `profile.routes.js` | 8 | own profile, avatar, notification preferences |
-| `admin.routes.js` | 22 | people, roles, departments, programmes, services, student import |
+| Router                     | Endpoints | Notes                                                                                                      |
+| -------------------------- | --------- | ---------------------------------------------------------------------------------------------------------- |
+| `auth.routes.js`           | 15        | login, refresh, logout, logout-all, 2FA enrol/verify/disable, email verify, forgot/reset password          |
+| `request.routes.js`        | 10        | create/list/detail, transition, assign, notes, documents                                                   |
+| `complaint.routes.js`      | 10        | create (incl. anonymous), list/detail, triage, transition, SLA policy                                      |
+| `certificate.routes.js`    | 14        | apply, list/detail, approve, issue, revoke, download, verify, templates, bulk issue                        |
+| `finance.routes.js`        | 23        | invoices, payments, orders, verify, refunds, receipts, instalments, penalties, tax profile, reconciliation |
+| `paymentWebhook.routes.js` | 1         | Razorpay webhook — mounted in `app.js` **above** the JSON parser for raw-body signature verification       |
+| `notification.routes.js`   | 4         | list, unread count, mark read, preferences                                                                 |
+| `announcement.routes.js`   | 8         | list/detail, create, publish, image upload                                                                 |
+| `report.routes.js`         | 6         | scoped reports + CSV/PDF export                                                                            |
+| `audit.routes.js`          | 3         | read-only trail, no write verbs by construction                                                            |
+| `academicTerm.routes.js`   | 8         | terms, current term, activate                                                                              |
+| `directory.routes.js`      | 1         | staff lookup for the assignment dropdown                                                                   |
+| `document.routes.js`       | 6         | upload, metadata, authorised download, delete                                                              |
+| `profile.routes.js`        | 8         | own profile, avatar, notification preferences                                                              |
+| `admin.routes.js`          | 22        | people, roles, departments, programmes, services, student import                                           |
 
 ### 3.7 `src/controllers/` — 15 files, ~2,970 lines
 
@@ -270,20 +270,20 @@ lazily-required nodemailer when `SMTP_HOST` is set),
 
 ### 3.9 `src/utils/` — 12 files, ~2,790 lines
 
-| File | Purpose |
-| --- | --- |
-| `permissions.js` | **The RBAC authority.** `ROLES`, permission strings `domain:action:scope`, scope constants, per-role grants, derivation. Every route re-checks it. |
-| `workflow.js` | Request workflow as data: permitted transitions per status/role/actor. |
-| `complaintWorkflow.js` | Separate complaint lifecycle (acknowledge → investigate → resolve). |
-| `sla.js` | SLA arithmetic over a **business calendar**, not `+48h`. |
-| `slaPolicy.js` | Default SLA durations per priority/category. |
-| `money.js` | Integer-paise arithmetic, explicit rounding, formatting. |
-| `tokens.js` | JWT issue/verify + stateless CSRF token signing. |
-| `cookies.js` | Cookie attributes in one place so login/refresh/logout cannot drift. |
-| `csv.js` | Hand-written state-machine CSV reader (no dependency). |
-| `ApiError.js` | Typed application error + `ERROR_CODE` registry. |
-| `asyncHandler.js` | Explicit async wrapper (Express 5 forward is automatic; kept for clarity). |
-| `response.js` | The `{ success, message, data, meta }` envelope helpers. |
+| File                   | Purpose                                                                                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `permissions.js`       | **The RBAC authority.** `ROLES`, permission strings `domain:action:scope`, scope constants, per-role grants, derivation. Every route re-checks it. |
+| `workflow.js`          | Request workflow as data: permitted transitions per status/role/actor.                                                                             |
+| `complaintWorkflow.js` | Separate complaint lifecycle (acknowledge → investigate → resolve).                                                                                |
+| `sla.js`               | SLA arithmetic over a **business calendar**, not `+48h`.                                                                                           |
+| `slaPolicy.js`         | Default SLA durations per priority/category.                                                                                                       |
+| `money.js`             | Integer-paise arithmetic, explicit rounding, formatting.                                                                                           |
+| `tokens.js`            | JWT issue/verify + stateless CSRF token signing.                                                                                                   |
+| `cookies.js`           | Cookie attributes in one place so login/refresh/logout cannot drift.                                                                               |
+| `csv.js`               | Hand-written state-machine CSV reader (no dependency).                                                                                             |
+| `ApiError.js`          | Typed application error + `ERROR_CODE` registry.                                                                                                   |
+| `asyncHandler.js`      | Explicit async wrapper (Express 5 forward is automatic; kept for clarity).                                                                         |
+| `response.js`          | The `{ success, message, data, meta }` envelope helpers.                                                                                           |
 
 ### 3.10 `src/jobs/` — 1 file
 
@@ -293,18 +293,18 @@ not an in-process scheduler).
 
 ### 3.11 `scripts/` — 12 files, ~2,870 lines
 
-| Script | Purpose |
-| --- | --- |
-| `create-admin.js` | The only way to create the first super admin (no HTTP register exists). |
-| `seed-demo.js` | Nine demo accounts + departments, programmes, services, requests, complaints, certificates, invoices. Refuses a non-empty non-demo DB; `--force` required. |
-| `migrate-indexes.js` | Syncs indexes against a real cluster (what `server.js` does in dev/test). |
-| `run-escalation.js` | One escalation sweep, for cron. |
-| `backup.js` / `restore-backup.js` | Timestamped archive; restore asks first. |
-| `check-razorpay.js` / `check-razorpay-live.js` | Connectivity check; live order + payment + refund. |
-| `live-payment-drill.js` | Invoice → partial payment → refund. |
-| `refund-drill.js` | Refund state machine end to end. |
-| `comms-drill.js` | Notification fan-out. |
-| `reports-drill.js` | Every report scope. |
+| Script                                         | Purpose                                                                                                                                                    |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create-admin.js`                              | The only way to create the first super admin (no HTTP register exists).                                                                                    |
+| `seed-demo.js`                                 | Nine demo accounts + departments, programmes, services, requests, complaints, certificates, invoices. Refuses a non-empty non-demo DB; `--force` required. |
+| `migrate-indexes.js`                           | Syncs indexes against a real cluster (what `server.js` does in dev/test).                                                                                  |
+| `run-escalation.js`                            | One escalation sweep, for cron.                                                                                                                            |
+| `backup.js` / `restore-backup.js`              | Timestamped archive; restore asks first.                                                                                                                   |
+| `check-razorpay.js` / `check-razorpay-live.js` | Connectivity check; live order + payment + refund.                                                                                                         |
+| `live-payment-drill.js`                        | Invoice → partial payment → refund.                                                                                                                        |
+| `refund-drill.js`                              | Refund state machine end to end.                                                                                                                           |
+| `comms-drill.js`                               | Notification fan-out.                                                                                                                                      |
+| `reports-drill.js`                             | Every report scope.                                                                                                                                        |
 
 ### 3.12 `tests/` — 37 files, ~14,900 lines
 
@@ -341,58 +341,59 @@ product.
 
 **Public — no session, outside the app shell**
 
-| URL | Page |
-| --- | --- |
-| `/verify` | `VerifyCertificate` — verify a paper certificate by code |
-| `/grievance` | `Grievance` — file a complaint anonymously |
-| `/login` | `Login` |
-| `/forgot-password` | `ForgotPassword` |
-| `/reset-password` | `ResetPassword` |
-| `/verify-email` | `VerifyEmail` |
+| URL                | Page                                                     |
+| ------------------ | -------------------------------------------------------- |
+| `/verify`          | `VerifyCertificate` — verify a paper certificate by code |
+| `/grievance`       | `Grievance` — file a complaint anonymously               |
+| `/login`           | `Login`                                                  |
+| `/forgot-password` | `ForgotPassword`                                         |
+| `/reset-password`  | `ResetPassword`                                          |
+| `/verify-email`    | `VerifyEmail`                                            |
 
 **Signed in but outside the shell** — `/set-password` (`RequireAuth`
 `allowUnchangedPassword`), so a forced password change shows no navigation.
 
 **Inside the shell** (`RequireAuth` → `AppShell`)
 
-| URL | Page | Permission gate |
-| --- | --- | --- |
-| `/` | `Dashboard` | — |
-| `/profile` | `Profile` | — |
-| `/requests`, `/requests/new`, `/requests/:reference` | `Requests`, `NewRequest`, `RequestDetail` | `request:read:own` / `request:create:own` |
-| `/complaints`, `/complaints/new`, `/complaints/:reference` | `Complaints`, `NewComplaint`, `ComplaintDetail` | `complaint:create:own` |
-| `/certificates`, `/certificates/new`, `/certificates/:reference` | `Certificates`, `ApplyCertificate`, `CertificateDetail` | `certificate:apply:own` |
-| `/finance/invoices`, `/finance/invoices/:reference` | `Invoices`, `InvoiceDetail` | `invoice:read:own` **or** `invoice:read:institution` |
-| `/finance/refunds` | `Refunds` | `refund:request:own` |
-| `/announcements`, `/announcements/:reference` | `Announcements`, `AnnouncementDetail` | `announcement:read:institution` |
-| `/management/requests`, `/management/requests/:reference` | `Requests(mode=assigned)`, `RequestDetail` | `request:read:assigned` |
-| `/management/complaints`, `/management/complaints/:reference` | `Complaints(mode=assigned)`, `ComplaintDetail` | `complaint:read:assigned` |
-| `/management/certificates`, `/management/certificates/:reference` | `Certificates(mode=assigned)`, `CertificateDetail` | any of `certificate:read:{assigned,department,institution}` |
-| `/management/announcements` | `ComposeAnnouncement` | `announcement:manage:institution` |
-| `/management/tax` | `GstProfile` | `invoice:manage:institution` |
-| `/management/certificate-templates` | `CertificateTemplates` | `certificate:issue:institution` |
-| `/management/terms` | `Terms` | `academic-term:manage:institution` |
-| `/admin/people` | `People` | `user:read:institution` |
-| `/admin/services` | `RequestTypes` | `request-type:manage:institution` |
-| `/admin/students` | `StudentImport` | `user:manage:institution` |
-| `/admin/departments` | `Departments` | `department:manage:institution` |
-| `/admin/programmes` | `Programmes` | `program:manage:institution` |
-| `/reports` | `Reports` | `report:read:institution` **or** `report:read:department` |
-| `/audit` | `AuditTrail` | `audit:read:institution` **or** `audit:read:department` |
-| `*` | `NotFound` | — |
+| URL                                                               | Page                                                    | Permission gate                                             |
+| ----------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------- |
+| `/`                                                               | `Dashboard`                                             | —                                                           |
+| `/profile`                                                        | `Profile`                                               | —                                                           |
+| `/requests`, `/requests/new`, `/requests/:reference`              | `Requests`, `NewRequest`, `RequestDetail`               | `request:read:own` / `request:create:own`                   |
+| `/complaints`, `/complaints/new`, `/complaints/:reference`        | `Complaints`, `NewComplaint`, `ComplaintDetail`         | `complaint:create:own`                                      |
+| `/certificates`, `/certificates/new`, `/certificates/:reference`  | `Certificates`, `ApplyCertificate`, `CertificateDetail` | `certificate:apply:own`                                     |
+| `/finance/invoices`, `/finance/invoices/:reference`               | `Invoices`, `InvoiceDetail`                             | `invoice:read:own` **or** `invoice:read:institution`        |
+| `/finance/refunds`                                                | `Refunds`                                               | `refund:request:own`                                        |
+| `/announcements`, `/announcements/:reference`                     | `Announcements`, `AnnouncementDetail`                   | `announcement:read:institution`                             |
+| `/management/requests`, `/management/requests/:reference`         | `Requests(mode=assigned)`, `RequestDetail`              | `request:read:assigned`                                     |
+| `/management/complaints`, `/management/complaints/:reference`     | `Complaints(mode=assigned)`, `ComplaintDetail`          | `complaint:read:assigned`                                   |
+| `/management/certificates`, `/management/certificates/:reference` | `Certificates(mode=assigned)`, `CertificateDetail`      | any of `certificate:read:{assigned,department,institution}` |
+| `/management/announcements`                                       | `ComposeAnnouncement`                                   | `announcement:manage:institution`                           |
+| `/management/tax`                                                 | `GstProfile`                                            | `invoice:manage:institution`                                |
+| `/management/certificate-templates`                               | `CertificateTemplates`                                  | `certificate:issue:institution`                             |
+| `/management/terms`                                               | `Terms`                                                 | `academic-term:manage:institution`                          |
+| `/admin/people`                                                   | `People`                                                | `user:read:institution`                                     |
+| `/admin/services`                                                 | `RequestTypes`                                          | `request-type:manage:institution`                           |
+| `/admin/students`                                                 | `StudentImport`                                         | `user:manage:institution`                                   |
+| `/admin/departments`                                              | `Departments`                                           | `department:manage:institution`                             |
+| `/admin/programmes`                                               | `Programmes`                                            | `program:manage:institution`                                |
+| `/reports`                                                        | `Reports`                                               | `report:read:institution` **or** `report:read:department`   |
+| `/audit`                                                          | `AuditTrail`                                            | `audit:read:institution` **or** `audit:read:department`     |
+| `*`                                                               | `NotFound`                                              | —                                                           |
 
 Outside the shell, `*` redirects to `/`.
 
 ### 4.3 `src/api/client.js` — 302 lines
 
 The shared HTTP client: an axios instance with `withCredentials: true`, CSRF
-header injection, a single refresh-and-retry path on 401, error normalisation,
-and helpers `apiGet/apiPost/apiPut/apiPatch/apiDelete/apiUpload/fetchDocument/
-downloadReport/readCsrfToken`. The session cookie is HttpOnly; no token is ever
-stored in `localStorage`.
+header injection when the page can read the cookie, a single refresh-and-retry
+path on 401, error normalisation, and helpers `apiGet/apiPost/apiPut/apiPatch/
+apiDelete/apiUpload/fetchDocument/downloadReport/apiAssetUrl/readCsrfToken`.
+The session cookie is HttpOnly; no token is ever stored in `localStorage`.
 
-Every API call goes through it except one: `components/DocumentPanel.jsx`
-downloads with a raw `fetch` to a hard-coded `/api/v1/documents/:id/download`
+`components/DocumentPanel.jsx` downloads with a raw `fetch` because it needs a
+blob/object URL; it uses `apiAssetUrl()` and `credentials: "include"` so the
+request follows `VITE_API_URL` instead of hard-coding the frontend origin.
 rather than the `fetchDocument` helper, so it only works when the API is
 same-origin.
 
@@ -414,21 +415,21 @@ same-origin.
 
 **Shared feature components**
 
-| File | What it does | Used by |
-| --- | --- | --- |
-| `AvatarPicker.jsx` | Upload/replace/remove profile picture | Profile |
-| `BulkIssueBar.jsx` | Select + bulk-issue certificates | Certificates |
-| `DocumentPanel.jsx` | Attach, list, download, delete documents | Request/Complaint/Certificate detail |
-| `DynamicField.jsx` | Render a form from a request type's field definitions | NewRequest |
-| `EmailVerification.jsx` | Resend/confirm email banner | Profile, VerifyEmail |
-| `InstalmentPanel.jsx` | Instalment schedule, penalties, pay | InvoiceDetail |
-| `NotificationPreferences.jsx` | Mute categories without losing them | Profile |
-| `PayDialog.jsx` | Razorpay checkout + verification | Invoices, InstalmentPanel |
-| `ReportExport.jsx` | CSV/PDF export buttons | Reports |
-| `RequireAuth.jsx` | Session gate (incl. forced password change) | App |
-| `RequirePermission.jsx` | Any-of permission gate with a named refusal | App |
-| `TransitionPanel.jsx` | Workflow actions available to this actor | Request/Complaint detail |
-| `TwoFactorSettings.jsx` | Enrol, confirm, disable 2FA | Profile |
+| File                          | What it does                                          | Used by                              |
+| ----------------------------- | ----------------------------------------------------- | ------------------------------------ |
+| `AvatarPicker.jsx`            | Upload/replace/remove profile picture                 | Profile                              |
+| `BulkIssueBar.jsx`            | Select + bulk-issue certificates                      | Certificates                         |
+| `DocumentPanel.jsx`           | Attach, list, download, delete documents              | Request/Complaint/Certificate detail |
+| `DynamicField.jsx`            | Render a form from a request type's field definitions | NewRequest                           |
+| `EmailVerification.jsx`       | Resend/confirm email banner                           | Profile, VerifyEmail                 |
+| `InstalmentPanel.jsx`         | Instalment schedule, penalties, pay                   | InvoiceDetail                        |
+| `NotificationPreferences.jsx` | Mute categories without losing them                   | Profile                              |
+| `PayDialog.jsx`               | Razorpay checkout + verification                      | Invoices, InstalmentPanel            |
+| `ReportExport.jsx`            | CSV/PDF export buttons                                | Reports                              |
+| `RequireAuth.jsx`             | Session gate (incl. forced password change)           | App                                  |
+| `RequirePermission.jsx`       | Any-of permission gate with a named refusal           | App                                  |
+| `TransitionPanel.jsx`         | Workflow actions available to this actor              | Request/Complaint detail             |
+| `TwoFactorSettings.jsx`       | Enrol, confirm, disable 2FA                           | Profile                              |
 
 **`components/layout/`**
 
@@ -443,16 +444,16 @@ rendered), `Modal`, `Pagination`, `Skeleton`, `States` (empty/error/loading).
 
 ### 4.7 `src/pages/` — 37 files, ~11,350 lines
 
-| Group | Pages |
-| --- | --- |
-| Auth & account | `Login`, `ForgotPassword`, `ResetPassword`, `SetPassword`, `VerifyEmail`, `Profile`, `NotFound` |
-| Landing | `Dashboard` (role-aware) |
-| Requests | `Requests`, `NewRequest`, `RequestDetail` |
-| Complaints | `Complaints`, `NewComplaint`, `ComplaintDetail`, `Grievance` (public) |
-| Certificates | `Certificates`, `ApplyCertificate`, `CertificateDetail`, `VerifyCertificate` (public) |
-| Finance | `Invoices`, `InvoiceDetail`, `Refunds` |
-| Announcements | `Announcements`, `AnnouncementDetail`, `ComposeAnnouncement` |
-| Oversight | `Reports`, `AuditTrail` |
+| Group          | Pages                                                                                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Auth & account | `Login`, `ForgotPassword`, `ResetPassword`, `SetPassword`, `VerifyEmail`, `Profile`, `NotFound`                                                                          |
+| Landing        | `Dashboard` (role-aware)                                                                                                                                                 |
+| Requests       | `Requests`, `NewRequest`, `RequestDetail`                                                                                                                                |
+| Complaints     | `Complaints`, `NewComplaint`, `ComplaintDetail`, `Grievance` (public)                                                                                                    |
+| Certificates   | `Certificates`, `ApplyCertificate`, `CertificateDetail`, `VerifyCertificate` (public)                                                                                    |
+| Finance        | `Invoices`, `InvoiceDetail`, `Refunds`                                                                                                                                   |
+| Announcements  | `Announcements`, `AnnouncementDetail`, `ComposeAnnouncement`                                                                                                             |
+| Oversight      | `Reports`, `AuditTrail`                                                                                                                                                  |
 | `pages/admin/` | `AdminLayout` (shared page frame), `People`, `RequestTypes`, `StudentImport`, `Departments`, `Programmes`, `Terms`, `CertificateTemplates`, `GstProfile`, `constants.js` |
 
 ### 4.8 `src/test/` — 20 files, ~4,880 lines
@@ -466,36 +467,36 @@ with providers. Suites cover `app`, `admin`, `apply-certificate`,
 
 ### 4.9 Build, browser checks, serving
 
-| Path | Purpose |
-| --- | --- |
-| `vite.config.js` | Reads `PORT` from the backend `.env` to configure the dev proxy (`/api`, `/health`), so the two halves cannot drift. Dev CSP header, jsdom test config, `dist` output with sourcemaps. |
-| `build/csp.js` | Vite plugin that injects the strict production CSP into `index.html`; exports `DEV_CSP` (allows Vite's inline preamble). |
-| `nginx.conf` | Serves the bundle, proxies `/api` to `api:5050`, sets CSP and the other security headers, gzip, `client_max_body_size 12m`. |
-| `scripts/verify-login.mjs` | Real browser: sign in as each role, confirm the landing page. |
-| `scripts/verify-roles.mjs` | Every page × every role, the two public pages with no session, 375px/320px overflow checks. |
-| `Dockerfile` | Build the bundle, serve from nginx. |
-| `index.html`, `src/index.css` | Shell document and Tailwind entry. |
+| Path                          | Purpose                                                                                                                                                                                |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vite.config.js`              | Reads `PORT` from the backend `.env` to configure the dev proxy (`/api`, `/health`), so the two halves cannot drift. Dev CSP header, jsdom test config, `dist` output with sourcemaps. |
+| `build/csp.js`                | Vite plugin that injects the strict production CSP into `index.html`; exports `DEV_CSP` (allows Vite's inline preamble).                                                               |
+| `nginx.conf`                  | Serves the bundle, proxies `/api` to `api:5050`, sets CSP and the other security headers, gzip, `client_max_body_size 12m`.                                                            |
+| `scripts/verify-login.mjs`    | Real browser: sign in as each role, confirm the landing page.                                                                                                                          |
+| `scripts/verify-roles.mjs`    | Every page × every role, the two public pages with no session, 375px/320px overflow checks.                                                                                            |
+| `Dockerfile`                  | Build the bundle, serve from nginx.                                                                                                                                                    |
+| `index.html`, `src/index.css` | Shell document and Tailwind entry.                                                                                                                                                     |
 
 ---
 
 ## 5. Domain → file index
 
-Use this when you know *what* you are changing but not *where*.
+Use this when you know _what_ you are changing but not _where_.
 
-| Domain | Backend | Frontend | Tests |
-| --- | --- | --- | --- |
-| **Auth / session** | `models/User`, `services/auth`, `services/emailAuth`, `services/twoFactor`, `services/totp`, `controllers/auth`, `routes/auth`, `validators/auth`, `utils/tokens`, `utils/cookies`, `middleware/csrf` | `pages/Login`, `ForgotPassword`, `ResetPassword`, `SetPassword`, `VerifyEmail`, `components/EmailVerification`, `TwoFactorSettings`, `context/AuthContext` | `auth`, `email-auth`, `two-factor`, `csrf`; FE `email-auth`, `set-password`, `two-factor` |
-| **Profile** | `models/Student`, `services/profile`, `services/avatar`, `controllers/profile`, `routes/profile`, `validators/profile` | `pages/Profile`, `components/AvatarPicker`, `NotificationPreferences` | `profile`, `avatar`; FE `profile`, `avatar-picker` |
-| **People / structure** | `models/User/Department/Program`, `services/admin`, `services/studentImport`, `controllers/admin`, `routes/admin`, `validators/admin` | `pages/admin/People`, `Departments`, `Programmes`, `StudentImport` | `admin`, `student-import`, `hod-assignment`, `rbac`; FE `admin`, `student-import` |
-| **Academic terms** | `models/AcademicTerm`, `services/academicTerm`, `controllers/academicTerm`, `routes/academicTerm`, `validators/academicTerm` | `pages/admin/Terms` | `academic-term`; FE `terms` |
-| **Requests** | `models/Request/RequestType/Document`, `services/request`, `services/workflow`, `utils/workflow`, `controllers/request`, `routes/request`, `validators/request` | `pages/Requests`, `NewRequest`, `RequestDetail`, `pages/admin/RequestTypes`, `components/DynamicField`, `TransitionPanel`, `DocumentPanel` | `request`, `workflow`, `documents`; FE `app` |
-| **Complaints** | `models/Complaint`, `services/complaint`, `utils/complaintWorkflow`, `utils/sla`, `utils/slaPolicy`, `controllers/complaint`, `routes/complaint`, `validators/complaint` | `pages/Complaints`, `NewComplaint`, `ComplaintDetail`, `Grievance` | `complaint`, `complaint-anonymous`; FE `grievance` |
-| **Certificates** | `models/Certificate/CertificateTemplate`, `services/certificate`, `services/certificateTemplate`, `services/pdf`, `controllers/certificate`, `routes/certificate`, `validators/certificate`, `validators/certificateTemplate` | `pages/Certificates`, `ApplyCertificate`, `CertificateDetail`, `VerifyCertificate`, `pages/admin/CertificateTemplates`, `components/BulkIssueBar` | `certificate`, `certificate-template`; FE `apply-certificate`, `verify-certificate` |
-| **Finance** | `models/Invoice/Payment/Refund/InstitutionTaxProfile`, `services/finance`, `instalment`, `refund`, `receipt`, `tax`, `taxProfile`, `config/razorpay`, `controllers/finance`, `routes/finance`, `routes/paymentWebhook`, `validators/finance/instalment/tax` | `pages/Invoices`, `InvoiceDetail`, `Refunds`, `pages/admin/GstProfile`, `components/PayDialog`, `InstalmentPanel` | `finance`, `gst`, `instalment`, `invoice-instalments`, `razorpay-gateway` |
-| **Announcements / notifications** | `models/Announcement/Notification`, `services/announcement`, `announcementImage`, `notification`, `notificationPreference`, `mailer`, `controllers/announcement/notification`, `routes/announcement/notification`, `validators/announcement/notification` | `pages/Announcements`, `AnnouncementDetail`, `ComposeAnnouncement`, `components/layout/NotificationBell` | `announcements-email`, `announcement-image`, `notifications`, `notification-preferences`; FE `announcement-detail` |
-| **Reports / audit** | `models/AuditLog`, `services/report`, `reportExport`, `audit`, `audit-query`, `controllers/report/audit`, `routes/report/audit`, `validators/report` | `pages/Reports`, `AuditTrail`, `components/ReportExport` | `reports`, `report-export` |
-| **Files** | `models/Document`, `services/document/avatar`, `config/storage`, `middleware/upload`, `controllers/document`, `routes/document`, `validators/document` | `components/DocumentPanel`, `AvatarPicker` | `documents`, `avatar`, `storage.cloudinary` |
-| **SLA / escalation** | `jobs/escalation.job`, `utils/sla`, `utils/slaPolicy`, `scripts/run-escalation` | (surfaced inside request/complaint detail) | `escalation` |
+| Domain                            | Backend                                                                                                                                                                                                                                                     | Frontend                                                                                                                                                   | Tests                                                                                                              |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Auth / session**                | `models/User`, `services/auth`, `services/emailAuth`, `services/twoFactor`, `services/totp`, `controllers/auth`, `routes/auth`, `validators/auth`, `utils/tokens`, `utils/cookies`, `middleware/csrf`                                                       | `pages/Login`, `ForgotPassword`, `ResetPassword`, `SetPassword`, `VerifyEmail`, `components/EmailVerification`, `TwoFactorSettings`, `context/AuthContext` | `auth`, `email-auth`, `two-factor`, `csrf`; FE `email-auth`, `set-password`, `two-factor`                          |
+| **Profile**                       | `models/Student`, `services/profile`, `services/avatar`, `controllers/profile`, `routes/profile`, `validators/profile`                                                                                                                                      | `pages/Profile`, `components/AvatarPicker`, `NotificationPreferences`                                                                                      | `profile`, `avatar`; FE `profile`, `avatar-picker`                                                                 |
+| **People / structure**            | `models/User/Department/Program`, `services/admin`, `services/studentImport`, `controllers/admin`, `routes/admin`, `validators/admin`                                                                                                                       | `pages/admin/People`, `Departments`, `Programmes`, `StudentImport`                                                                                         | `admin`, `student-import`, `hod-assignment`, `rbac`; FE `admin`, `student-import`                                  |
+| **Academic terms**                | `models/AcademicTerm`, `services/academicTerm`, `controllers/academicTerm`, `routes/academicTerm`, `validators/academicTerm`                                                                                                                                | `pages/admin/Terms`                                                                                                                                        | `academic-term`; FE `terms`                                                                                        |
+| **Requests**                      | `models/Request/RequestType/Document`, `services/request`, `services/workflow`, `utils/workflow`, `controllers/request`, `routes/request`, `validators/request`                                                                                             | `pages/Requests`, `NewRequest`, `RequestDetail`, `pages/admin/RequestTypes`, `components/DynamicField`, `TransitionPanel`, `DocumentPanel`                 | `request`, `workflow`, `documents`; FE `app`                                                                       |
+| **Complaints**                    | `models/Complaint`, `services/complaint`, `utils/complaintWorkflow`, `utils/sla`, `utils/slaPolicy`, `controllers/complaint`, `routes/complaint`, `validators/complaint`                                                                                    | `pages/Complaints`, `NewComplaint`, `ComplaintDetail`, `Grievance`                                                                                         | `complaint`, `complaint-anonymous`; FE `grievance`                                                                 |
+| **Certificates**                  | `models/Certificate/CertificateTemplate`, `services/certificate`, `services/certificateTemplate`, `services/pdf`, `controllers/certificate`, `routes/certificate`, `validators/certificate`, `validators/certificateTemplate`                               | `pages/Certificates`, `ApplyCertificate`, `CertificateDetail`, `VerifyCertificate`, `pages/admin/CertificateTemplates`, `components/BulkIssueBar`          | `certificate`, `certificate-template`; FE `apply-certificate`, `verify-certificate`                                |
+| **Finance**                       | `models/Invoice/Payment/Refund/InstitutionTaxProfile`, `services/finance`, `instalment`, `refund`, `receipt`, `tax`, `taxProfile`, `config/razorpay`, `controllers/finance`, `routes/finance`, `routes/paymentWebhook`, `validators/finance/instalment/tax` | `pages/Invoices`, `InvoiceDetail`, `Refunds`, `pages/admin/GstProfile`, `components/PayDialog`, `InstalmentPanel`                                          | `finance`, `gst`, `instalment`, `invoice-instalments`, `razorpay-gateway`                                          |
+| **Announcements / notifications** | `models/Announcement/Notification`, `services/announcement`, `announcementImage`, `notification`, `notificationPreference`, `mailer`, `controllers/announcement/notification`, `routes/announcement/notification`, `validators/announcement/notification`   | `pages/Announcements`, `AnnouncementDetail`, `ComposeAnnouncement`, `components/layout/NotificationBell`                                                   | `announcements-email`, `announcement-image`, `notifications`, `notification-preferences`; FE `announcement-detail` |
+| **Reports / audit**               | `models/AuditLog`, `services/report`, `reportExport`, `audit`, `audit-query`, `controllers/report/audit`, `routes/report/audit`, `validators/report`                                                                                                        | `pages/Reports`, `AuditTrail`, `components/ReportExport`                                                                                                   | `reports`, `report-export`                                                                                         |
+| **Files**                         | `models/Document`, `services/document/avatar`, `config/storage`, `middleware/upload`, `controllers/document`, `routes/document`, `validators/document`                                                                                                      | `components/DocumentPanel`, `AvatarPicker`                                                                                                                 | `documents`, `avatar`, `storage.cloudinary`                                                                        |
+| **SLA / escalation**              | `jobs/escalation.job`, `utils/sla`, `utils/slaPolicy`, `scripts/run-escalation`                                                                                                                                                                             | (surfaced inside request/complaint detail)                                                                                                                 | `escalation`                                                                                                       |
 
 ---
 
@@ -530,8 +531,8 @@ Mongoose model  →  MongoDB Atlas
 { success, message, data, meta }  →  JSON  →  React Query cache  →  screen
 ```
 
-**Authorization happens twice.** Route middleware answers "may this *role* use
-this endpoint". The service answers "may *this person* see *this* record" by
+**Authorization happens twice.** Route middleware answers "may this _role_ use
+this endpoint". The service answers "may _this person_ see _this_ record" by
 adding an ownership/department/confidentiality filter to the query itself. The
 second is the one that prevents IDOR.
 
@@ -599,18 +600,18 @@ Counter (sequences for human-readable references)
 
 ## 9. Where to make a change
 
-| I want to… | Touch |
-| --- | --- |
-| Add a field to a request | `models/Request.js` → `validators/request.validator.js` → `services/request.service.js` → `pages/NewRequest.jsx` / `RequestDetail.jsx` |
-| Add a new service type (e.g. "Bonafide") | Data, not code: `pages/admin/RequestTypes.jsx` (or `scripts/seed-demo.js` for demo data) |
-| Add a workflow transition | `utils/workflow.js` (data) → `services/workflow.service.js` (gates) → `tests/workflow.test.js` (denial case) |
-| Add a new role or permission | `config/constants.js` (`ROLES`) → `utils/permissions.js` (minimum grant) → `tests/rbac.test.js` (prove the denial) → `lib/nav.js` if it needs a link |
-| Add a page | `pages/Foo.jsx` → `App.jsx` route + `RequirePermission` → `lib/nav.js` if it belongs in the sidebar |
-| Add an endpoint | `routes/foo.routes.js` → `controllers/foo.controller.js` → `services/foo.service.js` → `validators/foo.validator.js` → `routes/index.js` |
-| Change money maths | `utils/money.js` and the owning service; never a float; update `tests/finance.test.js` |
-| Change uploads | `middleware/upload.js` (limits), `services/document.service.js` (magic bytes), `config/storage.js` (disk/Cloudinary), `nginx.conf` (`client_max_body_size`) |
-| Change the deploy contract | `campusOs_backend/.env.example` + `config/env.js` (validation) + `DEPLOY.md` + `docker-compose.yml` |
-| Add a test | Backend: `tests/<domain>.test.js` using `helpers/factory.js`. Frontend: `src/test/<page>.test.jsx` using `helpers.js`. |
+| I want to…                               | Touch                                                                                                                                                       |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Add a field to a request                 | `models/Request.js` → `validators/request.validator.js` → `services/request.service.js` → `pages/NewRequest.jsx` / `RequestDetail.jsx`                      |
+| Add a new service type (e.g. "Bonafide") | Data, not code: `pages/admin/RequestTypes.jsx` (or `scripts/seed-demo.js` for demo data)                                                                    |
+| Add a workflow transition                | `utils/workflow.js` (data) → `services/workflow.service.js` (gates) → `tests/workflow.test.js` (denial case)                                                |
+| Add a new role or permission             | `config/constants.js` (`ROLES`) → `utils/permissions.js` (minimum grant) → `tests/rbac.test.js` (prove the denial) → `lib/nav.js` if it needs a link        |
+| Add a page                               | `pages/Foo.jsx` → `App.jsx` route + `RequirePermission` → `lib/nav.js` if it belongs in the sidebar                                                         |
+| Add an endpoint                          | `routes/foo.routes.js` → `controllers/foo.controller.js` → `services/foo.service.js` → `validators/foo.validator.js` → `routes/index.js`                    |
+| Change money maths                       | `utils/money.js` and the owning service; never a float; update `tests/finance.test.js`                                                                      |
+| Change uploads                           | `middleware/upload.js` (limits), `services/document.service.js` (magic bytes), `config/storage.js` (disk/Cloudinary), `nginx.conf` (`client_max_body_size`) |
+| Change the deploy contract               | `campusOs_backend/.env.example` + `config/env.js` (validation) + `DEPLOY.md` + `docker-compose.yml`                                                         |
+| Add a test                               | Backend: `tests/<domain>.test.js` using `helpers/factory.js`. Frontend: `src/test/<page>.test.jsx` using `helpers.js`.                                      |
 
 ---
 
@@ -630,7 +631,7 @@ Counter (sequences for human-readable references)
    email never rolls back the state change that caused it.
 7. **References are human-readable and concurrency-safe** (`REQ-2026-000123`)
    via `Counter`, not `count() + 1`.
-8. **Comments explain *why*, and they are the project's documentation.** Most
+8. **Comments explain _why_, and they are the project's documentation.** Most
    modules open with the constraint that shaped them; read the header before
    editing the body.
 9. **Every security claim has a test that proves the denial**, not just the
@@ -640,50 +641,32 @@ Counter (sequences for human-readable references)
 
 ## 11. Observations and rough edges
 
-Found while mapping; none affect the source layout of a working copy, but the
-first three would bite a fresh clone or a deploy.
+Deployment prep fixed the earlier CSP-ignore, secret-name, port, finance-link,
+raw-fetch-origin, and compose-path issues. What remains:
 
-1. **`campusOs_frontend/build/csp.js` is untracked and ignored.** `vite.config.js`
-   imports `./build/csp`, but `.gitignore` ignores every `build/` directory
-   (`build/`), and `git ls-files campusOs_frontend/build` is empty. A fresh
-   clone therefore cannot build the frontend — and the CI frontend job's
-   `npm run build` would fail — until that file is force-added
-   (`git add -f`) or the ignore rule is narrowed to build output only.
-2. **Secret variable names drift between the app and its deployment files.**
-   `config/env.js` requires `JWT_SECRET` and `REFRESH_TOKEN_SECRET` (as does
-   `.env.example`), but `docker-compose.yml`, `.github/workflows/gates.yml` and
-   `DEPLOY.md` pass `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET`. With compose as
-   written, the API would fail its boot validation for a missing `JWT_SECRET`.
-3. **Ports disagree across the three run modes.** Local `.env` uses `5005`;
-   `env.js` defaults to `5000`; compose and nginx use `5050`. The CI browser job
-   seeds and starts the API without setting `PORT` (so `5000`) but waits on
-   `http://127.0.0.1:5050/health`.
-4. **A sidebar link has no route.** `lib/nav.js` defines
-   `/management/finance` (`payment:read:institution`), but `App.jsx` has no such
-   path — Accounts, Dean, Principal and Super Admin would land on `NotFound`.
-   Finance is reached through `/finance/invoices`.
-5. **One raw `fetch` bypasses the API client.** `components/DocumentPanel.jsx`
-   downloads documents from a hard-coded `/api/v1/...` path instead of
-   `api/client.js#fetchDocument`, so the download breaks wherever
-   `VITE_API_URL` points at a different origin.
-6. **`docker-compose.yml` references `docs/DEPLOY.md`;** the file is `DEPLOY.md`
-   at the root.
-7. **`src/hooks/` is empty** — no custom hooks have been extracted; state lives
+1. **`campusOs_frontend/build/csp.js` is still untracked.** It is no longer
+   ignored, but it must be added before a clean clone or the CI/Vercel build can
+   succeed. `vite.config.js` imports it as `./build/csp.js`.
+2. **The working tree is necessarily uncommitted.** Scheduling, deployment,
+   formatting, and dependency updates all need a review commit before pushing.
+3. **Docker images are not built locally.** Docker is unavailable here; the CI
+   `images` job builds both Dockerfiles, and the Render path uses the backend
+   image. Dependency installs for both Docker layouts were simulated
+   successfully.
+4. **Generated artifacts are present but ignored:**
+   `campusOs_frontend/dist/`, `campusOs_backend/storage/`, and `backups/`.
+5. **`src/hooks/` is empty** — no custom hooks have been extracted; state lives
    in contexts and page components.
-8. **Generated artifacts are present in the working tree but ignored:**
-   `campusOs_frontend/dist/` (3.5 MB), `campusOs_backend/storage/` (7,143 files),
-   and an empty `backups/`.
-9. **Uncommitted work in progress:** `models/Announcement.js`,
-   `services/announcement.service.js`, `services/emailAuth.service.js`,
-   `services/mailer.service.js` are modified and
-   `tests/announcement-email.test.js` is untracked — the announcement-email
-   feature described as "not built" in `README.md`.
-10. **Two unreachable route declarations:** `/requests/:reference` is declared
-    twice in `App.jsx` (the second is shadowed by the first), and
-    `pages/admin/AdminLayout.jsx` is imported by five admin pages but not by the
-    route table — it is a layout component, not a page, which is why it does not
-    appear as a route.
-11. **`config/db.js`'s header still says "no multi-document transactions anywhere
-    in slices 0-3".** Later code does use one real transaction
-    (`services/academicTerm.service.js`), which is why the test harness runs an
-    in-memory **replica set** rather than a standalone.
+6. **Two unreachable route declarations:** `/requests/:reference` is declared
+   twice in `App.jsx` (the second is shadowed by the first), and
+   `pages/admin/AdminLayout.jsx` is imported by five admin pages but not by the
+   route table — it is a layout component, not a page.
+7. **`config/db.js`'s header still says "no multi-document transactions anywhere
+   in slices 0-3".** Later code does use one real transaction
+   (`services/academicTerm.service.js`), which is why the test harness runs an
+   in-memory **replica set** rather than a standalone.
+8. **Browser sweep has not run in this session.** It needs a server, Vite, and
+   Chromium; CI provides all three after the demo seed.
+9. **Safari third-party cookie caveat:** the default `*.vercel.app` +
+   `*.onrender.com` split makes session cookies cross-site. Use `app.` and
+   `api.` subdomains of one registrable domain for a production deployment.

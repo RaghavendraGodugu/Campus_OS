@@ -1,12 +1,14 @@
-# CampusOS — local stack.
+# CampusOS — single-host production stack.
 #
+#     cp campusOs_backend/.env.example .env
 #     docker compose up --build
-#     open http://localhost:8080
 #
-# This is a single-host deployment: one API, one static bundle, one database.
-# It is deliberately not a cluster. Everything that would need coordination —
+# This stack expects TLS in front of the web container. Session cookies are
+# Secure in production, so signing in over plain HTTP will not work.
+#
+# This is deliberately not a cluster. Everything that would need coordination —
 # a second node, a shared rate-limit store, a replica set — is called out in
-# docs/DEPLOY.md as the next step rather than half-configured here.
+# DEPLOY.md as the next step rather than half-configured here.
 
 name: campusos
 
@@ -27,7 +29,8 @@ services:
     healthcheck:
       # `ping` rather than a find: it needs no credentials and no index, so it
       # cannot fail for a reason unrelated to "is Mongo up".
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      test:
+        ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -47,26 +50,36 @@ services:
     environment:
       NODE_ENV: production
       PORT: "5050"
-      MONGO_URI: mongodb://db:27017/campusos
-      LOG_LEVEL: info
+      MONGO_URI: ${MONGO_URI:-mongodb://db:27017/campusos}
+      # The browser origin that will reach this stack. Must be HTTPS in
+      # production because session cookies are Secure.
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:8080}
+      WEB_URL: ${WEB_URL:-http://localhost:8080}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_PRETTY: "false"
       # Secrets come from a .env beside this file, not from here. Committing a
       # value into a compose file is how test credentials reach production.
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET in .env}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET in .env}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET:?set REFRESH_TOKEN_SECRET in .env}
       CSRF_SECRET: ${CSRF_SECRET:?set CSRF_SECRET in .env}
-      # Leave Razorpay unset to run without payments; the finance pages then
-      # say so rather than failing at checkout.
-      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
-      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
-      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
-      # Set to true only when the deployment terminates TLS in front of this.
-      TRUST_PROXY: ${TRUST_PROXY:-false}
+      # Production validation requires all three Razorpay values. A real
+      # webhook URL is https://<host>/api/v1/payments/webhook/razorpay.
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:?set RAZORPAY_KEY_ID in .env}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:?set RAZORPAY_KEY_SECRET in .env}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:?set RAZORPAY_WEBHOOK_SECRET in .env}
+      # Production document storage requires Cloudinary, not the local volume.
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:?set CLOUDINARY_CLOUD_NAME in .env}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:?set CLOUDINARY_API_KEY in .env}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:?set CLOUDINARY_API_SECRET in .env}
+      # Password-reset and verification links are broken without a real sender.
+      SMTP_HOST: ${SMTP_HOST:?set SMTP_HOST in .env}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: "${SMTP_FROM:-CampusOS <no-reply@campusos.local>}"
     expose:
       - "5050"
-    volumes:
-      # Certificate PDFs and uploaded documents. A named volume rather than a
-      # bind mount, so the path means the same thing on a Mac and on Linux.
-      - app-storage:/app/storage
 
   web:
     build:
@@ -82,4 +95,3 @@ services:
 
 volumes:
   mongo-data:
-  app-storage:

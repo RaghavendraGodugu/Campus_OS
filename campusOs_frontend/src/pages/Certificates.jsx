@@ -112,7 +112,7 @@ export default function Certificates({ mode = "own" }) {
 
       {items.length > 0 && (
         <Card className="overflow-hidden p-0">
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-ink-100 dark:divide-ink-700/50">
             {items.map((certificate) => {
               const id = certificate._id ?? certificate.id;
               // Only an APPROVED certificate can be bulk-issued, so only an

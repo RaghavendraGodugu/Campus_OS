@@ -566,7 +566,9 @@ function TrackResult({ result }) {
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">Filed</dt>
+            <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+              Filed
+            </dt>
             <dd className="mt-0.5 text-sm text-ink-900 dark:text-ink-100">
               {formatDate(result.submittedAt)}
             </dd>
@@ -580,7 +582,9 @@ function TrackResult({ result }) {
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">Updates</dt>
+            <dt className="text-xs text-ink-500 dark:text-ink-400 dark:text-ink-500">
+              Updates
+            </dt>
             <dd className="mt-0.5 text-sm text-ink-900 dark:text-ink-100">
               {result.updateCount === 0
                 ? "None yet"

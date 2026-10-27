@@ -32,6 +32,7 @@ import {
   X,
 } from "lucide-react";
 
+import { apiAssetUrl } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { visibleNavItems } from "../../lib/nav";
 import { initials } from "../../lib/format";
@@ -197,7 +198,7 @@ export default function AppShell() {
                   <span aria-hidden="true">{initials(user?.fullName)}</span>
                   {user?.hasAvatar && (
                     <img
-                      src={`/api/v1/profile/avatar/${user.id}`}
+                      src={apiAssetUrl(`/profile/avatar/${user.id}`)}
                       alt=""
                       className="absolute inset-0 size-full object-cover"
                       loading="lazy"
@@ -239,7 +240,7 @@ export default function AppShell() {
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-ink-200/70 dark:border-ink-700/60 bg-white/70 dark:bg-surface/85 px-4 backdrop-blur-xl sm:px-6">
           <button
             type="button"
-            className="rounded-xl p-2 text-ink-600 transition-colors hover:bg-ink-100 dark:hover:bg-ink-200/50 lg:hidden"
+            className="rounded-xl p-2 text-ink-600 dark:text-ink-300 transition-colors hover:bg-ink-100 dark:hover:bg-ink-800 lg:hidden"
             onClick={() => setNavOpen(true)}
             aria-label="Open navigation"
           >
@@ -295,9 +296,9 @@ function RolePill() {
 function DemoBanner() {
   return (
     <div className="border-b border-amber-200/80 bg-linear-to-r from-amber-100 dark:from-amber-500/12 to-amber-50 dark:to-amber-500/12 px-4 py-2 text-center text-xs font-medium text-amber-900 dark:text-amber-200 sm:px-6">
-      Demo data — these records are not real. Every account uses the password{" "}
+      {/* Demo data — these records are not real. Every account uses the password{" "} */}
       <code className="rounded bg-amber-200 dark:bg-amber-500/20 px-1 py-0.5 font-mono">
-        Demo@Campus123
+        {/* Demo@Campus123 */}
       </code>
     </div>
   );

@@ -173,11 +173,16 @@ const schema = z
         "RAZORPAY_KEY_ID",
         "RAZORPAY_KEY_SECRET",
         "RAZORPAY_WEBHOOK_SECRET",
+        "CLOUDINARY_CLOUD_NAME",
+        "CLOUDINARY_API_KEY",
+        "CLOUDINARY_API_SECRET",
+        "SMTP_HOST",
+        "WEB_URL",
       ]
         .filter((key) => !value[key])
         .map((key) => key);
       if (missing.length) {
-        problems.push(`missing production payment credentials: ${missing.join(", ")}`);
+        problems.push(`missing production integration settings: ${missing.join(", ")}`);
       }
     }
 

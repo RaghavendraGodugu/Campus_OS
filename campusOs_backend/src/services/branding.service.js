@@ -56,7 +56,10 @@ async function toggleBranding({ user, isActive }) {
 function listPalettes() {
   return PALETTE_KEYS.map((key) => ({
     id: key,
-    name: key.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" / "),
+    name: key
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" / "),
   }));
 }
 

@@ -155,7 +155,7 @@ export const NAV_ITEMS = [
     ],
   },
   {
-    to: "/management/finance",
+    to: "/finance/invoices",
     label: "Finance",
     icon: "IndianRupee",
     permission: "payment:read:institution",

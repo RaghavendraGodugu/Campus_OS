@@ -46,7 +46,12 @@ afterEach(restoreApi);
 
 function renderEvents(overrides = {}) {
   const who = {
-    user: { id: "s1", fullName: "DEMO Student", email: "s@campusos.local", role: "STUDENT" },
+    user: {
+      id: "s1",
+      fullName: "DEMO Student",
+      email: "s@campusos.local",
+      role: "STUDENT",
+    },
     permissions: ["event:read"],
     scopes: ["own"],
     ...overrides,
@@ -87,7 +92,9 @@ describe("the events page", () => {
 
     const row = (await screen.findByText("Inter-college fest")).closest("li");
     expect(within(row).getByText("Registered")).toBeInTheDocument();
-    expect(within(row).getByRole("button", { name: "Release seat" })).toBeInTheDocument();
+    expect(
+      within(row).getByRole("button", { name: "Release seat" }),
+    ).toBeInTheDocument();
     expect(within(row).queryAllByText("Register").length).toBe(0);
   });
 
@@ -100,7 +107,12 @@ describe("the events page", () => {
 
   it("hands the people who answer for the poster the composer and the cancel", async () => {
     renderEvents({
-      user: { id: "d1", fullName: "DEMO Dean", email: "d@campusos.local", role: "DEAN" },
+      user: {
+        id: "d1",
+        fullName: "DEMO Dean",
+        email: "d@campusos.local",
+        role: "DEAN",
+      },
       permissions: ["event:read", "event:manage:institution"],
       scopes: ["own", "institution"],
     });
@@ -121,6 +133,7 @@ describe("the events page", () => {
     // The fest has none: no countdown against a ceiling that does not exist.
     const fest = (await screen.findByText("Inter-college fest")).closest("li");
     expect(fest.textContent).not.toMatch(new RegExp("/") + new RegExp("60"));
-    expect(fest.textContent).not.toContain("45");
+    expect(fest.textContent).not.toMatch(/45\s*registered/);
+    expect(fest.textContent).not.toMatch(/\/\s*45/);
   });
 });

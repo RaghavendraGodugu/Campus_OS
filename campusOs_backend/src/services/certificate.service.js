@@ -224,10 +224,12 @@ function buildDownloadableFilter(user) {
  * Apply for a certificate.
  */
 async function apply({ user, type, purpose, copies, department, req }) {
-  // Support both middleware-attached student (req.student) and legacy user.student
-  const student = req?.student ?? (user.student ? await Student.findById(user.student).lean() : null);
+  const { resolveStudentProfile } = require("../middleware/auth");
+  const student = req?.student ?? (await resolveStudentProfile(user));
   if (!student) {
-    throw ApiError.forbidden("Only student accounts with a linked student profile can apply for certificates");
+    throw ApiError.forbidden(
+      "Only student accounts with a linked student profile can apply for certificates"
+    );
   }
 
   const reference = await generateReference();
@@ -711,15 +713,9 @@ async function resolveDownload({ certificateId, user, token }) {
  * Bytes are read only after `resolveDownload` has authorized the request, so
  * this function is reachable exclusively through that path.
  */
-async function readDocument({ storageKey }) {
+async function readDocument({ storageKey, mimeType }) {
   const storage = getStorage();
-
-  if (typeof storage.getSignedUrl === "function") {
-    // Cloudinary: the CDN serves the bytes under its own signature.
-    return { redirect: await storage.getSignedUrl(storageKey) };
-  }
-
-  const buffer = await storage.read(storageKey);
+  const buffer = await storage.read(storageKey, { mimeType });
   return { buffer, filename: undefined };
 }
 

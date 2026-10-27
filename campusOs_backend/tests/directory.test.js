@@ -256,7 +256,9 @@ describe("searching the staff directory", () => {
     const world = await seedSearchWorld();
     const { agent } = await loginAs(world.master ?? world.faculty);
     const res = await agent.get("/api/v1/directory/staff");
-    expect(res.body.data.some((row) => row.id === world.student.id.toString())).toBe(false);
+    expect(res.body.data.some((row) => row.id === world.student.id.toString())).toBe(
+      false
+    );
   });
 
   it("does not reveal whether a query even parsed to someone without a session", async () => {
@@ -264,7 +266,7 @@ describe("searching the staff directory", () => {
     const { getApp } = require("./helpers/factory");
     await seedSearchWorld();
     const res = await request(getApp()).get(
-      "/api/v1/directory/staff?q=Asso&ciate+Professor&role=FACULTY&department=000000000000000000000000",
+      "/api/v1/directory/staff?q=Asso&ciate+Professor&role=FACULTY&department=000000000000000000000000"
     );
     // Bad params to an anonymous caller still produce an unauthenticated
     // answer: the parse happens behind authenticate's byzantine check.

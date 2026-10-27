@@ -7,17 +7,16 @@
  * API (Render) are different sites. Cookies are therefore sent on cross-site
  * requests, so CSRF protection is mandatory rather than optional.
  *
- *  - `login`      — no CSRF check. It authenticates rather than relying on an
- *                   ambient credential, so a forced login only signs the user
- *                   into an account the attacker does not control. The blast
- *                   radius is a nuisance (a login-CSRF), which is why login is
- *                   additionally rate-limited per IP and per account.
- *  - `refresh`    — requires a matching CSRF cookie/header pair, checked in the
- *                   controller. It rotates the refresh token, so without this a
- *                   cross-site POST would silently invalidate the victim's
- *                   session (logout-CSRF).
- *  - protected    — `authenticate` then `csrfProtection`, which binds the token
- *                   to the caller's identity and session.
+ *  - `login`      — no token check because it authenticates rather than
+ *                   relying on an ambient credential. The global Origin guard
+ *                   still rejects a browser request from an untrusted site.
+ *  - `refresh`    — a trusted Origin is sufficient; without Origin it requires
+ *                   a matching CSRF cookie/header pair. It rotates the refresh
+ *                   token, so without this a cross-site POST could silently
+ *                   invalidate the victim's session (logout-CSRF).
+ *  - protected    — `authenticate` then `csrfProtection`, which accepts a
+ *                   trusted Origin or binds the fallback token to the caller's
+ *                   identity and session.
  */
 
 const express = require("express");

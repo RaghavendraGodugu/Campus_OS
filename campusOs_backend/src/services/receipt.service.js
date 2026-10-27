@@ -380,15 +380,10 @@ function canReadReceipt(payment, user) {
   return perm.userHasPermission(user, perm.P.PAYMENT_READ_INSTITUTION);
 }
 
-/** Receipt bytes, or a redirect when the adapter is a CDN. */
-async function readReceiptBytes({ storageKey }) {
+/** Receipt bytes, fetched server-side from whatever storage adapter is configured. */
+async function readReceiptBytes({ storageKey, mimeType } = {}) {
   const storage = getStorage();
-
-  if (typeof storage.getSignedUrl === "function") {
-    return { redirect: await storage.getSignedUrl(storageKey) };
-  }
-
-  return { buffer: await storage.read(storageKey) };
+  return { buffer: await storage.read(storageKey, { mimeType }) };
 }
 
 module.exports = {

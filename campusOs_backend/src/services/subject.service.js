@@ -49,8 +49,7 @@ async function list({ query = {} } = {}) {
   return Subject.find(filter)
     .sort({ semester: 1, code: 1 })
     .populate("program", "name code")
-    .populate("department", "name code")
-    .lean();
+    .populate("department", "name code");
 }
 
 async function getById(id) {

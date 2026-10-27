@@ -33,10 +33,8 @@ function assertApprove(user) {
 }
 
 async function studentFor(user) {
-  const student = await Student.findOne({ user: user._id }).select(
-    "rollNumber semester program"
-  );
-  return student; // null if no student record linked
+  const { resolveStudentProfile } = require("../middleware/auth");
+  return resolveStudentProfile(user);
 }
 
 const ROOM_POPULATE = [{ path: "hostel", select: "name code kind" }];
@@ -193,6 +191,9 @@ async function listAllocations({ status } = {}) {
 
 async function mine({ user }) {
   const student = await studentFor(user);
+  if (!student) {
+    return { allocation: null, leaves: [] };
+  }
   const allocation = await HostelAllocation.findOne({
     student: student._id,
     status: HOSTEL_ALLOCATION_STATUS.ACTIVE,
@@ -209,6 +210,9 @@ async function mine({ user }) {
 
 async function requestLeave({ user, payload, req }) {
   const student = await studentFor(user);
+  if (!student) {
+    throw ApiError.badRequest("You need an active hostel allocation to request leave");
+  }
   const allocation = await HostelAllocation.findOne({
     student: student._id,
     status: HOSTEL_ALLOCATION_STATUS.ACTIVE,

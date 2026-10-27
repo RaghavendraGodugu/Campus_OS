@@ -16,7 +16,7 @@ router.get(
   "/events",
   authenticate,
   requirePermission(P.EVENT_READ),
-  controller.listEvents,
+  controller.listEvents
 );
 
 router.post(
@@ -25,7 +25,7 @@ router.post(
   csrfProtection,
   requirePermission(P.EVENT_MANAGE),
   validate({ body: createEventSchema }),
-  controller.createEvent,
+  controller.createEvent
 );
 
 router.patch(
@@ -34,7 +34,7 @@ router.patch(
   csrfProtection,
   requirePermission(P.EVENT_MANAGE),
   validate({ params: idParam, body: updateEventSchema }),
-  controller.updateEvent,
+  controller.updateEvent
 );
 
 router.post(
@@ -43,7 +43,7 @@ router.post(
   csrfProtection,
   requirePermission(P.EVENT_READ),
   validate({ params: idParam }),
-  controller.rsvp,
+  controller.rsvp
 );
 
 router.delete(
@@ -52,7 +52,7 @@ router.delete(
   csrfProtection,
   requirePermission(P.EVENT_READ),
   validate({ params: idParam }),
-  controller.withdraw,
+  controller.withdraw
 );
 
 module.exports = router;
