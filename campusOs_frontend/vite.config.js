@@ -61,7 +61,7 @@ export default defineConfig({
     // Vercel builds this npm workspace from the repository root, where it
     // expects the configured static output. Keep the artefact at that root
     // instead of hiding it one directory below the deployment boundary.
-    outDir: resolve(here, "..", "dist"),
+    outDir: "dist",
     emptyOutDir: true,
     sourcemap: true,
   },
