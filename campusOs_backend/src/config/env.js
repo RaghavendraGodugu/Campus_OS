@@ -90,7 +90,15 @@ const originList = z
 
 const schema = z
   .object({
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    // Hosting dashboards commonly preserve accidental casing or surrounding
+    // whitespace (for example, `Production`). Normalise that harmless input
+    // before enforcing the only three supported runtime modes.
+    NODE_ENV: z
+      .preprocess(
+        (value) => (typeof value === "string" ? value.trim().toLowerCase() : value),
+        z.enum(["development", "test", "production"])
+      )
+      .default("development"),
     PORT: z.coerce.number().int().min(1).max(65535).default(5000),
 
     /**
