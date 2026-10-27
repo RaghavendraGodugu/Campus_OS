@@ -3,7 +3,7 @@
   "framework": "vite",
   "installCommand": "npm ci --include=dev --ignore-scripts --workspace=campusos-frontend",
   "buildCommand": "npm run build --workspace=campusos-frontend",
-  "outputDirectory": "campusOs_frontend/dist",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/((?!assets/|index\\.html$).*)",

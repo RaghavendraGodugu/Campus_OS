@@ -38,7 +38,8 @@ Import this repository into Vercel and use these Build and Deployment settings:
 Do not set `campusOs_frontend` as Vercel's Root Directory. Vercel limits builds
 to the selected directory, while this repository intentionally has one lockfile
 at the root. The root `vercel.json` installs the package named
-`campusos-frontend` and writes the static site to `campusOs_frontend/dist`.
+`campusos-frontend` and writes the static site to `dist` at the repository
+root.
 
 Add these Vercel environment variables for **Production**, **Preview**, and
 **Development** as appropriate:
