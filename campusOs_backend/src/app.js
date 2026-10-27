@@ -8,17 +8,11 @@
  *     security headers.
  *  2. `cors` before any body parsing, so a rejected cross-origin preflight is
  *     answered without buffering an upload body.
- *  3. The payment webhook router, which needs the RAW request body, mounted
- *     above `express.json`. This is the one ordering constraint that is easy to
- *     break by accident; see the comment at its registration for why.
- *  4. `express.json` with an explicit size limit, ahead of cookie parsing, so
+ *  3. `express.json` with an explicit size limit, ahead of cookie parsing, so
  *     an oversized body is rejected before anything else inspects it.
- *  5. Route mounting, then `notFoundHandler`, then `errorHandler` — Express
+ *  4. Route mounting, then `notFoundHandler`, then `errorHandler` — Express
  *     requires the error handler to be registered last.
  *
- * Raw-body capture (needed for Razorpay webhook signature verification) is
- * intentionally NOT configured globally here; that route mounts its own
- * `express.raw()` so no other endpoint pays for buffering raw bytes.
  */
 
 const express = require("express");
@@ -42,7 +36,6 @@ const { logger } = require("./config/logger");
 // complete regardless of which routers are mounted.
 require("./models");
 const routes = require("./routes");
-const paymentWebhookRoutes = require("./routes/paymentWebhook.routes");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 const { originGuard } = require("./middleware/csrf");
 const { ApiError, ERROR_CODE } = require("./utils/ApiError");
@@ -130,20 +123,7 @@ function createApp() {
   //    passed through untouched by the compression middleware).
   app.use(compression());
 
-  // 5. Payment webhooks — BEFORE the JSON body parser.
-  //
-  //    Razorpay signs the exact bytes it transmitted. `express.json()` parses
-  //    the body, after which the original bytes are gone and re-serialising
-  //    cannot be relied on to reproduce them (key order and whitespace are not
-  //    guaranteed to survive). A webhook route mounted after the JSON parser
-  //    therefore could never verify its signature — or, worse, could verify a
-  //    signature over a body the server had itself reformatted.
-  //
-  //    This route mounts its own `express.raw()` and must stay above the next
-  //    line. Nothing else in the app needs the raw body.
-  app.use("/api/v1", paymentWebhookRoutes);
-
-  // 5b. Reject a mutating request carrying an untrusted browser Origin before
+  // 5. Reject a mutating request carrying an untrusted browser Origin before
   //     any body is read. CORS prevents the attacker from reading the response,
   //     but not from causing the mutation; this is the CSRF origin gate.
   app.use(originGuard);

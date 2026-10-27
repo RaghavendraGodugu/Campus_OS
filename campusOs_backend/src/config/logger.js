@@ -46,9 +46,7 @@ const redactPaths = [
 
   // Payment secrets
   "razorpaySignature",
-  "razorpay_webhook_secret",
   "RAZORPAY_KEY_SECRET",
-  "RAZORPAY_WEBHOOK_SECRET",
   "CLOUDINARY_API_SECRET",
   "SMTP_PASSWORD",
   "JWT_SECRET",

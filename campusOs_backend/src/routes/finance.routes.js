@@ -1,13 +1,4 @@
-/**
- * Finance routes.
- *
- * The Razorpay webhook is NOT here — it lives in `paymentWebhook.routes.js` and
- * is mounted in app.js *above* the JSON body parser, because it needs the raw
- * request bytes to verify its signature. Mounting it here would put it behind
- * `express.json()` and the signature could never be checked.
- *
- * There is no webhook verification route in this file by design.
- */
+/** Finance routes. */
 
 const express = require("express");
 
@@ -92,9 +83,8 @@ router.post(
 /**
  * POST /api/v1/finance/payments/confirm
  *
- * Records the browser's report. It does **not** mark an invoice paid; only a
- * verified webhook does. The comment is here because it is the single most
- * important thing to know about this endpoint.
+ * Records the browser's report. It does **not** mark an invoice paid; a direct
+ * Razorpay API verification is required.
  */
 router.post(
   "/finance/payments/confirm",
@@ -131,9 +121,8 @@ router.post(
 /**
  * POST /api/v1/finance/payments/:id/verify
  *
- * Settlement path for deployments with no public webhook URL. The browser still
- * only supplies an id; Razorpay's authenticated response decides whether money
- * moved. Identical trust anchor to the webhook, different direction.
+ * The browser supplies only an id; Razorpay's authenticated response decides
+ * whether money moved.
  */
 router.post(
   "/finance/payments/:id/verify",

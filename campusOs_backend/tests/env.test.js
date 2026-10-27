@@ -134,7 +134,6 @@ describe("production integration validation", () => {
     CLOUDINARY_API_SECRET: "cloudinary-secret",
     RAZORPAY_KEY_ID: "rzp_live_example",
     RAZORPAY_KEY_SECRET: "razorpay-secret",
-    RAZORPAY_WEBHOOK_SECRET: "webhook-secret",
     SMTP_HOST: "smtp.example.com",
   };
 

@@ -4,19 +4,17 @@
  * ## A payment record is a record of an attempt, not proof of receipt
  *
  * A `Payment` is created in CREATED state when a Razorpay order is made. It only
- * reaches PAID when a **verified webhook** says the money settled. The browser's
+ * reaches PAID when Razorpay's authenticated API confirms the money settled. The browser's
  * "payment successful" callback is recorded as an ATTEMPTED note and never
  * promotes the row — the spec (§12) is explicit that an invoice must not be
  * marked paid from a browser callback.
  *
  * ## Idempotency
  *
- * Razorpay retries webhooks, and a retry must not create a second payment or
+ * Repeated direct verification must not create a second payment or
  * double-credit an invoice. `razorpayOrderId` and `razorpayPaymentId` are both
- * uniquely indexed, and `webhookEvents` records which event ids have been
- * applied. `applyWebhookEvent()` claims an event with an atomic conditional
- * write, so two concurrent deliveries of the same event produce exactly one
- * application.
+ * uniquely indexed, and invoice crediting is conditional so duplicate
+ * verification cannot apply the same payment twice.
  */
 
 const mongoose = require("mongoose");
@@ -112,20 +110,6 @@ const paymentSchema = new mongoose.Schema(
 
     method: { type: String, default: null },
 
-    /**
-     * Webhook event ids already applied to this payment.
-     *
-     * Razorpay delivers `payment.captured` more than once in practice. This
-     * ledger makes re-processing a no-op.
-     */
-    webhookEvents: [
-      {
-        eventId: { type: String, required: true },
-        event: { type: String, required: true },
-        appliedAt: { type: Date, required: true, default: Date.now },
-      },
-    ],
-
     /** Failure detail from the gateway. Never contains secrets. */
     failureCode: { type: String, default: null },
     failureDescription: { type: String, default: null },
@@ -134,7 +118,7 @@ const paymentSchema = new mongoose.Schema(
      * The browser reported success.
      *
      * Recorded for audit, and explicitly NOT sufficient to mark the invoice
-     * paid — only a verified webhook does that.
+     * paid — only direct Razorpay API verification does that.
      */
     clientReportedSuccess: {
       reportedAt: { type: Date, default: null },
@@ -154,7 +138,7 @@ const paymentSchema = new mongoose.Schema(
      *
      * Written once, when the payment settles (see receipt.service.issueReceipt).
      * `receiptNumber` is unique, which is what makes issuance idempotent: a
-     * repeated capture webhook cannot produce a second receipt.
+     * repeated verification cannot produce a second receipt.
      */
     /**
      * Uniquely indexed, but only for documents that actually have a value.
@@ -189,15 +173,12 @@ const paymentSchema = new mongoose.Schema(
     /**
      * How this payment came to be trusted as settled.
      *
-     * "webhook" means Razorpay pushed it; "gateway_api" means the server asked
-     * Razorpay directly. Both trust the same thing — Razorpay's key secret —
-     * but an auditor needs to know which actually happened, and a deployment
-     * with no public URL has only the second.
+     * Settlement is verified by an authenticated lookup against Razorpay's API.
      */
     verifiedVia: {
       type: String,
       enum: {
-        values: ["webhook", "gateway_api"],
+        values: ["gateway_api"],
         message: "`{VALUE}` is not a valid verification source",
       },
       default: null,
@@ -237,7 +218,7 @@ paymentSchema.index({ student: 1, createdAt: -1 });
 // Reconciliation: captured payments, newest first.
 paymentSchema.index({ status: 1, createdAt: -1 });
 
-// A payment awaiting its webhook.
+// A payment awaiting direct gateway verification.
 paymentSchema.index({ status: 1, razorpayOrderId: 1 });
 
 const Payment = mongoose.model("Payment", paymentSchema);

@@ -68,7 +68,6 @@ function gatewayWithStubbedClient(overrides = {}) {
 
   gateway.keyId = overrides.keyId ?? "rzp_test_ABCDEF";
   gateway.keySecret = overrides.keySecret ?? "test_secret";
-  gateway.webhookSecret = overrides.webhookSecret ?? "test_webhook_secret";
 
   return { gateway, calls };
 }

@@ -29,7 +29,7 @@ audit trail. Everyone who needs to act on it can see the same thing.
 | **Requests**       | Raise one against a published service. Assigned staff accept it, add progress notes, resolve, reject or forward it. SLA breaches escalate, and the dean sees them.                                                                                         |
 | **Complaints**     | Raise one with attachments. Confidential complaints are invisible to staff until assigned. Anyone can file anonymously at `/grievance` with no account, no name and no IP stored, and track it by a code that is stored only as a hash.                    |
 | **Certificates**   | Apply for any of nine types. Staff issue, verify and revoke. A PDF is generated, stored privately and served only after an authorisation check. Anyone can verify a paper certificate at `/verify` without an account.                                     |
-| **Finance**        | Invoices in integer paise, totals computed server-side. Razorpay orders, webhook _and_ direct verification, receipts, partial and full refunds, reconciliation. Instalments, late-payment penalties, and GST with the correct CGST/SGST-versus-IGST split. |
+| **Finance**        | Invoices in integer paise, totals computed server-side. Razorpay orders and direct API verification, receipts, partial and full refunds, reconciliation. Instalments, late-payment penalties, and GST with the correct CGST/SGST-versus-IGST split. |
 | **Announcements**  | Compose and publish to a whole audience, with an image, and see who was notified.                                                                                                                                                                          |
 | **Reports**        | Role-scoped figures that omit what you may not see rather than showing zero. Export to CSV or PDF.                                                                                                                                                         |
 | **Directory**      | Departments, programmes and services, with retirement blocked while anything still depends on them. Head of department appointed from the interface.                                                                                                       |
@@ -258,7 +258,6 @@ worse than one that is not finished.
 
 **Needs a provider or a host**:
 
-- Live Razorpay webhook delivery (needs a public URL and a signing secret)
 - Uptime monitoring and error tracking
 - Malware scanning of uploads
 

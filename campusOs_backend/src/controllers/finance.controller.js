@@ -87,8 +87,8 @@ const getInvoice = asyncHandler(async (req, res) => {
 /**
  * POST /api/v1/finance/payments/order
  *
- * Returns the order plus the publishable key. The key secret and the webhook
- * secret never appear in any response.
+ * Returns the order plus the publishable key. The key secret never appears in
+ * any response.
  */
 const createOrder = asyncHandler(async (req, res) => {
   const result = await financeService.createOrder({
@@ -178,9 +178,8 @@ const reconcile = asyncHandler(async (req, res) => {
  * POST /api/v1/finance/payments/:id/verify
  *
  * Asks Razorpay whether the payment was really captured, and settles only if
- * it says so. This is the settlement path for a deployment that cannot receive
- * webhooks — it is not a weaker form of the webhook, because the decision comes
- * from Razorpay's authenticated response rather than from this request.
+ * it says so. The decision comes from Razorpay's authenticated response rather
+ * than from this request.
  */
 const verifyPayment = asyncHandler(async (req, res) => {
   const outcome = await financeService.verifyPaymentWithGateway({
@@ -226,7 +225,8 @@ function describeUnapplied(outcome) {
  * POST /api/v1/finance/payments/verify-pending
  *
  * Sweeps payments left ATTEMPTED — the students who closed the browser after
- * paying. Without webhooks nothing else would ever revisit them.
+ * paying. This lets accounts staff revisit them when a browser callback does
+ * not complete verification.
  */
 const verifyPending = asyncHandler(async (req, res) => {
   const { limit } = req.validated?.query ?? {};

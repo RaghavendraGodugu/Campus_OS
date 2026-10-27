@@ -134,7 +134,6 @@ const schema = z
 
     RAZORPAY_KEY_ID: z.string().optional(),
     RAZORPAY_KEY_SECRET: z.string().optional(),
-    RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
 
     SMTP_HOST: z.string().optional(),
     SMTP_PORT: z.coerce.number().int().default(587),
@@ -172,7 +171,6 @@ const schema = z
       const missing = [
         "RAZORPAY_KEY_ID",
         "RAZORPAY_KEY_SECRET",
-        "RAZORPAY_WEBHOOK_SECRET",
         "CLOUDINARY_CLOUD_NAME",
         "CLOUDINARY_API_KEY",
         "CLOUDINARY_API_SECRET",

@@ -44,7 +44,6 @@ const TEST_ENV = {
   CLOUDINARY_CLOUD_NAME: "",
   RAZORPAY_KEY_ID: "",
   RAZORPAY_KEY_SECRET: "",
-  RAZORPAY_WEBHOOK_SECRET: "",
   SMTP_HOST: "",
   // Marks this process as a test run, for any code that needs to know.
   VITEST: "true",

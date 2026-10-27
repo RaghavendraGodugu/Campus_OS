@@ -16,10 +16,8 @@ const mongoose = require("mongoose");
  *  1. `createOrder`     — creates a gateway order and a CREATED payment.
  *  2. `confirmPayment`  — the browser callback. Records that the client said
  *     success and whether its signature verified. **Never** marks paid.
- *  3. `applyWebhookEvent` — a signed webhook. This, and only this, sets PAID.
- *
- * A student who closes the browser after paying still gets their receipt,
- * because the webhook arrives independently of any browser.
+ *  3. `verifyPaymentWithGateway` — Razorpay's authenticated API confirms
+ *     settlement. This, and only this, sets PAID.
  */
 
 const Invoice = require("../models/Invoice");
@@ -664,7 +662,7 @@ async function createOrder({ user, invoiceId, req }) {
  * investigating even though it has no financial effect.
  */
 /**
- * Settle a payment by asking Razorpay directly, for deployments with no webhook.
+ * Settle a payment by asking Razorpay directly.
  *
  * ## Why this is not "trusting the browser"
  *
@@ -675,23 +673,15 @@ async function createOrder({ user, invoiceId, req }) {
  * connection. A student who invents a payment id gets a 400 from Razorpay and
  * settles nothing.
  *
- * Webhooks and this path differ only in who initiates the conversation. Both
- * rely on the same trust anchor — Razorpay's key secret — and both ignore what
- * the browser claims. A webhook is preferable because it is push and cannot be
- * forgotten, but it requires a publicly reachable URL, which a project under
- * development does not have. This is the honest fallback, not a weaker door.
- *
- * ## Every cross-check the webhook gets, it gets here too
+ * Razorpay's response, not browser input, supplies the amount, order, capture
+ * state, and payment method.
  *
  * The payment must belong to the order we created, must actually be captured,
  * and must not report more than we ever asked for. Amount and status come from
  * Razorpay; nothing is taken from the request.
  *
- * ## Idempotent, and idempotent *with* the webhook
- *
  * Verification only proceeds from a payment that is not already settled, and
- * crediting is guarded on the invoice balance, so running it after a real
- * webhook is a no-op rather than a double credit.
+ * crediting is guarded on the invoice balance, so repeated checks are safe.
  *
  * @param {object} params
  * @param {object} params.user    Owner (student) or accounts staff.
@@ -712,8 +702,7 @@ async function verifyPaymentWithGateway({ user, paymentId, req }) {
     throw ApiError.notFound("Payment not found");
   }
 
-  // Already settled — by a webhook or an earlier verification. Settling twice
-  // must be impossible, whichever path got here first.
+  // Already settled — repeated verification must never credit twice.
   if (payment.status === PAYMENT_STATUS.PAID) {
     return {
       applied: false,
@@ -1450,7 +1439,6 @@ module.exports = {
   confirmPayment,
   verifyPaymentWithGateway,
   verifyPendingPayments,
-  applyWebhookEvent,
   creditInvoice,
   listPayments,
   reconcile,

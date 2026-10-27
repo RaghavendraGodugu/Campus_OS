@@ -4,21 +4,15 @@
  * ## Why an interface
  *
  * Razorpay credentials are not available during development, and the payment
- * logic that matters — signature verification, idempotency, invoice settlement —
+ * logic that matters — payment verification, idempotency, invoice settlement —
  * is the same whether the money moves on a sandbox or in production. Splitting
  * the *transport* from the *logic* means the real code paths are exercised in
  * tests rather than mocked out of existence.
  *
- * ## Signature verification lives here, not in the service
+ * ## Payment signature verification lives here, not in the service
  *
- * Both Razorpay signature schemes are HMAC-SHA256 and are implemented once, here,
- * so a call site cannot accidentally verify with the wrong secret or the wrong
- * payload order:
- *
- *  - Payment: `HMAC(order_id + "|" + razorpay_payment_id, KEY_SECRET)`
- *  - Webhook: `HMAC(raw_body, WEBHOOK_SECRET)`
- *
- * Both are verified with `timingSafeEqual`.
+ * The checkout signature is HMAC-SHA256 over
+ * `order_id + "|" + razorpay_payment_id`, verified with `timingSafeEqual`.
  *
  * ## The mock cannot run in production
  *
@@ -48,8 +42,8 @@ function safeEqual(a, b) {
  *
  * This is a *defence in depth* check, not the source of truth: the spec (§12)
  * says an invoice must never be marked paid from a browser callback. The
- * signature proves the response came from Razorpay; the webhook proves the
- * money actually settled.
+ * signature proves the response came from Razorpay; settlement is confirmed by
+ * an authenticated lookup against Razorpay's API.
  *
  * @param {object} params
  * @param {string} params.orderId         Our order id (`order_...`).
@@ -72,35 +66,6 @@ function verifyPaymentSignature({
     .digest("hex");
 
   return safeEqual(expected, razorpaySignature);
-}
-
-/**
- * Verify a webhook signature over the RAW request body.
- *
- * The raw bytes are essential: re-serialising parsed JSON can change key order
- * or spacing, and the signature would then never match — or, worse, a naive
- * implementation that re-signs the parsed object would accept a body it had
- * itself reformatted.
- *
- * @param {Buffer|string} rawBody    Exact bytes received.
- * @param {string} signature         `x-razorpay-signature` header.
- * @param {string} webhookSecret
- * @returns {boolean}
- */
-function verifyWebhookSignature(rawBody, signature, webhookSecret) {
-  if (!rawBody || !signature || !webhookSecret) return false;
-
-  const expected = crypto
-    .createHmac("sha256", webhookSecret)
-    .update(rawBody)
-    .digest("hex");
-
-  return safeEqual(expected, signature);
-}
-
-/** Sign a body the way Razorpay would — used only by the mock and by tests. */
-function signWebhookPayload(rawBody, webhookSecret) {
-  return crypto.createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
 }
 
 /** Sign a checkout the way Razorpay would — mock and tests only. */
@@ -142,7 +107,6 @@ class RazorpayGateway {
     this.name = "razorpay";
     this.keyId = env.RAZORPAY_KEY_ID;
     this.keySecret = env.RAZORPAY_KEY_SECRET;
-    this.webhookSecret = env.RAZORPAY_WEBHOOK_SECRET;
 
     // Derived from the key itself, never from a second setting that could
     // drift out of step with it.
@@ -266,7 +230,6 @@ class MockRazorpayGateway {
     this.name = "mock";
     this.keyId = "rzp_test_MOCKKEY";
     this.keySecret = "mock_key_secret_not_usable_in_production";
-    this.webhookSecret = "mock_webhook_secret_not_usable_in_production";
     this.mode = "MOCK";
 
     /**
@@ -438,8 +401,6 @@ module.exports = {
   getGateway,
   resetGateway,
   verifyPaymentSignature,
-  verifyWebhookSignature,
-  signWebhookPayload,
   signPayment,
   safeEqual,
   RazorpayGateway,

@@ -9,8 +9,7 @@
  * the check is a read, so it is safe to run against live keys too.
  *
  * It deliberately reports what it could NOT verify. A green result here means
- * the credentials work — it does not mean webhooks work, which needs a real
- * delivery and a local tunnel.
+ * the credentials work. Settlement is confirmed by Razorpay API verification.
  */
 
 const { getGateway, paymentModeForKey } = require("../src/config/razorpay");
@@ -33,7 +32,6 @@ const fail = (m) => console.log(`  FAIL  ${m}`);
     `  key id      : ${env.RAZORPAY_KEY_ID ? mask(env.RAZORPAY_KEY_ID) : "(not set)"}`
   );
   console.log(`  key secret  : ${env.RAZORPAY_KEY_SECRET ? "set" : "(not set)"}`);
-  console.log(`  webhook sec : ${env.RAZORPAY_WEBHOOK_SECRET ? "set" : "(NOT SET)"}`);
   console.log("");
 
   if (gateway.isMock) {
@@ -57,22 +55,13 @@ const fail = (m) => console.log(`  FAIL  ${m}`);
     fail(`key prefix indicates ${expected} but the gateway reports ${gateway.mode}`);
   }
 
-  if (!env.RAZORPAY_WEBHOOK_SECRET) {
-    warn("No webhook secret — every incoming webhook will be rejected with 400.");
-    console.log(
-      "       Create one at Dashboard > Webhooks and set RAZORPAY_WEBHOOK_SECRET."
-    );
-  } else {
-    pass("webhook secret present (deliveries will be signature-verified)");
-  }
-
   // A read against the API: proves the key id and secret authenticate.
   // A read against the API: proves the key id and secret authenticate.
   await probeCredentials(gateway);
 
   console.log("");
   console.log("  Still unverified until you send a real payment:");
-  console.log("    - webhook signature verification against live bytes");
+  console.log("    - direct payment verification through Razorpay's API");
   console.log("    - capture settling an invoice, and duplicates being absorbed");
   console.log("    - a real refund through payments.refund()");
   console.log("");
