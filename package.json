@@ -9,7 +9,7 @@
     "campusOs_frontend"
   ],
   "engines": {
-    "node": ">=20.19.0"
+    "node": "22.x"
   },
   "scripts": {
     "dev:backend": "npm run dev --workspace campusOs_backend",

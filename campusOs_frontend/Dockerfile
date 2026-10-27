@@ -14,7 +14,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY campusOs_backend/package.json ./campusOs_backend/package.json
 COPY campusOs_frontend/package.json ./campusOs_frontend/package.json
-RUN npm ci --ignore-scripts --workspace campusOs_frontend
+RUN npm ci --ignore-scripts --workspace=campusos-frontend
 
 COPY campusOs_frontend/ ./campusOs_frontend/
 WORKDIR /app/campusOs_frontend

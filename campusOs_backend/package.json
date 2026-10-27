@@ -6,7 +6,7 @@
   "license": "MIT",
   "main": "src/server.js",
   "engines": {
-    "node": ">=20.19.0"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "node scripts/dev.js",

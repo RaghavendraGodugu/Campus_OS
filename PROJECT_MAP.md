@@ -65,6 +65,7 @@ Campus_OS/
 ├── LICENSE                    MIT / private
 ├── package.json               npm workspaces root: dev, test, lint, build, seed
 ├── package-lock.json          single lockfile for both workspaces
+├── vercel.json                Vercel SPA build: frontend workspace from this root
 ├── docker-compose.yml         db + api + web, one host
 ├── .github/workflows/
 │   └── gates.yml              lint, format, test, browser sweep, image build
@@ -114,7 +115,8 @@ The server decides permission on every request; the UI only hides things.
 
 | Path                          | What it is                                                                                                                                                                                                    |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `package.json`                | Workspace root. Scripts fan out with `--workspace`: `dev:backend`, `dev:frontend`, `test`, `test:frontend`, `lint`, `format`, `build`, `seed:demo`, `create-admin`, `run:escalations`. Requires Node ≥ 20.19. |
+| `package.json`                | Workspace root. Scripts fan out with `--workspace`: `dev:backend`, `dev:frontend`, `test`, `test:frontend`, `lint`, `format`, `build`, `seed:demo`, `create-admin`, `run:escalations`. Uses Node 22.x. |
+| `vercel.json`                 | Vercel configuration for the React SPA. The Vercel project Root Directory must remain `.` so it can use this root lockfile and build `campusos-frontend`. |
 | `docker-compose.yml`          | Three services: `db` (mongo:7, not published to host), `api` (port 5050 internal), `web` (nginx on `${WEB_PORT:-8080}`). Named volumes `mongo-data`, `app-storage`. Secrets are required via `${VAR:?}`.      |
 | `.github/workflows/gates.yml` | Four jobs: **backend** (lint, format, test), **frontend** (lint, format, test, build), **browser** (seed → start API → start Vite → `verify:roles`), **images** (build both Dockerfiles, never push).         |
 | `README.md`                   | The product view: what it does, how to run, demo accounts, commands, an explicit "what is not built".                                                                                                         |

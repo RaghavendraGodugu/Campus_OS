@@ -338,10 +338,11 @@ The supported path is **Vercel** for the frontend, **Render** for the API, and
 the app refuses to start in production without a named database URI, Razorpay,
 Cloudinary and SMTP configured.
 
-```bash
-# Vercel: import the repository root and set VITE_API_URL
-# Render: apply render.yaml, then fill the sync:false secrets
-```
+In Vercel, set **Root Directory** to the repository root (`.`), not
+`campusOs_frontend`. The root configuration installs and builds only the
+`campusos-frontend` workspace from the single committed lockfile. Set
+`VITE_API_URL` to the public Render API URL including `/api/v1` before
+deploying. The full environment checklist is in [DEPLOY.md](DEPLOY.md).
 
 The Dockerfiles and compose file remain as a single-host fallback. `docker
 compose up -d` serves the frontend through nginx and proxies the API; the

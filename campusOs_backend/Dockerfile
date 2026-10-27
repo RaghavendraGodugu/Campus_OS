@@ -11,7 +11,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY campusOs_backend/package.json ./campusOs_backend/package.json
 COPY campusOs_frontend/package.json ./campusOs_frontend/package.json
-RUN npm ci --omit=dev --ignore-scripts --workspace campusOs_backend
+RUN npm ci --omit=dev --ignore-scripts --workspace=campusos-backend
 
 # ===== runtime =====
 FROM node:22-alpine AS runtime
